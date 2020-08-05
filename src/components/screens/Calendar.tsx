@@ -1,10 +1,24 @@
+import React from 'react';
 import { firestore } from 'firebase';
-import {Calendar as CalendarElement, CalendarList, Agenda, DateObject} from 'react-native-calendars';
+import { CalendarList, DateObject } from 'react-native-calendars';
+import { StyleSheet } from 'react-native';
+import { connect } from 'react-redux';
+import { State } from '../../Types';
 
-const Calendar = () => {
-  
+const Calendar = (props: any) => {
+  const { 
+    authenticated,
+    user,
+    theme
+  } = props;
+  const calendarTheme = {
+    ...theme,
+    arrowColor: theme.dark ? 'white' : ' black',
+    calendarBackground: theme.dark ? 'black' : 'white'
+  }
+
   return (
-    <CalendarElement
+    <CalendarList
         // Initially visible month. Default = Date()
         //current={'2012-03-01'}
         // Minimum date that can be selected, dates before minDate will be grayed out. Default = undefined
@@ -46,8 +60,41 @@ const Calendar = () => {
         //disableAllTouchEventsForDisabledDays={true}
         /** Replace default month and year title with custom one. the function receive a date as parameter. */
         //renderHeader={(date: Date) => {/*Return JSX*/}}
+        theme={calendarTheme}
+        // Callback which gets executed when visible months change in scroll view. Default = undefined
+        onVisibleMonthsChange={(months) => {console.log('now these months are visible', months);}}
+        // Max amount of months allowed to scroll to the past. Default = 50
+        pastScrollRange={50}
+        // Max amount of months allowed to scroll to the future. Default = 50
+        futureScrollRange={50}
+        // Enable or disable scrolling of calendar list
+        scrollEnabled={true}
+        // Enable or disable vertical scroll indicator. Default = false
+        showScrollIndicator={true}
+        style={{
+          height: '100%'
+        }}
       />
   )
 }
 
-export default Calendar;
+const styles = StyleSheet.create({
+  buttons: {
+    padding: 8,
+  },
+  button: {
+    margin: 8,
+  },
+});
+
+// Map State To Props (Redux Store Passes State To Component)
+const mapStateToProps = (state: State) => {
+  // Redux Store --> Component
+  return {
+    authenticated: state.AuthReducer.user !== undefined,
+    user: state.AuthReducer.user,
+    theme: state.ThemeReducer.theme
+  };
+};
+
+export default connect(mapStateToProps)(Calendar);

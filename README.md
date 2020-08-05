@@ -13,10 +13,10 @@ The intent of this app is to help people with chronic illnesses track their medi
   user: firebase.User
 }``
 
-# Notes
+# Notes to Self
 
-https://callstack.github.io/react-native-paper/theming.html
-https://github.com/react-navigation/react-navigation/tree/main/example
-https://docs.expo.io/guides/using-firebase/
-https://redux.js.org/recipes/usage-with-typescript
-https://github.com/wix/react-native-calendars
+* https://callstack.github.io/react-native-paper/theming.html
+* https://github.com/react-navigation/react-navigation/tree/main/example
+* https://docs.expo.io/guides/using-firebase/
+* https://redux.js.org/recipes/usage-with-typescript
+* https://github.com/wix/react-native-calendars
