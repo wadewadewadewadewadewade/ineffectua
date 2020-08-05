@@ -6,6 +6,8 @@ import {
   Dimensions,
   ScaledSize,
   Linking,
+  Text,
+  View,
 } from 'react-native';
 // eslint-disable-next-line import/no-unresolved
 import { enableScreens } from 'react-native-screens';
@@ -13,6 +15,7 @@ import {
   Provider as PaperProvider,
   Appbar,
   ActivityIndicator,
+  Button,
 } from 'react-native-paper';
 import {
   InitialState,
@@ -34,19 +37,21 @@ import { useReduxDevToolsExtension } from '@react-navigation/devtools';
 
 // use this to restart the app for things like changing RTL to LTR
 //import { restartApp } from './Restart';
-import AsyncStorage from '../AsyncStorage';
+import { AsyncStorage } from 'react-native';
 import LinkingPrefixes from '../LinkingPrefixes';
 import MaterialBottomTabs from '../screens/MaterialBottomTabs';
 import NotFound from './NotFound';
 import AuthFlow from './AuthFlow';
 
-import { User, auth } from 'firebase';
+import { User } from 'firebase';
 import * as Analytics from 'expo-firebase-analytics';
 import Profile from './Profile';
 
 import { NAVIGATION_PERSISTENCE_KEY, State } from '../../Types';
 import { SignInAction, Action as AuthAction } from '../../reducers/AuthReducer';
-import { paperTheme, CombinedLightTheme } from '../../reducers/ThemeReducer'
+import { paperTheme, CombinedLightTheme } from '../../reducers/ThemeReducer';
+import { ScrollView } from 'react-native-gesture-handler';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 enableScreens();
 
@@ -59,10 +64,25 @@ type RootStackParamList = {
   Tabs: undefined
   AuthFlow: undefined;
   NotFound: undefined;
+  ModalScreen: undefined;
 };
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
+
+function ModalScreen(props : {
+    navigation: NavigationContainerRef,
+    route: RouteProp<RootStackParamList, "Tabs">
+  }) {
+    const { navigation, route } = props;
+    const { component } = route.params as any;
+    return (
+      <View>
+        <Text>{JSON.stringify(component)}</Text>
+        <Button onPress={() => navigation.goBack()}>Dismiss</Button>
+      </View>
+    );
+}
 
 const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => void}) => {
   const { theme, setUser } = props;
@@ -235,7 +255,7 @@ const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => 
                       : () => (
                           <Appbar.Action
                             color={theme !== undefined ? theme.colors.text : CombinedLightTheme.colors.text}
-                            icon="menu"
+                            icon={() => <MaterialCommunityIcons name="folder" color={theme !== undefined ? theme.colors.text : CombinedLightTheme.colors.text} size={26} />}
                             onPress={() => navigation.toggleDrawer()}
                           />
                         ),
@@ -245,6 +265,10 @@ const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => 
                 <Stack.Screen
                   name="AuthFlow"
                   component={AuthFlow}
+                />
+                <Stack.Screen
+                  name="ModalScreen"
+                  component={ModalScreen}
                 />
                 <Stack.Screen
                   name="NotFound"

@@ -5,7 +5,14 @@ import PainLogEntry from '../shared/PainLogEntry';
 import Contacts from '../shared/Contacts';
 import Agenda from '../shared/Agenda';
 import Calendar from './Calendar';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+/*import * as Font from 'expo-font';
+
+async function loadFonts() {
+  await Font.loadAsync({
+    "material-community": require("@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf"),
+  })
+}*/
 
 type MaterialBottomTabParams = {
   Agenda: undefined;

@@ -4,22 +4,25 @@ import { CalendarList, DateObject } from 'react-native-calendars';
 import { StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
 import { State } from '../../Types';
-import { Theme } from '@react-navigation/native';
+import { Theme, NavigationContainerRef } from '@react-navigation/native';
+import CalendarEntry from '../shared/CalendarEntry';
 
 const Calendar = (props: any) => {
-  const { 
+  const {
+    navigation,
     authenticated,
     user,
     theme
   } : {
+    navigation: NavigationContainerRef,
     authenticated: Boolean,
     user:  User | undefined,
     theme: Theme | undefined
   } = props;
   const calendarTheme = {
     ...theme,
-    arrowColor: theme && theme.dark ? 'white' : ' black',
-    calendarBackground: theme && theme.dark ? 'black' : 'white'
+    arrowColor: theme && theme.dark ? '#fff' : '#000',
+    calendarBackground: theme && theme.dark ? '#000' : '#fff'
   }
   let dates: firestore.QueryDocumentSnapshot<firestore.DocumentData>[] = [];
   /*if (user) {
@@ -37,9 +40,9 @@ const Calendar = (props: any) => {
         // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
         //maxDate={'2012-05-30'}
         // Handler which gets executed on day press. Default = undefined
-        onDayPress={(day: DateObject) => {console.log('selected day', day)}}
+        onDayPress={(day: DateObject) => navigation.navigate('ModalScreen', { component: CalendarEntry, date: day })}
         // Handler which gets executed on day long press. Default = undefined
-        onDayLongPress={(day: DateObject) => {console.log('selected day', day)}}
+        onDayLongPress={(day: DateObject) => navigation.navigate('ModalScreen', { component: <CalendarEntry date={day}/>})}
         // Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
         monthFormat={'yyyy MM'}
         // Handler which gets executed when visible month changes in calendar. Default = undefined
