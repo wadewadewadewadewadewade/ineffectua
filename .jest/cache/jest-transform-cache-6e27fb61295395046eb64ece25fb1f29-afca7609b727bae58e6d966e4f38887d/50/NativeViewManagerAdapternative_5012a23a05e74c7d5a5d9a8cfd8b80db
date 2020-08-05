@@ -1,0 +1,55 @@
+d5adb557b8ec1d46827ada36303f9d14
+"use strict";var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports, "__esModule", { value: true });exports.requireNativeViewManager = requireNativeViewManager;var _extends2 = _interopRequireDefault(require("@babel/runtime/helpers/extends"));var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));var _omit = _interopRequireDefault(require("lodash/omit"));
+var _pick = _interopRequireDefault(require("lodash/pick"));
+var _react = _interopRequireDefault(require("react"));
+var _reactNative = require("react-native");
+
+
+
+
+
+
+
+
+
+
+
+var ViewPropTypesKeys = Object.keys(_reactNative.ViewPropTypes);
+
+
+
+function requireNativeViewManager(viewName) {
+  if (__DEV__) {var
+    NativeUnimoduleProxy = _reactNative.NativeModules.NativeUnimoduleProxy;
+    if (!NativeUnimoduleProxy.viewManagersNames.includes(viewName)) {
+      var exportedViewManagerNames = NativeUnimoduleProxy.viewManagersNames.join(', ');
+      console.warn("The native view manager required by name (" + viewName + ") from NativeViewManagerAdapter isn't exported by @unimodules/react-native-adapter. Views of this type may not render correctly. Exported view managers: [" + exportedViewManagerNames + "].");
+    }
+  }
+
+
+  var reactNativeViewName = "ViewManagerAdapter_" + viewName;
+  var ReactNativeComponent = (0, _reactNative.requireNativeComponent)(reactNativeViewName);
+  var reactNativeUIConfiguration = (_reactNative.UIManager.getViewManagerConfig ?
+  _reactNative.UIManager.getViewManagerConfig(reactNativeViewName) :
+  _reactNative.UIManager[reactNativeViewName]) || {
+    NativeProps: {},
+    directEventTypes: {} };
+
+  var reactNativeComponentPropNames = [
+  'children'].concat((0, _toConsumableArray2.default)(
+  ViewPropTypesKeys), (0, _toConsumableArray2.default)(
+  Object.keys(reactNativeUIConfiguration.NativeProps)), (0, _toConsumableArray2.default)(
+  Object.keys(reactNativeUIConfiguration.directEventTypes)));
+
+
+  function NativeComponentAdapter(props, ref) {
+
+
+    var nativeProps = (0, _pick.default)(props, reactNativeComponentPropNames);
+    var proxiedProps = (0, _omit.default)(props, reactNativeComponentPropNames);
+    return _react.default.createElement(ReactNativeComponent, (0, _extends2.default)({}, nativeProps, { proxiedProperties: proxiedProps, ref: ref }));
+  }
+  NativeComponentAdapter.displayName = "Adapter<" + viewName + ">";
+  return _react.default.forwardRef(NativeComponentAdapter);
+}

@@ -1,0 +1,115 @@
+97142474c0d6ed4cf96ee1d07ec400f5
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = HeaderContainer;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+
+
+var _Header = _interopRequireDefault(require("./Header"));
+
+
+
+var _HeaderShownContext = _interopRequireDefault(require("../../utils/HeaderShownContext"));
+
+var _PreviousSceneContext = _interopRequireDefault(require("../../utils/PreviousSceneContext"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function HeaderContainer(_ref)
+
+
+
+
+
+
+
+
+
+
+{var mode = _ref.mode,scenes = _ref.scenes,layout = _ref.layout,insets = _ref.insets,getPreviousScene = _ref.getPreviousScene,getFocusedRoute = _ref.getFocusedRoute,onContentHeightChange = _ref.onContentHeightChange,gestureDirection = _ref.gestureDirection,styleInterpolator = _ref.styleInterpolator,style = _ref.style;
+  var focusedRoute = getFocusedRoute();
+  var isParentHeaderShown = React.useContext(_HeaderShownContext.default);
+  var parentPreviousScene = React.useContext(_PreviousSceneContext.default);
+  return React.createElement(require("react-native").View, {
+    pointerEvents: "box-none",
+    style: style },
+  scenes.slice(-3).map(function (scene, i, self) {
+    var _getPreviousScene;
+
+    if (mode === 'screen' && i !== self.length - 1 || !scene) {
+      return null;
+    }var _ref2 =
+
+
+
+
+
+    scene.descriptor.options || {},header = _ref2.header,_ref2$headerShown = _ref2.headerShown,headerShown = _ref2$headerShown === void 0 ? isParentHeaderShown === false : _ref2$headerShown,headerTransparent = _ref2.headerTransparent;
+
+    if (!headerShown) {
+      return null;
+    }
+
+    var isFocused = focusedRoute.key === scene.route.key;
+    var previous = (_getPreviousScene = getPreviousScene({
+      route: scene.route })) !==
+    null && _getPreviousScene !== void 0 ? _getPreviousScene : parentPreviousScene;
+
+
+    var previousScene = self[i - 1];
+    var nextScene = self[i + 1];var _ref3 =
+
+
+    (previousScene === null || previousScene === void 0 ? void 0 : previousScene.descriptor.options) || {},_ref3$headerShown = _ref3.headerShown,previousHeaderShown = _ref3$headerShown === void 0 ? isParentHeaderShown === false : _ref3$headerShown;var _ref4 =
+
+
+    (nextScene === null || nextScene === void 0 ? void 0 : nextScene.descriptor.options) || {},_ref4$headerShown = _ref4.headerShown,nextHeaderShown = _ref4$headerShown === void 0 ? isParentHeaderShown === false : _ref4$headerShown;
+    var isHeaderStatic = previousHeaderShown === false &&
+
+    !nextScene || nextHeaderShown === false;
+    var props = {
+      mode: mode,
+      layout: layout,
+      insets: insets,
+      scene: scene,
+      previous: previous,
+      navigation: scene.descriptor.navigation,
+      styleInterpolator: mode === 'float' ? isHeaderStatic ? gestureDirection === 'vertical' || gestureDirection === 'vertical-inverted' ? require("../../TransitionConfigs/HeaderStyleInterpolators").forSlideUp : gestureDirection === 'horizontal-inverted' ? require("../../TransitionConfigs/HeaderStyleInterpolators").forSlideRight : require("../../TransitionConfigs/HeaderStyleInterpolators").forSlideLeft : styleInterpolator : require("../../TransitionConfigs/HeaderStyleInterpolators").forNoAnimation };
+
+    return React.createElement(require("@react-navigation/native").NavigationContext.Provider, {
+      key: scene.route.key,
+      value: scene.descriptor.navigation },
+    React.createElement(require("@react-navigation/native").NavigationRouteContext.Provider, {
+      value: scene.route },
+    React.createElement(require("react-native").View, {
+      onLayout: onContentHeightChange ? function (e) {return onContentHeightChange({
+          route: scene.route,
+          height: e.nativeEvent.layout.height });} :
+      undefined,
+      pointerEvents: isFocused ? 'box-none' : 'none',
+      accessibilityElementsHidden: !isFocused,
+      importantForAccessibility: isFocused ? 'auto' : 'no-hide-descendants',
+      style:
+
+      mode === 'float' && !isFocused || headerTransparent ? styles.header : null },
+    header !== undefined ? header(props) : React.createElement(_Header.default, props))));
+  }));
+}
+
+var styles = require("react-native").StyleSheet.create({
+  header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0 } });

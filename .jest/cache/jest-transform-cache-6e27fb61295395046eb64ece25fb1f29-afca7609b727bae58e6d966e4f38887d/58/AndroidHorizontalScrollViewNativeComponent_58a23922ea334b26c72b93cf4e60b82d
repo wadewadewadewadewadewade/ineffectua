@@ -1,0 +1,57 @@
+9c57767b6da7946774e399c12a7189d9
+
+
+
+
+
+
+
+
+
+
+'use strict';Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;
+
+
+
+
+
+
+
+var AndroidHorizontalScrollViewViewConfig = {
+  uiViewClassName: 'AndroidHorizontalScrollView',
+  bubblingEventTypes: {},
+  directEventTypes: {},
+  validAttributes: {
+    decelerationRate: true,
+    disableIntervalMomentum: true,
+    endFillColor: { process: require('../../StyleSheet/processColor') },
+    fadingEdgeLength: true,
+    nestedScrollEnabled: true,
+    overScrollMode: true,
+    pagingEnabled: true,
+    persistentScrollbar: true,
+    scrollEnabled: true,
+    scrollPerfTag: true,
+    sendMomentumEvents: true,
+    showsHorizontalScrollIndicator: true,
+    snapToEnd: true,
+    snapToInterval: true,
+    snapToStart: true,
+    snapToOffsets: true } };
+
+
+
+var AndroidHorizontalScrollViewNativeComponent;
+if (global.RN$Bridgeless) {
+  require('../../Utilities/registerGeneratedViewConfig')(
+  'AndroidHorizontalScrollView',
+  AndroidHorizontalScrollViewViewConfig);
+
+  AndroidHorizontalScrollViewNativeComponent = 'AndroidHorizontalScrollView';
+} else {
+  AndroidHorizontalScrollViewNativeComponent = require('../../ReactNative/requireNativeComponent')(
+  'AndroidHorizontalScrollView');
+
+}var _default =
+
+AndroidHorizontalScrollViewNativeComponent;exports.default = _default;

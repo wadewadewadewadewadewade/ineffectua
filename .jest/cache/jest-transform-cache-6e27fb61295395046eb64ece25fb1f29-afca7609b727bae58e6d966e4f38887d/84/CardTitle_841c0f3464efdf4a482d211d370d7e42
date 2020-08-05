@@ -1,0 +1,132 @@
+d680a420aef75ce24302cd424a64d45d
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.CardTitle = exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+
+
+var _Caption = _interopRequireDefault(require("./../Typography/Caption"));
+
+var _Title = _interopRequireDefault(require("./../Typography/Title"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+var LEFT_SIZE = 40;var
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CardTitle = function (_React$Component) {require("@babel/runtime/helpers/inherits")(CardTitle, _React$Component);var _super = _createSuper(CardTitle);function CardTitle() {require("@babel/runtime/helpers/classCallCheck")(this, CardTitle);return _super.apply(this, arguments);}require("@babel/runtime/helpers/createClass")(CardTitle, [{ key: "render", value: function render()
+    {var _this$props =
+
+
+
+
+
+
+
+
+
+
+
+      this.props,left = _this$props.left,leftStyle = _this$props.leftStyle,right = _this$props.right,rightStyle = _this$props.rightStyle,subtitle = _this$props.subtitle,subtitleStyle = _this$props.subtitleStyle,subtitleNumberOfLines = _this$props.subtitleNumberOfLines,style = _this$props.style,title = _this$props.title,titleStyle = _this$props.titleStyle;
+      return React.createElement(require("react-native").View, {
+        style: [styles.container, {
+          minHeight: subtitle || left || right ? 72 : 50 },
+        style] },
+      left ? React.createElement(require("react-native").View, {
+        style: [styles.left, leftStyle] },
+      left({
+        size: LEFT_SIZE })) :
+      null, React.createElement(require("react-native").View, {
+        style: [styles.titles] },
+      title ? React.createElement(_Title.default, {
+        style: [styles.title, {
+          marginBottom: subtitle ? 0 : 2 },
+        titleStyle],
+        numberOfLines: 1 },
+      title) : null, subtitle ? React.createElement(_Caption.default, {
+        style: [styles.subtitle, subtitleStyle],
+        numberOfLines: subtitleNumberOfLines },
+      subtitle) : null), React.createElement(require("react-native").View, {
+        style: rightStyle },
+      right ? right({
+        size: 24 }) :
+      null));
+    } }]);return CardTitle;}(React.Component);
+
+
+
+exports.CardTitle = CardTitle;
+
+_defineProperty(CardTitle, "displayName", 'Card.Title');
+
+_defineProperty(CardTitle, "defaultProps", {
+  subtitleNumberOfLines: 1 });
+
+
+var styles = require("react-native").StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingLeft: 16 },
+
+  left: {
+    justifyContent: 'center',
+    marginRight: 16,
+    height: LEFT_SIZE,
+    width: LEFT_SIZE },
+
+  titles: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center' },
+
+  title: {
+    minHeight: 30 },
+
+  subtitle: {
+    minHeight: 20,
+    marginVertical: 0 } });
+
+
+
+var _default = (0, require("../../core/theming").withTheme)(CardTitle);
+
+
+exports.default = _default;

@@ -1,0 +1,87 @@
+0a6a0d49df8a5f0e649b4aaf9fc1972c
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+var _ListSubheader = _interopRequireDefault(require("./ListSubheader"));
+
+
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _extends() {_extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}return target;};return _extends.apply(this, arguments);}
+
+function _objectWithoutProperties(source, excluded) {if (source == null) return {};var target = _objectWithoutPropertiesLoose(source, excluded);var key, i;if (Object.getOwnPropertySymbols) {var sourceSymbolKeys = Object.getOwnPropertySymbols(source);for (i = 0; i < sourceSymbolKeys.length; i++) {key = sourceSymbolKeys[i];if (excluded.indexOf(key) >= 0) continue;if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;target[key] = source[key];}}return target;}
+
+function _objectWithoutPropertiesLoose(source, excluded) {if (source == null) return {};var target = {};var sourceKeys = Object.keys(source);var key, i;for (i = 0; i < sourceKeys.length; i++) {key = sourceKeys[i];if (excluded.indexOf(key) >= 0) continue;target[key] = source[key];}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ListSection = function (_React$Component) {require("@babel/runtime/helpers/inherits")(ListSection, _React$Component);var _super = _createSuper(ListSection);function ListSection() {require("@babel/runtime/helpers/classCallCheck")(this, ListSection);return _super.apply(this, arguments);}require("@babel/runtime/helpers/createClass")(ListSection, [{ key: "render", value: function render()
+    {
+      var _this$props = this.props,
+
+      children =
+
+
+
+      _this$props.children,title = _this$props.title,titleStyle = _this$props.titleStyle,style = _this$props.style,
+      rest = _objectWithoutProperties(_this$props, ["children", "title", "titleStyle", "style"]);
+
+      return React.createElement(require("react-native").View, _extends({}, rest, {
+        style: [styles.container, style] }),
+      title && React.createElement(_ListSubheader.default, {
+        style: titleStyle },
+      title), children);
+    } }]);return ListSection;}(React.Component);
+
+
+
+_defineProperty(ListSection, "displayName", 'List.Section');
+
+var styles = require("react-native").StyleSheet.create({
+  container: {
+    marginVertical: 8 } });
+
+
+
+var _default = (0, require("../../core/theming").withTheme)(ListSection);
+
+exports.default = _default;

@@ -1,0 +1,228 @@
+f7b0c6402aa8bcecd8bd9fecb9088e72
+
+
+
+
+
+
+
+
+
+
+'use strict';var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+
+
+
+var _YellowBoxWarning = _interopRequireDefault(require("./Data/YellowBoxWarning"));
+
+var LogBoxData = _interopRequireWildcard(require("../LogBox/Data/LogBoxData"));
+var _NativeLogBox = _interopRequireDefault(require("../NativeModules/specs/NativeLogBox"));var _jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native/Libraries/YellowBox/YellowBox.js";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = (0, _getPrototypeOf2.default)(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = (0, _getPrototypeOf2.default)(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return (0, _possibleConstructorReturn2.default)(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+
+
+
+
+
+var YellowBox;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+if (__DEV__) {
+  var Platform = require('../Utilities/Platform');
+  var RCTLog = require('../Utilities/RCTLog');
+  var YellowBoxContainer = require('./YellowBoxContainer').default;
+  var LogBox = require('../LogBox/LogBox');
+  var YellowBoxRegistry = require('./Data/YellowBoxRegistry');
+  var LogBoxNotificationContainer = require('../LogBox/LogBoxNotificationContainer').
+  default;var _console =
+
+
+
+  console,error = _console.error,warn = _console.warn;
+  var errorImpl = error;
+  var warnImpl = warn;
+  var _isLogBoxEnabled = false;
+  var _isInstalled = false;
+  console.error = function () {
+    errorImpl.apply(void 0, arguments);
+  };
+  console.warn = function () {
+    warnImpl.apply(void 0, arguments);
+  };
+
+
+  YellowBox = function (_React$Component) {(0, _inherits2.default)(YellowBox, _React$Component);var _super = _createSuper(YellowBox);function YellowBox() {(0, _classCallCheck2.default)(this, YellowBox);return _super.apply(this, arguments);}(0, _createClass2.default)(YellowBox, [{ key: "render", value: function render()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {
+        if (_isLogBoxEnabled) {
+          return require('react').createElement(LogBoxNotificationContainer, { __self: this, __source: { fileName: _jsxFileName, lineNumber: 143, columnNumber: 16 } });
+        }
+
+
+        return require('react').createElement(YellowBoxContainer, { __self: this, __source: { fileName: _jsxFileName, lineNumber: 147, columnNumber: 14 } });
+      } }], [{ key: "ignoreWarnings", value: function ignoreWarnings(patterns) {LogBoxData.addIgnorePatterns(patterns);YellowBoxRegistry.addIgnorePatterns(patterns);} }, { key: "install", value: function install() {if (_isLogBoxEnabled) {LogBox.install();return;}_isInstalled = true;errorImpl = function errorImpl() {registerError.apply(void 0, arguments);};warnImpl = function warnImpl() {registerWarning.apply(void 0, arguments);};if (console.disableYellowBox === true) {YellowBoxRegistry.setDisabled(true);}Object.defineProperty(console, 'disableYellowBox', { configurable: true, get: function get() {return YellowBoxRegistry.isDisabled();}, set: function set(value) {return YellowBoxRegistry.setDisabled(value);} });if (Platform.isTesting) {console.disableYellowBox = true;}RCTLog.setWarningHandler(function () {registerWarning.apply(void 0, arguments);});} }, { key: "uninstall", value: function uninstall() {if (_isLogBoxEnabled) {LogBox.uninstall();return;}_isInstalled = false;errorImpl = error;warnImpl = warn;delete console.disableYellowBox;} }, { key: "__unstable_enableLogBox", value: function __unstable_enableLogBox() {if (_NativeLogBox.default == null) {return;}if (_isInstalled) {throw new Error('LogBox must be enabled before AppContainer is required so that it can properly wrap the console methods.\n\nPlease enable LogBox earlier in your app.\n\n');}_isLogBoxEnabled = true;global.__unstable_isLogBoxEnabled = true;} }, { key: "__unstable_isLogBoxEnabled", value: function __unstable_isLogBoxEnabled() {return !!_isLogBoxEnabled;} }]);return YellowBox;}(require('react').Component);
+
+
+  var registerWarning = function registerWarning() {for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {args[_key] = arguments[_key];}
+    if (typeof args[0] === 'string' && args[0].startsWith('(ADVICE)')) {
+      return;
+    }var _YellowBoxWarning$par =
+
+    _YellowBoxWarning.default.parse({
+      args: args }),category = _YellowBoxWarning$par.category,message = _YellowBoxWarning$par.message,stack = _YellowBoxWarning$par.stack;
+
+
+    if (!YellowBoxRegistry.isWarningIgnored(message)) {
+      YellowBoxRegistry.add({ category: category, message: message, stack: stack });
+      warn.call.apply(warn, [console].concat(args));
+    }
+  };
+
+  var registerError = function registerError() {for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {args[_key2] = arguments[_key2];}
+
+    if (typeof args[0] !== 'string' || !args[0].startsWith('Warning: ')) {
+      error.call.apply(error, [console].concat(args));
+      return;
+    }
+
+    var format = args[0].replace('Warning: ', '');
+    var filterResult = LogBoxData.checkWarningFilter(format);
+    if (filterResult.suppressCompletely) {
+      return;
+    }
+
+    args[0] = filterResult.finalFormat;var _YellowBoxWarning$par2 =
+    _YellowBoxWarning.default.parse({
+      args: args }),category = _YellowBoxWarning$par2.category,message = _YellowBoxWarning$par2.message,stack = _YellowBoxWarning$par2.stack;
+
+
+    if (YellowBoxRegistry.isWarningIgnored(message)) {
+      return;
+    }
+
+    if (filterResult.forceDialogImmediately === true) {
+
+      error.call(console, message.content);
+    } else {
+
+      args[0] = "Warning: " + filterResult.finalFormat;
+
+
+      YellowBoxRegistry.add({ category: category, message: message, stack: stack });
+      error.call.apply(error, [console].concat(args));
+    }
+  };
+} else {
+  YellowBox = function (_React$Component2) {(0, _inherits2.default)(YellowBox, _React$Component2);var _super2 = _createSuper(YellowBox);function YellowBox() {(0, _classCallCheck2.default)(this, YellowBox);return _super2.apply(this, arguments);}(0, _createClass2.default)(YellowBox, [{ key: "render", value: function render()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {
+        return null;
+      } }], [{ key: "ignoreWarnings", value: function ignoreWarnings(patterns) {} }, { key: "install", value: function install() {} }, { key: "uninstall", value: function uninstall() {} }, { key: "__unstable_enableLogBox", value: function __unstable_enableLogBox() {} }, { key: "__unstable_isLogBoxEnabled", value: function __unstable_isLogBoxEnabled() {return false;} }]);return YellowBox;}(require('react').Component);
+
+}
+
+module.exports = YellowBox;

@@ -1,0 +1,368 @@
+42efda025e5a7736bd6e6ab141e9ce91
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = exports.getDefaultHeaderHeight = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+var _HeaderBackButton = _interopRequireDefault(require("./HeaderBackButton"));
+
+var _HeaderBackground = _interopRequireDefault(require("./HeaderBackground"));
+
+var _memoize = _interopRequireDefault(require("../../utils/memoize"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _objectWithoutProperties(source, excluded) {if (source == null) return {};var target = _objectWithoutPropertiesLoose(source, excluded);var key, i;if (Object.getOwnPropertySymbols) {var sourceSymbolKeys = Object.getOwnPropertySymbols(source);for (i = 0; i < sourceSymbolKeys.length; i++) {key = sourceSymbolKeys[i];if (excluded.indexOf(key) >= 0) continue;if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;target[key] = source[key];}}return target;}
+
+function _objectWithoutPropertiesLoose(source, excluded) {if (source == null) return {};var target = {};var sourceKeys = Object.keys(source);var key, i;for (i = 0; i < sourceKeys.length; i++) {key = sourceKeys[i];if (excluded.indexOf(key) >= 0) continue;target[key] = source[key];}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+var warnIfHeaderStylesDefined = function warnIfHeaderStylesDefined(styles) {
+  Object.keys(styles).forEach(function (styleProp) {
+    var value = styles[styleProp];
+
+    if (styleProp === 'position' && value === 'absolute') {
+      console.warn("position: 'absolute' is not supported on headerStyle. If you would like to render content under the header, use the 'headerTransparent' navigationOption.");
+    } else if (value !== undefined) {
+      console.warn("".concat(styleProp, " was given a value of ").concat(value, ", this has no effect on headerStyle."));
+    }
+  });
+};
+
+var getDefaultHeaderHeight = function getDefaultHeaderHeight(layout, statusBarHeight) {
+  var isLandscape = layout.width > layout.height;
+  var headerHeight;
+
+  if (require("react-native").Platform.OS === 'ios') {
+    if (isLandscape && !require("react-native").Platform.isPad) {
+      headerHeight = 32;
+    } else {
+      headerHeight = 44;
+    }
+  } else if (require("react-native").Platform.OS === 'android') {
+    headerHeight = 56;
+  } else {
+    headerHeight = 64;
+  }
+
+  return headerHeight + statusBarHeight;
+};
+
+exports.getDefaultHeaderHeight = getDefaultHeaderHeight;var
+
+HeaderSegment = function (_React$Component) {require("@babel/runtime/helpers/inherits")(HeaderSegment, _React$Component);var _super = _createSuper(HeaderSegment);
+  function HeaderSegment() {var _this;require("@babel/runtime/helpers/classCallCheck")(this, HeaderSegment);for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {args[_key] = arguments[_key];}
+    _this = _super.call.apply(_super, [this].concat(args));
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "state", {});
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handleTitleLayout", function (e) {var _e$nativeEvent$layout =
+
+
+
+      e.nativeEvent.layout,height = _e$nativeEvent$layout.height,width = _e$nativeEvent$layout.width;
+      _this.setState(function (_ref2)
+
+      {var titleLayout = _ref2.titleLayout;
+        if (titleLayout && height === titleLayout.height && width === titleLayout.width) {
+          return null;
+        }
+
+        return {
+          titleLayout: {
+            height: height,
+            width: width } };
+
+
+      });
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handleLeftLabelLayout", function (e) {var _e$nativeEvent$layout2 =
+
+
+
+      e.nativeEvent.layout,height = _e$nativeEvent$layout2.height,width = _e$nativeEvent$layout2.width;var
+
+      leftLabelLayout =
+      _this.state.leftLabelLayout;
+
+      if (leftLabelLayout && height === leftLabelLayout.height && width === leftLabelLayout.width) {
+        return;
+      }
+
+      _this.setState({
+        leftLabelLayout: {
+          height: height,
+          width: width } });
+
+
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "getInterpolatedStyle", (0, _memoize.default)(function (styleInterpolator, layout, current, next, titleLayout, leftLabelLayout, headerHeight) {return styleInterpolator({
+        current: {
+          progress: current },
+
+        next: next && {
+          progress: next },
+
+        layouts: {
+          header: {
+            height: headerHeight,
+            width: layout.width },
+
+          screen: layout,
+          title: titleLayout,
+          leftLabel: leftLabelLayout } });}));return _this;
+
+
+  }require("@babel/runtime/helpers/createClass")(HeaderSegment, [{ key: "render", value: function render()
+
+    {var _this$props =
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      this.props,scene = _this$props.scene,layout = _this$props.layout,insets = _this$props.insets,currentTitle = _this$props.title,previousTitle = _this$props.leftLabel,onGoBack = _this$props.onGoBack,headerTitle = _this$props.headerTitle,_this$props$headerTit = _this$props.headerTitleAlign,headerTitleAlign = _this$props$headerTit === void 0 ? require("react-native").Platform.select({ ios: 'center', default: 'left' }) : _this$props$headerTit,_this$props$headerLef = _this$props.headerLeft,left = _this$props$headerLef === void 0 ? onGoBack ? function (props) {return React.createElement(_HeaderBackButton.default, props);} : undefined : _this$props$headerLef,headerTransparent = _this$props.headerTransparent,headerTintColor = _this$props.headerTintColor,headerBackground = _this$props.headerBackground,right = _this$props.headerRight,backImage = _this$props.headerBackImage,leftLabel = _this$props.headerBackTitle,headerBackTitleVisible = _this$props.headerBackTitleVisible,truncatedLabel = _this$props.headerTruncatedBackTitle,pressColorAndroid = _this$props.headerPressColorAndroid,backAllowFontScaling = _this$props.headerBackAllowFontScaling,titleAllowFontScaling = _this$props.headerTitleAllowFontScaling,customTitleStyle = _this$props.headerTitleStyle,customLeftLabelStyle = _this$props.headerBackTitleStyle,leftContainerStyle = _this$props.headerLeftContainerStyle,rightContainerStyle = _this$props.headerRightContainerStyle,titleContainerStyle = _this$props.headerTitleContainerStyle,customHeaderStyle = _this$props.headerStyle,_this$props$headerSta = _this$props.headerStatusBarHeight,headerStatusBarHeight = _this$props$headerSta === void 0 ? insets.top : _this$props$headerSta,styleInterpolator = _this$props.styleInterpolator;var _this$state =
+
+
+
+      this.state,leftLabelLayout = _this$state.leftLabelLayout,titleLayout = _this$state.titleLayout;
+      var defaultHeight = getDefaultHeaderHeight(layout, headerStatusBarHeight);
+
+      var _ref = require("react-native").StyleSheet.flatten(customHeaderStyle || {}),_ref$height =
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      _ref.height,height = _ref$height === void 0 ? defaultHeight : _ref$height,minHeight = _ref.minHeight,maxHeight = _ref.maxHeight,backgroundColor = _ref.backgroundColor,borderBottomColor = _ref.borderBottomColor,borderBottomEndRadius = _ref.borderBottomEndRadius,borderBottomLeftRadius = _ref.borderBottomLeftRadius,borderBottomRightRadius = _ref.borderBottomRightRadius,borderBottomStartRadius = _ref.borderBottomStartRadius,borderBottomWidth = _ref.borderBottomWidth,borderColor = _ref.borderColor,borderEndColor = _ref.borderEndColor,borderEndWidth = _ref.borderEndWidth,borderLeftColor = _ref.borderLeftColor,borderLeftWidth = _ref.borderLeftWidth,borderRadius = _ref.borderRadius,borderRightColor = _ref.borderRightColor,borderRightWidth = _ref.borderRightWidth,borderStartColor = _ref.borderStartColor,borderStartWidth = _ref.borderStartWidth,borderStyle = _ref.borderStyle,borderTopColor = _ref.borderTopColor,borderTopEndRadius = _ref.borderTopEndRadius,borderTopLeftRadius = _ref.borderTopLeftRadius,borderTopRightRadius = _ref.borderTopRightRadius,borderTopStartRadius = _ref.borderTopStartRadius,borderTopWidth = _ref.borderTopWidth,borderWidth = _ref.borderWidth,boxShadow = _ref.boxShadow,elevation = _ref.elevation,shadowColor = _ref.shadowColor,shadowOffset = _ref.shadowOffset,shadowOpacity = _ref.shadowOpacity,shadowRadius = _ref.shadowRadius,opacity = _ref.opacity,transform = _ref.transform,
+      unsafeStyles = _objectWithoutProperties(_ref, ["height", "minHeight", "maxHeight", "backgroundColor", "borderBottomColor", "borderBottomEndRadius", "borderBottomLeftRadius", "borderBottomRightRadius", "borderBottomStartRadius", "borderBottomWidth", "borderColor", "borderEndColor", "borderEndWidth", "borderLeftColor", "borderLeftWidth", "borderRadius", "borderRightColor", "borderRightWidth", "borderStartColor", "borderStartWidth", "borderStyle", "borderTopColor", "borderTopEndRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderTopStartRadius", "borderTopWidth", "borderWidth", "boxShadow", "elevation", "shadowColor", "shadowOffset", "shadowOpacity", "shadowRadius", "opacity", "transform"]);
+
+      if (process.env.NODE_ENV !== 'production') {
+        warnIfHeaderStylesDefined(unsafeStyles);
+      }
+
+      var safeStyles = {
+        backgroundColor: backgroundColor,
+        borderBottomColor: borderBottomColor,
+        borderBottomEndRadius: borderBottomEndRadius,
+        borderBottomLeftRadius: borderBottomLeftRadius,
+        borderBottomRightRadius: borderBottomRightRadius,
+        borderBottomStartRadius: borderBottomStartRadius,
+        borderBottomWidth: borderBottomWidth,
+        borderColor: borderColor,
+        borderEndColor: borderEndColor,
+        borderEndWidth: borderEndWidth,
+        borderLeftColor: borderLeftColor,
+        borderLeftWidth: borderLeftWidth,
+        borderRadius: borderRadius,
+        borderRightColor: borderRightColor,
+        borderRightWidth: borderRightWidth,
+        borderStartColor: borderStartColor,
+        borderStartWidth: borderStartWidth,
+        borderStyle: borderStyle,
+        borderTopColor: borderTopColor,
+        borderTopEndRadius: borderTopEndRadius,
+        borderTopLeftRadius: borderTopLeftRadius,
+        borderTopRightRadius: borderTopRightRadius,
+        borderTopStartRadius: borderTopStartRadius,
+        borderTopWidth: borderTopWidth,
+        borderWidth: borderWidth,
+        boxShadow: boxShadow,
+        elevation: elevation,
+        shadowColor: shadowColor,
+        shadowOffset: shadowOffset,
+        shadowOpacity: shadowOpacity,
+        shadowRadius: shadowRadius,
+        opacity: opacity,
+        transform: transform };
+
+
+
+
+      for (var styleProp in safeStyles) {
+
+        if (safeStyles[styleProp] === undefined) {
+
+
+          delete safeStyles[styleProp];
+        }
+      }var _this$getInterpolated =
+
+
+
+
+
+
+
+      this.getInterpolatedStyle(styleInterpolator, layout, scene.progress.current, scene.progress.next, titleLayout, previousTitle ? leftLabelLayout : undefined, typeof height === 'number' ? height : defaultHeight),titleStyle = _this$getInterpolated.titleStyle,leftButtonStyle = _this$getInterpolated.leftButtonStyle,leftLabelStyle = _this$getInterpolated.leftLabelStyle,rightButtonStyle = _this$getInterpolated.rightButtonStyle,backgroundStyle = _this$getInterpolated.backgroundStyle;
+      var leftButton = left ? left({
+        backImage: backImage,
+        pressColorAndroid: pressColorAndroid,
+        allowFontScaling: backAllowFontScaling,
+        onPress: onGoBack,
+        labelVisible: headerBackTitleVisible,
+        label: leftLabel !== undefined ? leftLabel : previousTitle,
+        truncatedLabel: truncatedLabel,
+        labelStyle: [leftLabelStyle, customLeftLabelStyle],
+        onLabelLayout: this.handleLeftLabelLayout,
+        screenLayout: layout,
+        titleLayout: titleLayout,
+        tintColor: headerTintColor,
+        canGoBack: Boolean(onGoBack) }) :
+      null;
+      var rightButton = right ? right({
+        tintColor: headerTintColor }) :
+      null;
+      return React.createElement(React.Fragment, null, React.createElement(require("react-native").Animated.View, {
+        pointerEvents: "box-none",
+        style: [require("react-native").StyleSheet.absoluteFill, {
+          zIndex: 0 },
+        backgroundStyle] },
+      headerBackground ? headerBackground({
+        style: safeStyles }) :
+      headerTransparent ? null : React.createElement(_HeaderBackground.default, {
+        style: safeStyles })),
+      React.createElement(require("react-native").Animated.View, {
+        pointerEvents: "box-none",
+        style: [{
+          height: height,
+          minHeight: minHeight,
+          maxHeight: maxHeight,
+          opacity: opacity,
+          transform: transform }] },
+
+      React.createElement(require("react-native").View, {
+        pointerEvents: "none",
+        style: {
+          height: headerStatusBarHeight } }),
+
+      React.createElement(require("react-native").View, {
+        pointerEvents: "box-none",
+        style: styles.content },
+      leftButton ? React.createElement(require("react-native").Animated.View, {
+        pointerEvents: "box-none",
+        style: [styles.left, {
+          left: insets.left },
+        leftButtonStyle, leftContainerStyle] },
+      leftButton) : null, React.createElement(require("react-native").Animated.View, {
+        pointerEvents: "box-none",
+        style: [headerTitleAlign === 'left' ? {
+          position: 'absolute',
+          left: (leftButton ? 72 : 16) + insets.left,
+          right: (rightButton ? 72 : 16) + insets.right } :
+        {
+          marginHorizontal: (leftButton ? 32 : 16) + (leftButton && headerBackTitleVisible !== false ? 40 : 0) + Math.max(insets.left, insets.right) },
+        titleStyle, titleContainerStyle] },
+      headerTitle({
+        children: currentTitle,
+        onLayout: this.handleTitleLayout,
+        allowFontScaling: titleAllowFontScaling,
+        tintColor: headerTintColor,
+        style: customTitleStyle })),
+      rightButton ? React.createElement(require("react-native").Animated.View, {
+        pointerEvents: "box-none",
+        style: [styles.right, {
+          right: insets.right },
+        rightButtonStyle, rightContainerStyle] },
+      rightButton) : null)));
+    } }]);return HeaderSegment;}(React.Component);
+
+
+
+exports.default = HeaderSegment;
+
+var styles = require("react-native").StyleSheet.create({
+  content: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center' },
+
+  left: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'flex-start' },
+
+  right: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'flex-end' } });

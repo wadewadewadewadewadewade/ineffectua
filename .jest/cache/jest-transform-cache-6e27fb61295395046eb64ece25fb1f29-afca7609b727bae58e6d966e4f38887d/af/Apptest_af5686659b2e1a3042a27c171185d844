@@ -1,0 +1,25 @@
+6212295a920a6a5627ffdae1cd52ce55
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+jest.mock('react-native-screens', () => {
+    const RealComponent = jest.requireActual('react-native-screens');
+    RealComponent.enableScreens = function () { };
+    return RealComponent;
+});
+/**
+ * @format
+ */
+require("react-native");
+const react_1 = __importDefault(require("react"));
+const App_1 = __importDefault(require("../src/components/App"));
+// Note: test renderer must be required after react-native.
+const react_test_renderer_1 = __importDefault(require("react-test-renderer"));
+// neededd this to get some async items like StatusBar to build properly when running the test
+jest.useFakeTimers();
+it('renders correctly', () => {
+    react_test_renderer_1.default.create(react_1.default.createElement(App_1.default, null));
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL19fdGVzdHNfXy9BcHAudGVzdC50c3giLCJtYXBwaW5ncyI6Ijs7Ozs7QUFjQSxJQUFJLENBQUMsSUFBSSxDQUFDLHNCQUFzQixFQUFFLEdBQUcsRUFBRTtJQUNyQyxNQUFNLGFBQWEsR0FBRyxJQUFJLENBQUMsYUFBYSxDQUFDLHNCQUFzQixDQUFDLENBQUM7SUFDakUsYUFBYSxDQUFDLGFBQWEsR0FBRyxjQUFZLENBQUMsQ0FBQztJQUM1QyxPQUFPLGFBQWEsQ0FBQztBQUN2QixDQUFDLENBQUMsQ0FBQztBQWxCSDs7R0FFRztBQUVILHdCQUFzQjtBQUN0QixrREFBMEI7QUFDMUIsZ0VBQXdDO0FBRXhDLDJEQUEyRDtBQUMzRCw4RUFBMkM7QUFFM0MsOEZBQThGO0FBQzlGLElBQUksQ0FBQyxhQUFhLEVBQUUsQ0FBQztBQVFyQixFQUFFLENBQUMsbUJBQW1CLEVBQUUsR0FBRyxFQUFFO0lBQzNCLDZCQUFRLENBQUMsTUFBTSxDQUFDLDhCQUFDLGFBQUcsT0FBRyxDQUFDLENBQUE7QUFDMUIsQ0FBQyxDQUFDLENBQUEiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL19fdGVzdHNfXy9BcHAudGVzdC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBAZm9ybWF0XG4gKi9cblxuaW1wb3J0ICdyZWFjdC1uYXRpdmUnO1xuaW1wb3J0IFJlYWN0IGZyb20gJ3JlYWN0JztcbmltcG9ydCBBcHAgZnJvbSAnLi4vc3JjL2NvbXBvbmVudHMvQXBwJztcblxuLy8gTm90ZTogdGVzdCByZW5kZXJlciBtdXN0IGJlIHJlcXVpcmVkIGFmdGVyIHJlYWN0LW5hdGl2ZS5cbmltcG9ydCByZW5kZXJlciBmcm9tICdyZWFjdC10ZXN0LXJlbmRlcmVyJztcblxuLy8gbmVlZGVkZCB0aGlzIHRvIGdldCBzb21lIGFzeW5jIGl0ZW1zIGxpa2UgU3RhdHVzQmFyIHRvIGJ1aWxkIHByb3Blcmx5IHdoZW4gcnVubmluZyB0aGUgdGVzdFxuamVzdC51c2VGYWtlVGltZXJzKCk7XG5cbmplc3QubW9jaygncmVhY3QtbmF0aXZlLXNjcmVlbnMnLCAoKSA9PiB7XG4gIGNvbnN0IFJlYWxDb21wb25lbnQgPSBqZXN0LnJlcXVpcmVBY3R1YWwoJ3JlYWN0LW5hdGl2ZS1zY3JlZW5zJyk7XG4gIFJlYWxDb21wb25lbnQuZW5hYmxlU2NyZWVucyA9IGZ1bmN0aW9uKCkge307XG4gIHJldHVybiBSZWFsQ29tcG9uZW50O1xufSk7XG5cbml0KCdyZW5kZXJzIGNvcnJlY3RseScsICgpID0+IHtcbiAgcmVuZGVyZXIuY3JlYXRlKDxBcHAgLz4pXG59KSJdLCJ2ZXJzaW9uIjozfQ==

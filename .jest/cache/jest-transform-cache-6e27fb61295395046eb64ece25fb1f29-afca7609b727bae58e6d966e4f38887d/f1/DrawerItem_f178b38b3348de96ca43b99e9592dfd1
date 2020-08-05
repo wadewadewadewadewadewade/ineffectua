@@ -1,0 +1,156 @@
+77bc59be9349f869796309c17d566f88
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = DrawerItem;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+
+
+var _color = _interopRequireDefault(require("color"));
+
+var _TouchableItem = _interopRequireDefault(require("./TouchableItem"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _extends() {_extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}return target;};return _extends.apply(this, arguments);}
+
+function _objectWithoutProperties(source, excluded) {if (source == null) return {};var target = _objectWithoutPropertiesLoose(source, excluded);var key, i;if (Object.getOwnPropertySymbols) {var sourceSymbolKeys = Object.getOwnPropertySymbols(source);for (i = 0; i < sourceSymbolKeys.length; i++) {key = sourceSymbolKeys[i];if (excluded.indexOf(key) >= 0) continue;if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;target[key] = source[key];}}return target;}
+
+function _objectWithoutPropertiesLoose(source, excluded) {if (source == null) return {};var target = {};var sourceKeys = Object.keys(source);var key, i;for (i = 0; i < sourceKeys.length; i++) {key = sourceKeys[i];if (excluded.indexOf(key) >= 0) continue;target[key] = source[key];}return target;}
+
+var Touchable = function Touchable(_ref) {var
+
+  children =
+
+
+
+
+
+  _ref.children,style = _ref.style,_onPress = _ref.onPress,to = _ref.to,accessibilityRole = _ref.accessibilityRole,delayPressIn = _ref.delayPressIn,
+  rest = _objectWithoutProperties(_ref, ["children", "style", "onPress", "to", "accessibilityRole", "delayPressIn"]);
+
+  if (require("react-native").Platform.OS === 'web' && to) {
+
+
+    return React.createElement(require("@react-navigation/native").Link, _extends({}, rest, {
+      to: to,
+      style: [styles.button, style],
+      onPress: function onPress(e) {
+        if (!(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) && (
+        e.button == null || e.button === 0))
+          {
+            e.preventDefault();
+            _onPress === null || _onPress === void 0 ? void 0 : _onPress(e);
+          }
+      } }),
+    children);
+  } else {
+    return React.createElement(_TouchableItem.default, _extends({}, rest, {
+      accessibilityRole: accessibilityRole,
+      delayPressIn: delayPressIn,
+      onPress: _onPress }),
+    React.createElement(require("react-native").View, {
+      style: style },
+    children));
+  }
+};
+
+
+
+
+
+function DrawerItem(props) {var _ref2 =
+
+
+  (0, require("@react-navigation/native").useTheme)(),colors = _ref2.colors;var
+
+
+  icon =
+
+
+
+
+
+
+
+
+
+
+  props.icon,label = props.label,labelStyle = props.labelStyle,to = props.to,_props$focused = props.focused,focused = _props$focused === void 0 ? false : _props$focused,_props$activeTintColo = props.activeTintColor,activeTintColor = _props$activeTintColo === void 0 ? colors.primary : _props$activeTintColo,_props$inactiveTintCo = props.inactiveTintColor,inactiveTintColor = _props$inactiveTintCo === void 0 ? (0, _color.default)(colors.text).alpha(0.68).rgb().string() : _props$inactiveTintCo,_props$activeBackgrou = props.activeBackgroundColor,activeBackgroundColor = _props$activeBackgrou === void 0 ? (0, _color.default)(activeTintColor).alpha(0.12).rgb().string() : _props$activeBackgrou,_props$inactiveBackgr = props.inactiveBackgroundColor,inactiveBackgroundColor = _props$inactiveBackgr === void 0 ? 'transparent' : _props$inactiveBackgr,style = props.style,onPress = props.onPress,
+  rest = _objectWithoutProperties(props, ["icon", "label", "labelStyle", "to", "focused", "activeTintColor", "inactiveTintColor", "activeBackgroundColor", "inactiveBackgroundColor", "style", "onPress"]);var _reactNative$StyleShe =
+
+
+
+  require("react-native").StyleSheet.flatten(style || {}),_reactNative$StyleShe2 = _reactNative$StyleShe.borderRadius,borderRadius = _reactNative$StyleShe2 === void 0 ? 4 : _reactNative$StyleShe2;
+
+  var color = focused ? activeTintColor : inactiveTintColor;
+  var backgroundColor = focused ? activeBackgroundColor : inactiveBackgroundColor;
+  var iconNode = icon ? icon({
+    size: 24,
+    focused: focused,
+    color: color }) :
+  null;
+  return React.createElement(require("react-native").View, _extends({
+    collapsable: false },
+  rest, {
+    style: [styles.container, {
+      borderRadius: borderRadius,
+      backgroundColor: backgroundColor },
+    style] }),
+  React.createElement(Touchable, {
+    delayPressIn: 0,
+    onPress: onPress,
+    style: [styles.wrapper, {
+      borderRadius: borderRadius }],
+
+    accessibilityTraits: focused ? ['button', 'selected'] : 'button',
+    accessibilityComponentType: "button",
+    accessibilityRole: "button",
+    accessibilityState: {
+      selected: focused },
+
+    accessibilityStates: focused ? ['selected'] : [],
+    to: to },
+  React.createElement(React.Fragment, null, iconNode, React.createElement(require("react-native").View, {
+    style: [styles.label, {
+      marginLeft: iconNode ? 32 : 0,
+      marginVertical: 5 }] },
+
+  typeof label === 'string' ? React.createElement(require("react-native").Text, {
+    numberOfLines: 1,
+    style: [{
+      color: color,
+      fontWeight: '500' },
+    labelStyle] },
+  label) : label({
+    color: color,
+    focused: focused })))));
+
+}
+
+var styles = require("react-native").StyleSheet.create({
+  container: {
+    marginHorizontal: 10,
+    marginVertical: 4,
+    overflow: 'hidden' },
+
+  wrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8 },
+
+  label: {
+    marginRight: 32 },
+
+  button: {
+    display: 'flex' } });

@@ -1,0 +1,228 @@
+8e6455feef1db390c3ad95781e0c103b
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = DrawerView;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+
+
+
+
+
+
+var _SafeAreaProviderCompat = _interopRequireDefault(require("./SafeAreaProviderCompat"));
+
+var _ResourceSavingScene = _interopRequireDefault(require("./ResourceSavingScene"));
+
+var _DrawerContent = _interopRequireDefault(require("./DrawerContent"));
+
+var _Drawer = _interopRequireDefault(require("./Drawer"));
+
+var _DrawerOpenContext = _interopRequireDefault(require("../utils/DrawerOpenContext"));
+
+var _DrawerPositionContext = _interopRequireDefault(require("../utils/DrawerPositionContext"));
+
+var _useWindowDimensions = _interopRequireDefault(require("../utils/useWindowDimensions"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}
+
+function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+var getDefaultDrawerWidth = function getDefaultDrawerWidth(_ref)
+
+
+{var height = _ref.height,width = _ref.width;
+
+
+
+
+
+  var smallerAxisSize = Math.min(height, width);
+  var isLandscape = width > height;
+  var isTablet = smallerAxisSize >= 600;
+  var appBarHeight = require("react-native").Platform.OS === 'ios' ? isLandscape ? 32 : 44 : 56;
+  var maxWidth = isTablet ? 320 : 280;
+  return Math.min(smallerAxisSize - appBarHeight, maxWidth);
+};
+
+var GestureHandlerWrapper = require("./GestureHandler").GestureHandlerRootView !== null && require("./GestureHandler").GestureHandlerRootView !== void 0 ? require("./GestureHandler").GestureHandlerRootView : require("react-native").View;
+
+
+
+
+function DrawerView(_ref2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{var state = _ref2.state,navigation = _ref2.navigation,descriptors = _ref2.descriptors,_ref2$lazy = _ref2.lazy,lazy = _ref2$lazy === void 0 ? true : _ref2$lazy,_ref2$drawerContent = _ref2.drawerContent,drawerContent = _ref2$drawerContent === void 0 ? function (props) {return React.createElement(_DrawerContent.default, props);} : _ref2$drawerContent,_ref2$drawerPosition = _ref2.drawerPosition,drawerPosition = _ref2$drawerPosition === void 0 ? require("react-native").I18nManager.isRTL ? 'right' : 'left' : _ref2$drawerPosition,_ref2$keyboardDismiss = _ref2.keyboardDismissMode,keyboardDismissMode = _ref2$keyboardDismiss === void 0 ? 'on-drag' : _ref2$keyboardDismiss,_ref2$overlayColor = _ref2.overlayColor,overlayColor = _ref2$overlayColor === void 0 ? 'rgba(0, 0, 0, 0.5)' : _ref2$overlayColor,_ref2$drawerType = _ref2.drawerType,drawerType = _ref2$drawerType === void 0 ? 'front' : _ref2$drawerType,_ref2$hideStatusBar = _ref2.hideStatusBar,hideStatusBar = _ref2$hideStatusBar === void 0 ? false : _ref2$hideStatusBar,_ref2$statusBarAnimat = _ref2.statusBarAnimation,statusBarAnimation = _ref2$statusBarAnimat === void 0 ? 'slide' : _ref2$statusBarAnimat,drawerContentOptions = _ref2.drawerContentOptions,drawerStyle = _ref2.drawerStyle,edgeWidth = _ref2.edgeWidth,gestureHandlerProps = _ref2.gestureHandlerProps,minSwipeDistance = _ref2.minSwipeDistance,sceneContainerStyle = _ref2.sceneContainerStyle;var _React$useState =
+  React.useState([state.index]),_React$useState2 = require("@babel/runtime/helpers/slicedToArray")(_React$useState, 2),loaded = _React$useState2[0],setLoaded = _React$useState2[1];
+  var dimensions = (0, _useWindowDimensions.default)();var _ref3 =
+
+
+  (0, require("@react-navigation/native").useTheme)(),colors = _ref3.colors;
+  var isDrawerOpen = state.history.some(function (it) {return it.type === 'drawer';});
+  var handleDrawerOpen = React.useCallback(function () {
+    navigation.dispatch(_objectSpread(_objectSpread({}, require("@react-navigation/native").DrawerActions.openDrawer()), {}, {
+      target: state.key }));
+
+  }, [navigation, state.key]);
+  var handleDrawerClose = React.useCallback(function () {
+    navigation.dispatch(_objectSpread(_objectSpread({}, require("@react-navigation/native").DrawerActions.closeDrawer()), {}, {
+      target: state.key }));
+
+  }, [navigation, state.key]);
+  React.useEffect(function () {
+    if (isDrawerOpen) {
+      navigation.emit({
+        type: 'drawerOpen' });
+
+    } else {
+      navigation.emit({
+        type: 'drawerClose' });
+
+    }
+  }, [isDrawerOpen, navigation]);
+  React.useEffect(function () {
+    var subscription;
+
+    if (isDrawerOpen) {
+
+
+
+      subscription = require("react-native").BackHandler.addEventListener('hardwareBackPress', function () {
+        handleDrawerClose();
+        return true;
+      });
+    }
+
+    return function () {
+      var _subscription;
+
+      return (_subscription = subscription) === null || _subscription === void 0 ? void 0 : _subscription.remove();
+    };
+  }, [handleDrawerClose, isDrawerOpen, navigation, state.key]);
+
+  if (!loaded.includes(state.index)) {
+    setLoaded([].concat(require("@babel/runtime/helpers/toConsumableArray")(loaded), [state.index]));
+  }
+
+  var renderNavigationView = function renderNavigationView(_ref4)
+
+  {var progress = _ref4.progress;
+    return React.createElement(_DrawerPositionContext.default.Provider, {
+      value: drawerPosition },
+    drawerContent(_objectSpread(_objectSpread({}, drawerContentOptions), {}, {
+      progress: progress,
+      state: state,
+      navigation: navigation,
+      descriptors: descriptors })));
+
+  };
+
+  var renderContent = function renderContent() {
+    return React.createElement(require("react-native-screens").ScreenContainer, {
+      style: styles.content },
+    state.routes.map(function (route, index) {
+      var descriptor = descriptors[route.key];var
+
+      unmountOnBlur =
+      descriptor.options.unmountOnBlur;
+      var isFocused = state.index === index;
+
+      if (unmountOnBlur && !isFocused) {
+        return null;
+      }
+
+      if (lazy && !loaded.includes(index) && !isFocused) {
+
+        return null;
+      }
+
+      return React.createElement(_ResourceSavingScene.default, {
+        key: route.key,
+        style: [require("react-native").StyleSheet.absoluteFill, {
+          opacity: isFocused ? 1 : 0 }],
+
+        isVisible: isFocused },
+      descriptor.render());
+    }));
+  };
+
+  var activeKey = state.routes[state.index].key;var _descriptors$activeKe =
+
+
+
+  descriptors[activeKey].options,gestureEnabled = _descriptors$activeKe.gestureEnabled,swipeEnabled = _descriptors$activeKe.swipeEnabled;
+  return React.createElement(require("@react-navigation/native").NavigationHelpersContext.Provider, {
+    value: navigation },
+  React.createElement(GestureHandlerWrapper, {
+    style: styles.content },
+  React.createElement(_SafeAreaProviderCompat.default, null, React.createElement(_DrawerOpenContext.default.Provider, {
+    value: isDrawerOpen },
+  React.createElement(_Drawer.default, {
+    open: isDrawerOpen,
+    gestureEnabled: gestureEnabled,
+    swipeEnabled: swipeEnabled,
+    onOpen: handleDrawerOpen,
+    onClose: handleDrawerClose,
+    gestureHandlerProps: gestureHandlerProps,
+    drawerType: drawerType,
+    drawerPosition: drawerPosition,
+    sceneContainerStyle: [{
+      backgroundColor: colors.background },
+    sceneContainerStyle],
+    drawerStyle: [{
+      width: getDefaultDrawerWidth(dimensions),
+      backgroundColor: colors.card },
+    drawerType === 'permanent' && (drawerPosition === 'left' ? {
+      borderRightColor: colors.border,
+      borderRightWidth: require("react-native").StyleSheet.hairlineWidth } :
+    {
+      borderLeftColor: colors.border,
+      borderLeftWidth: require("react-native").StyleSheet.hairlineWidth }),
+    drawerStyle],
+    overlayStyle: {
+      backgroundColor: overlayColor },
+
+    swipeEdgeWidth: edgeWidth,
+    swipeDistanceThreshold: minSwipeDistance,
+    hideStatusBar: hideStatusBar,
+    statusBarAnimation: statusBarAnimation,
+    renderDrawerContent: renderNavigationView,
+    renderSceneContent: renderContent,
+    keyboardDismissMode: keyboardDismissMode,
+    dimensions: dimensions })))));
+
+}
+
+var styles = require("react-native").StyleSheet.create({
+  content: {
+    flex: 1 } });

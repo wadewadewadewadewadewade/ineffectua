@@ -1,0 +1,109 @@
+07f427c81c98cf598aa6a415eaf4eef6
+"use strict";function _createForOfIteratorHelperLoose(o, allowArrayLike) {var it;if (typeof Symbol === "undefined" || o[typeof Symbol === "function" ? Symbol.iterator : "@@iterator"] == null) {if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {if (it) o = it;var i = 0;return function () {if (i >= o.length) return { done: true };return { done: false, value: o[i++] };};}throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");}it = o[typeof Symbol === "function" ? Symbol.iterator : "@@iterator"]();return it.next.bind(it);}function _unsupportedIterableToArray(o, minLen) {if (!o) return;if (typeof o === "string") return _arrayLikeToArray(o, minLen);var n = Object.prototype.toString.call(o).slice(8, -1);if (n === "Object" && o.constructor) n = o.constructor.name;if (n === "Map" || n === "Set") return Array.from(o);if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);}function _arrayLikeToArray(arr, len) {if (len == null || len > arr.length) len = arr.length;for (var i = 0, arr2 = new Array(len); i < len; i++) {arr2[i] = arr[i];}return arr2;}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = useLinking;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+var isUsingLinking = false;
+
+function useLinking(ref, _ref)
+
+
+
+
+{var _ref$enabled = _ref.enabled,enabled = _ref$enabled === void 0 ? true : _ref$enabled,prefixes = _ref.prefixes,config = _ref.config,_ref$getStateFromPath = _ref.getStateFromPath,getStateFromPath = _ref$getStateFromPath === void 0 ? require("@react-navigation/core").getStateFromPath : _ref$getStateFromPath;
+  React.useEffect(function () {
+    if (enabled !== false && isUsingLinking) {
+      throw new Error(['Looks like you have configured linking in multiple places. This is likely an error since deep links should only be handled in one place to avoid conflicts. Make sure that:', "- You are not using both 'linking' prop and 'useLinking'", "- You don't have 'useLinking' in multiple components", require("react-native").Platform.OS === 'android' ? "- You have set 'android:launchMode=singleTask' in the '<activity />' section of the 'AndroidManifest.xml' file to avoid launching multiple instances" : ''].join('\n').trim());
+    } else {
+      isUsingLinking = enabled !== false;
+    }
+
+    return function () {
+      isUsingLinking = false;
+    };
+  });
+
+
+
+  var enabledRef = React.useRef(enabled);
+  var prefixesRef = React.useRef(prefixes);
+  var configRef = React.useRef(config);
+  var getStateFromPathRef = React.useRef(getStateFromPath);
+  React.useEffect(function () {
+    enabledRef.current = enabled;
+    prefixesRef.current = prefixes;
+    configRef.current = config;
+    getStateFromPathRef.current = getStateFromPath;
+  }, [config, enabled, getStateFromPath, prefixes]);
+  var extractPathFromURL = React.useCallback(function (url) {
+    for (var _iterator = _createForOfIteratorHelperLoose(prefixesRef.current), _step; !(_step = _iterator()).done;) {var prefix = _step.value;
+      if (url.startsWith(prefix)) {
+        return url.replace(prefix, '');
+      }
+    }
+
+    return undefined;
+  }, []);
+  var getInitialState = React.useCallback(function _callee() {var url, path;return require("@babel/runtime/regenerator").async(function _callee$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:if (
+            enabledRef.current) {_context.next = 2;break;}return _context.abrupt("return",
+            undefined);case 2:_context.next = 4;return require("@babel/runtime/regenerator").awrap(
+
+
+            Promise.race([require("react-native").Linking.getInitialURL(), new Promise(function (resolve) {return (
+
+                setTimeout(resolve, 150));})]));case 4:url = _context.sent;
+            path = url ? extractPathFromURL(url) : null;if (!
+
+            path) {_context.next = 10;break;}return _context.abrupt("return",
+            getStateFromPathRef.current(path, configRef.current));case 10:return _context.abrupt("return",
+
+            undefined);case 11:case "end":return _context.stop();}}}, null, null, null, Promise);},
+
+  [extractPathFromURL]);
+  React.useEffect(function () {
+    var listener = function listener(_ref2)
+
+    {var url = _ref2.url;
+      if (!enabled) {
+        return;
+      }
+
+      var path = extractPathFromURL(url);
+      var navigation = ref.current;
+
+      if (navigation && path) {
+        var state = getStateFromPathRef.current(path, configRef.current);
+
+        if (state) {
+          var action = (0, require("@react-navigation/core").getActionFromState)(state);
+
+          if (action !== undefined) {
+            navigation.dispatch(action);
+          } else {
+            navigation.resetRoot(state);
+          }
+        }
+      }
+    };
+
+    require("react-native").Linking.addEventListener('url', listener);
+
+    return function () {return require("react-native").Linking.removeEventListener('url', listener);};
+  }, [enabled, extractPathFromURL, ref]);
+  return {
+    getInitialState: getInitialState };
+
+}

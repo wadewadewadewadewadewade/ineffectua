@@ -1,0 +1,107 @@
+8ba68149b1011873a0e6fb85ee3644b7
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+var _ToggleButton = _interopRequireDefault(require("./ToggleButton"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ToggleButtonRow = function (_React$Component) {require("@babel/runtime/helpers/inherits")(ToggleButtonRow, _React$Component);var _super = _createSuper(ToggleButtonRow);function ToggleButtonRow() {require("@babel/runtime/helpers/classCallCheck")(this, ToggleButtonRow);return _super.apply(this, arguments);}require("@babel/runtime/helpers/createClass")(ToggleButtonRow, [{ key: "render", value: function render()
+    {var _this$props =
+
+
+
+
+
+      this.props,value = _this$props.value,onValueChange = _this$props.onValueChange,children = _this$props.children,style = _this$props.style;
+      var count = React.Children.count(children);
+      return React.createElement(_ToggleButton.default.Group, {
+        value: value,
+        onValueChange: onValueChange },
+      React.createElement(require("react-native").View, {
+        style: [styles.row, style] },
+      React.Children.map(children, function (child, i) {
+
+        if (child && child.type === _ToggleButton.default) {
+
+          return React.cloneElement(child, {
+            style: [styles.button, i === 0 ? styles.first : i === count - 1 ? styles.last : styles.middle,
+            child.props.style] });
+
+        }
+
+        return child;
+      })));
+    } }]);return ToggleButtonRow;}(React.Component);
+
+
+
+_defineProperty(ToggleButtonRow, "displayName", 'ToggleButton.Row');
+
+var styles = require("react-native").StyleSheet.create({
+  row: {
+    flexDirection: 'row' },
+
+  button: {
+    borderWidth: require("react-native").StyleSheet.hairlineWidth },
+
+  first: {
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0 },
+
+  middle: {
+    borderRadius: 0,
+    borderLeftWidth: 0 },
+
+  last: {
+    borderLeftWidth: 0,
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0 } });
+
+
+
+var _default = ToggleButtonRow;
+exports.default = _default;

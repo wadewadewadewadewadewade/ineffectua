@@ -1,0 +1,45 @@
+3625ce5b1b92da8a023b0f41bc065325
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = useOnRouteFocus;
+
+var React = _interopRequireWildcard(require("react"));
+
+var _NavigationBuilderContext = _interopRequireDefault(require("./NavigationBuilderContext"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+
+
+
+
+
+function useOnRouteFocus(_ref)
+
+
+
+
+{var router = _ref.router,getState = _ref.getState,sourceRouteKey = _ref.key,setState = _ref.setState;var _React$useContext =
+
+
+  React.useContext(_NavigationBuilderContext.default),onRouteFocusParent = _React$useContext.onRouteFocus;
+  return React.useCallback(function (key) {
+    var state = getState();
+    var result = router.getStateForRouteFocus(state, key);
+
+    if (result !== state) {
+      setState(result);
+    }
+
+    if (onRouteFocusParent !== undefined && sourceRouteKey !== undefined) {
+      onRouteFocusParent(sourceRouteKey);
+    }
+  }, [getState, onRouteFocusParent, router, setState, sourceRouteKey]);
+}

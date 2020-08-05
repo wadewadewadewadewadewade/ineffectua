@@ -1,0 +1,40 @@
+025ada9d823942d298da4ce71f4fb7ae
+
+
+
+
+
+
+
+
+
+
+
+
+'use strict';var _jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native/Libraries/Components/ScrollView/__mocks__/ScrollViewMock.js";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+
+
+
+
+
+
+
+var RCTScrollView = require('../../../ReactNative/requireNativeComponent')(
+'RCTScrollView');
+
+
+var ScrollViewComponent = jest.genMockFromModule('../ScrollView');var
+
+ScrollViewMock = function (_ScrollViewComponent) {require("@babel/runtime/helpers/inherits")(ScrollViewMock, _ScrollViewComponent);var _super = _createSuper(ScrollViewMock);function ScrollViewMock() {require("@babel/runtime/helpers/classCallCheck")(this, ScrollViewMock);return _super.apply(this, arguments);}require("@babel/runtime/helpers/createClass")(ScrollViewMock, [{ key: "render", value: function render()
+    {
+      return (
+        require('react').createElement(RCTScrollView, require("@babel/runtime/helpers/extends")({}, this.props, { __self: this, __source: { fileName: _jsxFileName, lineNumber: 31, columnNumber: 7 } }),
+        this.props.refreshControl,
+        require('react').createElement(require('../../View/View'), { __self: this, __source: { fileName: _jsxFileName, lineNumber: 33, columnNumber: 9 } }, this.props.children)));
+
+
+    } }]);return ScrollViewMock;}(ScrollViewComponent);
+
+
+module.exports = ScrollViewMock;

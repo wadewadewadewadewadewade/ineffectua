@@ -1,0 +1,422 @@
+cd26c2df071d3fee9a58a7b069e8102d
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = useNavigationBuilder;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+
+
+var _NavigationStateContext = _interopRequireDefault(require("./NavigationStateContext"));
+
+var _NavigationRouteContext = _interopRequireDefault(require("./NavigationRouteContext"));
+
+var _Screen = _interopRequireDefault(require("./Screen"));
+
+var _useEventEmitter = _interopRequireDefault(require("./useEventEmitter"));
+
+var _useRegisterNavigator = _interopRequireDefault(require("./useRegisterNavigator"));
+
+var _useDescriptors = _interopRequireDefault(require("./useDescriptors"));
+
+var _useNavigationHelpers = _interopRequireDefault(require("./useNavigationHelpers"));
+
+var _useOnAction = _interopRequireDefault(require("./useOnAction"));
+
+var _useFocusEvents = _interopRequireDefault(require("./useFocusEvents"));
+
+var _useOnRouteFocus = _interopRequireDefault(require("./useOnRouteFocus"));
+
+var _useChildListeners = _interopRequireDefault(require("./useChildListeners"));
+
+var _useFocusedListenersChildrenAdapter = _interopRequireDefault(require("./useFocusedListenersChildrenAdapter"));
+
+
+
+var _useKeyedChildListeners = _interopRequireDefault(require("./useKeyedChildListeners"));
+
+var _useOnGetState = _interopRequireDefault(require("./useOnGetState"));
+
+var _useScheduleUpdate = _interopRequireDefault(require("./useScheduleUpdate"));
+
+var _useCurrentRender = _interopRequireDefault(require("./useCurrentRender"));
+
+var _isArrayEqual = _interopRequireDefault(require("./isArrayEqual"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}
+
+function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+function _objectWithoutProperties(source, excluded) {if (source == null) return {};var target = _objectWithoutPropertiesLoose(source, excluded);var key, i;if (Object.getOwnPropertySymbols) {var sourceSymbolKeys = Object.getOwnPropertySymbols(source);for (i = 0; i < sourceSymbolKeys.length; i++) {key = sourceSymbolKeys[i];if (excluded.indexOf(key) >= 0) continue;if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;target[key] = source[key];}}return target;}
+
+function _objectWithoutPropertiesLoose(source, excluded) {if (source == null) return {};var target = {};var sourceKeys = Object.keys(source);var key, i;for (i = 0; i < sourceKeys.length; i++) {key = sourceKeys[i];if (excluded.indexOf(key) >= 0) continue;target[key] = source[key];}return target;}
+
+
+
+require("./types").PrivateValueStore;
+
+
+
+
+
+
+var getRouteConfigsFromChildren = function getRouteConfigsFromChildren(children) {
+  var configs = React.Children.toArray(children).reduce(function (acc, child) {
+    if (React.isValidElement(child)) {
+      if (child.type === _Screen.default) {
+
+
+        acc.push(child.props);
+        return acc;
+      }
+
+      if (child.type === React.Fragment) {
+
+
+        acc.push.apply(acc, require("@babel/runtime/helpers/toConsumableArray")(getRouteConfigsFromChildren(child.props.children)));
+        return acc;
+      }
+    }
+
+    throw new Error("A navigator can only contain 'Screen' components as its direct children (found '".concat(
+    child.type && child.type.name ? child.type.name : String(child), "')"));
+  }, []);
+
+  if (process.env.NODE_ENV !== 'production') {
+    configs.forEach(function (config) {var
+
+      name =
+
+
+
+      config.name,children = config.children,component = config.component,getComponent = config.getComponent;
+
+      if (typeof name !== 'string' || !name) {
+        throw new Error("Got an invalid name (".concat(JSON.stringify(name), ") for the screen. It must be a non-empty string."));
+      }
+
+      if (children != null || component !== undefined || getComponent !== undefined) {
+        if (children != null && component !== undefined) {
+          throw new Error("Got both 'component' and 'children' props for the screen '".concat(name, "'. You must pass only one of them."));
+        }
+
+        if (children != null && getComponent !== undefined) {
+          throw new Error("Got both 'getComponent' and 'children' props for the screen '".concat(name, "'. You must pass only one of them."));
+        }
+
+        if (component !== undefined && getComponent !== undefined) {
+          throw new Error("Got both 'component' and 'getComponent' props for the screen '".concat(name, "'. You must pass only one of them."));
+        }
+
+        if (children != null && typeof children !== 'function') {
+          throw new Error("Got an invalid value for 'children' prop for the screen '".concat(name, "'. It must be a function returning a React Element."));
+        }
+
+        if (component !== undefined && !(0, require("react-is").isValidElementType)(component)) {
+          throw new Error("Got an invalid value for 'component' prop for the screen '".concat(name, "'. It must be a valid React Component."));
+        }
+
+        if (getComponent !== undefined && typeof getComponent !== 'function') {
+          throw new Error("Got an invalid value for 'getComponent' prop for the screen '".concat(name, "'. It must be a function returning a React Component."));
+        }
+
+        if (typeof component === 'function' && component.name === 'component') {
+
+
+
+          console.warn("Looks like you're passing an inline function for 'component' prop for the screen '".concat(name, "' (e.g. component={() => <SomeComponent />}). Passing an inline function will cause the component state to be lost on re-render and cause perf issues since it's re-created every render. You can pass the function as children to 'Screen' instead to achieve the desired behaviour."));
+        }
+      } else {
+        throw new Error("Couldn't find a 'component', 'getComponent' or 'children' prop for the screen '".concat(name, "'. This can happen if you passed 'undefined'. You likely forgot to export your component from the file it's defined in, or mixed up default import and named import when importing."));
+      }
+    });
+  }
+
+  return configs;
+};
+
+
+
+
+
+
+
+
+
+function useNavigationBuilder(createRouter, options) {
+  var _route$params3;
+
+  var navigatorKey = (0, _useRegisterNavigator.default)();
+  var route = React.useContext(_NavigationRouteContext.default);
+  var previousNestedParamsRef = React.useRef(route === null || route === void 0 ? void 0 : route.params);
+  React.useEffect(function () {
+    previousNestedParamsRef.current = route === null || route === void 0 ? void 0 : route.params;
+  }, [route]);
+
+  var
+  children =
+  options.children,
+  rest = _objectWithoutProperties(options, ["children"]);var _React$useRef =
+
+
+
+  React.useRef(createRouter(_objectSpread(_objectSpread({}, rest), (route === null || route === void 0 ? void 0 : route.params) && route.params.initial !== false && typeof route.params.screen === 'string' ? {
+    initialRouteName: route.params.screen } :
+  null))),router = _React$useRef.current;
+  var routeConfigs = getRouteConfigsFromChildren(children);
+  var screens = routeConfigs.reduce(function (acc, config) {
+    if (config.name in acc) {
+      throw new Error("A navigator cannot contain multiple 'Screen' components with the same name (found duplicate screen named '".concat(config.name, "')"));
+    }
+
+    acc[config.name] = config;
+    return acc;
+  }, {});
+  var routeNames = routeConfigs.map(function (config) {return config.name;});
+  var routeParamList = routeNames.reduce(function (acc, curr) {
+    var _route$params, _route$params2;var
+
+
+    initialParams =
+    screens[curr].initialParams;
+    var initialParamsFromParams = (route === null || route === void 0 ? void 0 : (_route$params = route.params) === null || _route$params === void 0 ? void 0 : _route$params.initial) !== false && (route === null || route === void 0 ? void 0 : (_route$params2 = route.params) === null || _route$params2 === void 0 ? void 0 : _route$params2.screen) === curr ? route.params.params : undefined;
+    acc[curr] = initialParams !== undefined || initialParamsFromParams !== undefined ? _objectSpread(_objectSpread({}, initialParams), initialParamsFromParams) : undefined;
+    return acc;
+  }, {});
+
+  if (!routeNames.length) {
+    throw new Error("Couldn't find any screens for the navigator. Have you defined any screens as its children?");
+  }
+
+  var isStateValid = React.useCallback(function (state) {return state.type === undefined || state.type === router.type;}, [router.type]);
+  var isStateInitialized = React.useCallback(function (state) {return state !== undefined && state.stale === false && isStateValid(state);}, [isStateValid]);var _React$useContext =
+
+
+
+
+
+
+
+  React.useContext(_NavigationStateContext.default),currentState = _React$useContext.state,getCurrentState = _React$useContext.getState,setState = _React$useContext.setState,setKey = _React$useContext.setKey,getKey = _React$useContext.getKey,getIsInitial = _React$useContext.getIsInitial;var _React$useMemo =
+  React.useMemo(function () {
+
+
+
+
+    if (currentState === undefined || !isStateValid(currentState)) {
+      return [router.getInitialState({
+        routeNames: routeNames,
+        routeParamList: routeParamList }),
+      true];
+    } else {
+      return [router.getRehydratedState(currentState, {
+        routeNames: routeNames,
+        routeParamList: routeParamList }),
+      false];
+    }
+
+
+
+
+
+
+
+  }, [currentState, router, isStateValid]),_React$useMemo2 = require("@babel/runtime/helpers/slicedToArray")(_React$useMemo, 2),initializedState = _React$useMemo2[0],isFirstStateInitialization = _React$useMemo2[1];
+  var state =
+
+
+  isStateInitialized(currentState) ? currentState : initializedState;
+  var nextState = state;
+
+  if (!(0, _isArrayEqual.default)(state.routeNames, routeNames)) {
+
+    nextState = router.getStateForRouteNamesChange(state, {
+      routeNames: routeNames,
+      routeParamList: routeParamList });
+
+  }
+
+  if (typeof (route === null || route === void 0 ? void 0 : (_route$params3 = route.params) === null || _route$params3 === void 0 ? void 0 : _route$params3.screen) === 'string' && (route.params !== previousNestedParamsRef.current || route.params.initial === false && isFirstStateInitialization)) {
+
+
+    var updatedState = router.getStateForAction(nextState, require("@react-navigation/routers").CommonActions.navigate(route.params.screen, route.params.params), {
+      routeNames: routeNames,
+      routeParamList: routeParamList });
+
+    nextState = updatedState !== null ? router.getRehydratedState(updatedState, {
+      routeNames: routeNames,
+      routeParamList: routeParamList }) :
+    nextState;
+  }
+
+  var shouldUpdate = state !== nextState;
+  (0, _useScheduleUpdate.default)(function () {
+    if (shouldUpdate) {
+
+      setState(nextState);
+    }
+  });
+
+
+
+  state = nextState;
+  React.useEffect(function () {
+    setKey(navigatorKey);
+
+    if (!getIsInitial()) {
+
+
+
+      setState(nextState);
+    }
+
+    return function () {
+
+
+
+
+      setTimeout(function () {
+        if (getCurrentState() !== undefined && getKey() === navigatorKey) {
+          setState(undefined);
+        }
+      }, 0);
+    };
+  }, []);
+
+
+
+  var initializedStateRef = React.useRef();
+  initializedStateRef.current = initializedState;
+  var getState = React.useCallback(function () {
+    var currentState = getCurrentState();
+    return isStateInitialized(currentState) ? currentState : initializedStateRef.current;
+  }, [getCurrentState, isStateInitialized]);
+  var emitter = (0, _useEventEmitter.default)(function (e) {var _ref;
+    var routeNames = [];
+    var route;
+
+    if (e.target) {
+      var _route;
+
+      route = state.routes.find(function (route) {return route.key === e.target;});
+
+      if ((_route = route) === null || _route === void 0 ? void 0 : _route.name) {
+        routeNames.push(route.name);
+      }
+    } else {
+      route = state.routes[state.index];
+      routeNames.push.apply(routeNames, require("@babel/runtime/helpers/toConsumableArray")(Object.keys(screens).filter(function (name) {
+        var _route2;
+
+        return ((_route2 = route) === null || _route2 === void 0 ? void 0 : _route2.name) === name;
+      })));
+    }
+
+    if (route == null) {
+      return;
+    }
+
+    var navigation = descriptors[route.key].navigation;
+    var listeners = (_ref = []).concat.apply(_ref, require("@babel/runtime/helpers/toConsumableArray")(routeNames.map(function (name) {var
+
+      listeners =
+      screens[name].listeners;
+      var map = typeof listeners === 'function' ? listeners({
+        route: route,
+        navigation: navigation }) :
+      listeners;
+      return map ? Object.keys(map).filter(function (type) {return type === e.type;}).map(function (type) {return map === null || map === void 0 ? void 0 : map[type];}) : undefined;
+    }))).filter(function (cb, i, self) {return cb && self.lastIndexOf(cb) === i;});
+    listeners.forEach(function (listener) {return listener === null || listener === void 0 ? void 0 : listener(e);});
+  });
+  (0, _useFocusEvents.default)({
+    state: state,
+    emitter: emitter });
+
+  React.useEffect(function () {
+    emitter.emit({
+      type: 'state',
+      data: {
+        state: state } });
+
+
+  }, [emitter, state]);var _ref2 =
+
+
+
+  (0, _useChildListeners.default)(),childListeners = _ref2.listeners,addListener = _ref2.addListener;var _ref3 =
+
+
+
+  (0, _useKeyedChildListeners.default)(),keyedListeners = _ref3.keyedListeners,addKeyedListener = _ref3.addKeyedListener;
+  var onAction = (0, _useOnAction.default)({
+    router: router,
+    getState: getState,
+    setState: setState,
+    key: route === null || route === void 0 ? void 0 : route.key,
+    actionListeners: childListeners.action,
+    beforeRemoveListeners: keyedListeners.beforeRemove,
+    routerConfigOptions: {
+      routeNames: routeNames,
+      routeParamList: routeParamList },
+
+    emitter: emitter });
+
+  var onRouteFocus = (0, _useOnRouteFocus.default)({
+    router: router,
+    key: route === null || route === void 0 ? void 0 : route.key,
+    getState: getState,
+    setState: setState });
+
+  var navigation = (0, _useNavigationHelpers.default)({
+    onAction: onAction,
+    getState: getState,
+    emitter: emitter,
+    router: router });
+
+  (0, _useFocusedListenersChildrenAdapter.default)({
+    navigation: navigation,
+    focusedListeners: childListeners.focus });
+
+  (0, _useOnGetState.default)({
+    getState: getState,
+    getStateListeners: keyedListeners.getState });
+
+  var descriptors = (0, _useDescriptors.default)({
+    state: state,
+    screens: screens,
+    navigation: navigation,
+    screenOptions: options.screenOptions,
+    onAction: onAction,
+    getState: getState,
+    setState: setState,
+    onRouteFocus: onRouteFocus,
+    addListener: addListener,
+    addKeyedListener: addKeyedListener,
+    router: router,
+    emitter: emitter });
+
+  (0, _useCurrentRender.default)({
+    state: state,
+    navigation: navigation,
+    descriptors: descriptors });
+
+  return {
+    state: state,
+    navigation: navigation,
+    descriptors: descriptors };
+
+}

@@ -1,0 +1,89 @@
+730900e40248a626cd8c02cd7f486999
+
+
+
+
+
+
+
+
+
+
+'use strict';var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+var _Text = _interopRequireDefault(require("../../Text/Text"));var _jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native/Libraries/LogBox/UI/LogBoxMessage.js";
+
+
+
+
+
+
+
+
+
+
+
+
+var cleanContent = function cleanContent(content) {return (
+    content.replace(/^(TransformError |Warning: (Warning: )?|Error: )/g, ''));};
+
+function LogBoxMessage(props) {var _this = this;var _props$message =
+  props.message,content = _props$message.content,substitutions = _props$message.substitutions;
+
+  if (props.plaintext === true) {
+    return React.createElement(_Text.default, { __self: this, __source: { fileName: _jsxFileName, lineNumber: 34, columnNumber: 12 } }, cleanContent(content));
+  }
+
+  var maxLength = props.maxLength != null ? props.maxLength : Infinity;
+  var substitutionStyle = props.style;
+  var elements = [];
+  var length = 0;
+  var createUnderLength = function createUnderLength(key, message, style) {
+    var cleanMessage = cleanContent(message);
+
+    if (props.maxLength != null) {
+      cleanMessage = cleanMessage.slice(0, props.maxLength - length);
+    }
+
+    if (length < maxLength) {
+      elements.push(
+      React.createElement(_Text.default, { key: key, style: style, __self: _this, __source: { fileName: _jsxFileName, lineNumber: 50, columnNumber: 9 } },
+      cleanMessage));
+
+
+    }
+
+    length += cleanMessage.length;
+  };
+
+  var lastOffset = substitutions.reduce(function (prevOffset, substitution, index) {
+    var key = String(index);
+
+    if (substitution.offset > prevOffset) {
+      var prevPart = content.substr(
+      prevOffset,
+      substitution.offset - prevOffset);
+
+
+      createUnderLength(key, prevPart);
+    }
+
+    var substititionPart = content.substr(
+    substitution.offset,
+    substitution.length);
+
+
+    createUnderLength(key + '.5', substititionPart, substitutionStyle);
+    return substitution.offset + substitution.length;
+  }, 0);
+
+  if (lastOffset < content.length) {
+    var lastPart = content.substr(lastOffset);
+    createUnderLength('-1', lastPart);
+  }
+
+  return React.createElement(React.Fragment, null, elements);
+}var _default =
+
+LogBoxMessage;exports.default = _default;

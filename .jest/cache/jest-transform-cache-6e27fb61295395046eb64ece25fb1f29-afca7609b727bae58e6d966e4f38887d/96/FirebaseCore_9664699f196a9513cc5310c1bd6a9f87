@@ -1,0 +1,47 @@
+fb369f4e784b02e26ba2ab2745902a67
+"use strict";var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports, "__esModule", { value: true });exports.DEFAULT_WEB_APP_OPTIONS = exports.DEFAULT_APP_OPTIONS = exports.DEFAULT_APP_NAME = void 0;var _ExpoFirebaseCore = _interopRequireDefault(require("./ExpoFirebaseCore"));
+var _FirebaseOptions = require("./FirebaseOptions");
+if (!_ExpoFirebaseCore.default) {
+  console.warn('No native ExpoFirebaseCore module found, are you sure the expo-firebase-core module is linked properly?');
+}
+
+
+
+
+var DEFAULT_APP_NAME = _ExpoFirebaseCore.default ?
+_ExpoFirebaseCore.default.DEFAULT_APP_NAME :
+undefined;exports.DEFAULT_APP_NAME = DEFAULT_APP_NAME;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var DEFAULT_APP_OPTIONS = _ExpoFirebaseCore.default ?
+_ExpoFirebaseCore.default.DEFAULT_APP_OPTIONS :
+undefined;exports.DEFAULT_APP_OPTIONS = DEFAULT_APP_OPTIONS;
+
+
+
+var DEFAULT_WEB_APP_OPTIONS = (0, _FirebaseOptions.getDefaultWebOptions)();exports.DEFAULT_WEB_APP_OPTIONS = DEFAULT_WEB_APP_OPTIONS;

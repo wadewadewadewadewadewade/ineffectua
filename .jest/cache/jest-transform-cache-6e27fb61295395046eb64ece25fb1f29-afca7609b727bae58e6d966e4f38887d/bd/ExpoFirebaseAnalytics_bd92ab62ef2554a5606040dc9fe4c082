@@ -1,0 +1,97 @@
+c591cbc40cd04157d65e417a88cede2b
+"use strict";var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));var _core = require("@unimodules/core");
+var _expoConstants = _interopRequireDefault(require("expo-constants"));
+var _expoFirebaseCore = require("expo-firebase-core");
+var _reactNative = require("react-native");
+var _FirebaseAnalyticsJS = _interopRequireDefault(require("./FirebaseAnalyticsJS"));var
+ExpoFirebaseAnalytics = _core.NativeModulesProxy.ExpoFirebaseAnalytics;
+if (!ExpoFirebaseAnalytics) {
+  console.warn("No native ExpoFirebaseAnalytics module found, are you sure the expo-firebase-analytics's module is linked properly?");
+}
+var pureJSAnalyticsTracker;
+var isUnavailabilityLoggingEnabled = true;
+var isUnavailabilityWarningLogged = false;
+function callAnalyticsModule(funcName) {var _ExpoFirebaseAnalytic;
+  if (!ExpoFirebaseAnalytics[funcName]) {
+    if (funcName === 'setDebugModeEnabled') {
+
+
+
+      if (!(_expoFirebaseCore.DEFAULT_APP_NAME !== '[DEFAULT]' && _expoFirebaseCore.DEFAULT_WEB_APP_OPTIONS)) {
+        throw new _core.CodedError('ERR_FIREBASE_NOTCONFIGURED', "setDebugModeEnabled is not available in this environment. See \"https://firebase.google.com/docs/analytics/debugview\" on how to enable debug mode.");
+      }
+    } else
+    {
+      throw new _core.UnavailabilityError('expo-firebase-analytics', funcName);
+    }
+  }
+  if (!_expoFirebaseCore.DEFAULT_APP_OPTIONS) {
+    throw new _core.CodedError('ERR_FIREBASE_NOTCONFIGURED', "Firebase is not configured. Ensure that you have configured '" + _reactNative.Platform.select({
+      ios: 'GoogleService-Info.plist',
+      android: 'google-services.json' }) + "' correctly.");
+
+  }for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {args[_key - 1] = arguments[_key];}
+
+
+
+
+  if (_expoFirebaseCore.DEFAULT_APP_NAME !== '[DEFAULT]') {
+    if (_expoFirebaseCore.DEFAULT_WEB_APP_OPTIONS && !pureJSAnalyticsTracker) {var _Constants$manifest;
+      pureJSAnalyticsTracker = new _FirebaseAnalyticsJS.default(_expoFirebaseCore.DEFAULT_WEB_APP_OPTIONS, {
+        clientId: _expoConstants.default.installationId,
+        sessionId: _expoConstants.default.sessionId,
+        strictNativeEmulation: true,
+        appName: ((_Constants$manifest = _expoConstants.default.manifest) == null ? void 0 : _Constants$manifest.name) || 'Unnamed Expo project',
+        appVersion: _expoConstants.default.nativeAppVersion || undefined,
+        headers: {
+
+
+          'user-agent': "Expo/" + _expoConstants.default.nativeAppVersion } });
+
+
+    }
+    if (pureJSAnalyticsTracker) {var _pureJSAnalyticsTrack;
+      return (_pureJSAnalyticsTrack = pureJSAnalyticsTracker[funcName]).call.apply(_pureJSAnalyticsTrack, [pureJSAnalyticsTracker].concat(args));
+    }
+    if (isUnavailabilityLoggingEnabled) {
+      if (!isUnavailabilityWarningLogged) {
+        console.warn("Firebase Analytics is not available in the Expo client. See \"https://docs.expo.io/versions/latest/sdk/firebase-analytics\" on more information on setting up Firebase Analytics with the standard Expo client.");
+        isUnavailabilityWarningLogged = true;
+      }
+      console.info("ExpoFirebaseAnalytics." + funcName + ": " + JSON.stringify(args));
+    }
+    return;
+  }
+
+  return (_ExpoFirebaseAnalytic = ExpoFirebaseAnalytics[funcName]).call.apply(_ExpoFirebaseAnalytic, [ExpoFirebaseAnalytics].concat(args));
+}var _default =
+{
+  get name() {
+    return 'ExpoFirebaseAnalytics';
+  },
+  logEvent: function logEvent(name, properties) {return _regenerator.default.async(function logEvent$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:return _context.abrupt("return",
+            callAnalyticsModule('logEvent', name, properties));case 1:case "end":return _context.stop();}}}, null, null, null, Promise);},
+
+  setAnalyticsCollectionEnabled: function setAnalyticsCollectionEnabled(isEnabled) {return _regenerator.default.async(function setAnalyticsCollectionEnabled$(_context2) {while (1) {switch (_context2.prev = _context2.next) {case 0:return _context2.abrupt("return",
+            callAnalyticsModule('setAnalyticsCollectionEnabled', isEnabled));case 1:case "end":return _context2.stop();}}}, null, null, null, Promise);},
+
+  setCurrentScreen: function setCurrentScreen(screenName, screenClassOverride) {return _regenerator.default.async(function setCurrentScreen$(_context3) {while (1) {switch (_context3.prev = _context3.next) {case 0:return _context3.abrupt("return",
+            callAnalyticsModule('setCurrentScreen', screenName, screenClassOverride));case 1:case "end":return _context3.stop();}}}, null, null, null, Promise);},
+
+  setSessionTimeoutDuration: function setSessionTimeoutDuration(sessionTimeoutInterval) {return _regenerator.default.async(function setSessionTimeoutDuration$(_context4) {while (1) {switch (_context4.prev = _context4.next) {case 0:return _context4.abrupt("return",
+            callAnalyticsModule('setSessionTimeoutDuration', sessionTimeoutInterval));case 1:case "end":return _context4.stop();}}}, null, null, null, Promise);},
+
+  setUserId: function setUserId(userId) {return _regenerator.default.async(function setUserId$(_context5) {while (1) {switch (_context5.prev = _context5.next) {case 0:return _context5.abrupt("return",
+            callAnalyticsModule('setUserId', userId));case 1:case "end":return _context5.stop();}}}, null, null, null, Promise);},
+
+  setUserProperties: function setUserProperties(properties) {return _regenerator.default.async(function setUserProperties$(_context6) {while (1) {switch (_context6.prev = _context6.next) {case 0:return _context6.abrupt("return",
+            callAnalyticsModule('setUserProperties', properties));case 1:case "end":return _context6.stop();}}}, null, null, null, Promise);},
+
+  resetAnalyticsData: function resetAnalyticsData() {return _regenerator.default.async(function resetAnalyticsData$(_context7) {while (1) {switch (_context7.prev = _context7.next) {case 0:return _context7.abrupt("return",
+            callAnalyticsModule('resetAnalyticsData'));case 1:case "end":return _context7.stop();}}}, null, null, null, Promise);},
+
+  setUnavailabilityLogging: function setUnavailabilityLogging(isEnabled) {
+    isUnavailabilityLoggingEnabled = isEnabled;
+  },
+  setDebugModeEnabled: function setDebugModeEnabled(isEnabled) {return _regenerator.default.async(function setDebugModeEnabled$(_context8) {while (1) {switch (_context8.prev = _context8.next) {case 0:return _context8.abrupt("return",
+            callAnalyticsModule('setDebugModeEnabled', isEnabled));case 1:case "end":return _context8.stop();}}}, null, null, null, Promise);} };exports.default = _default;

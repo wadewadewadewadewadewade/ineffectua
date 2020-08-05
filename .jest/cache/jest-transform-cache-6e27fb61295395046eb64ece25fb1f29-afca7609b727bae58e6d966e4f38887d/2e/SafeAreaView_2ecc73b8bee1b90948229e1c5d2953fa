@@ -1,0 +1,62 @@
+67f2a4a17b8c6d07f97c6dd14a62c048
+var _jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native/Libraries/Components/SafeAreaView/SafeAreaView.js";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var exported;
+
+
+
+
+
+
+
+
+
+
+
+
+
+if (require('../../Utilities/Platform').OS === 'android') {
+  exported = require('react').forwardRef(
+  function SafeAreaView(props, forwardedRef) {var
+    emulateUnlessSupported = props.emulateUnlessSupported,localProps = require("@babel/runtime/helpers/objectWithoutProperties")(props, ["emulateUnlessSupported"]);
+    return require('react').createElement(require('../View/View'), require("@babel/runtime/helpers/extends")({}, localProps, { ref: forwardedRef, __self: this, __source: { fileName: _jsxFileName, lineNumber: 41, columnNumber: 14 } }));
+  });
+
+} else {
+  var RCTSafeAreaViewNativeComponent = require('./RCTSafeAreaViewNativeComponent').
+  default;
+
+  exported = require('react').forwardRef(
+  function SafeAreaView(props, forwardedRef) {
+    return (
+      require('react').createElement(RCTSafeAreaViewNativeComponent, require("@babel/runtime/helpers/extends")({
+        emulateUnlessSupported: true },
+      props, {
+        ref: forwardedRef, __self: this, __source: { fileName: _jsxFileName, lineNumber: 51, columnNumber: 9 } })));
+
+
+  });
+
+}
+
+module.exports = exported;

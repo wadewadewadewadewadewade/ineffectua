@@ -1,0 +1,9 @@
+6a7fbff4142096134fc27bb0deb631be
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const react_native_1 = __importDefault(require("react-native"));
+exports.default = react_native_1.default;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL3NyYy9jb21wb25lbnRzL0FzeW5jU3RvcmFnZS5uYXRpdmUudHMiLCJtYXBwaW5ncyI6Ijs7Ozs7QUFBQSxnRUFBd0M7QUFFeEMsa0JBQWUsc0JBQVksQ0FBQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvaG9tZS93YWRlL3Byb2plY3RzL2luZWZmZWN0dWEvc3JjL2NvbXBvbmVudHMvQXN5bmNTdG9yYWdlLm5hdGl2ZS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgQXN5bmNTdG9yYWdlIGZyb20gJ3JlYWN0LW5hdGl2ZSc7XG5cbmV4cG9ydCBkZWZhdWx0IEFzeW5jU3RvcmFnZTsiXSwidmVyc2lvbiI6M30=

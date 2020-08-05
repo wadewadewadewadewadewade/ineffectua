@@ -1,0 +1,70 @@
+ddea954e3d57bf4a8ce7a639c53cd4a8
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _extends() {_extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}return target;};return _extends.apply(this, arguments);}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CardActions = function (_React$Component) {require("@babel/runtime/helpers/inherits")(CardActions, _React$Component);var _super = _createSuper(CardActions);function CardActions() {require("@babel/runtime/helpers/classCallCheck")(this, CardActions);return _super.apply(this, arguments);}require("@babel/runtime/helpers/createClass")(CardActions, [{ key: "render", value: function render()
+    {
+      return React.createElement(require("react-native").View, _extends({}, this.props, {
+        style: [styles.container, this.props.style] }),
+      React.Children.map(this.props.children, function (child) {return React.isValidElement(child) ? React.cloneElement(child, {
+          compact: child.props.compact !== false }) :
+        child;}));
+    } }]);return CardActions;}(React.Component);
+
+
+
+_defineProperty(CardActions, "displayName", 'Card.Actions');
+
+var styles = require("react-native").StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    padding: 8 } });
+
+
+
+var _default = CardActions;
+exports.default = _default;

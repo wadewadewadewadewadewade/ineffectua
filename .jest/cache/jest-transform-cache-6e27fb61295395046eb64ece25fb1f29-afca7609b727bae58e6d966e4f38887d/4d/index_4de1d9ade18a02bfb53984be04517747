@@ -1,0 +1,13 @@
+57df99def83bd23efd0ff3dbce6c04d9
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const redux_1 = require("redux");
+const User_1 = __importDefault(require("./User"));
+//import { loadingBarReducer } from 'react-redux-loading'
+exports.default = redux_1.combineReducers({
+    user: User_1.default,
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL3NyYy9yZWR1Y2Vycy9pbmRleC50cyIsIm1hcHBpbmdzIjoiOzs7OztBQUFBLGlDQUF1QztBQUN2QyxrREFBeUI7QUFDekIseURBQXlEO0FBRXpELGtCQUFlLHVCQUFlLENBQUM7SUFDN0IsSUFBSSxFQUFKLGNBQUk7Q0FFTCxDQUFDLENBQUEiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL3NyYy9yZWR1Y2Vycy9pbmRleC50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBjb21iaW5lUmVkdWNlcnMgfSBmcm9tICdyZWR1eCdcbmltcG9ydCB1c2VyIGZyb20gJy4vVXNlcidcbi8vaW1wb3J0IHsgbG9hZGluZ0JhclJlZHVjZXIgfSBmcm9tICdyZWFjdC1yZWR1eC1sb2FkaW5nJ1xuXG5leHBvcnQgZGVmYXVsdCBjb21iaW5lUmVkdWNlcnMoe1xuICB1c2VyLFxuICAvL2xvYWRpbmdCYXI6IGxvYWRpbmdCYXJSZWR1Y2VyXG59KSJdLCJ2ZXJzaW9uIjozfQ==

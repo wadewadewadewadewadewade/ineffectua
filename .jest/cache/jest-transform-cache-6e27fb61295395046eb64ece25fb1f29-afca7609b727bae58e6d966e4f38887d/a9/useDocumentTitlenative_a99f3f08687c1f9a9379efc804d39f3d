@@ -1,0 +1,10 @@
+23833648cbac476446b1e28f2457a246
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = useDocumentTitle;
+
+function useDocumentTitle() {
+}

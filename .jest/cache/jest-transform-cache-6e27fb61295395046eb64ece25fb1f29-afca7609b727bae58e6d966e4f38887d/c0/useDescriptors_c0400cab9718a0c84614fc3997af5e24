@@ -1,0 +1,116 @@
+45672f0f11879ffe2ba25f92118add03
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = useDescriptors;
+
+var React = _interopRequireWildcard(require("react"));
+
+var _SceneView = _interopRequireDefault(require("./SceneView"));
+
+var _NavigationBuilderContext = _interopRequireDefault(require("./NavigationBuilderContext"));
+
+var _useNavigationCache = _interopRequireDefault(require("./useNavigationCache"));
+
+var _NavigationContext = _interopRequireDefault(require("./NavigationContext"));
+
+var _NavigationRouteContext = _interopRequireDefault(require("./NavigationRouteContext"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}
+
+function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+
+
+
+
+
+
+
+
+function useDescriptors(_ref)
+
+
+
+
+
+
+
+
+
+
+
+
+{var state = _ref.state,screens = _ref.screens,navigation = _ref.navigation,screenOptions = _ref.screenOptions,onAction = _ref.onAction,getState = _ref.getState,setState = _ref.setState,addListener = _ref.addListener,addKeyedListener = _ref.addKeyedListener,onRouteFocus = _ref.onRouteFocus,router = _ref.router,emitter = _ref.emitter;var _React$useState =
+  React.useState({}),_React$useState2 = require("@babel/runtime/helpers/slicedToArray")(_React$useState, 2),options = _React$useState2[0],setOptions = _React$useState2[1];var _React$useContext =
+
+
+
+  React.useContext(_NavigationBuilderContext.default),onDispatchAction = _React$useContext.onDispatchAction,onOptionsChange = _React$useContext.onOptionsChange;
+  var context = React.useMemo(function () {return {
+      navigation: navigation,
+      onAction: onAction,
+      addListener: addListener,
+      addKeyedListener: addKeyedListener,
+      onRouteFocus: onRouteFocus,
+      onDispatchAction: onDispatchAction,
+      onOptionsChange: onOptionsChange };},
+  [navigation, onAction, addListener, addKeyedListener, onRouteFocus, onDispatchAction, onOptionsChange]);
+  var navigations = (0, _useNavigationCache.default)({
+    state: state,
+    getState: getState,
+    navigation: navigation,
+    setOptions: setOptions,
+    router: router,
+    emitter: emitter });
+
+  return state.routes.reduce(function (acc, route) {
+    var screen = screens[route.name];
+    var navigation = navigations[route.key];
+
+    var routeOptions = _objectSpread(_objectSpread(_objectSpread({}, typeof screenOptions === 'object' || screenOptions == null ? screenOptions :
+    screenOptions({
+      route: route,
+      navigation: navigation })),
+    typeof screen.options === 'object' || screen.options == null ? screen.options :
+    screen.options({
+      route: route,
+      navigation: navigation })),
+    options[route.key]);
+
+    acc[route.key] = {
+      navigation: navigation,
+
+      render: function render() {
+        return React.createElement(_NavigationBuilderContext.default.Provider, {
+          key: route.key,
+          value: context },
+        React.createElement(_NavigationContext.default.Provider, {
+          value: navigation },
+        React.createElement(_NavigationRouteContext.default.Provider, {
+          value: route },
+        React.createElement(_SceneView.default, {
+          navigation: navigation,
+          route: route,
+          screen: screen,
+          getState: getState,
+          setState: setState,
+          options: routeOptions }))));
+
+      },
+
+      options: routeOptions };
+
+    return acc;
+  }, {});
+}

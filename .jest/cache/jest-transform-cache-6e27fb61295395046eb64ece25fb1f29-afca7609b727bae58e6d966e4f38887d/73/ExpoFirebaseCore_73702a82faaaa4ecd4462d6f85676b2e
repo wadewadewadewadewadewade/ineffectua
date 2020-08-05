@@ -1,0 +1,3 @@
+3413352ab95bc53ba513e2d9bd890db8
+"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _core = require("@unimodules/core");var _default =
+_core.NativeModulesProxy.ExpoFirebaseCore;exports.default = _default;

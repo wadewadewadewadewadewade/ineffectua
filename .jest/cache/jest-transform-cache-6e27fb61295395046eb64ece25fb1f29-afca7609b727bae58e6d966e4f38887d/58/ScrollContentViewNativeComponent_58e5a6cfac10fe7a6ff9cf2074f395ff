@@ -1,0 +1,40 @@
+b0866b91ec45953de8a2b2793788f666
+
+
+
+
+
+
+
+
+
+
+'use strict';Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;
+
+
+
+
+
+
+
+var ScrollContentViewViewConfig = {
+  uiViewClassName: 'RCTScrollContentView',
+  bubblingEventTypes: {},
+  directEventTypes: {},
+  validAttributes: {} };
+
+
+var ScrollContentViewNativeComponent;
+if (global.RN$Bridgeless) {
+  require('../../Utilities/registerGeneratedViewConfig')(
+  'RCTScrollContentView',
+  ScrollContentViewViewConfig);
+
+  ScrollContentViewNativeComponent = 'RCTScrollContentView';
+} else {
+  ScrollContentViewNativeComponent = require('../../ReactNative/requireNativeComponent')(
+  'RCTScrollContentView');
+
+}var _default =
+
+ScrollContentViewNativeComponent;exports.default = _default;

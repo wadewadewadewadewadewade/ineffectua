@@ -1,0 +1,215 @@
+1231c0ee11c83fbe627a4cb3f16e5a5c
+var _jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native-reanimated/mock.js";function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {require("@babel/runtime/helpers/defineProperty")(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+
+
+
+
+
+
+
+
+
+
+
+function NOOP() {}var
+
+Code = function (_React$Component) {"use strict";require("@babel/runtime/helpers/inherits")(Code, _React$Component);var _super = _createSuper(Code);function Code() {require("@babel/runtime/helpers/classCallCheck")(this, Code);return _super.apply(this, arguments);}require("@babel/runtime/helpers/createClass")(Code, [{ key: "render", value: function render()
+    {
+      return null;
+    } }]);return Code;}(require('react').Component);
+
+
+var getValue = function getValue(node) {
+  if (typeof node === "number") {
+    return node;
+  }
+  return node && node[" __value"];
+};var
+
+AnimatedValue = function () {"use strict";
+  function AnimatedValue(val) {require("@babel/runtime/helpers/classCallCheck")(this, AnimatedValue);
+    this[" __value"] = val;
+  }require("@babel/runtime/helpers/createClass")(AnimatedValue, [{ key: "setValue", value: function setValue(
+
+    val) {
+      this[" __value"] = val;
+    } }, { key: "interpolate", value: function interpolate()
+
+    {
+      return this;
+    } }]);return AnimatedValue;}();
+
+
+function createMockComponent(name) {var _class, _temp;
+  return _temp = _class = function (_React$Component2) {"use strict";require("@babel/runtime/helpers/inherits")(_class, _React$Component2);var _super2 = _createSuper(_class);function _class() {require("@babel/runtime/helpers/classCallCheck")(this, _class);return _super2.apply(this, arguments);}require("@babel/runtime/helpers/createClass")(_class, [{ key: "render", value: function render()
+
+
+      {
+        return this.props.children;
+      } }]);return _class;}(require('react').Component), _class.displayName = name, _temp;
+
+}
+
+function createTransitioningComponent(Component) {var _class2, _temp2;
+  return _temp2 = _class2 = function (_React$Component3) {"use strict";require("@babel/runtime/helpers/inherits")(_class2, _React$Component3);var _super3 = _createSuper(_class2);function _class2() {require("@babel/runtime/helpers/classCallCheck")(this, _class2);return _super3.apply(this, arguments);}require("@babel/runtime/helpers/createClass")(_class2, [{ key: "setNativeProps", value: function setNativeProps()
+
+
+      {} }, { key: "animateNextTransition", value: function animateNextTransition()
+
+      {} }, { key: "render", value: function render()
+
+      {
+        return require('react').createElement(Component, require("@babel/runtime/helpers/extends")({}, this.props, { __self: this, __source: { fileName: _jsxFileName, lineNumber: 62, columnNumber: 14 } }));
+      } }]);return _class2;}(require('react').Component), _class2.displayName = "Transitioning." + (Component.displayName || Component.name || 'Component'), _temp2;
+
+}
+
+var Reanimated = {
+  SpringUtils: {
+    makeDefaultConfig: NOOP,
+    makeConfigFromBouncinessAndSpeed: NOOP,
+    makeConfigFromOrigamiTensionAndFriction: NOOP },
+
+
+  View: require('react-native').View,
+  Text: require('react-native').Text,
+  Image: require('react-native').Image,
+  ScrollView: require('react-native').Animated.ScrollView,
+  Code: Code,
+
+  Clock: NOOP,
+  Node: NOOP,
+  Value: function Value() {
+    return {
+      setValue: NOOP };
+
+  },
+
+  Extrapolate: {
+    EXTEND: 'extend',
+    CLAMP: 'clamp',
+    IDENTITY: 'identity' },
+
+
+
+  add: function add() {for (var _len = arguments.length, vals = new Array(_len), _key = 0; _key < _len; _key++) {vals[_key] = arguments[_key];}return (
+      new AnimatedValue(vals.map(function (v) {return getValue(v);}).reduce(function (acc, v) {return acc + v;})));},
+  sub: function sub() {for (var _len2 = arguments.length, vals = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {vals[_key2] = arguments[_key2];}return (
+      new AnimatedValue(vals.map(function (v) {return getValue(v);}).reduce(function (acc, v) {return acc - v;})));},
+  divide: function divide() {for (var _len3 = arguments.length, vals = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {vals[_key3] = arguments[_key3];}return (
+      new AnimatedValue(vals.map(function (v) {return getValue(v);}).reduce(function (acc, v) {return acc / v;})));},
+  multiply: function multiply() {for (var _len4 = arguments.length, vals = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {vals[_key4] = arguments[_key4];}return (
+      new AnimatedValue(vals.map(function (v) {return getValue(v);}).reduce(function (acc, v) {return acc * v;})));},
+  pow: function pow() {for (var _len5 = arguments.length, vals = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {vals[_key5] = arguments[_key5];}return (
+      new AnimatedValue(vals.map(function (v) {return getValue(v);}).reduce(function (acc, v) {return Math.pow(acc, v);})));},
+  modulo: function modulo(a, b) {return new AnimatedValue(getValue(a) % getValue(b));},
+  sqrt: function sqrt(a) {return new AnimatedValue(Math.sqrt(getValue(a)));},
+  log: function log(a) {return new AnimatedValue(Math.log(getValue(a)));},
+  sin: function sin(a) {return new AnimatedValue(Math.sin(getValue(a)));},
+  cos: function cos(a) {return new AnimatedValue(Math.cos(getValue(a)));},
+  tan: function tan(a) {return new AnimatedValue(Math.tan(getValue(a)));},
+  acos: function acos(a) {return new AnimatedValue(Math.acos(getValue(a)));},
+  asin: function asin(a) {return new AnimatedValue(Math.asin(getValue(a)));},
+  atan: function atan(a) {return new AnimatedValue(Math.atan(getValue(a)));},
+  exp: function exp(a) {return new AnimatedValue(Math.exp(getValue(a)));},
+  round: function round(a) {return new AnimatedValue(Math.round(getValue(a)));},
+  floor: function floor(a) {return new AnimatedValue(Math.floor(getValue(a)));},
+  ceil: function ceil(a) {return new AnimatedValue(Math.ceil(getValue(a)));},
+  lessThan: function lessThan(a, b) {return new AnimatedValue(getValue(a) < getValue(b));},
+  eq: function eq(a, b) {return new AnimatedValue(getValue(a) === getValue(b));},
+  greaterThan: function greaterThan(a, b) {return new AnimatedValue(getValue(a) > getValue(b));},
+  lessOrEq: function lessOrEq(a, b) {return new AnimatedValue(getValue(a) <= getValue(b));},
+  greaterOrEq: function greaterOrEq(a, b) {return new AnimatedValue(getValue(a) >= getValue(b));},
+  neq: function neq(a, b) {return new AnimatedValue(getValue(a) !== getValue(b));},
+  and: function and(a, b) {return new AnimatedValue(getValue(a) && getValue(b));},
+  or: function or(a, b) {return new AnimatedValue(getValue(a) || getValue(b));},
+  defined: function defined(a) {return new AnimatedValue(getValue(a) !== null && getValue(a) !== undefined);},
+  not: function not(a) {return new AnimatedValue(!getValue(a));},
+  set: function set(a, b) {
+    a.setValue(getValue(b));
+    return a;
+  },
+  concat: function concat(a, b) {return "" + a + b;},
+  cond: function cond(a, b, c) {
+    if (getValue(a)) {
+      return b;
+    } else {
+      return c;
+    }
+  },
+  block: function block(a) {return a[a.length - 1];},
+  call: function call(a, b) {return b(a);},
+  debug: NOOP,
+  onChange: NOOP,
+  startClock: NOOP,
+  stopClock: NOOP,
+  clockRunning: NOOP,
+  event: NOOP,
+  abs: function abs(a) {return Math.abs(getValue(a));},
+  acc: NOOP,
+  color: function color(r, g, b) {var a = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1;
+    var color = 16777216 * Math.round(getValue(a) * 255) + 65536 * getValue(r) + 256 * getValue(g) + getValue(b);
+    if (require('react-native').Platform.OS === 'android') {
+
+      if (color < 1 << 31 >>> 0) {
+        return new AnimatedValue(color);
+      }
+      return new AnimatedValue(color - Math.pow(2, 32));
+    }
+    return new AnimatedValue(color);
+  },
+  diff: NOOP,
+  diffClamp: NOOP,
+  interpolate: NOOP,
+  max: function max(a, b) {return Math.max(getValue(a), getValue(b));},
+  min: function min(a, b) {return Math.min(getValue(a), getValue(b));},
+
+  decay: NOOP,
+  timing: NOOP,
+  spring: NOOP,
+
+  proc: function proc(cb) {return cb;},
+
+  useCode: NOOP,
+  createAnimatedComponent: function createAnimatedComponent(Component) {return Component;} };
+
+
+module.exports = _objectSpread(_objectSpread({
+  __esModule: true },
+
+Reanimated), {}, {
+
+  default: Reanimated,
+
+  Easing: {
+    linear: NOOP,
+    ease: NOOP,
+    quad: NOOP,
+    cubic: NOOP,
+    poly: function poly() {return NOOP;},
+    sin: NOOP,
+    circle: NOOP,
+    exp: NOOP,
+    elastic: function elastic() {return NOOP;},
+    back: function back() {return NOOP;},
+    bounce: function bounce() {return NOOP;},
+    bezier: function bezier() {return NOOP;},
+    in: function _in() {return NOOP;},
+    out: function out() {return NOOP;},
+    inOut: function inOut() {return NOOP;} },
+
+
+  Transitioning: {
+    View: createTransitioningComponent(require('react-native').View) },
+
+
+  Transition: {
+    Sequence: createMockComponent('Transition.Sequence'),
+    Together: createMockComponent('Transition.Together'),
+    In: createMockComponent('Transition.In'),
+    Out: createMockComponent('Transition.Out'),
+    Change: createMockComponent('Transition.Change') },
+
+
+  createTransitioningComponent: createTransitioningComponent });

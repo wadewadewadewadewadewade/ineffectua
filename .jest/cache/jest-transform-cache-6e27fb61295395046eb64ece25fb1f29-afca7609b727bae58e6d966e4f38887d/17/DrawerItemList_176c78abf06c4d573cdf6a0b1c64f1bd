@@ -1,0 +1,68 @@
+895cc82591367ab4204b9dae3d9f2456
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = DrawerItemList;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+var _DrawerItem = _interopRequireDefault(require("./DrawerItem"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}
+
+function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+
+
+
+function DrawerItemList(_ref)
+
+
+
+
+
+
+
+
+
+{var state = _ref.state,navigation = _ref.navigation,descriptors = _ref.descriptors,activeTintColor = _ref.activeTintColor,inactiveTintColor = _ref.inactiveTintColor,activeBackgroundColor = _ref.activeBackgroundColor,inactiveBackgroundColor = _ref.inactiveBackgroundColor,itemStyle = _ref.itemStyle,labelStyle = _ref.labelStyle;
+  var buildLink = (0, require("@react-navigation/native").useLinkBuilder)();
+  return state.routes.map(function (route, i) {
+    var focused = i === state.index;var _descriptors$route$ke =
+
+
+
+
+    descriptors[route.key].options,title = _descriptors$route$ke.title,drawerLabel = _descriptors$route$ke.drawerLabel,drawerIcon = _descriptors$route$ke.drawerIcon;
+    return React.createElement(_DrawerItem.default, {
+      key: route.key,
+      label: drawerLabel !== undefined ? drawerLabel : title !== undefined ? title : route.name,
+      icon: drawerIcon,
+      focused: focused,
+      activeTintColor: activeTintColor,
+      inactiveTintColor: inactiveTintColor,
+      activeBackgroundColor: activeBackgroundColor,
+      inactiveBackgroundColor: inactiveBackgroundColor,
+      labelStyle: labelStyle,
+      style: itemStyle,
+      to: buildLink(route.name, route.params),
+      onPress: function onPress() {
+        navigation.dispatch(_objectSpread(_objectSpread({}, focused ? require("@react-navigation/native").DrawerActions.closeDrawer() : require("@react-navigation/native").CommonActions.navigate(route.name)), {}, {
+          target: state.key }));
+
+      } });
+
+  });
+}

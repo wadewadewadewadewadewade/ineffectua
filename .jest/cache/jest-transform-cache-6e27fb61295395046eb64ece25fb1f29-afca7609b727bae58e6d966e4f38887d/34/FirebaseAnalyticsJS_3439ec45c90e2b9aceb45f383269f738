@@ -1,0 +1,306 @@
+f13b5d15214a52bbf2c3b7e1498c6841
+"use strict";var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {(0, _defineProperty2.default)(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}var
+
+
+
+
+
+
+
+
+
+
+
+
+FirebaseAnalyticsJS = function () {
+  function FirebaseAnalyticsJS(config, options) {(0, _classCallCheck2.default)(this, FirebaseAnalyticsJS);
+    this.eventQueue = new Set();
+    this.flushEventsPromise = Promise.resolve();
+    this.lastTime = -1;
+    this.sequenceNr = 1;
+
+    if (!config.measurementId)
+    throw new Error('No valid measurementId. Make sure to provide a valid measurementId with a G-XXXXXXXXXX format.');
+    if (!options.clientId)
+    throw new Error('No valid clientId. Make sure to provide a valid clientId with a UUID (v4) format.');
+
+    this.url = 'https://www.google-analytics.com/g/collect';
+    this.enabled = true;
+    this.config = config;
+    this.options = _objectSpread({
+      customArgs: {},
+      maxCacheTime: 5000,
+      strictNativeEmulation: false,
+      origin: 'firebase' },
+    options);
+
+  }(0, _createClass2.default)(FirebaseAnalyticsJS, [{ key: "send", value: function send(
+
+
+
+
+
+
+    events) {var _this = this;var config, options, queryArgs, body, lastTime, event, args, url;return _regenerator.default.async(function send$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:
+              config = this.config, options = this.options;
+              queryArgs = _objectSpread(_objectSpread({},
+              options.customArgs), {}, {
+                v: 2,
+                tid: config.measurementId,
+                cid: options.clientId,
+                sid: options.sessionId,
+                _s: this.sequenceNr++,
+                seg: 1 });
+
+              if (options.sessionNumber)
+              queryArgs.sct = options.sessionNumber;
+              if (options.userLanguage)
+              queryArgs.ul = options.userLanguage;
+              if (options.appName)
+              queryArgs.an = options.appName;
+              if (options.appVersion)
+              queryArgs.av = options.appVersion;
+              if (options.docTitle)
+              queryArgs.dt = options.docTitle;
+              if (options.docLocation)
+              queryArgs.dl = options.docLocation;
+              if (options.screenRes)
+              queryArgs.sr = options.screenRes;
+              if (options.debug)
+              queryArgs._dbg = 1;
+              if (this.sequenceNr === 2)
+              queryArgs._ss = 1;
+
+              lastTime = this.lastTime;
+              if (events.size > 1) {
+                body = '';
+                events.forEach(function (event) {
+                  body += encodeQueryArgs(event, _this.lastTime) + '\n';
+                  _this.lastTime = event._et;
+                });
+              } else
+              if (events.size === 1) {
+                event = events.values().next().value;
+                this.lastTime = event._et;
+                queryArgs = _objectSpread(_objectSpread({},
+                event),
+                queryArgs);
+
+              }
+              args = encodeQueryArgs(queryArgs, lastTime);
+              url = this.url + "?" + args;_context.next = 17;return _regenerator.default.awrap(
+              fetch(url, _objectSpread(_objectSpread({
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                headers: {
+                  'Content-Type': 'text/plain;charset=UTF-8' } },
+
+              options.headers ?
+              {
+                headers: options.headers } :
+
+              {}), {}, {
+                body: body })));case 17:case "end":return _context.stop();}}}, null, this, null, Promise);} }, { key: "addEvent", value: function addEvent(
+
+
+    event) {var _this2 = this;var userId, userProperties, screenName, options, name;return _regenerator.default.async(function addEvent$(_context3) {while (1) {switch (_context3.prev = _context3.next) {case 0:
+              userId = this.userId, userProperties = this.userProperties, screenName = this.screenName, options = this.options;
+
+              if (userId)
+              event.uid = userId;
+              if (screenName)
+              event['ep.screen_name'] = screenName;
+
+              if (userProperties) {
+                for (name in userProperties) {
+                  event[name] = userProperties[name];
+                }
+
+
+                this.userProperties = undefined;
+              }
+
+              this.eventQueue.add(event);
+
+              if (!this.flushEventsTimer) {
+                this.flushEventsTimer = setTimeout(function _callee() {return _regenerator.default.async(function _callee$(_context2) {while (1) {switch (_context2.prev = _context2.next) {case 0:
+                          _this2.flushEventsTimer = undefined;_context2.prev = 1;_context2.next = 4;return _regenerator.default.awrap(
+
+                          _this2.flushEventsPromise);case 4:_context2.next = 8;break;case 6:_context2.prev = 6;_context2.t0 = _context2["catch"](1);case 8:
+
+
+
+
+                          _this2.flushEventsPromise = _this2.flushEvents();case 9:case "end":return _context2.stop();}}}, null, null, [[1, 6]], Promise);},
+                options.debug ? 10 : options.maxCacheTime);
+              }case 6:case "end":return _context3.stop();}}}, null, this, null, Promise);} }, { key: "flushEvents", value: function flushEvents() {var _this3 = this;var events;return _regenerator.default.async(function flushEvents$(_context4) {while (1) {switch (_context4.prev = _context4.next) {case 0:if (
+
+
+              this.eventQueue.size) {_context4.next = 2;break;}return _context4.abrupt("return");case 2:
+
+              events = new Set(this.eventQueue);_context4.next = 5;return _regenerator.default.awrap(
+              this.send(events));case 5:
+              events.forEach(function (event) {return _this3.eventQueue.delete(event);});case 6:case "end":return _context4.stop();}}}, null, this, null, Promise);} }, { key: "clearEvents", value: function clearEvents()
+
+
+
+
+    {
+      this.eventQueue.clear();
+      if (this.flushEventsTimer) {
+        clearTimeout(this.flushEventsTimer);
+        this.flushEventsTimer = 0;
+      }
+    } }, { key: "logEvent", value: function logEvent(
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    eventName, eventParams) {var event;return _regenerator.default.async(function logEvent$(_context5) {while (1) {switch (_context5.prev = _context5.next) {case 0:
+              event = FirebaseAnalyticsJS.parseEvent(this.options, eventName, eventParams);if (
+              this.enabled) {_context5.next = 3;break;}return _context5.abrupt("return");case 3:
+
+              if (this.options.debug) {
+                console.log("FirebaseAnalytics event: \"" + eventName + "\", params: " + JSON.stringify(eventParams, undefined, 2));
+              }return _context5.abrupt("return",
+              this.addEvent(event));case 5:case "end":return _context5.stop();}}}, null, this, null, Promise);} }, { key: "setAnalyticsCollectionEnabled", value: function setAnalyticsCollectionEnabled(
+
+
+
+
+    isEnabled) {return _regenerator.default.async(function setAnalyticsCollectionEnabled$(_context6) {while (1) {switch (_context6.prev = _context6.next) {case 0:
+              this.enabled = isEnabled;case 1:case "end":return _context6.stop();}}}, null, this, null, Promise);} }, { key: "setCurrentScreen", value: function setCurrentScreen(
+
+
+
+
+    screenName, screenClassOverride) {return _regenerator.default.async(function setCurrentScreen$(_context7) {while (1) {switch (_context7.prev = _context7.next) {case 0:if (!(
+              screenName && screenName.length > 100)) {_context7.next = 2;break;}throw (
+                new Error('Invalid screen-name specified. Should contain 1 to 100 characters. Set to undefined to clear the current screen name.'));case 2:if (
+
+              this.enabled) {_context7.next = 4;break;}return _context7.abrupt("return");case 4:
+
+              this.screenName = screenName || undefined;if (!(
+
+
+
+              screenName && this.options.strictNativeEmulation)) {_context7.next = 8;break;}_context7.next = 8;return _regenerator.default.awrap(
+              this.logEvent('screen_view', {
+                screen_name: screenName }));case 8:case "end":return _context7.stop();}}}, null, this, null, Promise);} }, { key: "setUserId", value: function setUserId(
+
+
+
+
+
+
+    userId) {return _regenerator.default.async(function setUserId$(_context8) {while (1) {switch (_context8.prev = _context8.next) {case 0:if (
+              this.enabled) {_context8.next = 2;break;}return _context8.abrupt("return");case 2:
+
+              this.userId = userId || undefined;case 3:case "end":return _context8.stop();}}}, null, this, null, Promise);} }, { key: "setUserProperties", value: function setUserProperties(
+
+
+
+
+    userProperties) {var name, val, key;return _regenerator.default.async(function setUserProperties$(_context9) {while (1) {switch (_context9.prev = _context9.next) {case 0:if (
+              this.enabled) {_context9.next = 2;break;}return _context9.abrupt("return");case 2:
+
+              for (name in userProperties) {
+                val = userProperties[name];
+                key = FirebaseAnalyticsJS.parseUserProperty(this.options, name, val);
+                if (val === null || val === undefined) {
+                  if (this.userProperties) {
+                    delete this.userProperties[key];
+                  }
+                } else
+                {
+                  this.userProperties = this.userProperties || {};
+                  this.userProperties[key] = val;
+                }
+              }case 3:case "end":return _context9.stop();}}}, null, this, null, Promise);} }, { key: "resetAnalyticsData", value: function resetAnalyticsData() {return _regenerator.default.async(function resetAnalyticsData$(_context10) {while (1) {switch (_context10.prev = _context10.next) {case 0:
+
+
+
+
+
+              this.clearEvents();
+              this.screenName = undefined;
+              this.userId = undefined;
+              this.userProperties = undefined;case 4:case "end":return _context10.stop();}}}, null, this, null, Promise);} }, { key: "setDebugModeEnabled", value: function setDebugModeEnabled(
+
+
+
+
+    isEnabled) {return _regenerator.default.async(function setDebugModeEnabled$(_context11) {while (1) {switch (_context11.prev = _context11.next) {case 0:
+              this.options.debug = isEnabled;case 1:case "end":return _context11.stop();}}}, null, this, null, Promise);} }], [{ key: "isValidName", value: function isValidName(name, maxLength) {return !!(name && name.length && name.length <= maxLength && name.match(/^[A-Za-z][A-Za-z_\d]*$/) && !name.startsWith('firebase_') && !name.startsWith('google_') && !name.startsWith('ga_'));} }, { key: "parseEvent", value: function parseEvent(options, eventName, eventParams) {if (!FirebaseAnalyticsJS.isValidName(eventName, 40)) {throw new Error("Invalid event-name (" + eventName + ") specified. Should contain 1 to 40 alphanumeric characters or underscores. The name must start with an alphabetic character.");}var params = { en: eventName, _et: Date.now(), 'ep.origin': options.origin };if (eventParams) {for (var key in eventParams) {var paramKey = SHORT_EVENT_PARAMS[key] || (typeof eventParams[key] === 'number' ? "epn." + key : "ep." + key);params[paramKey] = eventParams[key];}}return params;} }, { key: "parseUserProperty", value: function parseUserProperty(options, userPropertyName, userPropertyValue) {if (!FirebaseAnalyticsJS.isValidName(userPropertyName, 24) || userPropertyName === 'user_id') {throw new Error("Invalid user-property name (" + userPropertyName + ") specified. Should contain 1 to 24 alphanumeric characters or underscores. The name must start with an alphabetic character.");}if (userPropertyValue !== undefined && userPropertyValue !== null && options.strictNativeEmulation && (typeof userPropertyValue !== 'string' || userPropertyValue.length > 36)) {throw new Error('Invalid user-property value specified. Value should be a string of up to 36 characters long.');}return typeof userPropertyValue === 'number' ? "upn." + userPropertyName : "up." + userPropertyName;} }]);return FirebaseAnalyticsJS;}();
+
+
+function encodeQueryArgs(queryArgs, lastTime) {
+  var keys = Object.keys(queryArgs);
+  if (lastTime < 0) {
+    keys = keys.filter(function (key) {return key !== '_et';});
+  }
+  return keys.
+  map(function (key) {
+    return key + "=" + encodeURIComponent(key === '_et' ? Math.max(queryArgs[key] - lastTime, 0) : queryArgs[key]);
+  }).
+  join('&');
+}
+var SHORT_EVENT_PARAMS = {
+  currency: 'cu' };var _default =
+
+FirebaseAnalyticsJS;exports.default = _default;

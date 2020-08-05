@@ -1,0 +1,187 @@
+6cb8ef6a4ce5b50f784ff1b7b2c677c1
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.RadioButtonAndroid = exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+var _color = _interopRequireDefault(require("color"));
+
+
+
+
+
+var _TouchableRipple = _interopRequireDefault(require("../TouchableRipple"));
+
+
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _extends() {_extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}return target;};return _extends.apply(this, arguments);}
+
+function _objectWithoutProperties(source, excluded) {if (source == null) return {};var target = _objectWithoutPropertiesLoose(source, excluded);var key, i;if (Object.getOwnPropertySymbols) {var sourceSymbolKeys = Object.getOwnPropertySymbols(source);for (i = 0; i < sourceSymbolKeys.length; i++) {key = sourceSymbolKeys[i];if (excluded.indexOf(key) >= 0) continue;if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;target[key] = source[key];}}return target;}
+
+function _objectWithoutPropertiesLoose(source, excluded) {if (source == null) return {};var target = {};var sourceKeys = Object.keys(source);var key, i;for (i = 0; i < sourceKeys.length; i++) {key = sourceKeys[i];if (excluded.indexOf(key) >= 0) continue;target[key] = source[key];}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+var BORDER_WIDTH = 2;var
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+RadioButtonAndroid = function (_React$Component) {require("@babel/runtime/helpers/inherits")(RadioButtonAndroid, _React$Component);var _super = _createSuper(RadioButtonAndroid);
+  function RadioButtonAndroid() {var _this;require("@babel/runtime/helpers/classCallCheck")(this, RadioButtonAndroid);for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {args[_key] = arguments[_key];}
+    _this = _super.call.apply(_super, [this].concat(args));
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "state", {
+      borderAnim: new (require("react-native").Animated.Value)(BORDER_WIDTH),
+      radioAnim: new (require("react-native").Animated.Value)(1) });return _this;
+
+  }require("@babel/runtime/helpers/createClass")(RadioButtonAndroid, [{ key: "componentDidUpdate", value: function componentDidUpdate(
+
+    prevProps) {
+      if (prevProps.status === this.props.status) {
+        return;
+      }var
+
+
+      scale =
+      this.props.theme.animation.scale;
+
+      if (this.props.status === 'checked') {
+        this.state.radioAnim.setValue(1.2);
+
+        require("react-native").Animated.timing(this.state.radioAnim, {
+          toValue: 1,
+          duration: 150 * scale,
+          useNativeDriver: true }).
+        start();
+      } else {
+        this.state.borderAnim.setValue(10);
+
+        require("react-native").Animated.timing(this.state.borderAnim, {
+          toValue: BORDER_WIDTH,
+          duration: 150 * scale,
+          useNativeDriver: false }).
+        start();
+      }
+    } }, { key: "render", value: function render()
+
+    {var _this2 = this;
+      var _this$props = this.props,
+
+      disabled =
+
+
+
+
+      _this$props.disabled,onPress = _this$props.onPress,theme = _this$props.theme,value = _this$props.value,status = _this$props.status,
+      rest = _objectWithoutProperties(_this$props, ["disabled", "onPress", "theme", "value", "status"]);
+
+      var checkedColor = this.props.color || theme.colors.accent;
+      var uncheckedColor = this.props.uncheckedColor || (0, _color.default)(theme.colors.text).alpha(theme.dark ? 0.7 : 0.54).rgb().string();
+      var rippleColor, radioColor;
+      return React.createElement(require("./RadioButtonGroup").RadioButtonContext.Consumer, null, function (context) {
+        var checked = (0, require("./utils").isChecked)({
+          contextValue: context === null || context === void 0 ? void 0 : context.value,
+          status: status,
+          value: value }) ===
+        'checked';
+
+        if (disabled) {
+          rippleColor = (0, _color.default)(theme.colors.text).alpha(0.16).rgb().string();
+          radioColor = theme.colors.disabled;
+        } else {
+          rippleColor = (0, _color.default)(checkedColor).fade(0.32).rgb().string();
+          radioColor = checked ? checkedColor : uncheckedColor;
+        }
+
+        return React.createElement(_TouchableRipple.default, _extends({}, rest, {
+          borderless: true,
+          rippleColor: rippleColor,
+          onPress: disabled ? undefined : function () {
+            (0, require("./utils").handlePress)({
+              onPress: onPress,
+              onValueChange: context === null || context === void 0 ? void 0 : context.onValueChange,
+              value: value });
+
+          },
+          accessibilityTraits: disabled ? ['button', 'disabled'] : 'button',
+          accessibilityComponentType: checked ? 'radiobutton_checked' : 'radiobutton_unchecked',
+          accessibilityRole: "button",
+          accessibilityState: {
+            disabled: disabled },
+
+          accessibilityLiveRegion: "polite",
+          style: styles.container }),
+        React.createElement(require("react-native").Animated.View, {
+          style: [styles.radio, {
+            borderColor: radioColor,
+            borderWidth: _this2.state.borderAnim }] },
+
+        checked ? React.createElement(require("react-native").View, {
+          style: [require("react-native").StyleSheet.absoluteFill, styles.radioContainer] },
+        React.createElement(require("react-native").Animated.View, {
+          style: [styles.dot, {
+            backgroundColor: radioColor,
+            transform: [{
+              scale: _this2.state.radioAnim }] }] })) :
+
+
+        null));
+      });
+    } }]);return RadioButtonAndroid;}(React.Component);
+
+
+
+exports.RadioButtonAndroid = RadioButtonAndroid;
+
+_defineProperty(RadioButtonAndroid, "displayName", 'RadioButton.Android');
+
+var styles = require("react-native").StyleSheet.create({
+  container: {
+    borderRadius: 18 },
+
+  radioContainer: {
+    alignItems: 'center',
+    justifyContent: 'center' },
+
+  radio: {
+    height: 20,
+    width: 20,
+    borderRadius: 10,
+    margin: 8 },
+
+  dot: {
+    height: 10,
+    width: 10,
+    borderRadius: 5 } });
+
+
+
+var _default = (0, require("../../core/theming").withTheme)(RadioButtonAndroid);
+
+
+exports.default = _default;

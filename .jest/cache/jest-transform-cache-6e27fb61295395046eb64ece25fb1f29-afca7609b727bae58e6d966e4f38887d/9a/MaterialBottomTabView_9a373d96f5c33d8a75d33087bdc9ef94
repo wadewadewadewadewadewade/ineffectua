@@ -1,0 +1,170 @@
+104010db6b978de1709c9028a3bd0c05
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = MaterialBottomTabView;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+
+
+var _MaterialCommunityIcons = _interopRequireDefault(require("react-native-vector-icons/MaterialCommunityIcons"));
+
+
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _extends() {_extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}return target;};return _extends.apply(this, arguments);}
+
+function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}
+
+function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+function _objectWithoutProperties(source, excluded) {if (source == null) return {};var target = _objectWithoutPropertiesLoose(source, excluded);var key, i;if (Object.getOwnPropertySymbols) {var sourceSymbolKeys = Object.getOwnPropertySymbols(source);for (i = 0; i < sourceSymbolKeys.length; i++) {key = sourceSymbolKeys[i];if (excluded.indexOf(key) >= 0) continue;if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;target[key] = source[key];}}return target;}
+
+function _objectWithoutPropertiesLoose(source, excluded) {if (source == null) return {};var target = {};var sourceKeys = Object.keys(source);var key, i;for (i = 0; i < sourceKeys.length; i++) {key = sourceKeys[i];if (excluded.indexOf(key) >= 0) continue;target[key] = source[key];}return target;}
+
+function MaterialBottomTabViewInner(_ref) {var
+
+  state =
+
+
+  _ref.state,navigation = _ref.navigation,descriptors = _ref.descriptors,
+  rest = _objectWithoutProperties(_ref, ["state", "navigation", "descriptors"]);var _ref3 =
+
+
+
+
+  (0, require("@react-navigation/native").useTheme)(),dark = _ref3.dark,colors = _ref3.colors;
+  var buildLink = (0, require("@react-navigation/native").useLinkBuilder)();
+  var theme = React.useMemo(function () {
+    var t = dark ? require("react-native-paper").DarkTheme : require("react-native-paper").DefaultTheme;
+    return _objectSpread(_objectSpread({}, t), {}, {
+      colors: _objectSpread(_objectSpread(_objectSpread({}, t.colors), colors), {}, {
+        surface: colors.card }) });
+
+
+  }, [colors, dark]);
+  return React.createElement(require("react-native-paper").BottomNavigation, _extends({}, rest, {
+    theme: theme,
+    navigationState: state,
+    onIndexChange: function onIndexChange(index) {return navigation.dispatch(_objectSpread(_objectSpread({}, require("@react-navigation/native").TabActions.jumpTo(state.routes[index].name)), {}, {
+        target: state.key }));},
+
+    renderScene: function renderScene(_ref4) {var
+      route = _ref4.route;return (
+        descriptors[route.key].render());},
+    renderTouchable: require("react-native").Platform.OS === 'web' ? function (_ref2) {var
+
+      _onPress =
+
+
+
+
+
+
+      _ref2.onPress,route = _ref2.route,_0 = _ref2.accessibilityRole,_1 = _ref2.borderless,_2 = _ref2.centered,_3 = _ref2.rippleColor,style = _ref2.style,
+      rest = _objectWithoutProperties(_ref2, ["onPress", "route", "accessibilityRole", "borderless", "centered", "rippleColor", "style"]);
+
+      return React.createElement(require("@react-navigation/native").Link, _extends({}, rest, {
+
+        to: buildLink(route.name, route.params),
+        accessibilityRole: "link",
+        onPress: function onPress(e) {
+          if (!(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) && (
+          e.button == null || e.button === 0))
+            {
+              e.preventDefault();
+              _onPress === null || _onPress === void 0 ? void 0 : _onPress(e);
+            }
+        },
+        style: [styles.touchable, style] }));
+
+    } : undefined,
+    renderIcon: function renderIcon(_ref5)
+
+
+
+    {var route = _ref5.route,focused = _ref5.focused,color = _ref5.color;var
+
+      options =
+      descriptors[route.key].options;
+
+      if (typeof options.tabBarIcon === 'string') {
+        return React.createElement(_MaterialCommunityIcons.default, {
+          name: options.tabBarIcon,
+          color: color,
+          size: 24,
+          style: styles.icon });
+
+      }
+
+      if (typeof options.tabBarIcon === 'function') {
+        return options.tabBarIcon({
+          focused: focused,
+          color: color });
+
+      }
+
+      return null;
+    },
+    getLabelText: function getLabelText(_ref6)
+
+    {var route = _ref6.route;var
+
+      options =
+      descriptors[route.key].options;
+      return options.tabBarLabel !== undefined ? options.tabBarLabel : options.title !== undefined ? options.title : route.name;
+    },
+    getColor: function getColor(_ref7) {var
+      route = _ref7.route;return (
+        descriptors[route.key].options.tabBarColor);},
+    getBadge: function getBadge(_ref8) {var
+      route = _ref8.route;return (
+        descriptors[route.key].options.tabBarBadge);},
+    getAccessibilityLabel: function getAccessibilityLabel(_ref9) {var
+      route = _ref9.route;return (
+        descriptors[route.key].options.tabBarAccessibilityLabel);},
+    getTestID: function getTestID(_ref10) {var
+      route = _ref10.route;return (
+        descriptors[route.key].options.tabBarTestID);},
+    onTabPress: function onTabPress(_ref11)
+
+
+    {var route = _ref11.route,preventDefault = _ref11.preventDefault;
+      var event = navigation.emit({
+        type: 'tabPress',
+        target: route.key,
+        canPreventDefault: true });
+
+
+      if (event.defaultPrevented) {
+        preventDefault();
+      }
+    } }));
+
+}
+
+function MaterialBottomTabView(props) {
+  return React.createElement(require("@react-navigation/native").NavigationHelpersContext.Provider, {
+    value: props.navigation },
+  React.createElement(MaterialBottomTabViewInner, props));
+}
+
+var styles = require("react-native").StyleSheet.create({
+  icon: {
+    backgroundColor: 'transparent' },
+
+  touchable: {
+    display: 'flex',
+    justifyContent: 'center' } });

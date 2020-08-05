@@ -1,0 +1,127 @@
+12bf0652809953e018bda390623ffae4
+
+
+
+
+
+
+
+
+
+
+'use strict';function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {require("@babel/runtime/helpers/defineProperty")(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}var
+
+
+
+
+
+
+
+
+
+
+
+
+
+YellowBoxWarning = function () {require("@babel/runtime/helpers/createClass")(YellowBoxWarning, null, [{ key: "parse", value: function parse(_ref)
+
+
+
+
+
+
+
+
+    {var args = _ref.args;
+      var mutableArgs = require("@babel/runtime/helpers/toConsumableArray")(args);
+
+
+
+
+
+
+
+      if (mutableArgs.length === 2) {
+        var first = mutableArgs[0];
+        var last = mutableArgs[1];
+        if (
+        typeof first === 'string' &&
+        typeof last === 'string' &&
+        /^\n {4}in/.exec(last))
+        {
+          mutableArgs[0] = first + '%s';
+        }
+      }
+
+      return _objectSpread(_objectSpread({},
+      require('./YellowBoxCategory').parse(mutableArgs)), {}, {
+
+        stack: require('../../Core/Devtools/parseErrorStack')(new Error()) });
+
+    } }]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function YellowBoxWarning(message, stack) {require("@babel/runtime/helpers/classCallCheck")(this, YellowBoxWarning);this.symbolicated = { error: null, stack: null, status: 'NONE' };
+    this.message = message;
+    this.stack = stack;
+  }require("@babel/runtime/helpers/createClass")(YellowBoxWarning, [{ key: "getAvailableStack", value: function getAvailableStack()
+
+    {
+      return this.symbolicated.status === 'COMPLETE' ?
+      this.symbolicated.stack :
+      this.stack;
+    } }, { key: "retrySymbolicate", value: function retrySymbolicate(
+
+    callback) {
+      require('./YellowBoxSymbolication').delete(this.stack);
+      return this.symbolicate(callback);
+    } }, { key: "symbolicate", value: function symbolicate(
+
+    callback) {var _this = this;
+      var aborted = false;
+
+      if (this.symbolicated.status !== 'COMPLETE') {
+        var updateStatus = function updateStatus(error, stack) {
+          if (error != null) {
+            _this.symbolicated = { error: error, stack: null, status: 'FAILED' };
+          } else if (stack != null) {
+            _this.symbolicated = { error: null, stack: stack, status: 'COMPLETE' };
+          } else {
+            _this.symbolicated = { error: null, stack: null, status: 'PENDING' };
+          }
+          if (!aborted) {
+            callback();
+          }
+        };
+
+        updateStatus(null, null);
+        require('./YellowBoxSymbolication').symbolicate(this.stack).then(
+        function (stack) {
+          updateStatus(null, stack);
+        },
+        function (error) {
+          updateStatus(error, null);
+        });
+
+      }
+
+      return {
+        abort: function abort() {
+          aborted = true;
+        } };
+
+    } }]);return YellowBoxWarning;}();
+
+
+module.exports = YellowBoxWarning;

@@ -1,0 +1,97 @@
+a888ca2b2639ca42e02faedc49622142
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = SceneView;
+
+var React = _interopRequireWildcard(require("react"));
+
+var _NavigationStateContext = _interopRequireDefault(require("./NavigationStateContext"));
+
+var _StaticContainer = _interopRequireDefault(require("./StaticContainer"));
+
+var _EnsureSingleNavigator = _interopRequireDefault(require("./EnsureSingleNavigator"));
+
+var _useOptionsGetters = _interopRequireDefault(require("./useOptionsGetters"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}
+
+function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+
+
+
+
+function SceneView(_ref)
+
+
+
+
+
+
+{var screen = _ref.screen,route = _ref.route,navigation = _ref.navigation,getState = _ref.getState,setState = _ref.setState,options = _ref.options;
+  var navigatorKeyRef = React.useRef();
+  var getKey = React.useCallback(function () {return navigatorKeyRef.current;}, []);var _ref2 =
+
+
+  (0, _useOptionsGetters.default)({
+    key: route.key,
+    options: options,
+    navigation: navigation }),addOptionsGetter = _ref2.addOptionsGetter;
+
+  var setKey = React.useCallback(function (key) {
+    navigatorKeyRef.current = key;
+  }, []);
+  var getCurrentState = React.useCallback(function () {
+    var state = getState();
+    var currentRoute = state.routes.find(function (r) {return r.key === route.key;});
+    return currentRoute ? currentRoute.state : undefined;
+  }, [getState, route.key]);
+  var setCurrentState = React.useCallback(function (child) {
+    var state = getState();
+    setState(_objectSpread(_objectSpread({}, state), {}, {
+      routes: state.routes.map(function (r) {return r.key === route.key ? _objectSpread(_objectSpread({}, r), {}, {
+          state: child }) :
+        r;}) }));
+
+  }, [getState, route.key, setState]);
+  var isInitialRef = React.useRef(true);
+  React.useEffect(function () {
+    isInitialRef.current = false;
+  });
+  var getIsInitial = React.useCallback(function () {return isInitialRef.current;}, []);
+  var context = React.useMemo(function () {return {
+      state: route.state,
+      getState: getCurrentState,
+      setState: setCurrentState,
+      getKey: getKey,
+      setKey: setKey,
+      getIsInitial: getIsInitial,
+      addOptionsGetter: addOptionsGetter };},
+  [route.state, getCurrentState, setCurrentState, getKey, setKey, getIsInitial, addOptionsGetter]);
+  var ScreenComponent = screen.getComponent ? screen.getComponent() : screen.component;
+  return React.createElement(_NavigationStateContext.default.Provider, {
+    value: context },
+  React.createElement(_EnsureSingleNavigator.default, null, React.createElement(_StaticContainer.default, {
+    name: screen.name,
+    render: ScreenComponent || screen.children,
+    navigation: navigation,
+    route: route },
+  ScreenComponent !== undefined ? React.createElement(ScreenComponent, {
+    navigation: navigation,
+    route: route }) :
+  screen.children !== undefined ? screen.children({
+    navigation: navigation,
+    route: route }) :
+  null)));
+}

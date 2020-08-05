@@ -1,0 +1,93 @@
+cec24b37e27fa37767e1a9fbff33c9fb
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = withDimensions;
+exports.isOrientationLandscape = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+var _hoistNonReactStatics = _interopRequireDefault(require("hoist-non-react-statics"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _extends() {_extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}return target;};return _extends.apply(this, arguments);}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+var isOrientationLandscape = function isOrientationLandscape(_ref) {var
+  width = _ref.width,
+  height = _ref.height;return (
+    width > height);};
+
+exports.isOrientationLandscape = isOrientationLandscape;
+
+function withDimensions(WrappedComponent) {var
+  EnhancedComponent = function (_React$Component) {require("@babel/runtime/helpers/inherits")(EnhancedComponent, _React$Component);var _super = _createSuper(EnhancedComponent);
+    function EnhancedComponent(props) {var _this;require("@babel/runtime/helpers/classCallCheck")(this, EnhancedComponent);
+      _this = _super.call(this, props);
+
+      _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handleOrientationChange", function (_ref2)
+
+      {var window = _ref2.window;var
+
+        width =
+
+        window.width,height = window.height;
+        _this.setState({
+          dimensions: {
+            width: width,
+            height: height },
+
+          isLandscape: isOrientationLandscape({
+            width: width,
+            height: height }) });
+
+
+      });var _reactNative$Dimensio =
+
+
+
+
+      require("react-native").Dimensions.get('window'),_width = _reactNative$Dimensio.width,_height = _reactNative$Dimensio.height;
+
+      _this.state = {
+        dimensions: {
+          width: _width,
+          height: _height },
+
+        isLandscape: isOrientationLandscape({
+          width: _width,
+          height: _height }) };return _this;
+
+
+    }require("@babel/runtime/helpers/createClass")(EnhancedComponent, [{ key: "componentDidMount", value: function componentDidMount()
+
+      {
+        require("react-native").Dimensions.addEventListener('change', this.handleOrientationChange);
+      } }, { key: "componentWillUnmount", value: function componentWillUnmount()
+
+      {
+        require("react-native").Dimensions.removeEventListener('change', this.handleOrientationChange);
+      } }, { key: "render", value: function render()
+
+      {
+
+        return React.createElement(WrappedComponent, _extends({}, this.props, this.state));
+      } }]);return EnhancedComponent;}(React.Component);
+
+
+
+
+  _defineProperty(EnhancedComponent, "displayName", "withDimensions(".concat(WrappedComponent.displayName, ")"));
+
+  return (0, _hoistNonReactStatics.default)(EnhancedComponent, WrappedComponent);
+}

@@ -1,0 +1,43 @@
+8be7a836e80a2b2c6f3e52f27b104789
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+jest.mock('react-native-screens', () => {
+    const RealComponent = jest.requireActual('react-native-screens');
+    RealComponent.enableScreens = function () { };
+    return RealComponent;
+});
+jest.mock('react-native-reanimated', () => {
+    const Reanimated = require('react-native-reanimated/mock');
+    // The mock for `call` immediately calls the callback which is incorrect
+    // So we override it with a no-op
+    Reanimated.default.call = () => { };
+    return Reanimated;
+});
+// Silence the warning: Animated: `useNativeDriver` is not supported because the native animated module is missing
+jest.mock('react-native/Libraries/Animated/src/NativeAnimatedHelper');
+jest.mock('react-navigation-tabs', () => ({
+    withNavigation: (Component) => (props) => (react_1.default.createElement(Component, Object.assign({ navigation: { navigate: jest.fn() } }, props))),
+    createBottomTabNavigator: jest.fn()
+}));
+jest.mock('react-navigation-drawer', () => ({
+    withNavigation: (Component) => (props) => (react_1.default.createElement(Component, Object.assign({ navigation: { navigate: jest.fn() } }, props))),
+    createDrawerNavigator: () => ({}),
+}));
+/**
+ * @format
+ */
+require("react-native");
+const react_1 = __importDefault(require("react"));
+const App_1 = __importDefault(require("../src/components/App"));
+// Note: test renderer must be required after react-native.
+const react_test_renderer_1 = __importDefault(require("react-test-renderer"));
+// neededd this to get some async items like StatusBar to build properly when running the test
+jest.useFakeTimers();
+require("react-native-gesture-handler/jestSetup");
+it('renders correctly', () => {
+    react_test_renderer_1.default.create(react_1.default.createElement(App_1.default, null));
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL19fdGVzdHNfXy9BcHAudGVzdC50c3giLCJtYXBwaW5ncyI6Ijs7Ozs7QUFjQSxJQUFJLENBQUMsSUFBSSxDQUFDLHNCQUFzQixFQUFFLEdBQUcsRUFBRTtJQUNyQyxNQUFNLGFBQWEsR0FBRyxJQUFJLENBQUMsYUFBYSxDQUFDLHNCQUFzQixDQUFDLENBQUM7SUFDakUsYUFBYSxDQUFDLGFBQWEsR0FBRyxjQUFZLENBQUMsQ0FBQztJQUM1QyxPQUFPLGFBQWEsQ0FBQztBQUN2QixDQUFDLENBQUMsQ0FBQztBQUlILElBQUksQ0FBQyxJQUFJLENBQUMseUJBQXlCLEVBQUUsR0FBRyxFQUFFO0lBQ3hDLE1BQU0sVUFBVSxHQUFHLE9BQU8sQ0FBQyw4QkFBOEIsQ0FBQyxDQUFDO0lBRTNELHdFQUF3RTtJQUN4RSxpQ0FBaUM7SUFDakMsVUFBVSxDQUFDLE9BQU8sQ0FBQyxJQUFJLEdBQUcsR0FBRyxFQUFFLEdBQUUsQ0FBQyxDQUFDO0lBRW5DLE9BQU8sVUFBVSxDQUFDO0FBQ3BCLENBQUMsQ0FBQyxDQUFDO0FBRUgsa0hBQWtIO0FBQ2xILElBQUksQ0FBQyxJQUFJLENBQUMsMERBQTBELENBQUMsQ0FBQztBQUV0RSxJQUFJLENBQUMsSUFBSSxDQUFDLHVCQUF1QixFQUFFLEdBQUcsRUFBRSxDQUFDLENBQUM7SUFDeEMsY0FBYyxFQUFFLENBQUMsU0FBbUIsRUFBRSxFQUFFLENBQUMsQ0FBQyxLQUFVLEVBQUUsRUFBRSxDQUFDLENBQ3ZELDhCQUFDLFNBQVMsa0JBQUMsVUFBVSxFQUFFLEVBQUUsUUFBUSxFQUFFLElBQUksQ0FBQyxFQUFFLEVBQUUsRUFBRSxJQUFNLEtBQUssRUFBSSxDQUM5RDtJQUNELHdCQUF3QixFQUFFLElBQUksQ0FBQyxFQUFFLEVBQUU7Q0FDcEMsQ0FBQyxDQUFDLENBQUE7QUFFSCxJQUFJLENBQUMsSUFBSSxDQUFDLHlCQUF5QixFQUFFLEdBQUcsRUFBRSxDQUFDLENBQUM7SUFDMUMsY0FBYyxFQUFFLENBQUMsU0FBbUIsRUFBRSxFQUFFLENBQUMsQ0FBQyxLQUFVLEVBQUUsRUFBRSxDQUFDLENBQ3ZELDhCQUFDLFNBQVMsa0JBQUMsVUFBVSxFQUFFLEVBQUUsUUFBUSxFQUFFLElBQUksQ0FBQyxFQUFFLEVBQUUsRUFBRSxJQUFNLEtBQUssRUFBSSxDQUM5RDtJQUNELHFCQUFxQixFQUFFLEdBQUcsRUFBRSxDQUFDLENBQUMsRUFBRSxDQUFDO0NBQ2xDLENBQUMsQ0FBQyxDQUFBO0FBL0NIOztHQUVHO0FBRUgsd0JBQXNCO0FBQ3RCLGtEQUEwQjtBQUMxQixnRUFBd0M7QUFFeEMsMkRBQTJEO0FBQzNELDhFQUEyQztBQUUzQyw4RkFBOEY7QUFDOUYsSUFBSSxDQUFDLGFBQWEsRUFBRSxDQUFDO0FBUXJCLGtEQUFnRDtBQTZCaEQsRUFBRSxDQUFDLG1CQUFtQixFQUFFLEdBQUcsRUFBRTtJQUMzQiw2QkFBUSxDQUFDLE1BQU0sQ0FBQyw4QkFBQyxhQUFHLE9BQUcsQ0FBQyxDQUFBO0FBQzFCLENBQUMsQ0FBQyxDQUFBIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9ob21lL3dhZGUvcHJvamVjdHMvaW5lZmZlY3R1YS9fX3Rlc3RzX18vQXBwLnRlc3QudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQGZvcm1hdFxuICovXG5cbmltcG9ydCAncmVhY3QtbmF0aXZlJztcbmltcG9ydCBSZWFjdCBmcm9tICdyZWFjdCc7XG5pbXBvcnQgQXBwIGZyb20gJy4uL3NyYy9jb21wb25lbnRzL0FwcCc7XG5cbi8vIE5vdGU6IHRlc3QgcmVuZGVyZXIgbXVzdCBiZSByZXF1aXJlZCBhZnRlciByZWFjdC1uYXRpdmUuXG5pbXBvcnQgcmVuZGVyZXIgZnJvbSAncmVhY3QtdGVzdC1yZW5kZXJlcic7XG5cbi8vIG5lZWRlZGQgdGhpcyB0byBnZXQgc29tZSBhc3luYyBpdGVtcyBsaWtlIFN0YXR1c0JhciB0byBidWlsZCBwcm9wZXJseSB3aGVuIHJ1bm5pbmcgdGhlIHRlc3Rcbmplc3QudXNlRmFrZVRpbWVycygpO1xuXG5qZXN0Lm1vY2soJ3JlYWN0LW5hdGl2ZS1zY3JlZW5zJywgKCkgPT4ge1xuICBjb25zdCBSZWFsQ29tcG9uZW50ID0gamVzdC5yZXF1aXJlQWN0dWFsKCdyZWFjdC1uYXRpdmUtc2NyZWVucycpO1xuICBSZWFsQ29tcG9uZW50LmVuYWJsZVNjcmVlbnMgPSBmdW5jdGlvbigpIHt9O1xuICByZXR1cm4gUmVhbENvbXBvbmVudDtcbn0pO1xuXG5pbXBvcnQgJ3JlYWN0LW5hdGl2ZS1nZXN0dXJlLWhhbmRsZXIvamVzdFNldHVwJztcblxuamVzdC5tb2NrKCdyZWFjdC1uYXRpdmUtcmVhbmltYXRlZCcsICgpID0+IHtcbiAgY29uc3QgUmVhbmltYXRlZCA9IHJlcXVpcmUoJ3JlYWN0LW5hdGl2ZS1yZWFuaW1hdGVkL21vY2snKTtcblxuICAvLyBUaGUgbW9jayBmb3IgYGNhbGxgIGltbWVkaWF0ZWx5IGNhbGxzIHRoZSBjYWxsYmFjayB3aGljaCBpcyBpbmNvcnJlY3RcbiAgLy8gU28gd2Ugb3ZlcnJpZGUgaXQgd2l0aCBhIG5vLW9wXG4gIFJlYW5pbWF0ZWQuZGVmYXVsdC5jYWxsID0gKCkgPT4ge307XG5cbiAgcmV0dXJuIFJlYW5pbWF0ZWQ7XG59KTtcblxuLy8gU2lsZW5jZSB0aGUgd2FybmluZzogQW5pbWF0ZWQ6IGB1c2VOYXRpdmVEcml2ZXJgIGlzIG5vdCBzdXBwb3J0ZWQgYmVjYXVzZSB0aGUgbmF0aXZlIGFuaW1hdGVkIG1vZHVsZSBpcyBtaXNzaW5nXG5qZXN0Lm1vY2soJ3JlYWN0LW5hdGl2ZS9MaWJyYXJpZXMvQW5pbWF0ZWQvc3JjL05hdGl2ZUFuaW1hdGVkSGVscGVyJyk7XG5cbmplc3QubW9jaygncmVhY3QtbmF2aWdhdGlvbi10YWJzJywgKCkgPT4gKHtcbiAgd2l0aE5hdmlnYXRpb246IChDb21wb25lbnQ6IEZ1bmN0aW9uKSA9PiAocHJvcHM6IGFueSkgPT4gKFxuICAgIDxDb21wb25lbnQgbmF2aWdhdGlvbj17eyBuYXZpZ2F0ZTogamVzdC5mbigpIH19IHsuLi5wcm9wc30gLz5cbiAgKSxcbiAgY3JlYXRlQm90dG9tVGFiTmF2aWdhdG9yOiBqZXN0LmZuKClcbn0pKVxuXG5qZXN0Lm1vY2soJ3JlYWN0LW5hdmlnYXRpb24tZHJhd2VyJywgKCkgPT4gKHtcbiAgd2l0aE5hdmlnYXRpb246IChDb21wb25lbnQ6IEZ1bmN0aW9uKSA9PiAocHJvcHM6IGFueSkgPT4gKFxuICAgIDxDb21wb25lbnQgbmF2aWdhdGlvbj17eyBuYXZpZ2F0ZTogamVzdC5mbigpIH19IHsuLi5wcm9wc30gLz5cbiAgKSxcbiAgY3JlYXRlRHJhd2VyTmF2aWdhdG9yOiAoKSA9PiAoe30pLFxufSkpXG5cbml0KCdyZW5kZXJzIGNvcnJlY3RseScsICgpID0+IHtcbiAgcmVuZGVyZXIuY3JlYXRlKDxBcHAgLz4pXG59KSJdLCJ2ZXJzaW9uIjozfQ==

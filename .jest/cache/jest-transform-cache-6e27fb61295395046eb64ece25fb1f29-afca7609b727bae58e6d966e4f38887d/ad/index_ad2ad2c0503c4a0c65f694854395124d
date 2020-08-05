@@ -1,0 +1,11 @@
+a728c93ef384af658d1f566a233729dc
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const redux_thunk_1 = __importDefault(require("redux-thunk"));
+const logger_1 = __importDefault(require("./logger"));
+const redux_1 = require("redux");
+exports.default = redux_1.applyMiddleware(redux_thunk_1.default, logger_1.default);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL3NyYy9taWRkbGV3YXJlL2luZGV4LnRzIiwibWFwcGluZ3MiOiI7Ozs7O0FBQUEsOERBQStCO0FBQy9CLHNEQUE2QjtBQUM3QixpQ0FBdUM7QUFFdkMsa0JBQWUsdUJBQWUsQ0FDNUIscUJBQUssRUFDTCxnQkFBTSxDQUNQLENBQUEiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL3NyYy9taWRkbGV3YXJlL2luZGV4LnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB0aHVuayBmcm9tICdyZWR1eC10aHVuaydcbmltcG9ydCBsb2dnZXIgZnJvbSAnLi9sb2dnZXInXG5pbXBvcnQgeyBhcHBseU1pZGRsZXdhcmUgfSBmcm9tICdyZWR1eCdcblxuZXhwb3J0IGRlZmF1bHQgYXBwbHlNaWRkbGV3YXJlKFxuICB0aHVuayxcbiAgbG9nZ2VyXG4pIl0sInZlcnNpb24iOjN9

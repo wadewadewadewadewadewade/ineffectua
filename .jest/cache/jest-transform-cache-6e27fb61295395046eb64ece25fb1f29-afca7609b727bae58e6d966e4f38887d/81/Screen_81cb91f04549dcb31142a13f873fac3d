@@ -1,0 +1,15 @@
+8f20e72be930b18db17e024e4b63a1bb
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = Screen;
+
+
+
+
+function Screen(_) {
+
+  return null;
+}

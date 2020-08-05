@@ -1,0 +1,40 @@
+a7379e55d9a0f07536127b10dff89f12
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+jest.mock('react-native-screens', () => {
+    const RealComponent = jest.requireActual('react-native-screens');
+    RealComponent.enableScreens = function () { };
+    return RealComponent;
+});
+jest.mock('react-native-reanimated', () => {
+    const Reanimated = require('react-native-reanimated/mock');
+    // The mock for `call` immediately calls the callback which is incorrect
+    // So we override it with a no-op
+    Reanimated.default.call = () => { };
+    return Reanimated;
+});
+// Silence the warning: Animated: `useNativeDriver` is not supported because the native animated module is missing
+jest.mock('react-native/Libraries/Animated/src/NativeAnimatedHelper');
+/**
+ * @format
+ */
+require("react-native");
+const react_1 = __importDefault(require("react"));
+const App_1 = __importDefault(require("../src/components/App"));
+// Note: test renderer must be required after react-native.
+const react_test_renderer_1 = __importDefault(require("react-test-renderer"));
+// neededd this to get some async items like StatusBar to build properly when running the test
+jest.useFakeTimers();
+require("react-native-gesture-handler/jestSetup");
+/*jest.mock('react-navigation-tabs', () => ({
+  withNavigation: (Component: Function) => (props: any) => (
+    <Component navigation={{ navigate: jest.fn() }} {...props} />
+  ),
+}))*/
+it('renders correctly', () => {
+    react_test_renderer_1.default.create(react_1.default.createElement(App_1.default, null));
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL19fdGVzdHNfXy9BcHAudGVzdC50c3giLCJtYXBwaW5ncyI6Ijs7Ozs7QUFjQSxJQUFJLENBQUMsSUFBSSxDQUFDLHNCQUFzQixFQUFFLEdBQUcsRUFBRTtJQUNyQyxNQUFNLGFBQWEsR0FBRyxJQUFJLENBQUMsYUFBYSxDQUFDLHNCQUFzQixDQUFDLENBQUM7SUFDakUsYUFBYSxDQUFDLGFBQWEsR0FBRyxjQUFZLENBQUMsQ0FBQztJQUM1QyxPQUFPLGFBQWEsQ0FBQztBQUN2QixDQUFDLENBQUMsQ0FBQztBQUlILElBQUksQ0FBQyxJQUFJLENBQUMseUJBQXlCLEVBQUUsR0FBRyxFQUFFO0lBQ3hDLE1BQU0sVUFBVSxHQUFHLE9BQU8sQ0FBQyw4QkFBOEIsQ0FBQyxDQUFDO0lBRTNELHdFQUF3RTtJQUN4RSxpQ0FBaUM7SUFDakMsVUFBVSxDQUFDLE9BQU8sQ0FBQyxJQUFJLEdBQUcsR0FBRyxFQUFFLEdBQUUsQ0FBQyxDQUFDO0lBRW5DLE9BQU8sVUFBVSxDQUFDO0FBQ3BCLENBQUMsQ0FBQyxDQUFDO0FBRUgsa0hBQWtIO0FBQ2xILElBQUksQ0FBQyxJQUFJLENBQUMsMERBQTBELENBQUMsQ0FBQztBQWpDdEU7O0dBRUc7QUFFSCx3QkFBc0I7QUFDdEIsa0RBQTBCO0FBQzFCLGdFQUF3QztBQUV4QywyREFBMkQ7QUFDM0QsOEVBQTJDO0FBRTNDLDhGQUE4RjtBQUM5RixJQUFJLENBQUMsYUFBYSxFQUFFLENBQUM7QUFRckIsa0RBQWdEO0FBZWhEOzs7O0tBSUs7QUFFTCxFQUFFLENBQUMsbUJBQW1CLEVBQUUsR0FBRyxFQUFFO0lBQzNCLDZCQUFRLENBQUMsTUFBTSxDQUFDLDhCQUFDLGFBQUcsT0FBRyxDQUFDLENBQUE7QUFDMUIsQ0FBQyxDQUFDLENBQUEiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL19fdGVzdHNfXy9BcHAudGVzdC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBAZm9ybWF0XG4gKi9cblxuaW1wb3J0ICdyZWFjdC1uYXRpdmUnO1xuaW1wb3J0IFJlYWN0IGZyb20gJ3JlYWN0JztcbmltcG9ydCBBcHAgZnJvbSAnLi4vc3JjL2NvbXBvbmVudHMvQXBwJztcblxuLy8gTm90ZTogdGVzdCByZW5kZXJlciBtdXN0IGJlIHJlcXVpcmVkIGFmdGVyIHJlYWN0LW5hdGl2ZS5cbmltcG9ydCByZW5kZXJlciBmcm9tICdyZWFjdC10ZXN0LXJlbmRlcmVyJztcblxuLy8gbmVlZGVkZCB0aGlzIHRvIGdldCBzb21lIGFzeW5jIGl0ZW1zIGxpa2UgU3RhdHVzQmFyIHRvIGJ1aWxkIHByb3Blcmx5IHdoZW4gcnVubmluZyB0aGUgdGVzdFxuamVzdC51c2VGYWtlVGltZXJzKCk7XG5cbmplc3QubW9jaygncmVhY3QtbmF0aXZlLXNjcmVlbnMnLCAoKSA9PiB7XG4gIGNvbnN0IFJlYWxDb21wb25lbnQgPSBqZXN0LnJlcXVpcmVBY3R1YWwoJ3JlYWN0LW5hdGl2ZS1zY3JlZW5zJyk7XG4gIFJlYWxDb21wb25lbnQuZW5hYmxlU2NyZWVucyA9IGZ1bmN0aW9uKCkge307XG4gIHJldHVybiBSZWFsQ29tcG9uZW50O1xufSk7XG5cbmltcG9ydCAncmVhY3QtbmF0aXZlLWdlc3R1cmUtaGFuZGxlci9qZXN0U2V0dXAnO1xuXG5qZXN0Lm1vY2soJ3JlYWN0LW5hdGl2ZS1yZWFuaW1hdGVkJywgKCkgPT4ge1xuICBjb25zdCBSZWFuaW1hdGVkID0gcmVxdWlyZSgncmVhY3QtbmF0aXZlLXJlYW5pbWF0ZWQvbW9jaycpO1xuXG4gIC8vIFRoZSBtb2NrIGZvciBgY2FsbGAgaW1tZWRpYXRlbHkgY2FsbHMgdGhlIGNhbGxiYWNrIHdoaWNoIGlzIGluY29ycmVjdFxuICAvLyBTbyB3ZSBvdmVycmlkZSBpdCB3aXRoIGEgbm8tb3BcbiAgUmVhbmltYXRlZC5kZWZhdWx0LmNhbGwgPSAoKSA9PiB7fTtcblxuICByZXR1cm4gUmVhbmltYXRlZDtcbn0pO1xuXG4vLyBTaWxlbmNlIHRoZSB3YXJuaW5nOiBBbmltYXRlZDogYHVzZU5hdGl2ZURyaXZlcmAgaXMgbm90IHN1cHBvcnRlZCBiZWNhdXNlIHRoZSBuYXRpdmUgYW5pbWF0ZWQgbW9kdWxlIGlzIG1pc3Npbmdcbmplc3QubW9jaygncmVhY3QtbmF0aXZlL0xpYnJhcmllcy9BbmltYXRlZC9zcmMvTmF0aXZlQW5pbWF0ZWRIZWxwZXInKTtcblxuLypqZXN0Lm1vY2soJ3JlYWN0LW5hdmlnYXRpb24tdGFicycsICgpID0+ICh7XG4gIHdpdGhOYXZpZ2F0aW9uOiAoQ29tcG9uZW50OiBGdW5jdGlvbikgPT4gKHByb3BzOiBhbnkpID0+IChcbiAgICA8Q29tcG9uZW50IG5hdmlnYXRpb249e3sgbmF2aWdhdGU6IGplc3QuZm4oKSB9fSB7Li4ucHJvcHN9IC8+XG4gICksXG59KSkqL1xuXG5pdCgncmVuZGVycyBjb3JyZWN0bHknLCAoKSA9PiB7XG4gIHJlbmRlcmVyLmNyZWF0ZSg8QXBwIC8+KVxufSkiXSwidmVyc2lvbiI6M30=

@@ -1,0 +1,22 @@
+923e54158a22d4e058b8e2e01ce42ca6
+
+
+
+
+
+
+
+
+
+
+'use strict';
+
+
+
+
+
+
+
+
+
+module.exports = require('../createAnimatedComponent')(require('../../../Components/View/View'));

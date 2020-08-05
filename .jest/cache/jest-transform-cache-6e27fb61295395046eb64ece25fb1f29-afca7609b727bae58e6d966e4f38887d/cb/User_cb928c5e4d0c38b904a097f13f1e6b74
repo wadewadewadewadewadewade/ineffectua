@@ -1,0 +1,13 @@
+6d11320d98835726d0ae425a4fda69ba
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.setAuthedUser = exports.SET_AUTHED_USER = void 0;
+exports.SET_AUTHED_USER = 'SET_AUTHED_USER';
+function setAuthedUser(id) {
+    return {
+        type: exports.SET_AUTHED_USER,
+        id
+    };
+}
+exports.setAuthedUser = setAuthedUser;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL3NyYy9hY3Rpb25zL1VzZXIudHMiLCJtYXBwaW5ncyI6Ijs7O0FBQWEsUUFBQSxlQUFlLEdBQUcsaUJBQWlCLENBQUE7QUFFaEQsU0FBZ0IsYUFBYSxDQUFDLEVBQVU7SUFDdEMsT0FBTztRQUNMLElBQUksRUFBRSx1QkFBZTtRQUNyQixFQUFFO0tBQ0gsQ0FBQTtBQUNILENBQUM7QUFMRCxzQ0FLQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvaG9tZS93YWRlL3Byb2plY3RzL2luZWZmZWN0dWEvc3JjL2FjdGlvbnMvVXNlci50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJleHBvcnQgY29uc3QgU0VUX0FVVEhFRF9VU0VSID0gJ1NFVF9BVVRIRURfVVNFUidcblxuZXhwb3J0IGZ1bmN0aW9uIHNldEF1dGhlZFVzZXIoaWQ6IHN0cmluZykge1xuICByZXR1cm4ge1xuICAgIHR5cGU6IFNFVF9BVVRIRURfVVNFUixcbiAgICBpZFxuICB9XG59Il0sInZlcnNpb24iOjN9

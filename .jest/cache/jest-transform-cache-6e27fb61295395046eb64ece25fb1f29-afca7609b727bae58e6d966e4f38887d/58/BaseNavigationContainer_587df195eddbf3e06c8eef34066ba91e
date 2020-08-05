@@ -1,0 +1,366 @@
+c12663edd05bb9f1910e131efbb0cd80
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+var _EnsureSingleNavigator = _interopRequireDefault(require("./EnsureSingleNavigator"));
+
+var _NavigationBuilderContext = _interopRequireDefault(require("./NavigationBuilderContext"));
+
+var _NavigationStateContext = _interopRequireDefault(require("./NavigationStateContext"));
+
+var _UnhandledActionContext = _interopRequireDefault(require("./UnhandledActionContext"));
+
+
+
+var _useChildListeners = _interopRequireDefault(require("./useChildListeners"));
+
+var _useKeyedChildListeners = _interopRequireDefault(require("./useKeyedChildListeners"));
+
+var _useOptionsGetters = _interopRequireDefault(require("./useOptionsGetters"));
+
+var _useEventEmitter = _interopRequireDefault(require("./useEventEmitter"));
+
+var _useSyncState = _interopRequireDefault(require("./useSyncState"));
+
+var _checkSerializable = _interopRequireDefault(require("./checkSerializable"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}
+
+function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+function _objectWithoutProperties(source, excluded) {if (source == null) return {};var target = _objectWithoutPropertiesLoose(source, excluded);var key, i;if (Object.getOwnPropertySymbols) {var sourceSymbolKeys = Object.getOwnPropertySymbols(source);for (i = 0; i < sourceSymbolKeys.length; i++) {key = sourceSymbolKeys[i];if (excluded.indexOf(key) >= 0) continue;if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;target[key] = source[key];}}return target;}
+
+function _objectWithoutPropertiesLoose(source, excluded) {if (source == null) return {};var target = {};var sourceKeys = Object.keys(source);var key, i;for (i = 0; i < sourceKeys.length; i++) {key = sourceKeys[i];if (excluded.indexOf(key) >= 0) continue;target[key] = source[key];}return target;}
+
+var NOT_INITIALIZED_ERROR = "The 'navigation' object hasn't been initialized yet. This might happen if you don't have a navigator mounted, or if the navigator hasn't finished mounting. See https://reactnavigation.org/docs/navigating-without-navigation-prop#handling-initialization for more details.";
+var serializableWarnings = [];
+
+try {
+
+
+
+  Object.defineProperty(global, 'REACT_NAVIGATION_REDUX_DEVTOOLS_EXTENSION_INTEGRATION_ENABLED', {
+    set: function set(_) {
+      console.warn("Redux devtools extension integration can be enabled with the '@react-navigation/devtools' package. For more details, see https://reactnavigation.org/docs/devtools");
+    } });
+
+
+} catch (e) {}
+
+
+
+
+
+
+
+
+var getPartialState = function getPartialState(state) {
+  if (state === undefined) {
+    return;
+  }var
+
+
+
+  key =
+
+  state.key,routeNames = state.routeNames,
+  partialState = _objectWithoutProperties(state, ["key", "routeNames"]);
+
+  return _objectSpread(_objectSpread({}, partialState), {}, {
+    stale: true,
+    routes: state.routes.map(function (route) {
+      if (route.state === undefined) {
+        return route;
+      }
+
+      return _objectSpread(_objectSpread({}, route), {}, {
+        state: getPartialState(route.state) });
+
+    }) });
+
+};
+
+
+
+
+
+
+
+
+
+
+
+var BaseNavigationContainer = React.forwardRef(function BaseNavigationContainer(_ref,
+
+
+
+
+ref) {var initialState = _ref.initialState,onStateChange = _ref.onStateChange,independent = _ref.independent,children = _ref.children;
+  var parent = React.useContext(_NavigationStateContext.default);
+
+  if (!parent.isDefault && !independent) {
+    throw new Error("Looks like you have nested a 'NavigationContainer' inside another. Normally you need only one container at the root of the app, so this was probably an error. If this was intentional, pass 'independent={true}' explicitely. Note that this will make the child navigators disconnected from the parent and you won't be able to navigate between them.");
+  }var _ref2 =
+
+  (0, _useSyncState.default)(function () {return getPartialState(initialState == null ? undefined : initialState);}),_ref3 = require("@babel/runtime/helpers/slicedToArray")(_ref2, 5),state = _ref3[0],getState = _ref3[1],setState = _ref3[2],scheduleUpdate = _ref3[3],flushUpdates = _ref3[4];
+  var isFirstMountRef = React.useRef(true);
+  var navigatorKeyRef = React.useRef();
+  var getKey = React.useCallback(function () {return navigatorKeyRef.current;}, []);
+  var setKey = React.useCallback(function (key) {
+    navigatorKeyRef.current = key;
+  }, []);var _ref4 =
+
+
+
+  (0, _useChildListeners.default)(),listeners = _ref4.listeners,addListener = _ref4.addListener;var _ref5 =
+
+
+
+  (0, _useKeyedChildListeners.default)(),keyedListeners = _ref5.keyedListeners,addKeyedListener = _ref5.addKeyedListener;
+
+  var dispatch = function dispatch(action) {
+    if (listeners.focus[0] == null) {
+      throw new Error(NOT_INITIALIZED_ERROR);
+    }
+
+    listeners.focus[0](function (navigation) {return navigation.dispatch(action);});
+  };
+
+  var canGoBack = function canGoBack() {
+    if (listeners.focus[0] == null) {
+      return false;
+    }var _listeners$focus$ =
+
+
+
+
+    listeners.focus[0](function (navigation) {return navigation.canGoBack();}),result = _listeners$focus$.result,handled = _listeners$focus$.handled;
+
+    if (handled) {
+      return result;
+    } else {
+      return false;
+    }
+  };
+
+  var resetRoot = React.useCallback(function (state) {
+    setState(state);
+  }, [setState]);
+  var getRootState = React.useCallback(function () {
+    var _keyedListeners$getSt, _keyedListeners$getSt2;
+
+    return (_keyedListeners$getSt = (_keyedListeners$getSt2 = keyedListeners.getState).root) === null || _keyedListeners$getSt === void 0 ? void 0 : _keyedListeners$getSt.call(_keyedListeners$getSt2);
+  }, [keyedListeners.getState]);
+  var getCurrentRoute = React.useCallback(function () {
+    var state = getRootState();
+
+    if (state === undefined) {
+      return undefined;
+    }
+
+    while (state.routes[state.index].state !== undefined) {
+      state = state.routes[state.index].state;
+    }
+
+    return state.routes[state.index];
+  }, [getRootState]);
+  var emitter = (0, _useEventEmitter.default)();var _ref6 =
+
+
+
+  (0, _useOptionsGetters.default)({}),addOptionsGetter = _ref6.addOptionsGetter,getCurrentOptions = _ref6.getCurrentOptions;
+  React.useImperativeHandle(ref, function () {return _objectSpread(_objectSpread(_objectSpread({}, Object.keys(require("@react-navigation/routers").CommonActions).reduce(function (acc, name) {
+      acc[name] = function () {var _routers$CommonAction;return dispatch((_routers$CommonAction = require("@react-navigation/routers").CommonActions)[name].apply(_routers$CommonAction, arguments));};
+
+
+      return acc;
+    }, {})), emitter.create('root')), {}, {
+      resetRoot: resetRoot,
+      dispatch: dispatch,
+      canGoBack: canGoBack,
+      getRootState: getRootState,
+      dangerouslyGetState: function dangerouslyGetState() {return state;},
+      dangerouslyGetParent: function dangerouslyGetParent() {return undefined;},
+      getCurrentRoute: getCurrentRoute,
+      getCurrentOptions: getCurrentOptions });});
+
+  var onDispatchAction = React.useCallback(function (action, noop) {
+    emitter.emit({
+      type: '__unsafe_action__',
+      data: {
+        action: action,
+        noop: noop } });
+
+
+  }, [emitter]);
+  var lastEmittedOptionsRef = React.useRef();
+  var onOptionsChange = React.useCallback(function (options) {
+    if (lastEmittedOptionsRef.current === options) {
+      return;
+    }
+
+    lastEmittedOptionsRef.current = options;
+    emitter.emit({
+      type: 'options',
+      data: {
+        options: options } });
+
+
+  }, [emitter]);
+  var builderContext = React.useMemo(function () {return {
+      addListener: addListener,
+      addKeyedListener: addKeyedListener,
+      onDispatchAction: onDispatchAction,
+      onOptionsChange: onOptionsChange };},
+  [addListener, addKeyedListener, onDispatchAction, onOptionsChange]);
+  var scheduleContext = React.useMemo(function () {return {
+      scheduleUpdate: scheduleUpdate,
+      flushUpdates: flushUpdates };},
+  [scheduleUpdate, flushUpdates]);
+  var isInitialRef = React.useRef(true);
+  var getIsInitial = React.useCallback(function () {return isInitialRef.current;}, []);
+  var context = React.useMemo(function () {return {
+      state: state,
+      getState: getState,
+      setState: setState,
+      getKey: getKey,
+      setKey: setKey,
+      getIsInitial: getIsInitial,
+      addOptionsGetter: addOptionsGetter };},
+  [state, getState, setState, getKey, setKey, getIsInitial, addOptionsGetter]);
+  var onStateChangeRef = React.useRef(onStateChange);
+  React.useEffect(function () {
+    isInitialRef.current = false;
+    onStateChangeRef.current = onStateChange;
+  });
+  React.useEffect(function () {
+    if (process.env.NODE_ENV !== 'production') {
+      if (state !== undefined) {
+        var result = (0, _checkSerializable.default)(state);
+
+        if (!result.serializable) {var
+
+          location =
+
+          result.location,reason = result.reason;
+          var path = '';
+          var pointer = state;
+          var params = false;
+
+          for (var i = 0; i < location.length; i++) {
+            var curr = location[i];
+            var prev = location[i - 1];
+            pointer = pointer[curr];
+
+            if (!params && curr === 'state') {
+              continue;
+            } else if (!params && curr === 'routes') {
+              if (path) {
+                path += ' > ';
+              }
+            } else if (!params && typeof curr === 'number' && prev === 'routes') {
+              var _pointer;
+
+              path += (_pointer = pointer) === null || _pointer === void 0 ? void 0 : _pointer.name;
+            } else if (!params) {
+              path += " > ".concat(curr);
+              params = true;
+            } else {
+              if (typeof curr === 'number' || /^[0-9]+$/.test(curr)) {
+                path += "[".concat(curr, "]");
+              } else if (/^[a-z$_]+$/i.test(curr)) {
+                path += ".".concat(curr);
+              } else {
+                path += "[".concat(JSON.stringify(curr), "]");
+              }
+            }
+          }
+
+          var message = "Non-serializable values were found in the navigation state. Check:\n\n".concat(path, " (").concat(reason, ")\n\nThis can break usage such as persisting and restoring state. This might happen if you passed non-serializable values such as function, class instances etc. in params. If you need to use components with callbacks in your options, you can use 'navigation.setOptions' instead. See https://reactnavigation.org/docs/troubleshooting#i-get-the-warning-non-serializable-values-were-found-in-the-navigation-state for more details.");
+
+          if (!serializableWarnings.includes(message)) {
+            serializableWarnings.push(message);
+            console.warn(message);
+          }
+        }
+      }
+    }
+
+    emitter.emit({
+      type: 'state',
+      data: {
+        state: state } });
+
+
+
+    if (!isFirstMountRef.current && onStateChangeRef.current) {
+      onStateChangeRef.current(getRootState());
+    }
+
+    isFirstMountRef.current = false;
+  }, [getRootState, emitter, state]);
+  var onUnhandledAction = React.useCallback(function (action) {
+    if (process.env.NODE_ENV === 'production') {
+      return;
+    }
+
+    var payload = action.payload;
+    var message = "The action '".concat(action.type, "'").concat(payload ? " with payload ".concat(JSON.stringify(action.payload)) : '', " was not handled by any navigator.");
+
+    switch (action.type) {
+      case 'NAVIGATE':
+      case 'PUSH':
+      case 'REPLACE':
+      case 'JUMP_TO':
+        if (payload === null || payload === void 0 ? void 0 : payload.name) {
+          message += "\n\nDo you have a screen named '".concat(payload.name, "'?\n\nIf you're trying to navigate to a screen in a nested navigator, see https://reactnavigation.org/docs/nesting-navigators#navigating-to-a-screen-in-a-nested-navigator.");
+        } else {
+          message += "\n\nYou need to pass the name of the screen to navigate to.\n\nSee https://reactnavigation.org/docs/navigation-actions for usage.";
+        }
+
+        break;
+
+      case 'GO_BACK':
+      case 'POP':
+      case 'POP_TO_TOP':
+        message += "\n\nIs there any screen to go back to?";
+        break;
+
+      case 'OPEN_DRAWER':
+      case 'CLOSE_DRAWER':
+      case 'TOGGLE_DRAWER':
+        message += "\n\nIs your screen inside a Drawer navigator?";
+        break;}
+
+
+    message += "\n\nThis is a development-only warning and won't be shown in production.";
+    console.error(message);
+  }, []);
+  return React.createElement(require("./useScheduleUpdate").ScheduleUpdateContext.Provider, {
+    value: scheduleContext },
+  React.createElement(_NavigationBuilderContext.default.Provider, {
+    value: builderContext },
+  React.createElement(_NavigationStateContext.default.Provider, {
+    value: context },
+  React.createElement(_UnhandledActionContext.default.Provider, {
+    value: onUnhandledAction },
+  React.createElement(_EnsureSingleNavigator.default, null, children)))));
+});
+var _default = BaseNavigationContainer;
+exports.default = _default;

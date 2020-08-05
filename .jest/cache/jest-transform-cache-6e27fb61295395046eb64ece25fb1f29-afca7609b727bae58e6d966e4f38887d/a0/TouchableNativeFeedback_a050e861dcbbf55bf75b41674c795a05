@@ -1,0 +1,334 @@
+4acd07fa70ccbe6ff56a8f46734731c6
+
+
+
+
+
+
+
+
+
+
+'use strict';var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));var _objectWithoutProperties2 = _interopRequireDefault(require("@babel/runtime/helpers/objectWithoutProperties"));var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _Pressability = _interopRequireDefault(require("../../Pressability/Pressability.js"));
+var _PressabilityDebug = require("../../Pressability/PressabilityDebug.js");
+var _TVTouchable = _interopRequireDefault(require("./TVTouchable.js"));
+
+var _ViewNativeComponent = require("react-native/Libraries/Components/View/ViewNativeComponent");
+var _ReactNative = _interopRequireDefault(require("react-native/Libraries/Renderer/shims/ReactNative"));
+
+var _Platform = _interopRequireDefault(require("../../Utilities/Platform"));
+var _View = _interopRequireDefault(require("../../Components/View/View"));
+var _processColor = _interopRequireDefault(require("../../StyleSheet/processColor"));
+var React = _interopRequireWildcard(require("react"));var _jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native/Libraries/Components/Touchable/TouchableNativeFeedback.js";function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {(0, _defineProperty2.default)(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = (0, _getPrototypeOf2.default)(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = (0, _getPrototypeOf2.default)(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return (0, _possibleConstructorReturn2.default)(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}var
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TouchableNativeFeedback = function (_React$Component) {(0, _inherits2.default)(TouchableNativeFeedback, _React$Component);var _super = _createSuper(TouchableNativeFeedback);function TouchableNativeFeedback() {var _this;(0, _classCallCheck2.default)(this, TouchableNativeFeedback);for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {args[_key] = arguments[_key];}_this = _super.call.apply(_super, [this].concat(args));_this.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    state = {
+      pressability: new _Pressability.default({
+        getHitSlop: function getHitSlop() {return _this.props.hitSlop;},
+        getLongPressDelayMS: function getLongPressDelayMS() {
+          if (_this.props.delayLongPress != null) {
+            var maybeNumber = _this.props.delayLongPress;
+            if (typeof maybeNumber === 'number') {
+              return maybeNumber;
+            }
+          }
+          return 500;
+        },
+        getPressDelayMS: function getPressDelayMS() {return _this.props.delayPressIn;},
+        getPressOutDelayMS: function getPressOutDelayMS() {return _this.props.delayPressOut;},
+        getPressRectOffset: function getPressRectOffset() {return _this.props.pressRetentionOffset;},
+        getTouchSoundDisabled: function getTouchSoundDisabled() {return _this.props.touchSoundDisabled;},
+        onLongPress: function onLongPress(event) {
+          if (_this.props.onLongPress != null) {
+            _this.props.onLongPress(event);
+          }
+        },
+        onPress: function onPress(event) {
+          if (_this.props.onPress != null) {
+            _this.props.onPress(event);
+          }
+        },
+        onPressIn: function onPressIn(event) {
+          if (_Platform.default.OS === 'android') {
+            _this._dispatchPressedStateChange(true);
+            _this._dispatchHotspotUpdate(event);
+          }
+          if (_this.props.onPressIn != null) {
+            _this.props.onPressIn(event);
+          }
+        },
+        onPressMove: function onPressMove(event) {
+          if (_Platform.default.OS === 'android') {
+            _this._dispatchHotspotUpdate(event);
+          }
+        },
+        onPressOut: function onPressOut(event) {
+          if (_Platform.default.OS === 'android') {
+            _this._dispatchPressedStateChange(false);
+          }
+          if (_this.props.onPressOut != null) {
+            _this.props.onPressOut(event);
+          }
+        },
+        onResponderTerminationRequest: function onResponderTerminationRequest() {return (
+            !_this.props.rejectResponderTermination);},
+        onStartShouldSetResponder: function onStartShouldSetResponder() {return !_this.props.disabled;} }) };return _this;}(0, _createClass2.default)(TouchableNativeFeedback, [{ key: "_dispatchPressedStateChange", value: function _dispatchPressedStateChange(
+
+
+
+    pressed) {
+      if (_Platform.default.OS === 'android') {
+        var hostComponentRef = _ReactNative.default.findHostInstance_DEPRECATED(this);
+        if (hostComponentRef == null) {
+          console.warn(
+          'Touchable: Unable to find HostComponent instance. ' +
+          'Has your Touchable component been unmounted?');
+
+        } else {
+          _ViewNativeComponent.Commands.setPressed(hostComponentRef, pressed);
+        }
+      }
+    } }, { key: "_dispatchHotspotUpdate", value: function _dispatchHotspotUpdate(
+
+    event) {
+      if (_Platform.default.OS === 'android') {var _event$nativeEvent =
+        event.nativeEvent,locationX = _event$nativeEvent.locationX,locationY = _event$nativeEvent.locationY;
+        var hostComponentRef = _ReactNative.default.findHostInstance_DEPRECATED(this);
+        if (hostComponentRef == null) {
+          console.warn(
+          'Touchable: Unable to find HostComponent instance. ' +
+          'Has your Touchable component been unmounted?');
+
+        } else {
+          _ViewNativeComponent.Commands.hotspotUpdate(
+          hostComponentRef,
+          locationX != null ? locationX : 0,
+          locationY != null ? locationY : 0);
+
+        }
+      }
+    } }, { key: "render", value: function render()
+
+    {
+      var element = React.Children.only(this.props.children);
+      var children = [element.props.children];
+      if (__DEV__) {
+        if (element.type === _View.default) {
+          children.push(
+          React.createElement(_PressabilityDebug.PressabilityDebugView, { color: "brown", hitSlop: this.props.hitSlop, __self: this, __source: { fileName: _jsxFileName, lineNumber: 239, columnNumber: 11 } }));
+
+        }
+      }var _this$state$pressabil =
+
+
+
+
+
+
+
+      this.state.pressability.getEventHandlers(),onBlur = _this$state$pressabil.onBlur,onFocus = _this$state$pressabil.onFocus,eventHandlersWithoutBlurAndFocus = (0, _objectWithoutProperties2.default)(_this$state$pressabil, ["onBlur", "onFocus"]);
+
+      return React.cloneElement.apply(React, [
+      element, _objectSpread(_objectSpread(_objectSpread({},
+
+      eventHandlersWithoutBlurAndFocus),
+      getBackgroundProp(
+      this.props.background === undefined ?
+      TouchableNativeFeedback.SelectableBackground() :
+      this.props.background,
+      this.props.useForeground === true)), {}, {
+
+        accessible: this.props.accessible !== false,
+        accessibilityLabel: this.props.accessibilityLabel,
+        accessibilityRole: this.props.accessibilityRole,
+        accessibilityState: this.props.accessibilityState,
+        accessibilityActions: this.props.accessibilityActions,
+        onAccessibilityAction: this.props.onAccessibilityAction,
+        accessibilityValue: this.props.accessibilityValue,
+        importantForAccessibility: this.props.importantForAccessibility,
+        accessibilityLiveRegion: this.props.accessibilityLiveRegion,
+        accessibilityViewIsModal: this.props.accessibilityViewIsModal,
+        accessibilityElementsHidden: this.props.accessibilityElementsHidden,
+        hasTVPreferredFocus: this.props.hasTVPreferredFocus,
+        hitSlop: this.props.hitSlop,
+        focusable:
+        this.props.focusable !== false &&
+        this.props.onPress !== undefined &&
+        !this.props.disabled,
+        nativeID: this.props.nativeID,
+        nextFocusDown: this.props.nextFocusDown,
+        nextFocusForward: this.props.nextFocusForward,
+        nextFocusLeft: this.props.nextFocusLeft,
+        nextFocusRight: this.props.nextFocusRight,
+        nextFocusUp: this.props.nextFocusUp,
+        onLayout: this.props.onLayout,
+        testID: this.props.testID })].concat(
+
+      children));
+
+    } }, { key: "componentDidMount", value: function componentDidMount()
+
+    {var _this2 = this;
+      if (_Platform.default.isTV) {
+        this._tvTouchable = new _TVTouchable.default(this, {
+          getDisabled: function getDisabled() {return _this2.props.disabled === true;},
+          onBlur: function onBlur(event) {
+            if (_this2.props.onBlur != null) {
+              _this2.props.onBlur(event);
+            }
+          },
+          onFocus: function onFocus(event) {
+            if (_this2.props.onFocus != null) {
+              _this2.props.onFocus(event);
+            }
+          },
+          onPress: function onPress(event) {
+            if (_this2.props.onPress != null) {
+              _this2.props.onPress(event);
+            }
+          } });
+
+      }
+    } }, { key: "componentWillUnmount", value: function componentWillUnmount()
+
+    {
+      if (_Platform.default.isTV) {
+        if (this._tvTouchable != null) {
+          this._tvTouchable.destroy();
+        }
+      }
+      this.state.pressability.reset();
+    } }]);return TouchableNativeFeedback;}(React.Component);TouchableNativeFeedback.SelectableBackground = function () {return { type: 'ThemeAttrAndroid', attribute: 'selectableItemBackground' };};TouchableNativeFeedback.SelectableBackgroundBorderless = function () {return { type: 'ThemeAttrAndroid', attribute: 'selectableItemBackgroundBorderless' };};TouchableNativeFeedback.Ripple = function (color, borderless) {return { type: 'RippleAndroid', color: (0, _processColor.default)(color), borderless: borderless };};TouchableNativeFeedback.canUseNativeForeground = function () {return _Platform.default.OS === 'android' && _Platform.default.Version >= 23;};
+
+
+var getBackgroundProp =
+_Platform.default.OS === 'android' ?
+function (background, useForeground) {return (
+    useForeground && TouchableNativeFeedback.canUseNativeForeground() ?
+    { nativeForegroundAndroid: background } :
+    { nativeBackgroundAndroid: background });} :
+function (background, useForeground) {return null;};
+
+module.exports = TouchableNativeFeedback;

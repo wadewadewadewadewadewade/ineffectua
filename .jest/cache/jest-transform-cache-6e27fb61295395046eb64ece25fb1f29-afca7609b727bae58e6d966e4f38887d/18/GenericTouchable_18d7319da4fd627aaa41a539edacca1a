@@ -1,0 +1,276 @@
+12ce1ac73da954f7a19f9bf08d2c9c8b
+"use strict";var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");Object.defineProperty(exports, "__esModule", { value: true });exports.default = exports.TOUCHABLE_STATE = void 0;var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));var _extends2 = _interopRequireDefault(require("@babel/runtime/helpers/extends"));var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));var _react = _interopRequireWildcard(require("react"));
+var _reactNative = require("react-native");
+var _GestureHandler = require("../GestureHandler");
+var _propTypes = _interopRequireDefault(require("prop-types"));var _jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native-gesture-handler/touchables/GenericTouchable.js";function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {(0, _defineProperty2.default)(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = (0, _getPrototypeOf2.default)(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = (0, _getPrototypeOf2.default)(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return (0, _possibleConstructorReturn2.default)(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+
+
+
+
+
+
+
+var TOUCHABLE_STATE = {
+  UNDETERMINED: 0,
+  BEGAN: 1,
+  MOVED_OUTSIDE: 2 };exports.TOUCHABLE_STATE = TOUCHABLE_STATE;
+
+
+var PublicPropTypes = {
+
+
+  accessible: _propTypes.default.bool,
+  accessibilityLabel: _propTypes.default.node,
+  accessibilityHint: _propTypes.default.string,
+  hitSlop: _propTypes.default.shape({
+    top: _propTypes.default.number,
+    left: _propTypes.default.number,
+    bottom: _propTypes.default.number,
+    right: _propTypes.default.number }),
+
+  disabled: _propTypes.default.bool,
+  onPress: _propTypes.default.func,
+  onPressIn: _propTypes.default.func,
+  onPressOut: _propTypes.default.func,
+  onLayout: _propTypes.default.func,
+  onLongPress: _propTypes.default.func,
+  nativeID: _propTypes.default.string,
+  testID: _propTypes.default.string,
+  delayPressIn: _propTypes.default.number,
+  delayPressOut: _propTypes.default.number,
+  delayLongPress: _propTypes.default.number,
+  shouldActivateOnStart: _propTypes.default.bool,
+  disallowInterruption: _propTypes.default.bool };
+
+
+var InternalPropTypes = {
+  extraButtonProps: _propTypes.default.object,
+  onStateChange: _propTypes.default.func };var
+
+
+
+
+
+
+
+GenericTouchable = function (_Component) {(0, _inherits2.default)(GenericTouchable, _Component);var _super = _createSuper(GenericTouchable);function GenericTouchable() {var _this;(0, _classCallCheck2.default)(this, GenericTouchable);for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {args[_key] = arguments[_key];}_this = _super.call.apply(_super, [this].concat(args));_this.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    longPressDetected = false;_this.
+
+    pointerInside = true;_this.
+
+
+    STATE = TOUCHABLE_STATE.UNDETERMINED;_this.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    onGestureEvent = function (_ref) {var pointerInside = _ref.nativeEvent.pointerInside;
+      if (_this.pointerInside !== pointerInside) {
+        if (pointerInside) {
+          _this.onMoveIn();
+        } else {
+          _this.onMoveOut();
+        }
+      }
+      _this.pointerInside = pointerInside;
+    };_this.
+
+    onHandlerStateChange = function (_ref2) {var nativeEvent = _ref2.nativeEvent;var
+      state = nativeEvent.state;
+      if (state === _GestureHandler.State.CANCELLED || state === _GestureHandler.State.FAILED) {
+
+        _this.moveToState(TOUCHABLE_STATE.UNDETERMINED);
+      } else if (
+
+
+
+      state === (_reactNative.Platform.OS !== 'android' ? _GestureHandler.State.ACTIVE : _GestureHandler.State.BEGAN) &&
+      _this.STATE === TOUCHABLE_STATE.UNDETERMINED)
+      {
+
+        _this.handlePressIn();
+      } else if (state === _GestureHandler.State.END) {
+        var shouldCallOnPress =
+        !_this.longPressDetected &&
+        _this.STATE !== TOUCHABLE_STATE.MOVED_OUTSIDE &&
+        _this.pressOutTimeout === null;
+        _this.handleGoToUndetermined();
+        if (shouldCallOnPress) {
+
+          _this.props.onPress && _this.props.onPress();
+        }
+      }
+    };_this.
+
+    onLongPressDetected = function () {
+      _this.longPressDetected = true;
+      _this.props.onLongPress();
+    };return _this;}(0, _createClass2.default)(GenericTouchable, [{ key: "handlePressIn", value: function handlePressIn() {var _this2 = this;if (this.props.delayPressIn) {this.pressInTimeout = setTimeout(function () {_this2.moveToState(TOUCHABLE_STATE.BEGAN);_this2.pressInTimeout = null;}, this.props.delayPressIn);} else {this.moveToState(TOUCHABLE_STATE.BEGAN);}if (this.props.onLongPress) {var time = (this.props.delayPressIn || 0) + (this.props.delayLongPress || 0);this.longPressTimeout = setTimeout(this.onLongPressDetected, time);}} }, { key: "handleMoveOutside", value: function handleMoveOutside() {var _this3 = this;if (this.props.delayPressOut) {this.pressOutTimeout = this.pressOutTimeout || setTimeout(function () {_this3.moveToState(TOUCHABLE_STATE.MOVED_OUTSIDE);_this3.pressOutTimeout = null;}, this.props.delayPressOut);} else {this.moveToState(TOUCHABLE_STATE.MOVED_OUTSIDE);}} }, { key: "handleGoToUndetermined", value: function handleGoToUndetermined() {var _this4 = this;clearTimeout(this.pressOutTimeout);if (this.props.delayPressOut) {this.pressOutTimeout = setTimeout(function () {if (_this4.STATE === TOUCHABLE_STATE.UNDETERMINED) {_this4.moveToState(TOUCHABLE_STATE.BEGAN);}_this4.moveToState(TOUCHABLE_STATE.UNDETERMINED);_this4.pressOutTimeout = null;}, this.props.delayPressOut);} else {if (this.STATE === TOUCHABLE_STATE.UNDETERMINED) {this.moveToState(TOUCHABLE_STATE.BEGAN);}this.moveToState(TOUCHABLE_STATE.UNDETERMINED);}} }, { key: "componentDidMount", value: function componentDidMount() {this.reset();} }, { key: "reset", value: function reset() {this.longPressDetected = false;this.pointerInside = true;clearTimeout(this.pressInTimeout);clearTimeout(this.pressOutTimeout);clearTimeout(this.longPressTimeout);this.pressOutTimeout = null;this.longPressTimeout = null;this.pressInTimeout = null;} }, { key: "moveToState", value: function moveToState(newState) {if (newState === this.STATE) {return;}if (newState === TOUCHABLE_STATE.BEGAN) {this.props.onPressIn && this.props.onPressIn();} else if (newState === TOUCHABLE_STATE.MOVED_OUTSIDE) {this.props.onPressOut && this.props.onPressOut();} else if (newState === TOUCHABLE_STATE.UNDETERMINED) {this.reset();if (this.STATE === TOUCHABLE_STATE.BEGAN) {this.props.onPressOut && this.props.onPressOut();}}this.props.onStateChange && this.props.onStateChange(this.STATE, newState);this.STATE = newState;} }, { key: "componentWillUnmount", value: function componentWillUnmount()
+
+    {
+
+      this.reset();
+    } }, { key: "onMoveIn", value: function onMoveIn()
+
+    {
+      if (this.STATE === TOUCHABLE_STATE.MOVED_OUTSIDE) {
+
+        this.moveToState(TOUCHABLE_STATE.BEGAN);
+      }
+    } }, { key: "onMoveOut", value: function onMoveOut()
+
+    {
+
+      clearTimeout(this.longPressTimeout);
+      this.longPressTimeout = null;
+      if (this.STATE === TOUCHABLE_STATE.BEGAN) {
+        this.handleMoveOutside();
+      }
+    } }, { key: "render", value: function render()
+
+    {
+      var coreProps = {
+        accessible: this.props.accessible !== false,
+        accessibilityLabel: this.props.accessibilityLabel,
+        accessibilityHint: this.props.accessibilityHint,
+        accessibilityComponentType: this.props.accessibilityComponentType,
+        accessibilityRole: this.props.accessibilityRole,
+        accessibilityStates: this.props.accessibilityStates,
+        accessibilityTraits: this.props.accessibilityTraits,
+        nativeID: this.props.nativeID,
+        testID: this.props.testID,
+        onLayout: this.props.onLayout,
+        hitSlop: this.props.hitSlop };
+
+
+      return (
+        _react.default.createElement(_GestureHandler.BaseButton, (0, _extends2.default)({
+          style: this.props.containerStyle,
+          onHandlerStateChange:
+          this.props.disabled ? null : this.onHandlerStateChange,
+
+          onGestureEvent: this.onGestureEvent,
+          hitSlop: this.props.hitSlop,
+          shouldActivateOnStart: this.props.shouldActivateOnStart,
+          disallowInterruption: this.props.disallowInterruption },
+        this.props.extraButtonProps, { __self: this, __source: { fileName: _jsxFileName, lineNumber: 260, columnNumber: 7 } }),
+        _react.default.createElement(_reactNative.Animated.View, (0, _extends2.default)({}, coreProps, { style: this.props.style, __self: this, __source: { fileName: _jsxFileName, lineNumber: 270, columnNumber: 9 } }),
+        this.props.children)));
+
+
+
+    } }]);return GenericTouchable;}(_react.Component);exports.default = GenericTouchable;GenericTouchable.publicPropTypes = PublicPropTypes;GenericTouchable.internalPropTypes = InternalPropTypes;GenericTouchable.propTypes = _objectSpread(_objectSpread({}, InternalPropTypes), PublicPropTypes);GenericTouchable.defaultProps = { delayLongPress: 600, extraButtonProps: { rippleColor: 'transparent' } };

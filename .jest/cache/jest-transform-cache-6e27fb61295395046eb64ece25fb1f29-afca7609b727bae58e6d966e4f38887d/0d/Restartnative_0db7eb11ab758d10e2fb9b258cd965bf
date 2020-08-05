@@ -1,0 +1,29 @@
+a5d9e8f4ee8841cc40c75bcd8e9c9060
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.restartApp = void 0;
+const Updates = __importStar(require("expo-updates"));
+function restartApp() {
+    Updates.reloadAsync();
+}
+exports.restartApp = restartApp;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL3NyYy9jb21wb25lbnRzL1Jlc3RhcnQubmF0aXZlLnRzIiwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxzREFBd0M7QUFFeEMsU0FBZ0IsVUFBVTtJQUN4QixPQUFPLENBQUMsV0FBVyxFQUFFLENBQUM7QUFDeEIsQ0FBQztBQUZELGdDQUVDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9ob21lL3dhZGUvcHJvamVjdHMvaW5lZmZlY3R1YS9zcmMvY29tcG9uZW50cy9SZXN0YXJ0Lm5hdGl2ZS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgKiBhcyBVcGRhdGVzIGZyb20gJ2V4cG8tdXBkYXRlcyc7XG5cbmV4cG9ydCBmdW5jdGlvbiByZXN0YXJ0QXBwKCkge1xuICBVcGRhdGVzLnJlbG9hZEFzeW5jKCk7XG59Il0sInZlcnNpb24iOjN9

@@ -1,0 +1,119 @@
+6992d502b72323378dfa6f7c8d1f5054
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var
+
+KeyboardManager = function (_React$Component) {require("@babel/runtime/helpers/inherits")(KeyboardManager, _React$Component);var _super = _createSuper(KeyboardManager);
+  function KeyboardManager() {var _this;require("@babel/runtime/helpers/classCallCheck")(this, KeyboardManager);for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {args[_key] = arguments[_key];}
+    _this = _super.call.apply(_super, [this].concat(args));
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "previouslyFocusedTextInput", null);
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "startTimestamp", 0);
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "keyboardTimeout", void 0);
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "clearKeyboardTimeout", function () {
+      if (_this.keyboardTimeout !== undefined) {
+        clearTimeout(_this.keyboardTimeout);
+        _this.keyboardTimeout = undefined;
+      }
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handlePageChangeStart", function () {
+      if (!_this.props.enabled) {
+        return;
+      }
+
+      _this.clearKeyboardTimeout();
+
+      var input = require("react-native").TextInput.State.currentlyFocusedInput ?
+      require("react-native").TextInput.State.currentlyFocusedInput() : require("react-native").TextInput.State.currentlyFocusedField();
+
+      require("react-native").TextInput.State.blurTextInput(input);
+
+
+      _this.previouslyFocusedTextInput = input;
+
+      _this.startTimestamp = Date.now();
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handlePageChangeConfirm", function () {
+      if (!_this.props.enabled) {
+        return;
+      }
+
+      _this.clearKeyboardTimeout();
+      var input = _this.previouslyFocusedTextInput;
+
+      if (require("react-native").Platform.OS === 'android') {
+        require("react-native").Keyboard.dismiss();
+      } else if (input) {
+        require("react-native").TextInput.State.blurTextInput(input);
+      }
+
+
+      _this.previouslyFocusedTextInput = null;
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handlePageChangeCancel", function () {
+      if (!_this.props.enabled) {
+        return;
+      }
+
+      _this.clearKeyboardTimeout();
+
+      var input = _this.previouslyFocusedTextInput;
+
+      if (input) {
+
+
+
+
+
+
+        if (Date.now() - _this.startTimestamp < 100) {
+          _this.keyboardTimeout = setTimeout(function () {
+            require("react-native").TextInput.State.focusTextInput(input);
+
+            _this.previouslyFocusedTextInput = null;
+          }, 100);
+        } else {
+          require("react-native").TextInput.State.focusTextInput(input);
+
+          _this.previouslyFocusedTextInput = null;
+        }
+      }
+    });return _this;
+  }require("@babel/runtime/helpers/createClass")(KeyboardManager, [{ key: "componentWillUnmount", value: function componentWillUnmount()
+
+    {
+      this.clearKeyboardTimeout();
+    } }, { key: "render", value: function render()
+
+
+
+    {
+      return this.props.children({
+        onPageChangeStart: this.handlePageChangeStart,
+        onPageChangeConfirm: this.handlePageChangeConfirm,
+        onPageChangeCancel: this.handlePageChangeCancel });
+
+    } }]);return KeyboardManager;}(React.Component);
+
+
+
+exports.default = KeyboardManager;

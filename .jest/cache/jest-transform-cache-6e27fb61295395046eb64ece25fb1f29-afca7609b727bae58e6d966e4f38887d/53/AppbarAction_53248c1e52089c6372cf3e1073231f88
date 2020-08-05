@@ -1,0 +1,95 @@
+b76bd8df7be4ddf4c2e5ccd92c4402f0
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+var _color = _interopRequireDefault(require("color"));
+
+
+
+var _IconButton = _interopRequireDefault(require("../IconButton"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _extends() {_extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}return target;};return _extends.apply(this, arguments);}
+
+function _objectWithoutProperties(source, excluded) {if (source == null) return {};var target = _objectWithoutPropertiesLoose(source, excluded);var key, i;if (Object.getOwnPropertySymbols) {var sourceSymbolKeys = Object.getOwnPropertySymbols(source);for (i = 0; i < sourceSymbolKeys.length; i++) {key = sourceSymbolKeys[i];if (excluded.indexOf(key) >= 0) continue;if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;target[key] = source[key];}}return target;}
+
+function _objectWithoutPropertiesLoose(source, excluded) {if (source == null) return {};var target = {};var sourceKeys = Object.keys(source);var key, i;for (i = 0; i < sourceKeys.length; i++) {key = sourceKeys[i];if (excluded.indexOf(key) >= 0) continue;target[key] = source[key];}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+AppbarAction = function (_React$Component) {require("@babel/runtime/helpers/inherits")(AppbarAction, _React$Component);var _super = _createSuper(AppbarAction);function AppbarAction() {require("@babel/runtime/helpers/classCallCheck")(this, AppbarAction);return _super.apply(this, arguments);}require("@babel/runtime/helpers/createClass")(AppbarAction, [{ key: "render", value: function render()
+    {
+      var _this$props = this.props,_this$props$color =
+
+
+
+
+
+
+      _this$props.color,iconColor = _this$props$color === void 0 ? (0, _color.default)(require("../../styles/colors").black).alpha(0.54).rgb().string() : _this$props$color,icon = _this$props.icon,disabled = _this$props.disabled,onPress = _this$props.onPress,accessibilityLabel = _this$props.accessibilityLabel,
+      rest = _objectWithoutProperties(_this$props, ["color", "icon", "disabled", "onPress", "accessibilityLabel"]);
+
+      return React.createElement(_IconButton.default, _extends({
+        onPress: onPress,
+        color: iconColor,
+        icon: icon,
+        disabled: disabled,
+        accessibilityLabel: accessibilityLabel,
+        animated: true },
+      rest));
+    } }]);return AppbarAction;}(React.Component);
+
+
+
+exports.default = AppbarAction;
+
+_defineProperty(AppbarAction, "displayName", 'Appbar.Action');
+
+_defineProperty(AppbarAction, "defaultProps", {
+  size: 24 });

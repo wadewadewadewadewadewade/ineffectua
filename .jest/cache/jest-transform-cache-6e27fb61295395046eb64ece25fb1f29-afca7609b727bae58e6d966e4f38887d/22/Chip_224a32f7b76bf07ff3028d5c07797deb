@@ -1,0 +1,261 @@
+1f79ccb448b5ad5a517ae0e64e0aacbd
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+var _color = _interopRequireDefault(require("color"));
+
+var _Icon = _interopRequireDefault(require("./Icon"));
+
+var _Surface = _interopRequireDefault(require("./Surface"));
+
+var _Text = _interopRequireDefault(require("./Typography/Text"));
+
+var _TouchableRipple = _interopRequireDefault(require("./TouchableRipple"));
+
+
+
+
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _extends() {_extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}return target;};return _extends.apply(this, arguments);}
+
+function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}
+
+function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}
+
+function _objectWithoutProperties(source, excluded) {if (source == null) return {};var target = _objectWithoutPropertiesLoose(source, excluded);var key, i;if (Object.getOwnPropertySymbols) {var sourceSymbolKeys = Object.getOwnPropertySymbols(source);for (i = 0; i < sourceSymbolKeys.length; i++) {key = sourceSymbolKeys[i];if (excluded.indexOf(key) >= 0) continue;if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;target[key] = source[key];}}return target;}
+
+function _objectWithoutPropertiesLoose(source, excluded) {if (source == null) return {};var target = {};var sourceKeys = Object.keys(source);var key, i;for (i = 0; i < sourceKeys.length; i++) {key = sourceKeys[i];if (excluded.indexOf(key) >= 0) continue;target[key] = source[key];}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chip = function (_React$Component) {require("@babel/runtime/helpers/inherits")(Chip, _React$Component);var _super = _createSuper(Chip);
+  function Chip() {var _this;require("@babel/runtime/helpers/classCallCheck")(this, Chip);for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {args[_key] = arguments[_key];}
+    _this = _super.call.apply(_super, [this].concat(args));
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "state", {
+      elevation: new (require("react-native").Animated.Value)(0) });
+
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handlePressIn", function () {var
+
+      scale =
+      _this.props.theme.animation.scale;
+
+      require("react-native").Animated.timing(_this.state.elevation, {
+        toValue: 4,
+        duration: 200 * scale,
+        useNativeDriver: true }).
+      start();
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handlePressOut", function () {var
+
+      scale =
+      _this.props.theme.animation.scale;
+
+      require("react-native").Animated.timing(_this.state.elevation, {
+        toValue: 0,
+        duration: 150 * scale,
+        useNativeDriver: true }).
+      start();
+    });return _this;
+  }require("@babel/runtime/helpers/createClass")(Chip, [{ key: "render", value: function render()
+
+    {
+      var _this$props = this.props,
+
+      mode =
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      _this$props.mode,children = _this$props.children,icon = _this$props.icon,avatar = _this$props.avatar,selected = _this$props.selected,disabled = _this$props.disabled,accessibilityLabel = _this$props.accessibilityLabel,onPress = _this$props.onPress,onLongPress = _this$props.onLongPress,onClose = _this$props.onClose,textStyle = _this$props.textStyle,style = _this$props.style,theme = _this$props.theme,testID = _this$props.testID,selectedColor = _this$props.selectedColor,
+      rest = _objectWithoutProperties(_this$props, ["mode", "children", "icon", "avatar", "selected", "disabled", "accessibilityLabel", "onPress", "onLongPress", "onClose", "textStyle", "style", "theme", "testID", "selectedColor"]);var
+
+
+      dark =
+
+      theme.dark,colors = theme.colors;var _ref =
+
+
+
+      require("react-native").StyleSheet.flatten(style) || {},_ref$backgroundColor = _ref.backgroundColor,backgroundColor = _ref$backgroundColor === void 0 ? mode === 'outlined' ? colors.surface : dark ? '#383838' : '#ebebeb' : _ref$backgroundColor,_ref$borderRadius = _ref.borderRadius,borderRadius = _ref$borderRadius === void 0 ? 16 : _ref$borderRadius;
+      var borderColor = mode === 'outlined' ? (0, _color.default)(selectedColor !== undefined ? selectedColor : (0, _color.default)(dark ? require("../styles/colors").white : require("../styles/colors").black)).alpha(0.29).rgb().string() : backgroundColor;
+      var textColor = disabled ? colors.disabled : (0, _color.default)(selectedColor !== undefined ? selectedColor : colors.text).alpha(0.87).rgb().string();
+      var iconColor = disabled ? colors.disabled : (0, _color.default)(selectedColor !== undefined ? selectedColor : colors.text).alpha(0.54).rgb().string();
+      var selectedBackgroundColor = (dark ? (0, _color.default)(backgroundColor).lighten(mode === 'outlined' ? 0.2 : 0.4) : (0, _color.default)(backgroundColor).darken(mode === 'outlined' ? 0.08 : 0.2)).rgb().string();
+      var underlayColor = selectedColor ? (0, _color.default)(selectedColor).fade(0.5).rgb().string() : selectedBackgroundColor;
+      var accessibilityTraits = ['button'];
+      var accessibilityState = {
+        selected: selected,
+        disabled: disabled };
+
+
+      if (selected) {
+        accessibilityTraits.push('selected');
+      }
+
+      if (disabled) {
+        accessibilityTraits.push('disabled');
+      }
+
+      return React.createElement(_Surface.default, _extends({
+        style: [styles.container, {
+          elevation: require("react-native").Platform.OS === 'android' ? this.state.elevation : 0,
+          backgroundColor: selected ? selectedBackgroundColor : backgroundColor,
+          borderColor: borderColor,
+          borderRadius: borderRadius },
+        style] },
+      rest), React.createElement(_TouchableRipple.default, {
+        borderless: true,
+        delayPressIn: 0,
+        style: {
+          borderRadius: borderRadius },
+
+        onPress: onPress,
+        onLongPress: onLongPress,
+        onPressIn: this.handlePressIn,
+        onPressOut: this.handlePressOut,
+        underlayColor: underlayColor,
+        disabled: disabled,
+        accessibilityLabel: accessibilityLabel,
+        accessibilityTraits: accessibilityTraits,
+        accessibilityComponentType: "button",
+        accessibilityRole: "button",
+        accessibilityState: accessibilityState,
+        testID: testID },
+      React.createElement(require("react-native").View, {
+        style: styles.content },
+      avatar && !icon ? React.createElement(require("react-native").View, {
+        style: [styles.avatarWrapper, disabled && {
+          opacity: 0.26 }] },
+
+      React.isValidElement(avatar) ?
+
+
+
+      React.cloneElement(avatar, {
+
+        style: [styles.avatar, avatar.props.style] }) :
+      avatar) : null, icon || selected ? React.createElement(require("react-native").View, {
+        style: [styles.icon, avatar ? [styles.avatar, styles.avatarSelected] : null] },
+      React.createElement(_Icon.default, {
+        source: icon || 'check',
+        color: avatar ? require("../styles/colors").white : iconColor,
+        size: 18 })) :
+      null, React.createElement(_Text.default, {
+        numberOfLines: 1,
+        style: [styles.text, _objectSpread(_objectSpread({}, theme.fonts.regular), {}, {
+          color: textColor,
+          marginRight: onClose ? 4 : 8,
+          marginLeft: avatar || icon || selected ? 4 : 8 }),
+        textStyle] },
+      children), onClose ? React.createElement(require("react-native").TouchableWithoutFeedback, {
+        onPress: onClose,
+        accessibilityTraits: "button",
+        accessibilityComponentType: "button" },
+      React.createElement(require("react-native").View, {
+        style: styles.icon },
+      React.createElement(_Icon.default, {
+        source: "close-circle",
+        size: 16,
+        color: iconColor }))) :
+      null)));
+    } }]);return Chip;}(React.Component);
+
+
+
+_defineProperty(Chip, "defaultProps", {
+  mode: 'flat',
+  disabled: false,
+  selected: false });
+
+
+var styles = require("react-native").StyleSheet.create({
+  container: {
+    borderWidth: require("react-native").StyleSheet.hairlineWidth,
+    borderStyle: 'solid' },
+
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 4 },
+
+  icon: {
+    padding: 4 },
+
+  text: {
+    minHeight: 24,
+    lineHeight: 24,
+    textAlignVertical: 'center',
+    marginVertical: 4 },
+
+  avatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12 },
+
+  avatarWrapper: {
+    marginRight: 4 },
+
+  avatarSelected: {
+    position: 'absolute',
+    top: 4,
+    left: 4,
+    backgroundColor: 'rgba(0, 0, 0, .29)' } });
+
+
+
+var _default = (0, require("../core/theming").withTheme)(Chip);
+
+exports.default = _default;

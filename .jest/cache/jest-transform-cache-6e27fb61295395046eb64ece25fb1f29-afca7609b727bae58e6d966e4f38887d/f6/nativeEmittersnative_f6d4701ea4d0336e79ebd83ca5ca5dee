@@ -1,0 +1,3 @@
+b88cf8f186b203666611ad9587722d33
+"use strict";var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports, "__esModule", { value: true });Object.defineProperty(exports, "RCTDeviceEventEmitter", { enumerable: true, get: function get() {return _RCTDeviceEventEmitter.default;} });Object.defineProperty(exports, "RCTEventEmitter", { enumerable: true, get: function get() {return _EventEmitter.default;} });var _RCTDeviceEventEmitter = _interopRequireDefault(require("react-native/Libraries/EventEmitter/RCTDeviceEventEmitter"));
+var _EventEmitter = _interopRequireDefault(require("react-native/Libraries/vendor/emitter/EventEmitter"));

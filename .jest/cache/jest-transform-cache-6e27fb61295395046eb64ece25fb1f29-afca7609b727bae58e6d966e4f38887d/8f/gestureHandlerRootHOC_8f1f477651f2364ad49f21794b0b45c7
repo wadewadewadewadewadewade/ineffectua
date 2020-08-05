@@ -1,0 +1,28 @@
+71e483fe858a3ae3a0fee220a1a69c99
+"use strict";var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports, "__esModule", { value: true });exports.default = gestureHandlerRootHOC;var _extends2 = _interopRequireDefault(require("@babel/runtime/helpers/extends"));var _react = _interopRequireDefault(require("react"));
+var _reactNative = require("react-native");
+var _hoistNonReactStatics = _interopRequireDefault(require("hoist-non-react-statics"));
+var _GestureHandlerRootView = _interopRequireDefault(require("./GestureHandlerRootView"));var _jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native-gesture-handler/gestureHandlerRootHOC.js";
+
+function gestureHandlerRootHOC(
+Component)
+
+{var containerStyles = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
+  function Wrapper(props) {
+    return (
+      _react.default.createElement(_GestureHandlerRootView.default, { style: [styles.container, containerStyles], __self: this, __source: { fileName: _jsxFileName, lineNumber: 12, columnNumber: 7 } },
+      _react.default.createElement(Component, (0, _extends2.default)({}, props, { __self: this, __source: { fileName: _jsxFileName, lineNumber: 13, columnNumber: 9 } }))));
+
+
+  }
+
+  Wrapper.displayName = "gestureHandlerRootHOC(" + (Component.displayName ||
+  Component.name) + ")";
+
+  (0, _hoistNonReactStatics.default)(Wrapper, Component);
+
+  return Wrapper;
+}
+
+var styles = _reactNative.StyleSheet.create({
+  container: { flex: 1 } });

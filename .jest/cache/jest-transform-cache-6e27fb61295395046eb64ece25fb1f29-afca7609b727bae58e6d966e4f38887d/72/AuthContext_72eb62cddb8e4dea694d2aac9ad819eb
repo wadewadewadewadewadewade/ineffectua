@@ -1,0 +1,19 @@
+6876f809e4ccb9893aa4658d9970897b
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const react_1 = __importDefault(require("react"));
+const AUTH_CONTEXT_ERROR = 'Authentication context not found. Have your wrapped your components with AuthContext.Consumer?';
+const AuthContext = react_1.default.createContext({
+    user: null,
+    signIn: () => {
+        throw new Error(AUTH_CONTEXT_ERROR);
+    },
+    signOut: () => {
+        throw new Error(AUTH_CONTEXT_ERROR);
+    }
+});
+exports.default = AuthContext;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL3NyYy9jb21wb25lbnRzL3NoYXJlZC9BdXRoQ29udGV4dC50cyIsIm1hcHBpbmdzIjoiOzs7OztBQUFBLGtEQUEwQjtBQUcxQixNQUFNLGtCQUFrQixHQUN0QixnR0FBZ0csQ0FBQztBQUVuRyxNQUFNLFdBQVcsR0FBRyxlQUFLLENBQUMsYUFBYSxDQUlwQztJQUNELElBQUksRUFBRSxJQUFJO0lBQ1YsTUFBTSxFQUFFLEdBQUcsRUFBRTtRQUNYLE1BQU0sSUFBSSxLQUFLLENBQUMsa0JBQWtCLENBQUMsQ0FBQztJQUN0QyxDQUFDO0lBQ0QsT0FBTyxFQUFFLEdBQUcsRUFBRTtRQUNaLE1BQU0sSUFBSSxLQUFLLENBQUMsa0JBQWtCLENBQUMsQ0FBQztJQUN0QyxDQUFDO0NBQ0YsQ0FBQyxDQUFDO0FBRUgsa0JBQWUsV0FBVyxDQUFDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9ob21lL3dhZGUvcHJvamVjdHMvaW5lZmZlY3R1YS9zcmMvY29tcG9uZW50cy9zaGFyZWQvQXV0aENvbnRleHQudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IFJlYWN0IGZyb20gJ3JlYWN0JztcbmltcG9ydCAqIGFzIGZpcmViYXNlIGZyb20gJ2ZpcmViYXNlJztcblxuY29uc3QgQVVUSF9DT05URVhUX0VSUk9SID1cbiAgJ0F1dGhlbnRpY2F0aW9uIGNvbnRleHQgbm90IGZvdW5kLiBIYXZlIHlvdXIgd3JhcHBlZCB5b3VyIGNvbXBvbmVudHMgd2l0aCBBdXRoQ29udGV4dC5Db25zdW1lcj8nO1xuXG5jb25zdCBBdXRoQ29udGV4dCA9IFJlYWN0LmNyZWF0ZUNvbnRleHQ8e1xuICB1c2VyOiBudWxsIHwgZmlyZWJhc2UuVXNlcjtcbiAgc2lnbkluOiAoZW1haWw6IHN0cmluZywgcGFzc3dvcmQ6IHN0cmluZykgPT4gUHJvbWlzZTxzdHJpbmcgfCB2b2lkPjtcbiAgc2lnbk91dDogKCkgPT4gUHJvbWlzZTx2b2lkPjtcbn0+KHtcbiAgdXNlcjogbnVsbCxcbiAgc2lnbkluOiAoKSA9PiB7XG4gICAgdGhyb3cgbmV3IEVycm9yKEFVVEhfQ09OVEVYVF9FUlJPUik7XG4gIH0sXG4gIHNpZ25PdXQ6ICgpID0+IHtcbiAgICB0aHJvdyBuZXcgRXJyb3IoQVVUSF9DT05URVhUX0VSUk9SKTtcbiAgfVxufSk7XG5cbmV4cG9ydCBkZWZhdWx0IEF1dGhDb250ZXh0OyJdLCJ2ZXJzaW9uIjozfQ==

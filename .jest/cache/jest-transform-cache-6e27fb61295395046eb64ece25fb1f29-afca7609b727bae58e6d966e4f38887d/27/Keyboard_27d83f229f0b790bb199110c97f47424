@@ -1,0 +1,196 @@
+8a612647549107ea36e48263687ef60f
+
+
+
+
+
+
+
+
+
+
+'use strict';var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+
+
+
+
+
+
+var _NativeKeyboardObserver = _interopRequireDefault(require("./NativeKeyboardObserver"));
+var KeyboardEventEmitter = new (require('../../EventEmitter/NativeEventEmitter'))(
+_NativeKeyboardObserver.default);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var Keyboard = {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  addListener: function addListener(eventName, callback) {
+    require('invariant')(false, 'Dummy method used for documentation');
+  },
+
+
+
+
+
+
+
+  removeListener: function removeListener(
+  eventName,
+  callback)
+  {
+    require('invariant')(false, 'Dummy method used for documentation');
+  },
+
+
+
+
+
+
+  removeAllListeners: function removeAllListeners(eventName) {
+    require('invariant')(false, 'Dummy method used for documentation');
+  },
+
+
+
+
+  dismiss: function dismiss() {
+    require('invariant')(false, 'Dummy method used for documentation');
+  },
+
+
+
+
+
+  scheduleLayoutAnimation: function scheduleLayoutAnimation(event) {
+    require('invariant')(false, 'Dummy method used for documentation');
+  } };
+
+
+
+KeyboardEventEmitter.dismiss = require('../../Utilities/dismissKeyboard');
+KeyboardEventEmitter.scheduleLayoutAnimation = function (event) {var
+  duration = event.duration,easing = event.easing;
+  if (duration != null && duration !== 0) {
+    require('../../LayoutAnimation/LayoutAnimation').configureNext({
+      duration: duration,
+      update: {
+        duration: duration,
+        type: easing != null && require('../../LayoutAnimation/LayoutAnimation').Types[easing] || 'keyboard' } });
+
+
+  }
+};
+
+module.exports = KeyboardEventEmitter;

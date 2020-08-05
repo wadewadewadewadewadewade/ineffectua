@@ -1,0 +1,20 @@
+477724b8d98348a9cb14955aa1af378d
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.initialWindowSafeAreaInsets = exports.initialWindowMetrics = void 0;
+
+
+
+var RNCSafeAreaProviderConfig = require("react-native").UIManager.getViewManagerConfig('RNCSafeAreaProvider');
+
+var initialWindowMetrics = RNCSafeAreaProviderConfig != null && RNCSafeAreaProviderConfig.Constants != null ? RNCSafeAreaProviderConfig.Constants.initialWindowMetrics : null;
+
+
+
+
+exports.initialWindowMetrics = initialWindowMetrics;
+var initialWindowSafeAreaInsets = initialWindowMetrics === null || initialWindowMetrics === void 0 ? void 0 : initialWindowMetrics.insets;
+exports.initialWindowSafeAreaInsets = initialWindowSafeAreaInsets;

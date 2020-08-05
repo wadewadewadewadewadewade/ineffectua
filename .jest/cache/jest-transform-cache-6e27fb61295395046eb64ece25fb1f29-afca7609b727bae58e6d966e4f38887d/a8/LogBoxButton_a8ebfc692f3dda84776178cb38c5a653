@@ -1,0 +1,72 @@
+aee6092b052b9ca1922331158b9b1128
+
+
+
+
+
+
+
+
+
+
+'use strict';var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
+
+var React = _interopRequireWildcard(require("react"));
+var _StyleSheet = _interopRequireDefault(require("../../StyleSheet/StyleSheet"));
+var _TouchableWithoutFeedback = _interopRequireDefault(require("../../Components/Touchable/TouchableWithoutFeedback"));
+var _View = _interopRequireDefault(require("../../Components/View/View"));
+var LogBoxStyle = _interopRequireWildcard(require("./LogBoxStyle"));var _jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native/Libraries/LogBox/UI/LogBoxButton.js";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function LogBoxButton(props) {var _React$useState =
+  React.useState(false),_React$useState2 = (0, _slicedToArray2.default)(_React$useState, 2),pressed = _React$useState2[0],setPressed = _React$useState2[1];
+
+  var backgroundColor = props.backgroundColor;
+  if (!backgroundColor) {
+    backgroundColor = {
+      default: LogBoxStyle.getBackgroundColor(0.95),
+      pressed: LogBoxStyle.getBackgroundColor(0.6) };
+
+  }
+
+  var content =
+  React.createElement(_View.default, {
+    style: _StyleSheet.default.compose(
+    {
+      backgroundColor: pressed ?
+      backgroundColor.pressed :
+      backgroundColor.default },
+
+    props.style), __self: this, __source: { fileName: _jsxFileName, lineNumber: 45, columnNumber: 5 } },
+
+  props.children);
+
+
+
+  return props.onPress == null ?
+  content :
+
+  React.createElement(_TouchableWithoutFeedback.default, {
+    hitSlop: props.hitSlop,
+    onPress: props.onPress,
+    onPressIn: function onPressIn() {return setPressed(true);},
+    onPressOut: function onPressOut() {return setPressed(false);}, __self: this, __source: { fileName: _jsxFileName, lineNumber: 61, columnNumber: 5 } },
+  content);
+
+
+}var _default =
+
+LogBoxButton;exports.default = _default;

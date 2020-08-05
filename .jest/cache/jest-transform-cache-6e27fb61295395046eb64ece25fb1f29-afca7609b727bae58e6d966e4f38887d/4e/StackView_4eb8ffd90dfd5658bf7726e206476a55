@@ -1,0 +1,411 @@
+cbaa25ce73829c2fe9748dc437b36387
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+
+
+
+
+
+
+var _CardStack = _interopRequireDefault(require("./CardStack"));
+
+var _KeyboardManager = _interopRequireDefault(require("../KeyboardManager"));
+
+var _HeaderContainer = _interopRequireDefault(require("../Header/HeaderContainer"));
+
+var _SafeAreaProviderCompat = _interopRequireDefault(require("../SafeAreaProviderCompat"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _extends() {_extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}return target;};return _extends.apply(this, arguments);}
+
+function _objectWithoutProperties(source, excluded) {if (source == null) return {};var target = _objectWithoutPropertiesLoose(source, excluded);var key, i;if (Object.getOwnPropertySymbols) {var sourceSymbolKeys = Object.getOwnPropertySymbols(source);for (i = 0; i < sourceSymbolKeys.length; i++) {key = sourceSymbolKeys[i];if (excluded.indexOf(key) >= 0) continue;if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;target[key] = source[key];}}return target;}
+
+function _objectWithoutPropertiesLoose(source, excluded) {if (source == null) return {};var target = {};var sourceKeys = Object.keys(source);var key, i;for (i = 0; i < sourceKeys.length; i++) {key = sourceKeys[i];if (excluded.indexOf(key) >= 0) continue;target[key] = source[key];}return target;}
+
+function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}
+
+function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+var GestureHandlerWrapper = require("../GestureHandler").GestureHandlerRootView !== null && require("../GestureHandler").GestureHandlerRootView !== void 0 ? require("../GestureHandler").GestureHandlerRootView : require("react-native").View;
+
+
+
+
+
+var isArrayEqual = function isArrayEqual(a, b) {return a.length === b.length && a.every(function (it, index) {return it === b[index];});};var
+
+StackView = function (_React$Component) {require("@babel/runtime/helpers/inherits")(StackView, _React$Component);var _super = _createSuper(StackView);
+  function StackView() {var _this;require("@babel/runtime/helpers/classCallCheck")(this, StackView);for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {args[_key] = arguments[_key];}
+    _this = _super.call.apply(_super, [this].concat(args));
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "state", {
+      routes: [],
+      previousRoutes: [],
+      previousDescriptors: {},
+      openingRouteKeys: [],
+      closingRouteKeys: [],
+      replacingRouteKeys: [],
+      descriptors: {} });
+
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "getGesturesEnabled", function (_ref)
+
+    {var route = _ref.route;
+      var descriptor = _this.state.descriptors[route.key];
+
+      if (descriptor) {var _descriptor$options =
+
+
+
+        descriptor.options,gestureEnabled = _descriptor$options.gestureEnabled,animationEnabled = _descriptor$options.animationEnabled;
+
+        if (animationEnabled === false) {
+
+
+          return false;
+        }
+
+        return gestureEnabled !== false;
+      }
+
+      return false;
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "getPreviousRoute", function (_ref2)
+
+    {var route = _ref2.route;var _this$state =
+
+
+
+      _this.state,closingRouteKeys = _this$state.closingRouteKeys,replacingRouteKeys = _this$state.replacingRouteKeys;
+      var routes = _this.state.routes.filter(function (r) {return r.key === route.key || !closingRouteKeys.includes(r.key) && !replacingRouteKeys.includes(r.key);});
+      var index = routes.findIndex(function (r) {return r.key === route.key;});
+      return routes[index - 1];
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "renderScene", function (_ref3)
+
+    {var route = _ref3.route;
+      var descriptor = _this.state.descriptors[route.key] || _this.props.descriptors[route.key];
+
+      if (!descriptor) {
+        return null;
+      }
+
+      return descriptor.render();
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "renderHeader", function (props) {
+      return React.createElement(_HeaderContainer.default, props);
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handleOpenRoute", function (_ref4)
+
+    {var route = _ref4.route;var _this$props2 =
+
+
+
+      _this.props,state = _this$props2.state,navigation = _this$props2.navigation;var _this$state2 =
+
+
+
+      _this.state,closingRouteKeys = _this$state2.closingRouteKeys,replacingRouteKeys = _this$state2.replacingRouteKeys;
+
+      if (closingRouteKeys.some(function (key) {return key === route.key;}) && replacingRouteKeys.every(function (key) {return key !== route.key;}) && state.routeNames.includes(route.name) && !state.routes.some(function (r) {return r.key === route.key;})) {
+
+
+        navigation.navigate(route);
+      } else {
+        _this.setState(function (state) {return {
+            routes: state.replacingRouteKeys.length ? state.routes.filter(function (r) {return !state.replacingRouteKeys.includes(r.key);}) : state.routes,
+            openingRouteKeys: state.openingRouteKeys.filter(function (key) {return key !== route.key;}),
+            closingRouteKeys: state.closingRouteKeys.filter(function (key) {return key !== route.key;}),
+            replacingRouteKeys: [] };});
+
+      }
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handleCloseRoute", function (_ref5)
+
+    {var route = _ref5.route;var _this$props3 =
+
+
+
+      _this.props,state = _this$props3.state,navigation = _this$props3.navigation;
+
+      if (state.routes.some(function (r) {return r.key === route.key;})) {
+
+
+
+        navigation.dispatch(_objectSpread(_objectSpread({}, require("@react-navigation/native").StackActions.pop()), {}, {
+          source: route.key,
+          target: state.key }));
+
+      } else {
+
+        _this.setState(function (state) {return {
+            routes: state.routes.filter(function (r) {return r.key !== route.key;}),
+            openingRouteKeys: state.openingRouteKeys.filter(function (key) {return key !== route.key;}),
+            closingRouteKeys: state.closingRouteKeys.filter(function (key) {return key !== route.key;}) };});
+
+      }
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handleTransitionStart", function (_ref6,
+
+    closing) {var route = _ref6.route;return _this.props.navigation.emit({
+        type: 'transitionStart',
+        data: {
+          closing: closing },
+
+        target: route.key });});
+
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handleTransitionEnd", function (_ref7,
+
+    closing) {var route = _ref7.route;return _this.props.navigation.emit({
+        type: 'transitionEnd',
+        data: {
+          closing: closing },
+
+        target: route.key });});
+
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handleGestureStart", function (_ref8)
+
+    {var route = _ref8.route;
+      _this.props.navigation.emit({
+        type: 'gestureStart',
+        target: route.key });
+
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handleGestureEnd", function (_ref9)
+
+    {var route = _ref9.route;
+      _this.props.navigation.emit({
+        type: 'gestureEnd',
+        target: route.key });
+
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handleGestureCancel", function (_ref10)
+
+    {var route = _ref10.route;
+      _this.props.navigation.emit({
+        type: 'gestureCancel',
+        target: route.key });
+
+    });return _this;
+  }require("@babel/runtime/helpers/createClass")(StackView, [{ key: "render", value: function render()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    {var _this2 = this;
+      var _this$props = this.props,
+
+      state =
+
+
+
+
+
+
+      _this$props.state,navigation = _this$props.navigation,keyboardHandlingEnabled = _this$props.keyboardHandlingEnabled,_this$props$mode = _this$props.mode,mode = _this$props$mode === void 0 ? 'card' : _this$props$mode,_this$props$headerMod = _this$props.headerMode,headerMode = _this$props$headerMod === void 0 ? mode === 'card' && require("react-native").Platform.OS === 'ios' ? 'float' : 'screen' : _this$props$headerMod,_ = _this$props.descriptors,
+      rest = _objectWithoutProperties(_this$props, ["state", "navigation", "keyboardHandlingEnabled", "mode", "headerMode", "descriptors"]);var _this$state3 =
+
+
+
+
+
+
+      this.state,routes = _this$state3.routes,descriptors = _this$state3.descriptors,openingRouteKeys = _this$state3.openingRouteKeys,closingRouteKeys = _this$state3.closingRouteKeys;
+      return React.createElement(require("@react-navigation/native").NavigationHelpersContext.Provider, {
+        value: navigation },
+      React.createElement(GestureHandlerWrapper, {
+        style: styles.container },
+      React.createElement(_SafeAreaProviderCompat.default, null, React.createElement(require("react-native-safe-area-context").SafeAreaConsumer, null, function (insets) {return React.createElement(_KeyboardManager.default, {
+          enabled: keyboardHandlingEnabled !== false },
+        function (props) {return React.createElement(_CardStack.default, _extends({
+            mode: mode,
+            insets: insets,
+            getPreviousRoute: _this2.getPreviousRoute,
+            getGesturesEnabled: _this2.getGesturesEnabled,
+            routes: routes,
+            openingRouteKeys: openingRouteKeys,
+            closingRouteKeys: closingRouteKeys,
+            onOpenRoute: _this2.handleOpenRoute,
+            onCloseRoute: _this2.handleCloseRoute,
+            onTransitionStart: _this2.handleTransitionStart,
+            onTransitionEnd: _this2.handleTransitionEnd,
+            renderHeader: _this2.renderHeader,
+            renderScene: _this2.renderScene,
+            headerMode: headerMode,
+            state: state,
+            descriptors: descriptors,
+            onGestureStart: _this2.handleGestureStart,
+            onGestureEnd: _this2.handleGestureEnd,
+            onGestureCancel: _this2.handleGestureCancel },
+          rest, props));});}))));
+    } }], [{ key: "getDerivedStateFromProps", value: function getDerivedStateFromProps(props, state) {if ((props.state.routes === state.previousRoutes || isArrayEqual(props.state.routes.map(function (r) {return r.key;}), state.previousRoutes.map(function (r) {return r.key;}))) && state.routes.length) {var _routes = state.routes;var _previousRoutes = state.previousRoutes;var _descriptors = props.descriptors;var previousDescriptors = state.previousDescriptors;if (props.descriptors !== state.previousDescriptors) {_descriptors = state.routes.reduce(function (acc, route) {acc[route.key] = props.descriptors[route.key] || state.descriptors[route.key];return acc;}, {});previousDescriptors = props.descriptors;}if (props.state.routes !== state.previousRoutes) {var map = props.state.routes.reduce(function (acc, route) {acc[route.key] = route;return acc;}, {});_routes = state.routes.map(function (route) {return map[route.key] || route;});_previousRoutes = props.state.routes;}return { routes: _routes, previousRoutes: _previousRoutes, descriptors: _descriptors, previousDescriptors: previousDescriptors };}var routes = props.state.index < props.state.routes.length - 1 ? props.state.routes.slice(0, props.state.index + 1) : props.state.routes;var openingRouteKeys = state.openingRouteKeys,closingRouteKeys = state.closingRouteKeys,replacingRouteKeys = state.replacingRouteKeys,previousRoutes = state.previousRoutes;var previousFocusedRoute = previousRoutes[previousRoutes.length - 1];var nextFocusedRoute = routes[routes.length - 1];var isAnimationEnabled = function isAnimationEnabled(key) {var descriptor = props.descriptors[key] || state.descriptors[key];return descriptor ? descriptor.options.animationEnabled !== false : true;};var getAnimationTypeForReplace = function getAnimationTypeForReplace(key) {var _descriptor$options$a;var descriptor = props.descriptors[key] || state.descriptors[key];return (_descriptor$options$a = descriptor.options.animationTypeForReplace) !== null && _descriptor$options$a !== void 0 ? _descriptor$options$a : 'push';};if (previousFocusedRoute && previousFocusedRoute.key !== nextFocusedRoute.key) {if (!previousRoutes.some(function (r) {return r.key === nextFocusedRoute.key;})) {if (isAnimationEnabled(nextFocusedRoute.key) && !openingRouteKeys.includes(nextFocusedRoute.key)) {openingRouteKeys = [].concat(require("@babel/runtime/helpers/toConsumableArray")(openingRouteKeys), [nextFocusedRoute.key]);closingRouteKeys = closingRouteKeys.filter(function (key) {return key !== nextFocusedRoute.key;});replacingRouteKeys = replacingRouteKeys.filter(function (key) {return key !== nextFocusedRoute.key;});if (!routes.some(function (r) {return r.key === previousFocusedRoute.key;})) {openingRouteKeys = openingRouteKeys.filter(function (key) {return key !== previousFocusedRoute.key;});if (getAnimationTypeForReplace(nextFocusedRoute.key) === 'pop') {closingRouteKeys = [].concat(require("@babel/runtime/helpers/toConsumableArray")(closingRouteKeys), [previousFocusedRoute.key]);openingRouteKeys = openingRouteKeys.filter(function (key) {return key !== nextFocusedRoute.key;});routes = [].concat(require("@babel/runtime/helpers/toConsumableArray")(routes), [previousFocusedRoute]);} else {replacingRouteKeys = [].concat(require("@babel/runtime/helpers/toConsumableArray")(replacingRouteKeys), [previousFocusedRoute.key]);closingRouteKeys = closingRouteKeys.filter(function (key) {return key !== previousFocusedRoute.key;});routes = routes.slice();routes.splice(routes.length - 1, 0, previousFocusedRoute);}}}} else if (!routes.some(function (r) {return r.key === previousFocusedRoute.key;})) {if (isAnimationEnabled(previousFocusedRoute.key) && !closingRouteKeys.includes(previousFocusedRoute.key)) {closingRouteKeys = [].concat(require("@babel/runtime/helpers/toConsumableArray")(closingRouteKeys), [previousFocusedRoute.key]);openingRouteKeys = openingRouteKeys.filter(function (key) {return key !== previousFocusedRoute.key;});replacingRouteKeys = replacingRouteKeys.filter(function (key) {return key !== previousFocusedRoute.key;});routes = [].concat(require("@babel/runtime/helpers/toConsumableArray")(routes), [previousFocusedRoute]);}} else {}} else if (replacingRouteKeys.length || closingRouteKeys.length) {var _routes2;routes = routes.slice();(_routes2 = routes).splice.apply(_routes2, [routes.length - 1, 0].concat(require("@babel/runtime/helpers/toConsumableArray")(state.routes.filter(function (_ref11) {var key = _ref11.key;return isAnimationEnabled(key) ? replacingRouteKeys.includes(key) || closingRouteKeys.includes(key) : false;}))));}if (!routes.length) {throw new Error('There should always be at least one route in the navigation state.');}var descriptors = routes.reduce(function (acc, route) {acc[route.key] = props.descriptors[route.key] || state.descriptors[route.key];return acc;}, {});return { routes: routes, previousRoutes: props.state.routes, previousDescriptors: props.descriptors, openingRouteKeys: openingRouteKeys, closingRouteKeys: closingRouteKeys, replacingRouteKeys: replacingRouteKeys, descriptors: descriptors };} }]);return StackView;}(React.Component);
+
+
+
+exports.default = StackView;
+
+var styles = require("react-native").StyleSheet.create({
+  container: {
+    flex: 1 } });

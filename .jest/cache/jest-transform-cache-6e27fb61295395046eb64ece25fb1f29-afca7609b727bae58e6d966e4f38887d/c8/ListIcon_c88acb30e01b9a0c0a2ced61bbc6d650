@@ -1,0 +1,75 @@
+84e335ad6baefa82cf9c8c943a380341
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+var _Icon = _interopRequireDefault(require("../Icon"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ListIcon = function (_React$Component) {require("@babel/runtime/helpers/inherits")(ListIcon, _React$Component);var _super = _createSuper(ListIcon);function ListIcon() {require("@babel/runtime/helpers/classCallCheck")(this, ListIcon);return _super.apply(this, arguments);}require("@babel/runtime/helpers/createClass")(ListIcon, [{ key: "render", value: function render()
+    {var _this$props =
+
+
+
+
+      this.props,icon = _this$props.icon,iconColor = _this$props.color,style = _this$props.style;
+      return React.createElement(require("react-native").View, {
+        style: [styles.item, style],
+        pointerEvents: "box-none" },
+      React.createElement(_Icon.default, {
+        source: icon,
+        size: 24,
+        color: iconColor }));
+
+    } }]);return ListIcon;}(React.Component);
+
+
+
+exports.default = ListIcon;
+
+_defineProperty(ListIcon, "displayName", 'List.Icon');
+
+var styles = require("react-native").StyleSheet.create({
+  item: {
+    margin: 8,
+    height: 40,
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center' } });

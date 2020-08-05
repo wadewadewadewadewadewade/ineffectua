@@ -1,0 +1,75 @@
+ef1faf009fd75cf102f0f01af9d6c6c6
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = useSyncState;
+
+var React = _interopRequireWildcard(require("react"));
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+var UNINTIALIZED_STATE = {};
+
+
+
+
+function useSyncState(initialState) {
+  var stateRef = React.useRef(UNINTIALIZED_STATE);
+  var isSchedulingRef = React.useRef(false);
+  var isMountedRef = React.useRef(true);
+  React.useEffect(function () {
+    isMountedRef.current = true;
+    return function () {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  if (stateRef.current === UNINTIALIZED_STATE) {
+    stateRef.current =
+    typeof initialState === 'function' ? initialState() : initialState;
+  }var _React$useState =
+
+  React.useState(stateRef.current),_React$useState2 = require("@babel/runtime/helpers/slicedToArray")(_React$useState, 2),trackingState = _React$useState2[0],setTrackingState = _React$useState2[1];
+  var getState = React.useCallback(function () {return stateRef.current;}, []);
+  var setState = React.useCallback(function (state) {
+    if (state === stateRef.current || !isMountedRef.current) {
+      return;
+    }
+
+    stateRef.current = state;
+
+    if (!isSchedulingRef.current) {
+      setTrackingState(state);
+    }
+  }, []);
+  var scheduleUpdate = React.useCallback(function (callback) {
+    isSchedulingRef.current = true;
+
+    try {
+      callback();
+    } finally {
+      isSchedulingRef.current = false;
+    }
+  }, []);
+  var flushUpdates = React.useCallback(function () {
+    if (!isMountedRef.current) {
+      return;
+    }
+
+
+
+    setTrackingState(stateRef.current);
+  }, []);
+
+
+  if (trackingState !== stateRef.current) {
+    setTrackingState(stateRef.current);
+  }
+
+  var state = stateRef.current;
+  return [state, getState, setState, scheduleUpdate, flushUpdates];
+}

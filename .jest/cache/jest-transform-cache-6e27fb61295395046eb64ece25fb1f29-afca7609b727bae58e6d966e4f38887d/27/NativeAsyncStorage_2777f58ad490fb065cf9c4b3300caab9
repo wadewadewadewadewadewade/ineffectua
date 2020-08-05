@@ -1,0 +1,45 @@
+90476455ed25536d299d5a13aebe63d2
+
+
+
+
+
+
+
+
+
+
+'use strict';var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;
+
+
+var TurboModuleRegistry = _interopRequireWildcard(require("../TurboModule/TurboModuleRegistry"));var _default =
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TurboModuleRegistry.get('AsyncSQLiteDBStorage') ||
+TurboModuleRegistry.get('AsyncLocalStorage');exports.default = _default;

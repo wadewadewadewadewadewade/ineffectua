@@ -1,0 +1,5 @@
+e2ac28290686fb6fac7cb8ddbb8e2c31
+"use strict";var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports, "__esModule", { value: true });exports.getDefaultWebOptions = getDefaultWebOptions;var _expoConstants = _interopRequireDefault(require("expo-constants"));
+function getDefaultWebOptions() {var _Constants$manifest, _Constants$manifest$w, _Constants$manifest$w2;
+  return (_Constants$manifest = _expoConstants.default.manifest) == null ? void 0 : (_Constants$manifest$w = _Constants$manifest.web) == null ? void 0 : (_Constants$manifest$w2 = _Constants$manifest$w.config) == null ? void 0 : _Constants$manifest$w2.firebase;
+}

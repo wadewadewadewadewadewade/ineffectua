@@ -1,0 +1,126 @@
+85a7a76763de1ddd13affffb6705712f
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+var _createTabNavigator = _interopRequireDefault(require("../utils/createTabNavigator"));
+
+var _MaterialTopTabBar = _interopRequireDefault(require("../views/MaterialTopTabBar"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _objectWithoutProperties(source, excluded) {if (source == null) return {};var target = _objectWithoutPropertiesLoose(source, excluded);var key, i;if (Object.getOwnPropertySymbols) {var sourceSymbolKeys = Object.getOwnPropertySymbols(source);for (i = 0; i < sourceSymbolKeys.length; i++) {key = sourceSymbolKeys[i];if (excluded.indexOf(key) >= 0) continue;if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;target[key] = source[key];}}return target;}
+
+function _objectWithoutPropertiesLoose(source, excluded) {if (source == null) return {};var target = {};var sourceKeys = Object.keys(source);var key, i;for (i = 0; i < sourceKeys.length; i++) {key = sourceKeys[i];if (excluded.indexOf(key) >= 0) continue;target[key] = source[key];}return target;}
+
+function _extends() {_extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}return target;};return _extends.apply(this, arguments);}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var
+
+MaterialTabView = function (_React$PureComponent) {require("@babel/runtime/helpers/inherits")(MaterialTabView, _React$PureComponent);var _super = _createSuper(MaterialTabView);
+  function MaterialTabView() {var _this;require("@babel/runtime/helpers/classCallCheck")(this, MaterialTabView);for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {args[_key] = arguments[_key];}
+    _this = _super.call.apply(_super, [this].concat(args));
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "renderTabBar", function (props) {var
+
+      state =
+      _this.props.navigation.state;
+      var route = state.routes[state.index];var
+
+      descriptors =
+      _this.props.descriptors;
+      var descriptor = descriptors[route.key];
+      var options = descriptor.options;
+      var tabBarVisible = options.tabBarVisible == null ? true : options.tabBarVisible;var _this$props2 =
+
+
+
+
+
+
+
+
+
+
+
+
+      _this.props,navigation = _this$props2.navigation,getLabelText = _this$props2.getLabelText,getAccessibilityLabel = _this$props2.getAccessibilityLabel,getTestID = _this$props2.getTestID,renderIcon = _this$props2.renderIcon,onTabPress = _this$props2.onTabPress,onTabLongPress = _this$props2.onTabLongPress,_this$props2$tabBarCo = _this$props2.tabBarComponent,TabBarComponent = _this$props2$tabBarCo === void 0 ? _MaterialTopTabBar.default : _this$props2$tabBarCo,tabBarPosition = _this$props2.tabBarPosition,tabBarOptions = _this$props2.tabBarOptions,screenProps = _this$props2.screenProps;
+
+      if (TabBarComponent === null || !tabBarVisible) {
+        return null;
+      }
+
+      return React.createElement(TabBarComponent, _extends({}, tabBarOptions, props, {
+        tabBarPosition: tabBarPosition,
+        screenProps: screenProps,
+        navigation: navigation,
+        getLabelText: getLabelText,
+        getAccessibilityLabel: getAccessibilityLabel,
+        getTestID: getTestID,
+        renderIcon: renderIcon,
+        onTabPress: onTabPress,
+        onTabLongPress: onTabLongPress }));
+
+    });return _this;
+  }require("@babel/runtime/helpers/createClass")(MaterialTabView, [{ key: "render", value: function render()
+
+    {
+      var _this$props = this.props,
+
+
+      getLabelText =
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      _this$props.getLabelText,getAccessibilityLabel = _this$props.getAccessibilityLabel,getTestID = _this$props.getTestID,renderIcon = _this$props.renderIcon,onTabPress = _this$props.onTabPress,onTabLongPress = _this$props.onTabLongPress,screenProps = _this$props.screenProps,tabBarComponent = _this$props.tabBarComponent,tabBarOptions = _this$props.tabBarOptions,lazyPlaceholderComponent = _this$props.lazyPlaceholderComponent,pagerComponent = _this$props.pagerComponent,navigation = _this$props.navigation,descriptors = _this$props.descriptors,
+      rest = _objectWithoutProperties(_this$props, ["getLabelText", "getAccessibilityLabel", "getTestID", "renderIcon", "onTabPress", "onTabLongPress", "screenProps", "tabBarComponent", "tabBarOptions", "lazyPlaceholderComponent", "pagerComponent", "navigation", "descriptors"]);var
+
+
+      state =
+      navigation.state;
+      var route = state.routes[state.index];
+      var descriptor = descriptors[route.key];
+      var options = descriptor.options;
+      var swipeEnabled =
+      options.swipeEnabled == null ? this.props.swipeEnabled : options.swipeEnabled;
+
+      if (typeof swipeEnabled === 'function') {
+        swipeEnabled = swipeEnabled(state);
+      }
+
+      return React.createElement(require("react-native-tab-view").TabView, _extends({}, rest, {
+        navigationState: navigation.state,
+        swipeEnabled: swipeEnabled,
+        renderTabBar: this.renderTabBar,
+        renderLazyPlaceholder: lazyPlaceholderComponent !== undefined ? function (props) {return React.createElement(lazyPlaceholderComponent, props);} : undefined,
+        renderPager: pagerComponent !== undefined ? function (props) {return React.createElement(pagerComponent, props);} : undefined }));
+
+    } }]);return MaterialTabView;}(React.PureComponent);
+
+
+
+var _default = (0, _createTabNavigator.default)(MaterialTabView);
+
+exports.default = _default;

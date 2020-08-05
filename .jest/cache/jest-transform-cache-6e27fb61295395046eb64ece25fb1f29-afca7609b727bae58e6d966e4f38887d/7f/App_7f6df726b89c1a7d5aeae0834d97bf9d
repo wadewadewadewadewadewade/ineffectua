@@ -1,0 +1,69 @@
+d945378b1662464f6ac72d2cfb82874c
+"use strict";
+/**
+ * Sample React Native App
+ * https://github.com/facebook/react-native
+ *
+ * @format
+ * @flow strict-local
+ */
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const react_1 = __importDefault(require("react"));
+const react_native_1 = require("react-native");
+const redux_1 = require("redux");
+const react_redux_1 = require("react-redux");
+const reducers_1 = __importDefault(require("../reducers"));
+const react_native_screens_1 = require("react-native-screens");
+react_native_screens_1.enableScreens();
+const PrimaryNavigation_1 = __importDefault(require("../navigators/PrimaryNavigation"));
+const Authentaction_1 = __importDefault(require("../navigators/Authentaction"));
+const App = () => {
+    return (react_1.default.createElement(react_redux_1.Provider, { store: redux_1.createStore(reducers_1.default) },
+        react_1.default.createElement(react_native_1.StatusBar, { barStyle: "dark-content" }),
+        react_1.default.createElement(react_native_1.SafeAreaView, null,
+            react_1.default.createElement(PrimaryNavigation_1.default, null),
+            react_1.default.createElement(Authentaction_1.default, null))));
+};
+const styles = react_native_1.StyleSheet.create({
+    scrollView: {
+        backgroundColor: 'gray',
+    },
+    engine: {
+        position: 'absolute',
+        right: 0,
+    },
+    body: {
+        backgroundColor: 'white',
+    },
+    sectionContainer: {
+        marginTop: 32,
+        paddingHorizontal: 24,
+    },
+    sectionTitle: {
+        fontSize: 24,
+        fontWeight: '600',
+        color: 'black',
+    },
+    sectionDescription: {
+        marginTop: 8,
+        fontSize: 18,
+        fontWeight: '400',
+        color: '#666',
+    },
+    highlight: {
+        fontWeight: '700',
+    },
+    footer: {
+        color: '#666',
+        fontSize: 12,
+        fontWeight: '600',
+        padding: 4,
+        paddingRight: 12,
+        textAlign: 'right',
+    },
+});
+exports.default = App;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL3NyYy9jb21wb25lbnRzL0FwcC50c3giLCJtYXBwaW5ncyI6IjtBQUFBOzs7Ozs7R0FNRzs7Ozs7QUFFSCxrREFBMEI7QUFDMUIsK0NBSXNCO0FBQ3RCLGlDQUFtQztBQUNuQyw2Q0FBc0M7QUFDdEMsMkRBQWlDO0FBRWpDLCtEQUFxRDtBQUNyRCxvQ0FBYSxFQUFFLENBQUM7QUFDaEIsd0ZBQWdFO0FBQ2hFLGdGQUF5RDtBQUl6RCxNQUFNLEdBQUcsR0FBRyxHQUFHLEVBQUU7SUFDZixPQUFPLENBQ0wsOEJBQUMsc0JBQVEsSUFBQyxLQUFLLEVBQUUsbUJBQVcsQ0FBQyxrQkFBTyxDQUFDO1FBQ25DLDhCQUFDLHdCQUFTLElBQUMsUUFBUSxFQUFDLGNBQWMsR0FBRztRQUNyQyw4QkFBQywyQkFBWTtZQUNYLDhCQUFDLDJCQUFpQixPQUFHO1lBQ3JCLDhCQUFDLHVCQUFjLE9BQUcsQ0FDTCxDQUNOLENBQ1osQ0FBQztBQUNKLENBQUMsQ0FBQztBQUVGLE1BQU0sTUFBTSxHQUFHLHlCQUFVLENBQUMsTUFBTSxDQUFDO0lBQy9CLFVBQVUsRUFBRTtRQUNWLGVBQWUsRUFBRSxNQUFNO0tBQ3hCO0lBQ0QsTUFBTSxFQUFFO1FBQ04sUUFBUSxFQUFFLFVBQVU7UUFDcEIsS0FBSyxFQUFFLENBQUM7S0FDVDtJQUNELElBQUksRUFBRTtRQUNKLGVBQWUsRUFBRSxPQUFPO0tBQ3pCO0lBQ0QsZ0JBQWdCLEVBQUU7UUFDaEIsU0FBUyxFQUFFLEVBQUU7UUFDYixpQkFBaUIsRUFBRSxFQUFFO0tBQ3RCO0lBQ0QsWUFBWSxFQUFFO1FBQ1osUUFBUSxFQUFFLEVBQUU7UUFDWixVQUFVLEVBQUUsS0FBSztRQUNqQixLQUFLLEVBQUUsT0FBTztLQUNmO0lBQ0Qsa0JBQWtCLEVBQUU7UUFDbEIsU0FBUyxFQUFFLENBQUM7UUFDWixRQUFRLEVBQUUsRUFBRTtRQUNaLFVBQVUsRUFBRSxLQUFLO1FBQ2pCLEtBQUssRUFBRSxNQUFNO0tBQ2Q7SUFDRCxTQUFTLEVBQUU7UUFDVCxVQUFVLEVBQUUsS0FBSztLQUNsQjtJQUNELE1BQU0sRUFBRTtRQUNOLEtBQUssRUFBRSxNQUFNO1FBQ2IsUUFBUSxFQUFFLEVBQUU7UUFDWixVQUFVLEVBQUUsS0FBSztRQUNqQixPQUFPLEVBQUUsQ0FBQztRQUNWLFlBQVksRUFBRSxFQUFFO1FBQ2hCLFNBQVMsRUFBRSxPQUFPO0tBQ25CO0NBQ0YsQ0FBQyxDQUFDO0FBRUgsa0JBQWUsR0FBRyxDQUFDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9ob21lL3dhZGUvcHJvamVjdHMvaW5lZmZlY3R1YS9zcmMvY29tcG9uZW50cy9BcHAudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogU2FtcGxlIFJlYWN0IE5hdGl2ZSBBcHBcbiAqIGh0dHBzOi8vZ2l0aHViLmNvbS9mYWNlYm9vay9yZWFjdC1uYXRpdmVcbiAqXG4gKiBAZm9ybWF0XG4gKiBAZmxvdyBzdHJpY3QtbG9jYWxcbiAqL1xuXG5pbXBvcnQgUmVhY3QgZnJvbSAncmVhY3QnO1xuaW1wb3J0IHtcbiAgU2FmZUFyZWFWaWV3LFxuICBTdHlsZVNoZWV0LFxuICBTdGF0dXNCYXIsXG59IGZyb20gJ3JlYWN0LW5hdGl2ZSc7XG5pbXBvcnQgeyBjcmVhdGVTdG9yZSB9IGZyb20gJ3JlZHV4J1xuaW1wb3J0IHsgUHJvdmlkZXIgfSBmcm9tICdyZWFjdC1yZWR1eCdcbmltcG9ydCByZWR1Y2VyIGZyb20gJy4uL3JlZHVjZXJzJ1xuXG5pbXBvcnQgeyBlbmFibGVTY3JlZW5zIH0gZnJvbSBcInJlYWN0LW5hdGl2ZS1zY3JlZW5zXCI7XG5lbmFibGVTY3JlZW5zKCk7XG5pbXBvcnQgUHJpbWFyeU5hdmlnYXRpb24gZnJvbSAnLi4vbmF2aWdhdG9ycy9QcmltYXJ5TmF2aWdhdGlvbic7XG5pbXBvcnQgQXV0aGVudGljYXRpb24gZnJvbSAnLi4vbmF2aWdhdG9ycy9BdXRoZW50YWN0aW9uJztcblxuZGVjbGFyZSBjb25zdCBnbG9iYWw6IHtIZXJtZXNJbnRlcm5hbDogbnVsbCB8IHt9fTtcblxuY29uc3QgQXBwID0gKCkgPT4ge1xuICByZXR1cm4gKFxuICAgIDxQcm92aWRlciBzdG9yZT17Y3JlYXRlU3RvcmUocmVkdWNlcil9PlxuICAgICAgPFN0YXR1c0JhciBiYXJTdHlsZT1cImRhcmstY29udGVudFwiIC8+XG4gICAgICA8U2FmZUFyZWFWaWV3PlxuICAgICAgICA8UHJpbWFyeU5hdmlnYXRpb24gLz5cbiAgICAgICAgPEF1dGhlbnRpY2F0aW9uIC8+XG4gICAgICA8L1NhZmVBcmVhVmlldz5cbiAgICA8L1Byb3ZpZGVyPlxuICApO1xufTtcblxuY29uc3Qgc3R5bGVzID0gU3R5bGVTaGVldC5jcmVhdGUoe1xuICBzY3JvbGxWaWV3OiB7XG4gICAgYmFja2dyb3VuZENvbG9yOiAnZ3JheScsXG4gIH0sXG4gIGVuZ2luZToge1xuICAgIHBvc2l0aW9uOiAnYWJzb2x1dGUnLFxuICAgIHJpZ2h0OiAwLFxuICB9LFxuICBib2R5OiB7XG4gICAgYmFja2dyb3VuZENvbG9yOiAnd2hpdGUnLFxuICB9LFxuICBzZWN0aW9uQ29udGFpbmVyOiB7XG4gICAgbWFyZ2luVG9wOiAzMixcbiAgICBwYWRkaW5nSG9yaXpvbnRhbDogMjQsXG4gIH0sXG4gIHNlY3Rpb25UaXRsZToge1xuICAgIGZvbnRTaXplOiAyNCxcbiAgICBmb250V2VpZ2h0OiAnNjAwJyxcbiAgICBjb2xvcjogJ2JsYWNrJyxcbiAgfSxcbiAgc2VjdGlvbkRlc2NyaXB0aW9uOiB7XG4gICAgbWFyZ2luVG9wOiA4LFxuICAgIGZvbnRTaXplOiAxOCxcbiAgICBmb250V2VpZ2h0OiAnNDAwJyxcbiAgICBjb2xvcjogJyM2NjYnLFxuICB9LFxuICBoaWdobGlnaHQ6IHtcbiAgICBmb250V2VpZ2h0OiAnNzAwJyxcbiAgfSxcbiAgZm9vdGVyOiB7XG4gICAgY29sb3I6ICcjNjY2JyxcbiAgICBmb250U2l6ZTogMTIsXG4gICAgZm9udFdlaWdodDogJzYwMCcsXG4gICAgcGFkZGluZzogNCxcbiAgICBwYWRkaW5nUmlnaHQ6IDEyLFxuICAgIHRleHRBbGlnbjogJ3JpZ2h0JyxcbiAgfSxcbn0pO1xuXG5leHBvcnQgZGVmYXVsdCBBcHA7XG4iXSwidmVyc2lvbiI6M30=

@@ -1,0 +1,46 @@
+9d23b81c9701b15540d47e06cff14e57
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const React = __importStar(require("react"));
+const react_native_1 = require("react-native");
+const react_native_paper_1 = require("react-native-paper");
+const NotFoundScreen = ({ navigation, }) => {
+    return (React.createElement(react_native_1.View, { style: styles.container },
+        React.createElement(react_native_1.Text, { style: styles.title }, "404 Not Found"),
+        React.createElement(react_native_paper_1.Button, { mode: "contained", onPress: () => navigation.navigate('Home'), style: styles.button }, "Go to home")));
+};
+exports.default = NotFoundScreen;
+const styles = react_native_1.StyleSheet.create({
+    title: {
+        fontSize: 36,
+    },
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 8,
+    },
+    button: {
+        margin: 24,
+    },
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL3NyYy9jb21wb25lbnRzL3NjcmVlbnMvTm90Rm91bmQudHN4IiwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLDZDQUErQjtBQUMvQiwrQ0FBc0Q7QUFDdEQsMkRBQTRDO0FBRzVDLE1BQU0sY0FBYyxHQUFHLENBQUMsRUFDdEIsVUFBVSxHQUM0QixFQUFFLEVBQUU7SUFDMUMsT0FBTyxDQUNMLG9CQUFDLG1CQUFJLElBQUMsS0FBSyxFQUFFLE1BQU0sQ0FBQyxTQUFTO1FBQzNCLG9CQUFDLG1CQUFJLElBQUMsS0FBSyxFQUFFLE1BQU0sQ0FBQyxLQUFLLG9CQUFzQjtRQUMvQyxvQkFBQywyQkFBTSxJQUNMLElBQUksRUFBQyxXQUFXLEVBQ2hCLE9BQU8sRUFBRSxHQUFHLEVBQUUsQ0FBQyxVQUFVLENBQUMsUUFBUSxDQUFDLE1BQU0sQ0FBQyxFQUMxQyxLQUFLLEVBQUUsTUFBTSxDQUFDLE1BQU0saUJBR2IsQ0FDSixDQUNSLENBQUM7QUFDSixDQUFDLENBQUM7QUFFRixrQkFBZSxjQUFjLENBQUM7QUFFOUIsTUFBTSxNQUFNLEdBQUcseUJBQVUsQ0FBQyxNQUFNLENBQUM7SUFDL0IsS0FBSyxFQUFFO1FBQ0wsUUFBUSxFQUFFLEVBQUU7S0FDYjtJQUNELFNBQVMsRUFBRTtRQUNULElBQUksRUFBRSxDQUFDO1FBQ1AsY0FBYyxFQUFFLFFBQVE7UUFDeEIsVUFBVSxFQUFFLFFBQVE7UUFDcEIsT0FBTyxFQUFFLENBQUM7S0FDWDtJQUNELE1BQU0sRUFBRTtRQUNOLE1BQU0sRUFBRSxFQUFFO0tBQ1g7Q0FDRixDQUFDLENBQUMiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL3NyYy9jb21wb25lbnRzL3NjcmVlbnMvTm90Rm91bmQudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCAqIGFzIFJlYWN0IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IFN0eWxlU2hlZXQsIFRleHQsIFZpZXcgfSBmcm9tICdyZWFjdC1uYXRpdmUnO1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSAncmVhY3QtbmF0aXZlLXBhcGVyJztcbmltcG9ydCB0eXBlIHsgU3RhY2tTY3JlZW5Qcm9wcyB9IGZyb20gJ0ByZWFjdC1uYXZpZ2F0aW9uL3N0YWNrJztcblxuY29uc3QgTm90Rm91bmRTY3JlZW4gPSAoe1xuICBuYXZpZ2F0aW9uLFxufTogU3RhY2tTY3JlZW5Qcm9wczx7IEhvbWU6IHVuZGVmaW5lZCB9PikgPT4ge1xuICByZXR1cm4gKFxuICAgIDxWaWV3IHN0eWxlPXtzdHlsZXMuY29udGFpbmVyfT5cbiAgICAgIDxUZXh0IHN0eWxlPXtzdHlsZXMudGl0bGV9PjQwNCBOb3QgRm91bmQ8L1RleHQ+XG4gICAgICA8QnV0dG9uXG4gICAgICAgIG1vZGU9XCJjb250YWluZWRcIlxuICAgICAgICBvblByZXNzPXsoKSA9PiBuYXZpZ2F0aW9uLm5hdmlnYXRlKCdIb21lJyl9XG4gICAgICAgIHN0eWxlPXtzdHlsZXMuYnV0dG9ufVxuICAgICAgPlxuICAgICAgICBHbyB0byBob21lXG4gICAgICA8L0J1dHRvbj5cbiAgICA8L1ZpZXc+XG4gICk7XG59O1xuXG5leHBvcnQgZGVmYXVsdCBOb3RGb3VuZFNjcmVlbjtcblxuY29uc3Qgc3R5bGVzID0gU3R5bGVTaGVldC5jcmVhdGUoe1xuICB0aXRsZToge1xuICAgIGZvbnRTaXplOiAzNixcbiAgfSxcbiAgY29udGFpbmVyOiB7XG4gICAgZmxleDogMSxcbiAgICBqdXN0aWZ5Q29udGVudDogJ2NlbnRlcicsXG4gICAgYWxpZ25JdGVtczogJ2NlbnRlcicsXG4gICAgcGFkZGluZzogOCxcbiAgfSxcbiAgYnV0dG9uOiB7XG4gICAgbWFyZ2luOiAyNCxcbiAgfSxcbn0pO1xuIl0sInZlcnNpb24iOjN9

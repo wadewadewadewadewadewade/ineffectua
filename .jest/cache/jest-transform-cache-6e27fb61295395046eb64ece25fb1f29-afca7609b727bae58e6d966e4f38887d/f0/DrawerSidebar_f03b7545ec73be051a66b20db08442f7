@@ -1,0 +1,136 @@
+286a2e8e9fa4d65cba8a4bcc2fa64a3c
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _extends() {_extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}return target;};return _extends.apply(this, arguments);}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var
+
+
+
+
+DrawerSidebar = function (_React$PureComponent) {require("@babel/runtime/helpers/inherits")(DrawerSidebar, _React$PureComponent);var _super = _createSuper(DrawerSidebar);
+  function DrawerSidebar() {var _this;require("@babel/runtime/helpers/classCallCheck")(this, DrawerSidebar);for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {args[_key] = arguments[_key];}
+    _this = _super.call.apply(_super, [this].concat(args));
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "getScreenOptions", function (routeKey) {
+      var descriptor = _this.props.descriptors[routeKey];
+
+      if (!descriptor.options) {
+        throw new Error('Cannot access screen descriptor options from drawer sidebar');
+      }
+
+      return descriptor.options;
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "getLabel", function (_ref)
+
+
+
+    {var focused = _ref.focused,tintColor = _ref.tintColor,route = _ref.route;var _this$getScreenOption =
+
+
+
+      _this.getScreenOptions(route.key),drawerLabel = _this$getScreenOption.drawerLabel,title = _this$getScreenOption.title;
+
+      if (drawerLabel) {
+        return typeof drawerLabel === 'function' ? drawerLabel({
+          tintColor: tintColor,
+          focused: focused }) :
+        drawerLabel;
+      }
+
+      if (typeof title === 'string') {
+        return title;
+      }
+
+      return route.routeName;
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "renderIcon", function (_ref2)
+
+
+
+    {var focused = _ref2.focused,tintColor = _ref2.tintColor,route = _ref2.route;var _this$getScreenOption2 =
+
+
+      _this.getScreenOptions(route.key),drawerIcon = _this$getScreenOption2.drawerIcon;
+
+      if (drawerIcon) {
+        return typeof drawerIcon === 'function' ? drawerIcon({
+          tintColor: tintColor,
+          focused: focused }) :
+        drawerIcon;
+      }
+
+      return null;
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handleItemPress", function (_ref3)
+
+
+    {var route = _ref3.route,focused = _ref3.focused;
+      if (focused) {
+
+        _this.props.navigation.closeDrawer();
+      } else {
+        _this.props.navigation.dispatch(require("react-navigation").NavigationActions.navigate({
+          routeName: route.routeName }));
+
+      }
+    });return _this;
+  }require("@babel/runtime/helpers/createClass")(DrawerSidebar, [{ key: "render", value: function render()
+
+    {
+      var ContentComponent = this.props.contentComponent;
+
+      if (!ContentComponent) {
+        return null;
+      }var
+
+
+      state =
+      this.props.navigation.state;
+
+      if (typeof state.index !== 'number') {
+        throw new Error('The index of the route should be state in the navigation state');
+      }
+
+      return React.createElement(require("react-native").View, {
+        style: [styles.container, this.props.style] },
+      React.createElement(ContentComponent, _extends({}, this.props.contentOptions, {
+        navigation: this.props.navigation,
+        descriptors: this.props.descriptors,
+        drawerOpenProgress: this.props.drawerOpenProgress,
+        items: state.routes,
+        activeItemKey: state.routes[state.index] ? state.routes[state.index].key : null,
+        screenProps: this.props.screenProps,
+        getLabel: this.getLabel,
+        renderIcon: this.renderIcon,
+        onItemPress: this.handleItemPress,
+        drawerPosition: this.props.drawerPosition })));
+
+    } }]);return DrawerSidebar;}(React.PureComponent);
+
+
+
+var _default = DrawerSidebar;
+exports.default = _default;
+
+var styles = require("react-native").StyleSheet.create({
+  container: {
+    flex: 1 } });

@@ -1,0 +1,175 @@
+b058226c8574716c57cbefb0ea99e0c6
+"use strict";var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports, "__esModule", { value: true });Object.defineProperty(exports, "PureNativeButton", { enumerable: true, get: function get() {return _GestureHandlerButton.default;} });exports.BorderlessButton = exports.RectButton = exports.BaseButton = exports.RawButton = void 0;var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));var _extends2 = _interopRequireDefault(require("@babel/runtime/helpers/extends"));var _objectWithoutProperties2 = _interopRequireDefault(require("@babel/runtime/helpers/objectWithoutProperties"));var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));var _propTypes = _interopRequireDefault(require("prop-types"));
+var _react = _interopRequireDefault(require("react"));
+var _reactNative = require("react-native");
+
+var _createNativeWrapper = _interopRequireDefault(require("./createNativeWrapper"));
+var _GestureHandlerButton = _interopRequireDefault(require("./GestureHandlerButton"));
+var _State = _interopRequireDefault(require("./State"));var _jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native-gesture-handler/GestureButtons.js";function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {(0, _defineProperty2.default)(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = (0, _getPrototypeOf2.default)(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = (0, _getPrototypeOf2.default)(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return (0, _possibleConstructorReturn2.default)(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+var RawButton = (0, _createNativeWrapper.default)(_GestureHandlerButton.default, {
+  shouldCancelWhenOutside: false,
+  shouldActivateOnStart: false });exports.RawButton = RawButton;var
+
+
+
+
+BaseButton = function (_React$Component) {(0, _inherits2.default)(BaseButton, _React$Component);var _super = _createSuper(BaseButton);
+
+
+
+
+
+
+  function BaseButton(props) {var _this;(0, _classCallCheck2.default)(this, BaseButton);
+    _this = _super.call(this, props);_this.
+
+
+
+    _handleEvent = function (_ref) {var nativeEvent = _ref.nativeEvent;var
+      state = nativeEvent.state,oldState = nativeEvent.oldState,pointerInside = nativeEvent.pointerInside;
+      var active = pointerInside && state === _State.default.ACTIVE;
+
+      if (active !== _this._lastActive && _this.props.onActiveStateChange) {
+        _this.props.onActiveStateChange(active);
+      }
+
+      if (
+      oldState === _State.default.ACTIVE &&
+      state !== _State.default.CANCELLED &&
+      _this._lastActive &&
+      _this.props.onPress)
+      {
+        _this.props.onPress(active);
+      }
+
+      _this._lastActive = active;
+    };_this.
+
+
+
+
+
+    _onHandlerStateChange = function (e) {
+      _this.props.onHandlerStateChange && _this.props.onHandlerStateChange(e);
+      _this._handleEvent(e);
+    };_this.
+
+    _onGestureEvent = function (e) {
+      _this.props.onGestureEvent && _this.props.onGestureEvent(e);
+      _this._handleEvent(e);
+    };_this._lastActive = false;return _this;}(0, _createClass2.default)(BaseButton, [{ key: "render", value: function render()
+
+    {var _this$props =
+      this.props,rippleColor = _this$props.rippleColor,rest = (0, _objectWithoutProperties2.default)(_this$props, ["rippleColor"]);
+
+      return (
+        _react.default.createElement(RawButton, (0, _extends2.default)({
+          rippleColor: (0, _reactNative.processColor)(rippleColor) },
+        rest, {
+          onGestureEvent: this._onGestureEvent,
+          onHandlerStateChange: this._onHandlerStateChange, __self: this, __source: { fileName: _jsxFileName, lineNumber: 66, columnNumber: 7 } })));
+
+
+    } }]);return BaseButton;}(_react.default.Component);exports.BaseButton = BaseButton;BaseButton.propTypes = _objectSpread(_objectSpread({}, RawButton.propTypes), {}, { onPress: _propTypes.default.func, onActiveStateChange: _propTypes.default.func });
+
+
+var AnimatedBaseButton = _reactNative.Animated.createAnimatedComponent(BaseButton);
+
+var btnStyles = _reactNative.StyleSheet.create({
+  underlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    top: 0 } });var
+
+
+
+RectButton = function (_React$Component2) {(0, _inherits2.default)(RectButton, _React$Component2);var _super2 = _createSuper(RectButton);
+
+
+
+
+
+
+
+  function RectButton(props) {var _this2;(0, _classCallCheck2.default)(this, RectButton);
+    _this2 = _super2.call(this, props);_this2.
+
+
+
+    _onActiveStateChange = function (active) {
+      if (_reactNative.Platform.OS !== 'android') {
+        _this2._opacity.setValue(active ? _this2.props.activeOpacity : 0);
+      }
+
+      _this2.props.onActiveStateChange && _this2.props.onActiveStateChange(active);
+    };_this2._opacity = new _reactNative.Animated.Value(0);return _this2;}(0, _createClass2.default)(RectButton, [{ key: "render", value: function render()
+
+    {var _this$props2 =
+      this.props,children = _this$props2.children,style = _this$props2.style,rest = (0, _objectWithoutProperties2.default)(_this$props2, ["children", "style"]);
+
+      var resolvedStyle = _reactNative.StyleSheet.flatten(style != null ? style : {});
+
+      return (
+        _react.default.createElement(BaseButton, (0, _extends2.default)({},
+        rest, {
+          style: resolvedStyle,
+          onActiveStateChange: this._onActiveStateChange, __self: this, __source: { fileName: _jsxFileName, lineNumber: 115, columnNumber: 7 } }),
+        _react.default.createElement(_reactNative.Animated.View, {
+          style: [
+          btnStyles.underlay,
+          {
+            opacity: this._opacity,
+            backgroundColor: this.props.underlayColor,
+            borderRadius: resolvedStyle.borderRadius,
+            borderTopLeftRadius: resolvedStyle.borderTopLeftRadius,
+            borderTopRightRadius: resolvedStyle.borderTopRightRadius,
+            borderBottomLeftRadius: resolvedStyle.borderBottomLeftRadius,
+            borderBottomRightRadius: resolvedStyle.borderBottomRightRadius }], __self: this, __source: { fileName: _jsxFileName, lineNumber: 119, columnNumber: 9 } }),
+
+
+
+        children));
+
+
+    } }]);return RectButton;}(_react.default.Component);exports.RectButton = RectButton;RectButton.propTypes = BaseButton.propTypes;RectButton.defaultProps = { activeOpacity: 0.105, underlayColor: 'black' };var
+
+
+BorderlessButton = function (_React$Component3) {(0, _inherits2.default)(BorderlessButton, _React$Component3);var _super3 = _createSuper(BorderlessButton);
+
+
+
+
+
+
+
+
+
+
+  function BorderlessButton(props) {var _this3;(0, _classCallCheck2.default)(this, BorderlessButton);
+    _this3 = _super3.call(this, props);_this3.
+
+
+
+    _onActiveStateChange = function (active) {
+      if (_reactNative.Platform.OS !== 'android') {
+        _this3._opacity.setValue(active ? _this3.props.activeOpacity : 1);
+      }
+
+      _this3.props.onActiveStateChange && _this3.props.onActiveStateChange(active);
+    };_this3._opacity = new _reactNative.Animated.Value(1);return _this3;}(0, _createClass2.default)(BorderlessButton, [{ key: "render", value: function render()
+
+    {var _this$props3 =
+      this.props,children = _this$props3.children,style = _this$props3.style,rest = (0, _objectWithoutProperties2.default)(_this$props3, ["children", "style"]);
+
+      return (
+        _react.default.createElement(AnimatedBaseButton, (0, _extends2.default)({},
+        rest, {
+          onActiveStateChange: this._onActiveStateChange,
+          style: [style, _reactNative.Platform.OS === 'ios' && { opacity: this._opacity }], __self: this, __source: { fileName: _jsxFileName, lineNumber: 167, columnNumber: 7 } }),
+        children));
+
+
+    } }]);return BorderlessButton;}(_react.default.Component);exports.BorderlessButton = BorderlessButton;BorderlessButton.propTypes = _objectSpread(_objectSpread({}, BaseButton.propTypes), {}, { borderless: _propTypes.default.bool });BorderlessButton.defaultProps = { activeOpacity: 0.3, borderless: true };

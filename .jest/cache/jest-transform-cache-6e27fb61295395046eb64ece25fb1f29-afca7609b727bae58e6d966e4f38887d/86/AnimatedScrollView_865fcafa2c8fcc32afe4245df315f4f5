@@ -1,0 +1,28 @@
+bb3754b2afcfbf3c46462d3d2a26f563
+
+
+
+
+
+
+
+
+
+
+'use strict';var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");var _extends2 = _interopRequireDefault(require("@babel/runtime/helpers/extends"));
+
+var React = _interopRequireWildcard(require("react"));var _this = this,_jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native/Libraries/Animated/src/components/AnimatedScrollView.js";
+
+
+
+
+
+
+
+
+var ScrollViewWithEventThrottle = React.forwardRef(function (props, ref) {return (
+    React.createElement(require('../../../Components/ScrollView/ScrollView'), (0, _extends2.default)({ scrollEventThrottle: 0.0001 }, props, { ref: ref, __self: _this, __source: { fileName: _jsxFileName, lineNumber: 23, columnNumber: 3 } })));});
+
+
+module.exports = require('../createAnimatedComponent')(
+ScrollViewWithEventThrottle);

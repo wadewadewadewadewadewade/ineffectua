@@ -1,0 +1,22 @@
+2aaf070906156adab3ac14b7985f0fcc
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.useTheme = exports.withTheme = exports.ThemeProvider = void 0;
+
+
+
+var _DefaultTheme = _interopRequireDefault(require("../styles/DefaultTheme"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var _ref =
+
+
+
+
+
+(0, require("@callstack/react-theme-provider").createTheming)(_DefaultTheme.default),ThemeProvider = _ref.ThemeProvider,withTheme = _ref.withTheme,useTheme = _ref.useTheme;
+exports.useTheme = useTheme;
+exports.withTheme = withTheme;
+exports.ThemeProvider = ThemeProvider;

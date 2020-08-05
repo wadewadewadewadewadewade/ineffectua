@@ -1,0 +1,20 @@
+fd24dd9f799a2c9aced3eff304adcb4c
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.APPROX_STATUSBAR_HEIGHT = void 0;
+
+
+
+
+var expo = global.__expo;
+var DEFAULT_STATUSBAR_HEIGHT_EXPO = (expo === null || expo === void 0 ? void 0 : expo.Constants) ? expo.Constants.statusBarHeight : 0;
+
+var APPROX_STATUSBAR_HEIGHT = require("react-native").Platform.select({
+  android: DEFAULT_STATUSBAR_HEIGHT_EXPO,
+  ios: require("react-native").Platform.Version < 11 ? DEFAULT_STATUSBAR_HEIGHT_EXPO : 0 });
+
+
+exports.APPROX_STATUSBAR_HEIGHT = APPROX_STATUSBAR_HEIGHT;

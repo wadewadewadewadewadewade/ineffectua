@@ -1,0 +1,59 @@
+1e65523f8f44785000202476c0c7295d
+"use strict";var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports, "__esModule", { value: true });exports.default = createNativeWrapper;var _extends2 = _interopRequireDefault(require("@babel/runtime/helpers/extends"));var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));var _react = _interopRequireDefault(require("react"));
+
+var _NativeViewGestureHandler = _interopRequireDefault(require("./NativeViewGestureHandler"));var _jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native-gesture-handler/createNativeWrapper.js";function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {(0, _defineProperty2.default)(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}
+
+
+
+
+
+
+
+
+var NATIVE_WRAPPER_PROPS_FILTER = [
+'id',
+'minPointers',
+'enabled',
+'waitFor',
+'simultaneousHandlers',
+'shouldCancelWhenOutside',
+'hitSlop',
+'onGestureEvent',
+'onHandlerStateChange',
+'onBegan',
+'onFailed',
+'onCancelled',
+'onActivated',
+'onEnded',
+'shouldActivateOnStart',
+'disallowInterruption',
+'onGestureHandlerEvent',
+'onGestureHandlerStateChange'];
+
+
+function createNativeWrapper(Component) {var _this = this;var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var ComponentWrapper = _react.default.forwardRef(function (props, ref) {
+
+    var gestureHandlerProps = Object.keys(props).reduce(
+    function (res, key) {
+      if (NATIVE_WRAPPER_PROPS_FILTER.indexOf(key) !== -1) {
+        res[key] = props[key];
+      }
+      return res;
+    }, _objectSpread({},
+    config));
+
+    return (
+      _react.default.createElement(_NativeViewGestureHandler.default, (0, _extends2.default)({}, gestureHandlerProps, { __self: _this, __source: { fileName: _jsxFileName, lineNumber: 46, columnNumber: 7 } }),
+      _react.default.createElement(Component, (0, _extends2.default)({}, props, { ref: ref, __self: _this, __source: { fileName: _jsxFileName, lineNumber: 47, columnNumber: 9 } }))));
+
+
+  });
+
+  ComponentWrapper.propTypes = _objectSpread({},
+  Component.propTypes);
+
+  ComponentWrapper.displayName = Component.displayName || 'ComponentWrapper';
+
+  return ComponentWrapper;
+}

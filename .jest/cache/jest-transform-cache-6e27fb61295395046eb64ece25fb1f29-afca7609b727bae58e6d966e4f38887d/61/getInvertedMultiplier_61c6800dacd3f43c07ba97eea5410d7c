@@ -1,0 +1,25 @@
+ab9c8b0b1ec38caf5a49017fd59dc9d5
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = getInvertedMultiplier;
+
+
+
+function getInvertedMultiplier(gestureDirection) {
+  switch (gestureDirection) {
+    case 'vertical':
+      return 1;
+
+    case 'vertical-inverted':
+      return -1;
+
+    case 'horizontal':
+      return require("react-native").I18nManager.isRTL ? -1 : 1;
+
+    case 'horizontal-inverted':
+      return require("react-native").I18nManager.isRTL ? 1 : -1;}
+
+}

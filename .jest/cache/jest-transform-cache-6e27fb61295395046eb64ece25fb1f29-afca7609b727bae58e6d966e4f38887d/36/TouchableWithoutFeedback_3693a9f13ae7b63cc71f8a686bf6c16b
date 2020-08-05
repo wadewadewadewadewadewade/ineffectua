@@ -1,0 +1,13 @@
+be25254b0cdcd3f63af2b817fb220d6a
+"use strict";var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _extends2 = _interopRequireDefault(require("@babel/runtime/helpers/extends"));var _react = _interopRequireDefault(require("react"));
+var _GenericTouchable = _interopRequireDefault(require("./GenericTouchable"));var _this = this,_jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native-gesture-handler/touchables/TouchableWithoutFeedback.js";
+
+var TouchableWithoutFeedback = _react.default.forwardRef(function (props, ref) {return (
+    _react.default.createElement(_GenericTouchable.default, (0, _extends2.default)({ ref: ref }, props, { __self: _this, __source: { fileName: _jsxFileName, lineNumber: 5, columnNumber: 3 } })));});
+
+
+TouchableWithoutFeedback.defaultProps = _GenericTouchable.default.defaultProps;
+
+TouchableWithoutFeedback.propTypes = _GenericTouchable.default.publicPropTypes;var _default =
+
+TouchableWithoutFeedback;exports.default = _default;

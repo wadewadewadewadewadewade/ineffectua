@@ -1,0 +1,242 @@
+52f1819dc86fd47cc68b4462ed5dee27
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+var _color = _interopRequireDefault(require("color"));
+
+
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _extends() {_extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}return target;};return _extends.apply(this, arguments);}
+
+function _objectWithoutProperties(source, excluded) {if (source == null) return {};var target = _objectWithoutPropertiesLoose(source, excluded);var key, i;if (Object.getOwnPropertySymbols) {var sourceSymbolKeys = Object.getOwnPropertySymbols(source);for (i = 0; i < sourceSymbolKeys.length; i++) {key = sourceSymbolKeys[i];if (excluded.indexOf(key) >= 0) continue;if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;target[key] = source[key];}}return target;}
+
+function _objectWithoutPropertiesLoose(source, excluded) {if (source == null) return {};var target = {};var sourceKeys = Object.keys(source);var key, i;for (i = 0; i < sourceKeys.length; i++) {key = sourceKeys[i];if (excluded.indexOf(key) >= 0) continue;target[key] = source[key];}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+var INDETERMINATE_DURATION = 2000;
+var INDETERMINATE_MAX_WIDTH = 0.6;var
+
+isRTL =
+require("react-native").I18nManager.isRTL;var
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ProgressBar = function (_React$Component) {require("@babel/runtime/helpers/inherits")(ProgressBar, _React$Component);var _super = _createSuper(ProgressBar);
+  function ProgressBar() {var _this;require("@babel/runtime/helpers/classCallCheck")(this, ProgressBar);for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {args[_key] = arguments[_key];}
+    _this = _super.call.apply(_super, [this].concat(args));
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "state", {
+      width: 0,
+      timer: new (require("react-native").Animated.Value)(0),
+      fade: new (require("react-native").Animated.Value)(0) });
+
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "indeterminateAnimation", null);
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "onLayout", function (event) {var
+
+      visible =
+      _this.props.visible;var
+
+      previousWidth =
+      _this.state.width;
+      _this.setState({
+        width: event.nativeEvent.layout.width },
+      function () {
+
+        if (visible && previousWidth === 0) {
+          _this.startAnimation();
+        }
+      });
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "startAnimation", function () {var _this$props2 =
+
+
+
+
+
+
+
+
+      _this.props,indeterminate = _this$props2.indeterminate,progress = _this$props2.progress,scale = _this$props2.theme.animation.scale;var _this$state =
+
+
+
+      _this.state,fade = _this$state.fade,timer = _this$state.timer;
+
+      require("react-native").Animated.timing(fade, {
+        duration: 200 * scale,
+        toValue: 1,
+        useNativeDriver: true,
+        isInteraction: false }).
+      start();
+
+
+      if (indeterminate) {
+        if (!_this.indeterminateAnimation) {
+          _this.indeterminateAnimation = require("react-native").Animated.timing(timer, {
+            duration: INDETERMINATE_DURATION,
+            toValue: 1,
+
+            useNativeDriver: require("react-native").Platform.OS !== 'web',
+            isInteraction: false });
+
+        }
+
+
+        timer.setValue(0);
+
+        require("react-native").Animated.loop(_this.indeterminateAnimation).start();
+      } else {
+        require("react-native").Animated.timing(timer, {
+          duration: 200 * scale,
+          toValue: progress ? progress : 0,
+          useNativeDriver: true,
+          isInteraction: false }).
+        start();
+      }
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "stopAnimation", function () {var
+
+      fade =
+      _this.state.fade;var
+
+      scale =
+      _this.props.theme.animation.scale;
+
+      if (_this.indeterminateAnimation) {
+        _this.indeterminateAnimation.stop();
+      }
+
+      require("react-native").Animated.timing(fade, {
+        duration: 200 * scale,
+        toValue: 0,
+        useNativeDriver: true,
+        isInteraction: false }).
+      start();
+    });return _this;
+  }require("@babel/runtime/helpers/createClass")(ProgressBar, [{ key: "componentDidUpdate", value: function componentDidUpdate(
+
+    prevProps) {var _this$props3 =
+
+
+
+      this.props,visible = _this$props3.visible,progress = _this$props3.progress;
+
+      if (progress !== prevProps.progress || visible !== prevProps.visible) {
+        if (visible) {
+          this.startAnimation();
+        } else {
+          this.stopAnimation();
+        }
+      }
+    } }, { key: "render", value: function render()
+
+    {
+      var _this$props = this.props,
+
+      color =
+
+
+
+
+
+
+
+      _this$props.color,indeterminate = _this$props.indeterminate,style = _this$props.style,theme = _this$props.theme,progress = _this$props.progress,visible = _this$props.visible,
+      rest = _objectWithoutProperties(_this$props, ["color", "indeterminate", "style", "theme", "progress", "visible"]);var _this$state2 =
+
+
+
+
+
+      this.state,fade = _this$state2.fade,timer = _this$state2.timer,width = _this$state2.width;
+      var tintColor = color || theme.colors.primary;
+      var trackTintColor = (0, _color.default)(tintColor).alpha(0.38).rgb().string();
+      return React.createElement(require("react-native").View, _extends({
+        onLayout: this.onLayout },
+      rest), React.createElement(require("react-native").Animated.View, {
+        style: [styles.container, {
+          backgroundColor: trackTintColor,
+          opacity: fade },
+        style] },
+      React.createElement(require("react-native").Animated.View, {
+        style: [styles.progressBar, {
+          backgroundColor: tintColor,
+          width: width,
+          transform: [{
+            translateX: timer.interpolate(indeterminate ? {
+              inputRange: [0, 0.5, 1],
+              outputRange: [(isRTL ? 1 : -1) * 0.5 * width, (isRTL ? 1 : -1) * 0.5 * INDETERMINATE_MAX_WIDTH * width, (isRTL ? -1 : 1) * 0.7 * width] } :
+            {
+              inputRange: [0, 1],
+              outputRange: [(isRTL ? 1 : -1) * 0.5 * width, 0] }) },
+
+          {
+
+            scaleX: timer.interpolate(indeterminate ? {
+              inputRange: [0, 0.5, 1],
+              outputRange: [0.0001, INDETERMINATE_MAX_WIDTH, 0.0001] } :
+            {
+              inputRange: [0, 1],
+              outputRange: [0.0001, 1] }) }] }] })));
+
+
+
+
+    } }]);return ProgressBar;}(React.Component);
+
+
+
+_defineProperty(ProgressBar, "defaultProps", {
+  visible: true,
+  progress: 0 });
+
+
+var styles = require("react-native").StyleSheet.create({
+  container: {
+    height: 4,
+    overflow: 'hidden' },
+
+  progressBar: {
+    flex: 1 } });
+
+
+
+var _default = (0, require("../core/theming").withTheme)(ProgressBar);
+
+exports.default = _default;

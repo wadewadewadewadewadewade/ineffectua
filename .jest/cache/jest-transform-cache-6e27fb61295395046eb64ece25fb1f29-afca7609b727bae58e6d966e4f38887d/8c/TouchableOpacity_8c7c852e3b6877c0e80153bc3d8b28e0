@@ -1,0 +1,312 @@
+be21e22e15a23ff8837120048add8a3a
+
+
+
+
+
+
+
+
+
+
+'use strict';var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");var _extends2 = _interopRequireDefault(require("@babel/runtime/helpers/extends"));var _objectWithoutProperties2 = _interopRequireDefault(require("@babel/runtime/helpers/objectWithoutProperties"));var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _Pressability = _interopRequireDefault(require("../../Pressability/Pressability.js"));
+var _PressabilityDebug = require("../../Pressability/PressabilityDebug.js");
+var _TVTouchable = _interopRequireDefault(require("./TVTouchable.js"));
+
+var _Animated = _interopRequireDefault(require("react-native/Libraries/Animated/src/Animated"));
+var _Easing = _interopRequireDefault(require("react-native/Libraries/Animated/src/Easing"));
+
+var _flattenStyle2 = _interopRequireDefault(require("react-native/Libraries/StyleSheet/flattenStyle"));
+var _Platform = _interopRequireDefault(require("../../Utilities/Platform"));
+var React = _interopRequireWildcard(require("react"));var _jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native/Libraries/Components/Touchable/TouchableOpacity.js",_this3 = this;function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = (0, _getPrototypeOf2.default)(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = (0, _getPrototypeOf2.default)(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return (0, _possibleConstructorReturn2.default)(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}var
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TouchableOpacity = function (_React$Component) {(0, _inherits2.default)(TouchableOpacity, _React$Component);var _super = _createSuper(TouchableOpacity);function TouchableOpacity() {var _this;(0, _classCallCheck2.default)(this, TouchableOpacity);for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {args[_key] = arguments[_key];}_this = _super.call.apply(_super, [this].concat(args));_this.
+
+
+    state = {
+      anim: new _Animated.default.Value(_this._getChildStyleOpacityWithDefault()),
+      pressability: new _Pressability.default({
+        getHitSlop: function getHitSlop() {return _this.props.hitSlop;},
+        getLongPressDelayMS: function getLongPressDelayMS() {
+          if (_this.props.delayLongPress != null) {
+            var maybeNumber = _this.props.delayLongPress;
+            if (typeof maybeNumber === 'number') {
+              return maybeNumber;
+            }
+          }
+          return 500;
+        },
+        getPressDelayMS: function getPressDelayMS() {return _this.props.delayPressIn;},
+        getPressOutDelayMS: function getPressOutDelayMS() {return _this.props.delayPressOut;},
+        getPressRectOffset: function getPressRectOffset() {return _this.props.pressRetentionOffset;},
+        onBlur: function onBlur(event) {
+          if (_Platform.default.isTV) {
+            _this._opacityInactive(250);
+          }
+          if (_this.props.onBlur != null) {
+            _this.props.onBlur(event);
+          }
+        },
+        onFocus: function onFocus(event) {
+          if (_Platform.default.isTV) {
+            _this._opacityActive(150);
+          }
+          if (_this.props.onFocus != null) {
+            _this.props.onFocus(event);
+          }
+        },
+        onLongPress: function onLongPress(event) {
+          if (_this.props.onLongPress != null) {
+            _this.props.onLongPress(event);
+          }
+        },
+        onPress: function onPress(event) {
+          if (_this.props.onPress != null) {
+            _this.props.onPress(event);
+          }
+        },
+        onPressIn: function onPressIn(event) {
+          _this._opacityActive(
+          event.dispatchConfig.registrationName === 'onResponderGrant' ?
+          0 :
+          150);
+
+          if (_this.props.onPressIn != null) {
+            _this.props.onPressIn(event);
+          }
+        },
+        onPressOut: function onPressOut(event) {
+          _this._opacityInactive(250);
+          if (_this.props.onPressOut != null) {
+            _this.props.onPressOut(event);
+          }
+        },
+        onResponderTerminationRequest: function onResponderTerminationRequest() {return (
+            !_this.props.rejectResponderTermination);},
+        onStartShouldSetResponder: function onStartShouldSetResponder() {return !_this.props.disabled;} }) };return _this;}(0, _createClass2.default)(TouchableOpacity, [{ key: "_setOpacityTo", value: function _setOpacityTo(
+
+
+
+
+
+
+    toValue, duration) {
+      _Animated.default.timing(this.state.anim, {
+        toValue: toValue,
+        duration: duration,
+        easing: _Easing.default.inOut(_Easing.default.quad),
+        useNativeDriver: true }).
+      start();
+    } }, { key: "_opacityActive", value: function _opacityActive(
+
+    duration) {var _this$props$activeOpa;
+      this._setOpacityTo((_this$props$activeOpa = this.props.activeOpacity) != null ? _this$props$activeOpa : 0.2, duration);
+    } }, { key: "_opacityInactive", value: function _opacityInactive(
+
+    duration) {
+      this._setOpacityTo(this._getChildStyleOpacityWithDefault(), duration);
+    } }, { key: "_getChildStyleOpacityWithDefault", value: function _getChildStyleOpacityWithDefault()
+
+    {var _flattenStyle;
+      var opacity = (_flattenStyle = (0, _flattenStyle2.default)(this.props.style)) == null ? void 0 : _flattenStyle.opacity;
+      return typeof opacity === 'number' ? opacity : 1;
+    } }, { key: "render", value: function render()
+
+    {var _this$state$pressabil =
+
+
+
+
+
+
+      this.state.pressability.getEventHandlers(),onBlur = _this$state$pressabil.onBlur,onFocus = _this$state$pressabil.onFocus,eventHandlersWithoutBlurAndFocus = (0, _objectWithoutProperties2.default)(_this$state$pressabil, ["onBlur", "onFocus"]);
+
+      return (
+        React.createElement(_Animated.default.View, (0, _extends2.default)({
+          accessible: this.props.accessible !== false,
+          accessibilityLabel: this.props.accessibilityLabel,
+          accessibilityHint: this.props.accessibilityHint,
+          accessibilityRole: this.props.accessibilityRole,
+          accessibilityState: this.props.accessibilityState,
+          accessibilityActions: this.props.accessibilityActions,
+          onAccessibilityAction: this.props.onAccessibilityAction,
+          accessibilityValue: this.props.accessibilityValue,
+          importantForAccessibility: this.props.importantForAccessibility,
+          accessibilityLiveRegion: this.props.accessibilityLiveRegion,
+          accessibilityViewIsModal: this.props.accessibilityViewIsModal,
+          accessibilityElementsHidden: this.props.accessibilityElementsHidden,
+          style: [this.props.style, { opacity: this.state.anim }],
+          nativeID: this.props.nativeID,
+          testID: this.props.testID,
+          onLayout: this.props.onLayout,
+          nextFocusDown: this.props.nextFocusDown,
+          nextFocusForward: this.props.nextFocusForward,
+          nextFocusLeft: this.props.nextFocusLeft,
+          nextFocusRight: this.props.nextFocusRight,
+          nextFocusUp: this.props.nextFocusUp,
+          hasTVPreferredFocus: this.props.hasTVPreferredFocus,
+          hitSlop: this.props.hitSlop,
+          focusable:
+          this.props.focusable !== false && this.props.onPress !== undefined,
+
+          ref: this.props.hostRef },
+        eventHandlersWithoutBlurAndFocus, { __self: this, __source: { fileName: _jsxFileName, lineNumber: 234, columnNumber: 7 } }),
+        this.props.children,
+        __DEV__ ?
+        React.createElement(_PressabilityDebug.PressabilityDebugView, { color: "cyan", hitSlop: this.props.hitSlop, __self: this, __source: { fileName: _jsxFileName, lineNumber: 265, columnNumber: 11 } }) :
+        null));
+
+
+    } }, { key: "componentDidMount", value: function componentDidMount()
+
+    {var _this2 = this;
+      if (_Platform.default.isTV) {
+        this._tvTouchable = new _TVTouchable.default(this, {
+          getDisabled: function getDisabled() {return _this2.props.disabled === true;},
+          onBlur: function onBlur(event) {
+            if (_this2.props.onBlur != null) {
+              _this2.props.onBlur(event);
+            }
+          },
+          onFocus: function onFocus(event) {
+            if (_this2.props.onFocus != null) {
+              _this2.props.onFocus(event);
+            }
+          },
+          onPress: function onPress(event) {
+            if (_this2.props.onPress != null) {
+              _this2.props.onPress(event);
+            }
+          } });
+
+      }
+    } }, { key: "componentDidUpdate", value: function componentDidUpdate(
+
+    prevProps, prevState) {
+      if (this.props.disabled !== prevProps.disabled) {
+        this._opacityInactive(250);
+      }
+    } }, { key: "componentWillUnmount", value: function componentWillUnmount()
+
+    {
+      if (_Platform.default.isTV) {
+        if (this._tvTouchable != null) {
+          this._tvTouchable.destroy();
+        }
+      }
+      this.state.pressability.reset();
+    } }]);return TouchableOpacity;}(React.Component);
+
+
+module.exports = React.forwardRef(function (props, hostRef) {return (
+    React.createElement(TouchableOpacity, (0, _extends2.default)({}, props, { hostRef: hostRef, __self: _this3, __source: { fileName: _jsxFileName, lineNumber: 311, columnNumber: 3 } })));});

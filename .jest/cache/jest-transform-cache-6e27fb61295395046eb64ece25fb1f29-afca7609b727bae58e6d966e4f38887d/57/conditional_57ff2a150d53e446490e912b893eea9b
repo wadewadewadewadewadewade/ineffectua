@@ -1,0 +1,34 @@
+f8a5cbf0819fcd04d3c4e8bd17fb28fb
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = conditional;var
+
+
+
+
+add = require("react-native").Animated.add,
+multiply = require("react-native").Animated.multiply;
+
+
+
+
+
+
+
+
+
+function conditional(condition, main, fallback) {
+
+
+
+
+
+
+  return add(multiply(condition, main), multiply(condition.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0] }),
+  fallback));
+}

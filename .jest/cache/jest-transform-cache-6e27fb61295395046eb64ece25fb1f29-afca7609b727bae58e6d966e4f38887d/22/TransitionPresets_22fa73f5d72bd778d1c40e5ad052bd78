@@ -1,0 +1,123 @@
+dce48f12858b44a4a49afc4f7717c526
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.ModalTransition = exports.DefaultTransition = exports.ScaleFromCenterAndroid = exports.RevealFromBottomAndroid = exports.FadeFromBottomAndroid = exports.ModalPresentationIOS = exports.ModalSlideFromBottomIOS = exports.SlideFromRightIOS = void 0;
+
+
+
+
+
+
+
+
+
+var ANDROID_VERSION_PIE = 28;
+
+
+
+
+var SlideFromRightIOS = {
+  gestureDirection: 'horizontal',
+  transitionSpec: {
+    open: require("./TransitionSpecs").TransitionIOSSpec,
+    close: require("./TransitionSpecs").TransitionIOSSpec },
+
+  cardStyleInterpolator: require("./CardStyleInterpolators").forHorizontalIOS,
+  headerStyleInterpolator: require("./HeaderStyleInterpolators").forFade };
+
+
+
+
+
+exports.SlideFromRightIOS = SlideFromRightIOS;
+var ModalSlideFromBottomIOS = {
+  gestureDirection: 'vertical',
+  transitionSpec: {
+    open: require("./TransitionSpecs").TransitionIOSSpec,
+    close: require("./TransitionSpecs").TransitionIOSSpec },
+
+  cardStyleInterpolator: require("./CardStyleInterpolators").forVerticalIOS,
+  headerStyleInterpolator: require("./HeaderStyleInterpolators").forFade };
+
+
+
+
+
+exports.ModalSlideFromBottomIOS = ModalSlideFromBottomIOS;
+var ModalPresentationIOS = {
+  gestureDirection: 'vertical',
+  transitionSpec: {
+    open: require("./TransitionSpecs").TransitionIOSSpec,
+    close: require("./TransitionSpecs").TransitionIOSSpec },
+
+  cardStyleInterpolator: require("./CardStyleInterpolators").forModalPresentationIOS,
+  headerStyleInterpolator: require("./HeaderStyleInterpolators").forFade };
+
+
+
+
+
+exports.ModalPresentationIOS = ModalPresentationIOS;
+var FadeFromBottomAndroid = {
+  gestureDirection: 'vertical',
+  transitionSpec: {
+    open: require("./TransitionSpecs").FadeInFromBottomAndroidSpec,
+    close: require("./TransitionSpecs").FadeOutToBottomAndroidSpec },
+
+  cardStyleInterpolator: require("./CardStyleInterpolators").forFadeFromBottomAndroid,
+  headerStyleInterpolator: require("./HeaderStyleInterpolators").forFade };
+
+
+
+
+
+exports.FadeFromBottomAndroid = FadeFromBottomAndroid;
+var RevealFromBottomAndroid = {
+  gestureDirection: 'vertical',
+  transitionSpec: {
+    open: require("./TransitionSpecs").RevealFromBottomAndroidSpec,
+    close: require("./TransitionSpecs").RevealFromBottomAndroidSpec },
+
+  cardStyleInterpolator: require("./CardStyleInterpolators").forRevealFromBottomAndroid,
+  headerStyleInterpolator: require("./HeaderStyleInterpolators").forFade };
+
+
+
+
+
+exports.RevealFromBottomAndroid = RevealFromBottomAndroid;
+var ScaleFromCenterAndroid = {
+  gestureDirection: 'horizontal',
+  transitionSpec: {
+    open: require("./TransitionSpecs").ScaleFromCenterAndroidSpec,
+    close: require("./TransitionSpecs").ScaleFromCenterAndroidSpec },
+
+  cardStyleInterpolator: require("./CardStyleInterpolators").forScaleFromCenterAndroid,
+  headerStyleInterpolator: require("./HeaderStyleInterpolators").forFade };
+
+
+
+
+
+exports.ScaleFromCenterAndroid = ScaleFromCenterAndroid;
+
+var DefaultTransition = require("react-native").Platform.select({
+  ios: SlideFromRightIOS,
+  default: require("react-native").Platform.OS === 'android' && require("react-native").Platform.Version >= ANDROID_VERSION_PIE ? RevealFromBottomAndroid : FadeFromBottomAndroid });
+
+
+
+
+
+
+exports.DefaultTransition = DefaultTransition;
+
+var ModalTransition = require("react-native").Platform.select({
+  ios: ModalSlideFromBottomIOS,
+  default: DefaultTransition });
+
+
+exports.ModalTransition = ModalTransition;

@@ -1,0 +1,13 @@
+ea93b719946fde16c482d96f273d853f
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = void 0;
+
+
+
+var _default = (0, require("react-native").requireNativeComponent)('RNCSafeAreaProvider');
+
+exports.default = _default;

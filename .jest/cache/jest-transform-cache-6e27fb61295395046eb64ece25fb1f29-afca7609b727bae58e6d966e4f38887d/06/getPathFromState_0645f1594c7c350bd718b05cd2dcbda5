@@ -1,0 +1,247 @@
+e2bb799d29d6c6db5f27a6b70bf8d496
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = getPathFromState;
+
+var _queryString = _interopRequireDefault(require("query-string"));
+
+var _checkLegacyPathConfig = _interopRequireDefault(require("./checkLegacyPathConfig"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}
+
+function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+var getActiveRoute = function getActiveRoute(state) {
+  var route = typeof state.index === 'number' ? state.routes[state.index] : state.routes[state.routes.length - 1];
+
+  if (route.state) {
+    return getActiveRoute(route.state);
+  }
+
+  return route;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function getPathFromState(state, options) {
+  if (state == null) {
+    throw Error("Got 'undefined' for the navigation state. You must pass a valid state object.");
+  }var _ref =
+
+  (0, _checkLegacyPathConfig.default)(options),_ref2 = require("@babel/runtime/helpers/slicedToArray")(_ref, 2),legacy = _ref2[0],compatOptions = _ref2[1];
+
+  var configs = compatOptions ? createNormalizedConfigs(legacy, compatOptions.screens) : {};
+  var path = '/';
+  var current = state;
+  var allParams = {};var _loop = function _loop() {
+
+
+    var index = typeof current.index === 'number' ? current.index : 0;
+    var route = current.routes[index];
+    var pattern = void 0;
+    var focusedParams = void 0;
+    var focusedRoute = getActiveRoute(state);
+    var currentOptions = configs;
+
+    var nestedRouteNames = [];
+    var hasNext = true;
+
+    while (route.name in currentOptions && hasNext) {
+      pattern = currentOptions[route.name].pattern;
+      nestedRouteNames.push(route.name);
+
+      if (route.params) {(function () {
+
+
+          var stringify = (_currentOptions$route = currentOptions[route.name]) === null || _currentOptions$route === void 0 ? void 0 : _currentOptions$route.stringify;
+          var currentParams = fromEntries(Object.entries(route.params).map(function (_ref3) {var _ref4 = require("@babel/runtime/helpers/slicedToArray")(_ref3, 2),key = _ref4[0],value = _ref4[1];return [key, (stringify === null || stringify === void 0 ? void 0 : stringify[key]) ? stringify[key](value) : String(value)];}));
+
+          if (pattern) {
+            require("@babel/runtime/helpers/extends")(allParams, currentParams);
+          }
+
+          if (focusedRoute === route) {
+
+
+
+
+            focusedParams = _objectSpread({}, currentParams);
+            (_pattern = pattern) === null || _pattern === void 0 ? void 0 : _pattern.split('/').filter(function (p) {return p.startsWith(':');}).
+            forEach(function (p) {
+              var name = getParamName(p);
+
+              if (focusedParams) {
+
+                delete focusedParams[name];
+              }
+            });
+          }})();
+      }
+
+
+      if (!currentOptions[route.name].screens || route.state === undefined) {
+        hasNext = false;
+      } else {
+        index = typeof route.state.index === 'number' ? route.state.index : route.state.routes.length - 1;
+        var nextRoute = route.state.routes[index];
+        var nestedConfig = currentOptions[route.name].screens;
+
+        if (nestedConfig && nextRoute.name in nestedConfig) {
+          route = nextRoute;
+          currentOptions = nestedConfig;
+        } else {
+
+          hasNext = false;
+        }
+      }
+    }
+
+    if (pattern === undefined) {
+      pattern = nestedRouteNames.join('/');
+    }
+
+    if (currentOptions[route.name] !== undefined) {
+      path += pattern.split('/').map(function (p) {
+        var name = getParamName(p);
+
+
+
+        if (p === '*') {
+          if (legacy) {
+            throw new Error("Please update your config to the new format to use wildcard pattern ('*'). https://reactnavigation.org/docs/configuring-links/#updating-config");
+          }
+
+          return route.name;
+        }
+
+
+        if (p.startsWith(':')) {
+          var value = allParams[name];
+
+          if (value === undefined && p.endsWith('?')) {
+
+            return '';
+          }
+
+          return encodeURIComponent(value);
+        }
+
+        return encodeURIComponent(p);
+      }).join('/');
+    } else {
+      path += encodeURIComponent(route.name);
+    }
+
+    if (!focusedParams) {
+      focusedParams = focusedRoute.params;
+    }
+
+    if (route.state) {
+      path += '/';
+    } else if (focusedParams) {
+      for (var param in focusedParams) {
+        if (focusedParams[param] === 'undefined') {
+
+          delete focusedParams[param];
+        }
+      }
+
+      var query = _queryString.default.stringify(focusedParams);
+
+      if (query) {
+        path += "?".concat(query);
+      }
+    }
+
+    current = route.state;};while (current) {var _currentOptions$route;var _pattern;_loop();
+  }
+
+
+  path = path.replace(/\/+/g, '/');
+  path = path.length > 1 ? path.replace(/\/$/, '') : path;
+  return path;
+}
+
+
+var fromEntries = function fromEntries(entries) {return entries.reduce(function (acc, _ref5) {var _ref6 = require("@babel/runtime/helpers/slicedToArray")(_ref5, 2),k = _ref6[0],v = _ref6[1];
+    acc[k] = v;
+    return acc;
+  }, {});};
+
+var getParamName = function getParamName(pattern) {return pattern.replace(/^:/, '').replace(/\?$/, '');};
+
+var joinPaths = function joinPaths() {var _ref7;for (var _len = arguments.length, paths = new Array(_len), _key = 0; _key < _len; _key++) {paths[_key] = arguments[_key];}return (_ref7 = []).concat.apply(_ref7, require("@babel/runtime/helpers/toConsumableArray")(paths.map(function (p) {return p.split('/');}))).filter(Boolean).join('/');};
+
+var createConfigItem = function createConfigItem(legacy, config, parentPattern) {
+  var _pattern2;
+
+  if (typeof config === 'string') {
+
+    var _pattern3 = parentPattern ? joinPaths(parentPattern, config) : config;
+    return {
+      pattern: _pattern3 };
+
+  }
+
+
+
+  var pattern;
+
+  if (legacy) {
+    pattern = config.exact !== true && parentPattern && config.path ? joinPaths(parentPattern, config.path) : config.path;
+  } else {
+    if (config.exact && config.path === undefined) {
+      throw new Error("A 'path' needs to be specified when specifying 'exact: true'. If you don't want this screen in the URL, specify it as empty string, e.g. `path: ''`.");
+    }
+
+    pattern = config.exact !== true ? joinPaths(parentPattern || '', config.path || '') : config.path || '';
+  }
+
+  var screens = config.screens ? createNormalizedConfigs(legacy, config.screens, pattern) : undefined;
+  return {
+
+    pattern: (_pattern2 = pattern) === null || _pattern2 === void 0 ? void 0 : _pattern2.split('/').filter(Boolean).join('/'),
+    stringify: config.stringify,
+    screens: screens };
+
+};
+
+var createNormalizedConfigs = function createNormalizedConfigs(legacy, options, pattern) {return fromEntries(Object.entries(options).map(function (_ref8) {var _ref9 = require("@babel/runtime/helpers/slicedToArray")(_ref8, 2),name = _ref9[0],c = _ref9[1];
+    var result = createConfigItem(legacy, c, pattern);
+    return [name, result];
+  }));};

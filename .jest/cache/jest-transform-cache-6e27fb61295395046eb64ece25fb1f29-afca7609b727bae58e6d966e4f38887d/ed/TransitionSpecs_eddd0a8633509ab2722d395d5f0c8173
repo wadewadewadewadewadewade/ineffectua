@@ -1,0 +1,81 @@
+7fac3d99ca78bc8d2823b8eaa662560f
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.ScaleFromCenterAndroidSpec = exports.RevealFromBottomAndroidSpec = exports.FadeOutToBottomAndroidSpec = exports.FadeInFromBottomAndroidSpec = exports.TransitionIOSSpec = void 0;
+
+
+
+
+
+
+var TransitionIOSSpec = {
+  animation: 'spring',
+  config: {
+    stiffness: 1000,
+    damping: 500,
+    mass: 3,
+    overshootClamping: true,
+    restDisplacementThreshold: 10,
+    restSpeedThreshold: 10 } };
+
+
+
+
+
+
+
+exports.TransitionIOSSpec = TransitionIOSSpec;
+var FadeInFromBottomAndroidSpec = {
+  animation: 'timing',
+  config: {
+    duration: 350,
+    easing: require("react-native").Easing.out(require("react-native").Easing.poly(5)) } };
+
+
+
+
+
+
+
+exports.FadeInFromBottomAndroidSpec = FadeInFromBottomAndroidSpec;
+var FadeOutToBottomAndroidSpec = {
+  animation: 'timing',
+  config: {
+    duration: 150,
+    easing: require("react-native").Easing.in(require("react-native").Easing.linear) } };
+
+
+
+
+
+
+
+exports.FadeOutToBottomAndroidSpec = FadeOutToBottomAndroidSpec;
+var RevealFromBottomAndroidSpec = {
+  animation: 'timing',
+  config: {
+    duration: 425,
+
+
+    easing: require("react-native").Easing.bezier(0.35, 0.45, 0, 1) } };
+
+
+
+
+
+
+
+exports.RevealFromBottomAndroidSpec = RevealFromBottomAndroidSpec;
+var ScaleFromCenterAndroidSpec = {
+  animation: 'timing',
+  config: {
+    duration: 400,
+
+
+    easing: require("react-native").Easing.bezier(0.35, 0.45, 0, 1) } };
+
+
+exports.ScaleFromCenterAndroidSpec = ScaleFromCenterAndroidSpec;

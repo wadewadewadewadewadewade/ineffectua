@@ -1,0 +1,12 @@
+ddfdcaa5255416b8fe2eea8d6af2010f
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.SafeAreaView = void 0;
+
+
+
+var SafeAreaView = (0, require("react-native").requireNativeComponent)('RNCSafeAreaView');
+exports.SafeAreaView = SafeAreaView;

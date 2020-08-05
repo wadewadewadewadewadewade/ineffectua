@@ -1,0 +1,185 @@
+d2e7904582a8cda4f8f84e6e51b9ff76
+
+
+
+
+
+
+
+
+
+
+'use strict';var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+var _Platform = _interopRequireDefault(require("../Utilities/Platform"));
+var _RCTLog = _interopRequireDefault(require("../Utilities/RCTLog"));
+var LogBoxData = _interopRequireWildcard(require("./Data/LogBoxData"));
+var _parseLogBoxLog3 = require("./Data/parseLogBoxLog");
+
+
+
+var LogBox;
+
+
+
+
+if (__DEV__) {var _console =
+
+
+  console,error = _console.error,warn = _console.warn;
+  var errorImpl = error.bind(console);
+  var warnImpl = warn.bind(console);
+
+  console.error = function () {
+    errorImpl.apply(void 0, arguments);
+  };
+  console.warn = function () {
+    warnImpl.apply(void 0, arguments);
+  };
+
+  LogBox = {
+
+    ignoreWarnings: function ignoreWarnings(patterns) {
+      LogBox.ignoreLogs(patterns);
+    },
+
+    ignoreLogs: function ignoreLogs(patterns) {
+      LogBoxData.addIgnorePatterns(patterns);
+    },
+
+    uninstall: function uninstall() {
+      errorImpl = error;
+      warnImpl = warn;
+      delete console.disableLogBox;
+    },
+
+    install: function install() {
+
+      require('../NativeModules/specs/NativeLogBox');
+
+      errorImpl = function errorImpl() {
+        registerError.apply(void 0, arguments);
+      };
+
+      warnImpl = function warnImpl() {
+        registerWarning.apply(void 0, arguments);
+      };
+
+      if (console.disableLogBox === true) {
+        LogBoxData.setDisabled(true);
+      }
+
+      Object.defineProperty(console, 'disableLogBox', {
+        configurable: true,
+        get: function get() {return LogBoxData.isDisabled();},
+        set: function set(value) {return LogBoxData.setDisabled(value);} });
+
+
+      if (_Platform.default.isTesting) {
+        console.disableLogBox = true;
+      }
+
+      _RCTLog.default.setWarningHandler(function () {
+        registerWarning.apply(void 0, arguments);
+      });
+    } };
+
+
+  var isRCTLogAdviceWarning = function isRCTLogAdviceWarning() {for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {args[_key] = arguments[_key];}
+
+
+    return typeof args[0] === 'string' && args[0].startsWith('(ADVICE)');
+  };
+
+  var isWarningModuleWarning = function isWarningModuleWarning() {for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {args[_key2] = arguments[_key2];}
+    return typeof args[0] === 'string' && args[0].startsWith('Warning: ');
+  };
+
+  var registerWarning = function registerWarning() {
+    try {for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {args[_key3] = arguments[_key3];}
+      if (!isRCTLogAdviceWarning.apply(void 0, args)) {var _parseLogBoxLog =
+        (0, _parseLogBoxLog3.parseLogBoxLog)(args),category = _parseLogBoxLog.category,message = _parseLogBoxLog.message,componentStack = _parseLogBoxLog.componentStack;
+
+        if (!LogBoxData.isMessageIgnored(message.content)) {
+
+          warn.call.apply(warn, [console].concat(args));
+
+          if (!LogBoxData.isLogBoxErrorMessage(message.content)) {
+            LogBoxData.addLog({
+              level: 'warn',
+              category: category,
+              message: message,
+              componentStack: componentStack });
+
+          }
+        }
+      }
+    } catch (err) {
+      LogBoxData.reportLogBoxError(err);
+    }
+  };
+
+  var registerError = function registerError() {
+    try {for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {args[_key4] = arguments[_key4];}
+      if (!isWarningModuleWarning.apply(void 0, args)) {
+
+        error.call.apply(error, [console].concat(args));
+        return;
+      }
+
+      var format = args[0].replace('Warning: ', '');
+      var filterResult = LogBoxData.checkWarningFilter(format);
+      if (filterResult.suppressCompletely) {
+        return;
+      }
+
+      var level = 'error';
+      if (filterResult.suppressDialog_LEGACY === true) {
+        level = 'warn';
+      } else if (filterResult.forceDialogImmediately === true) {
+        level = 'fatal';
+      }
+
+
+      args[0] = "Warning: " + filterResult.finalFormat;var _parseLogBoxLog2 =
+      (0, _parseLogBoxLog3.parseLogBoxLog)(args),category = _parseLogBoxLog2.category,message = _parseLogBoxLog2.message,componentStack = _parseLogBoxLog2.componentStack;
+
+      if (!LogBoxData.isMessageIgnored(message.content)) {
+
+        error.call.apply(error, [console].concat(args));
+
+        if (!LogBoxData.isLogBoxErrorMessage(message.content)) {
+          LogBoxData.addLog({
+            level: level,
+            category: category,
+            message: message,
+            componentStack: componentStack });
+
+        }
+      }
+    } catch (err) {
+      LogBoxData.reportLogBoxError(err);
+    }
+  };
+} else {
+  LogBox = {
+
+    ignoreWarnings: function ignoreWarnings(patterns) {
+
+    },
+
+    ignoreLogs: function ignoreLogs(patterns) {
+
+    },
+
+    install: function install() {
+
+    },
+
+    uninstall: function uninstall() {
+
+    } };
+
+}
+
+module.exports = LogBox;

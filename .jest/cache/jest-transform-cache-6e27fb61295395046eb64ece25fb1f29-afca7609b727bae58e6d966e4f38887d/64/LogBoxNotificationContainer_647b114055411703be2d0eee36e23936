@@ -1,0 +1,102 @@
+bb265066ec5fcd27e2a54636fcc206a4
+
+
+
+
+
+
+
+
+
+
+'use strict';var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports, "__esModule", { value: true });exports._LogBoxNotificationContainer = _LogBoxNotificationContainer;exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+var _StyleSheet = _interopRequireDefault(require("../StyleSheet/StyleSheet"));
+var _View = _interopRequireDefault(require("../Components/View/View"));
+var LogBoxData = _interopRequireWildcard(require("./Data/LogBoxData"));
+var _LogBoxLog = _interopRequireDefault(require("./Data/LogBoxLog"));
+var _LogBoxNotification = _interopRequireDefault(require("./UI/LogBoxNotification"));var _jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native/Libraries/LogBox/LogBoxNotificationContainer.js";
+
+
+
+
+
+
+
+function _LogBoxNotificationContainer(props) {var
+  logs = props.logs;
+
+  var onDismissWarns = function onDismissWarns() {
+    LogBoxData.clearWarnings();
+  };
+  var onDismissErrors = function onDismissErrors() {
+    LogBoxData.clearErrors();
+  };
+
+  var setSelectedLog = function setSelectedLog(index) {
+    LogBoxData.setSelectedLog(index);
+  };
+
+  function openLog(log) {
+    var index = logs.length - 1;
+
+
+    while (index > 0 && logs[index] !== log) {
+      index -= 1;
+    }
+    setSelectedLog(index);
+  }
+
+  if (logs.length === 0 || props.isDisabled === true) {
+    return null;
+  }
+
+  var warnings = logs.filter(function (log) {return log.level === 'warn';});
+  var errors = logs.filter(
+  function (log) {return log.level === 'error' || log.level === 'fatal';});
+
+  return (
+    React.createElement(_View.default, { style: styles.list, __self: this, __source: { fileName: _jsxFileName, lineNumber: 59, columnNumber: 5 } },
+    warnings.length > 0 &&
+    React.createElement(_View.default, { style: styles.toast, __self: this, __source: { fileName: _jsxFileName, lineNumber: 61, columnNumber: 9 } },
+    React.createElement(_LogBoxNotification.default, {
+      log: warnings[warnings.length - 1],
+      level: "warn",
+      totalLogCount: warnings.length,
+      onPressOpen: function onPressOpen() {return openLog(warnings[warnings.length - 1]);},
+      onPressDismiss: onDismissWarns, __self: this, __source: { fileName: _jsxFileName, lineNumber: 62, columnNumber: 11 } })),
+
+
+
+    errors.length > 0 &&
+    React.createElement(_View.default, { style: styles.toast, __self: this, __source: { fileName: _jsxFileName, lineNumber: 72, columnNumber: 9 } },
+    React.createElement(_LogBoxNotification.default, {
+      log: errors[errors.length - 1],
+      level: "error",
+      totalLogCount: errors.length,
+      onPressOpen: function onPressOpen() {return openLog(errors[errors.length - 1]);},
+      onPressDismiss: onDismissErrors, __self: this, __source: { fileName: _jsxFileName, lineNumber: 73, columnNumber: 11 } }))));
+
+
+
+
+
+}
+
+var styles = _StyleSheet.default.create({
+  list: {
+    bottom: 20,
+    left: 10,
+    right: 10,
+    position: 'absolute' },
+
+  toast: {
+    borderRadius: 8,
+    marginBottom: 5,
+    overflow: 'hidden' } });var _default =
+
+
+
+LogBoxData.withSubscription(
+_LogBoxNotificationContainer);exports.default = _default;

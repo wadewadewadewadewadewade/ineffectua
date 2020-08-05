@@ -1,0 +1,155 @@
+bc7b45017143e78279885bbf2d65e2f2
+
+
+
+
+
+
+
+
+
+
+'use strict';function _createForOfIteratorHelperLoose(o, allowArrayLike) {var it;if (typeof Symbol === "undefined" || o[typeof Symbol === "function" ? Symbol.iterator : "@@iterator"] == null) {if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {if (it) o = it;var i = 0;return function () {if (i >= o.length) return { done: true };return { done: false, value: o[i++] };};}throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");}it = o[typeof Symbol === "function" ? Symbol.iterator : "@@iterator"]();return it.next.bind(it);}function _unsupportedIterableToArray(o, minLen) {if (!o) return;if (typeof o === "string") return _arrayLikeToArray(o, minLen);var n = Object.prototype.toString.call(o).slice(8, -1);if (n === "Object" && o.constructor) n = o.constructor.name;if (n === "Map" || n === "Set") return Array.from(o);if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);}function _arrayLikeToArray(arr, len) {if (len == null || len > arr.length) len = arr.length;for (var i = 0, arr2 = new Array(len); i < len; i++) {arr2[i] = arr[i];}return arr2;}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var observers = new Set();
+var ignorePatterns = new Set();
+var registry = new Map();
+
+var disabled = false;
+var projection = new Map();
+var updateTimeout = null;
+
+function handleUpdate() {
+  projection = new Map();
+  if (!disabled) {
+    for (var _iterator = _createForOfIteratorHelperLoose(registry), _step; !(_step = _iterator()).done;) {var _ref = _step.value;var _ref2 = require("@babel/runtime/helpers/slicedToArray")(_ref, 2);var category = _ref2[0];var warnings = _ref2[1];
+      var filtered = warnings.filter(
+      function (warning) {return !YellowBoxRegistry.isWarningIgnored(warning.message);});
+
+      if (filtered.length > 0) {
+        projection.set(category, filtered);
+      }
+    }
+  }
+  if (updateTimeout == null) {
+    updateTimeout = setImmediate(function () {
+      updateTimeout = null;
+      for (var _iterator2 = _createForOfIteratorHelperLoose(observers), _step2; !(_step2 = _iterator2()).done;) {var _ref3 = _step2.value;var observer = _ref3.observer;
+        observer(projection);
+      }
+    });
+  }
+}
+
+var YellowBoxRegistry = {
+  isWarningIgnored: function isWarningIgnored(message) {
+    for (var _iterator3 = _createForOfIteratorHelperLoose(ignorePatterns), _step3; !(_step3 = _iterator3()).done;) {var pattern = _step3.value;
+      if (pattern instanceof RegExp && pattern.test(message.content)) {
+        return true;
+      } else if (
+      typeof pattern === 'string' &&
+      message.content.includes(pattern))
+      {
+        return true;
+      }
+    }
+    return false;
+  },
+  add: function add(_ref4)
+
+
+
+
+
+
+
+  {var category = _ref4.category,message = _ref4.message,stack = _ref4.stack;
+    var warnings = registry.get(category);
+    if (warnings == null) {
+      warnings = [];
+    }
+    warnings = [].concat(require("@babel/runtime/helpers/toConsumableArray")(warnings), [new (require('./YellowBoxWarning'))(message, stack)]);
+
+    registry.delete(category);
+    registry.set(category, warnings);
+
+    handleUpdate();
+  },
+
+  delete: function _delete(category) {
+    if (registry.has(category)) {
+      registry.delete(category);
+      handleUpdate();
+    }
+  },
+
+  clear: function clear() {
+    if (registry.size > 0) {
+      registry.clear();
+      handleUpdate();
+    }
+  },
+
+  addIgnorePatterns: function addIgnorePatterns(patterns) {
+    var newPatterns = patterns.filter(function (pattern) {
+      if (pattern instanceof RegExp) {
+        for (var _iterator4 = _createForOfIteratorHelperLoose(ignorePatterns.entries()), _step4; !(_step4 = _iterator4()).done;) {var existingPattern = _step4.value;
+          if (
+          existingPattern instanceof RegExp &&
+          existingPattern.toString() === pattern.toString())
+          {
+            return false;
+          }
+        }
+        return true;
+      }
+      return !ignorePatterns.has(pattern);
+    });
+    if (newPatterns.length === 0) {
+      return;
+    }
+    for (var _iterator5 = _createForOfIteratorHelperLoose(newPatterns), _step5; !(_step5 = _iterator5()).done;) {var pattern = _step5.value;
+      ignorePatterns.add(pattern);
+    }
+    handleUpdate();
+  },
+
+  setDisabled: function setDisabled(value) {
+    if (value === disabled) {
+      return;
+    }
+    disabled = value;
+    handleUpdate();
+  },
+
+  isDisabled: function isDisabled() {
+    return disabled;
+  },
+
+  observe: function observe(observer) {
+    var subscription = { observer: observer };
+    observers.add(subscription);
+    observer(projection);
+    return {
+      unsubscribe: function unsubscribe() {
+        observers.delete(subscription);
+      } };
+
+  } };
+
+
+module.exports = YellowBoxRegistry;

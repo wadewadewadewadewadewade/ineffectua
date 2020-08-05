@@ -1,0 +1,174 @@
+cce2ab731dcd1fcfa71da56b8f18df0c
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.CheckboxAndroid = exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+var _color = _interopRequireDefault(require("color"));
+
+var _MaterialCommunityIcon = _interopRequireDefault(require("../MaterialCommunityIcon"));
+
+var _TouchableRipple = _interopRequireDefault(require("../TouchableRipple"));
+
+
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _extends() {_extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}return target;};return _extends.apply(this, arguments);}
+
+function _objectWithoutProperties(source, excluded) {if (source == null) return {};var target = _objectWithoutPropertiesLoose(source, excluded);var key, i;if (Object.getOwnPropertySymbols) {var sourceSymbolKeys = Object.getOwnPropertySymbols(source);for (i = 0; i < sourceSymbolKeys.length; i++) {key = sourceSymbolKeys[i];if (excluded.indexOf(key) >= 0) continue;if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;target[key] = source[key];}}return target;}
+
+function _objectWithoutPropertiesLoose(source, excluded) {if (source == null) return {};var target = {};var sourceKeys = Object.keys(source);var key, i;for (i = 0; i < sourceKeys.length; i++) {key = sourceKeys[i];if (excluded.indexOf(key) >= 0) continue;target[key] = source[key];}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+
+var ANIMATION_DURATION = 100;var
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CheckboxAndroid = function (_React$Component) {require("@babel/runtime/helpers/inherits")(CheckboxAndroid, _React$Component);var _super = _createSuper(CheckboxAndroid);
+  function CheckboxAndroid() {var _this;require("@babel/runtime/helpers/classCallCheck")(this, CheckboxAndroid);for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {args[_key] = arguments[_key];}
+    _this = _super.call.apply(_super, [this].concat(args));
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "state", {
+      scaleAnim: new (require("react-native").Animated.Value)(1) });return _this;
+
+  }require("@babel/runtime/helpers/createClass")(CheckboxAndroid, [{ key: "componentDidUpdate", value: function componentDidUpdate(
+
+    prevProps) {
+      if (prevProps.status === this.props.status) {
+        return;
+      }
+
+      var checked = this.props.status === 'checked';var
+
+      animation =
+      this.props.theme.animation;
+
+      require("react-native").Animated.sequence([require("react-native").Animated.timing(this.state.scaleAnim, {
+        toValue: 0.85,
+        duration: checked ? ANIMATION_DURATION * animation.scale : 0,
+        useNativeDriver: false }),
+      require("react-native").Animated.timing(this.state.scaleAnim, {
+        toValue: 1,
+        duration: checked ? ANIMATION_DURATION * animation.scale : ANIMATION_DURATION * animation.scale * 1.75,
+        useNativeDriver: false })]).
+      start();
+    } }, { key: "render", value: function render()
+
+    {
+      var _this$props = this.props,
+
+      status =
+
+
+
+      _this$props.status,disabled = _this$props.disabled,onPress = _this$props.onPress,theme = _this$props.theme,
+      rest = _objectWithoutProperties(_this$props, ["status", "disabled", "onPress", "theme"]);
+
+      var checked = status === 'checked';
+      var indeterminate = status === 'indeterminate';
+      var checkedColor = this.props.color || theme.colors.accent;
+      var uncheckedColor = this.props.uncheckedColor || (0, _color.default)(theme.colors.text).alpha(theme.dark ? 0.7 : 0.54).rgb().string();
+      var rippleColor, checkboxColor;
+
+      if (disabled) {
+        rippleColor = (0, _color.default)(theme.colors.text).alpha(0.16).rgb().string();
+        checkboxColor = theme.colors.disabled;
+      } else {
+        rippleColor = (0, _color.default)(checkedColor).fade(0.32).rgb().string();
+        checkboxColor = checked ? checkedColor : uncheckedColor;
+      }
+
+      var borderWidth = this.state.scaleAnim.interpolate({
+        inputRange: [0.8, 1],
+        outputRange: [7, 0] });
+
+      var icon = indeterminate ? 'minus-box' : checked ? 'checkbox-marked' : 'checkbox-blank-outline';
+      return React.createElement(_TouchableRipple.default, _extends({}, rest, {
+        borderless: true,
+        rippleColor: rippleColor,
+        onPress: onPress,
+        disabled: disabled,
+        accessibilityTraits: disabled ? ['button', 'disabled'] : 'button',
+        accessibilityComponentType: "button",
+        accessibilityRole: "button",
+        accessibilityState: {
+          disabled: disabled },
+
+        accessibilityLiveRegion: "polite",
+        style: styles.container }),
+      React.createElement(require("react-native").Animated.View, {
+        style: {
+          transform: [{
+            scale: this.state.scaleAnim }] } },
+
+
+      React.createElement(_MaterialCommunityIcon.default, {
+        allowFontScaling: false,
+        name: icon,
+        size: 24,
+        color: checkboxColor,
+        direction: "ltr" }),
+      React.createElement(require("react-native").View, {
+        style: [require("react-native").StyleSheet.absoluteFill, styles.fillContainer] },
+      React.createElement(require("react-native").Animated.View, {
+        style: [styles.fill, {
+          borderColor: checkboxColor },
+        {
+          borderWidth: borderWidth }] }))));
+
+
+    } }]);return CheckboxAndroid;}(React.Component);
+
+
+
+exports.CheckboxAndroid = CheckboxAndroid;
+
+_defineProperty(CheckboxAndroid, "displayName", 'Checkbox.Android');
+
+var styles = require("react-native").StyleSheet.create({
+  container: {
+    borderRadius: 18,
+    width: 36,
+    height: 36,
+    padding: 6 },
+
+  fillContainer: {
+    alignItems: 'center',
+    justifyContent: 'center' },
+
+  fill: {
+    height: 14,
+    width: 14 } });
+
+
+
+var _default = (0, require("../../core/theming").withTheme)(CheckboxAndroid);
+
+
+exports.default = _default;

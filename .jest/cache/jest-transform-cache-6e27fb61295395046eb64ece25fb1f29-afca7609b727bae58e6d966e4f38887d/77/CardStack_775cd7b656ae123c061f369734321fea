@@ -1,0 +1,464 @@
+72c20aa97e6aade33df77aea043e5235
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+
+
+
+
+
+
+
+var _CardContainer = _interopRequireDefault(require("./CardContainer"));
+
+
+
+
+
+
+
+var _HeaderShownContext = _interopRequireDefault(require("../../utils/HeaderShownContext"));
+
+var _getDistanceForDirection = _interopRequireDefault(require("../../utils/getDistanceForDirection"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function _extends() {_extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}return target;};return _extends.apply(this, arguments);}
+
+function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}
+
+function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}
+
+function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+var EPSILON = 0.01;
+var FALLBACK_DESCRIPTOR = Object.freeze({
+  options: {} });
+
+
+var getHeaderHeights = function getHeaderHeights(routes, insets, descriptors, layout, previous) {
+  return routes.reduce(function (acc, curr) {var _ref =
+
+
+    descriptors[curr.key] || {},_ref$options = _ref.options,options = _ref$options === void 0 ? {} : _ref$options;
+
+    var style = require("react-native").StyleSheet.flatten(options.headerStyle || {});
+
+    var height = typeof style.height === 'number' ? style.height : previous[curr.key];
+
+    var safeAreaInsets = _objectSpread(_objectSpread({}, insets), options.safeAreaInsets);var _options$headerStatus =
+
+
+
+    options.headerStatusBarHeight,headerStatusBarHeight = _options$headerStatus === void 0 ? safeAreaInsets.top : _options$headerStatus;
+    acc[curr.key] = typeof height === 'number' ? height : (0, require("../Header/HeaderSegment").getDefaultHeaderHeight)(layout, headerStatusBarHeight);
+    return acc;
+  }, {});
+};
+
+var getDistanceFromOptions = function getDistanceFromOptions(mode, layout, descriptor) {var _ref2 =
+
+
+  (descriptor === null || descriptor === void 0 ? void 0 : descriptor.options) || {},_ref2$gestureDirectio = _ref2.gestureDirection,gestureDirection = _ref2$gestureDirectio === void 0 ? mode === 'modal' ? require("../../TransitionConfigs/TransitionPresets").ModalTransition.gestureDirection : require("../../TransitionConfigs/TransitionPresets").DefaultTransition.gestureDirection : _ref2$gestureDirectio;
+  return (0, _getDistanceForDirection.default)(layout, gestureDirection);
+};
+
+var getProgressFromGesture = function getProgressFromGesture(mode, gesture, layout, descriptor) {
+  var distance = getDistanceFromOptions(mode, {
+
+
+    width: Math.max(1, layout.width),
+    height: Math.max(1, layout.height) },
+  descriptor);
+
+  if (distance > 0) {
+    return gesture.interpolate({
+      inputRange: [0, distance],
+      outputRange: [1, 0] });
+
+  }
+
+  return gesture.interpolate({
+    inputRange: [distance, 0],
+    outputRange: [0, 1] });
+
+};var
+
+CardStack = function (_React$Component) {require("@babel/runtime/helpers/inherits")(CardStack, _React$Component);var _super = _createSuper(CardStack);require("@babel/runtime/helpers/createClass")(CardStack, null, [{ key: "getDerivedStateFromProps", value: function getDerivedStateFromProps(
+    props, state) {
+      if (props.routes === state.routes && props.descriptors === state.descriptors) {
+        return null;
+      }
+
+      var gestures = props.routes.reduce(function (acc, curr) {
+        var descriptor = props.descriptors[curr.key];var _ref3 =
+
+
+        (descriptor === null || descriptor === void 0 ? void 0 : descriptor.options) || {},animationEnabled = _ref3.animationEnabled;
+        acc[curr.key] = state.gestures[curr.key] || new (require("react-native").Animated.Value)(props.openingRouteKeys.includes(curr.key) && animationEnabled !== false ? getDistanceFromOptions(props.mode, state.layout, descriptor) : 0);
+        return acc;
+      }, {});
+      return {
+        routes: props.routes,
+        scenes: props.routes.map(function (route, index, self) {
+          var previousRoute = self[index - 1];
+          var nextRoute = self[index + 1];
+          var oldScene = state.scenes[index];
+          var currentGesture = gestures[route.key];
+          var previousGesture = previousRoute ? gestures[previousRoute.key] : undefined;
+          var nextGesture = nextRoute ? gestures[nextRoute.key] : undefined;
+          var descriptor = props.descriptors[route.key] || state.descriptors[route.key] || (oldScene ? oldScene.descriptor : FALLBACK_DESCRIPTOR);
+          var nextDescriptor = props.descriptors[nextRoute === null || nextRoute === void 0 ? void 0 : nextRoute.key] || state.descriptors[nextRoute === null || nextRoute === void 0 ? void 0 : nextRoute.key];
+          var previousDescriptor = props.descriptors[previousRoute === null || previousRoute === void 0 ? void 0 : previousRoute.key] || state.descriptors[previousRoute === null || previousRoute === void 0 ? void 0 : previousRoute.key];
+          var scene = {
+            route: route,
+            descriptor: descriptor,
+            progress: {
+              current: getProgressFromGesture(props.mode, currentGesture, state.layout, descriptor),
+              next: nextGesture ? getProgressFromGesture(props.mode, nextGesture, state.layout, nextDescriptor) : undefined,
+              previous: previousGesture ? getProgressFromGesture(props.mode, previousGesture, state.layout, previousDescriptor) : undefined },
+
+            __memo: [route, state.layout, descriptor, nextDescriptor, previousDescriptor, currentGesture, nextGesture, previousGesture] };
+
+
+          if (oldScene && scene.__memo.every(function (it, i) {
+
+            return oldScene.__memo[i] === it;
+          })) {
+            return oldScene;
+          }
+
+          return scene;
+        }),
+        gestures: gestures,
+        descriptors: props.descriptors,
+        headerHeights: getHeaderHeights(props.routes, props.insets, state.descriptors, state.layout, state.headerHeights) };
+
+    } }]);
+
+  function CardStack(_props) {var _this;require("@babel/runtime/helpers/classCallCheck")(this, CardStack);
+    _this = _super.call(this, _props);
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handleLayout", function (e) {var _e$nativeEvent$layout =
+
+
+
+      e.nativeEvent.layout,height = _e$nativeEvent$layout.height,width = _e$nativeEvent$layout.width;
+      var layout = {
+        width: width,
+        height: height };
+
+      _this.setState(function (state, props) {
+        if (height === state.layout.height && width === state.layout.width) {
+          return null;
+        }
+
+        return {
+          layout: layout,
+          headerHeights: getHeaderHeights(props.routes, props.insets, state.descriptors, layout, state.headerHeights) };
+
+      });
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "handleHeaderLayout", function (_ref4)
+
+
+    {var route = _ref4.route,height = _ref4.height;
+      _this.setState(function (_ref5)
+
+      {var headerHeights = _ref5.headerHeights;
+        var previousHeight = headerHeights[route.key];
+
+        if (previousHeight === height) {
+          return null;
+        }
+
+        return {
+          headerHeights: _objectSpread(_objectSpread({}, headerHeights), {}, require("@babel/runtime/helpers/defineProperty")({},
+          route.key, height)) };
+
+
+      });
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "getFocusedRoute", function () {var
+
+      state =
+      _this.props.state;
+      return state.routes[state.index];
+    });
+
+    _defineProperty(require("@babel/runtime/helpers/assertThisInitialized")(_this), "getPreviousScene", function (_ref6)
+
+    {var route = _ref6.route;var
+
+      getPreviousRoute =
+      _this.props.getPreviousRoute;var
+
+      scenes =
+      _this.state.scenes;
+      var previousRoute = getPreviousRoute({
+        route: route });
+
+
+      if (previousRoute) {
+        var previousScene = scenes.find(function (scene) {return scene.route.key === previousRoute.key;});
+        return previousScene;
+      }
+
+      return undefined;
+    });var _reactNative$Dimensio =
+
+
+
+
+    require("react-native").Dimensions.get('window'),_reactNative$Dimensio2 = _reactNative$Dimensio.height,_height = _reactNative$Dimensio2 === void 0 ? 0 : _reactNative$Dimensio2,_reactNative$Dimensio3 = _reactNative$Dimensio.width,_width = _reactNative$Dimensio3 === void 0 ? 0 : _reactNative$Dimensio3;
+
+    _this.state = {
+      routes: [],
+      scenes: [],
+      gestures: {},
+      layout: {
+        height: _height,
+        width: _width },
+
+      descriptors: _this.props.descriptors,
+
+
+
+
+
+      headerHeights: {} };return _this;
+
+  }require("@babel/runtime/helpers/createClass")(CardStack, [{ key: "render", value: function render()
+
+    {var _this2 = this;var _this$props =
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      this.props,mode = _this$props.mode,insets = _this$props.insets,descriptors = _this$props.descriptors,state = _this$props.state,routes = _this$props.routes,closingRouteKeys = _this$props.closingRouteKeys,onOpenRoute = _this$props.onOpenRoute,onCloseRoute = _this$props.onCloseRoute,getGesturesEnabled = _this$props.getGesturesEnabled,renderHeader = _this$props.renderHeader,renderScene = _this$props.renderScene,headerMode = _this$props.headerMode,onTransitionStart = _this$props.onTransitionStart,onTransitionEnd = _this$props.onTransitionEnd,onPageChangeStart = _this$props.onPageChangeStart,onPageChangeConfirm = _this$props.onPageChangeConfirm,onPageChangeCancel = _this$props.onPageChangeCancel,onGestureStart = _this$props.onGestureStart,onGestureEnd = _this$props.onGestureEnd,onGestureCancel = _this$props.onGestureCancel;var _this$state =
+
+
+
+
+
+      this.state,scenes = _this$state.scenes,layout = _this$state.layout,gestures = _this$state.gestures,headerHeights = _this$state.headerHeights;
+      var focusedRoute = state.routes[state.index];
+      var focusedDescriptor = descriptors[focusedRoute.key];
+      var focusedOptions = focusedDescriptor ? focusedDescriptor.options : {};
+      var defaultTransitionPreset = mode === 'modal' ? require("../../TransitionConfigs/TransitionPresets").ModalTransition : require("../../TransitionConfigs/TransitionPresets").DefaultTransition;
+
+      if (headerMode === 'screen') {
+        defaultTransitionPreset = _objectSpread(_objectSpread({}, defaultTransitionPreset), {}, {
+          headerStyleInterpolator: require("../../TransitionConfigs/HeaderStyleInterpolators").forNoAnimation });
+
+      }var _ref7 =
+
+
+
+
+
+
+      focusedOptions.safeAreaInsets || {},_ref7$top = _ref7.top,top = _ref7$top === void 0 ? insets.top : _ref7$top,_ref7$right = _ref7.right,right = _ref7$right === void 0 ? insets.right : _ref7$right,_ref7$bottom = _ref7.bottom,bottom = _ref7$bottom === void 0 ? insets.bottom : _ref7$bottom,_ref7$left = _ref7.left,left = _ref7$left === void 0 ? insets.left : _ref7$left;
+
+
+      var isScreensEnabled = require("react-native").Platform.OS !== 'ios' && mode !== 'modal';
+      return React.createElement(_HeaderShownContext.default.Consumer, null, function (isParentHeaderShown) {
+        var isFloatHeaderAbsolute = headerMode === 'float' ? _this2.state.scenes.slice(-2).some(function (scene) {var
+
+          descriptor =
+          scene.descriptor;
+          var options = descriptor ? descriptor.options : {};var
+
+          headerTransparent =
+
+          options.headerTransparent,_options$headerShown = options.headerShown,headerShown = _options$headerShown === void 0 ? isParentHeaderShown === false : _options$headerShown;
+
+          if (headerTransparent || headerShown === false) {
+            return true;
+          }
+
+          return false;
+        }) : false;
+        var floatingHeader = headerMode === 'float' ? React.createElement(React.Fragment, {
+          key: "header" },
+        renderHeader({
+          mode: 'float',
+          layout: layout,
+          insets: {
+            top: top,
+            right: right,
+            bottom: bottom,
+            left: left },
+
+          scenes: scenes,
+          getPreviousScene: _this2.getPreviousScene,
+          getFocusedRoute: _this2.getFocusedRoute,
+          onContentHeightChange: _this2.handleHeaderLayout,
+          gestureDirection: focusedOptions.gestureDirection !== undefined ? focusedOptions.gestureDirection : defaultTransitionPreset.gestureDirection,
+          styleInterpolator: focusedOptions.headerStyleInterpolator !== undefined ? focusedOptions.headerStyleInterpolator : defaultTransitionPreset.headerStyleInterpolator,
+          style: [styles.floating, isFloatHeaderAbsolute && styles.absolute] })) :
+        null;
+        return React.createElement(React.Fragment, null, isFloatHeaderAbsolute ? null : floatingHeader, React.createElement(require("../Screens").MaybeScreenContainer, {
+          enabled: isScreensEnabled,
+          style: styles.container,
+          onLayout: _this2.handleLayout },
+        routes.map(function (route, index, self) {
+          var focused = focusedRoute.key === route.key;
+          var gesture = gestures[route.key];
+          var scene = scenes[index];
+          var isScreenActive = scene.progress.next ? scene.progress.next.interpolate({
+            inputRange: [0, 1 - EPSILON, 1],
+            outputRange: [1, 1, 0],
+            extrapolate: 'clamp' }) :
+          1;var _ref8 =
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          scene.descriptor ? scene.descriptor.options : {},safeAreaInsets = _ref8.safeAreaInsets,_ref8$headerShown = _ref8.headerShown,headerShown = _ref8$headerShown === void 0 ? isParentHeaderShown === false : _ref8$headerShown,headerTransparent = _ref8.headerTransparent,cardShadowEnabled = _ref8.cardShadowEnabled,cardOverlayEnabled = _ref8.cardOverlayEnabled,cardOverlay = _ref8.cardOverlay,cardStyle = _ref8.cardStyle,animationEnabled = _ref8.animationEnabled,gestureResponseDistance = _ref8.gestureResponseDistance,gestureVelocityImpact = _ref8.gestureVelocityImpact,_ref8$gestureDirectio = _ref8.gestureDirection,gestureDirection = _ref8$gestureDirectio === void 0 ? defaultTransitionPreset.gestureDirection : _ref8$gestureDirectio,_ref8$transitionSpec = _ref8.transitionSpec,transitionSpec = _ref8$transitionSpec === void 0 ? defaultTransitionPreset.transitionSpec : _ref8$transitionSpec,_ref8$cardStyleInterp = _ref8.cardStyleInterpolator,cardStyleInterpolator = _ref8$cardStyleInterp === void 0 ? animationEnabled === false ? require("../../TransitionConfigs/CardStyleInterpolators").forNoAnimation : defaultTransitionPreset.cardStyleInterpolator : _ref8$cardStyleInterp,_ref8$headerStyleInte = _ref8.headerStyleInterpolator,headerStyleInterpolator = _ref8$headerStyleInte === void 0 ? defaultTransitionPreset.headerStyleInterpolator : _ref8$headerStyleInte;
+          var transitionConfig = {
+            gestureDirection: gestureDirection,
+            transitionSpec: transitionSpec,
+            cardStyleInterpolator: cardStyleInterpolator,
+            headerStyleInterpolator: headerStyleInterpolator };
+
+
+
+
+
+
+
+          if (index !== self.length - 1) {
+            var nextScene = scenes[index + 1];
+
+            if (nextScene) {var _ref9 =
+
+
+
+
+
+
+              nextScene.descriptor ? nextScene.descriptor.options : {},_animationEnabled = _ref9.animationEnabled,_ref9$gestureDirectio = _ref9.gestureDirection,_gestureDirection = _ref9$gestureDirectio === void 0 ? defaultTransitionPreset.gestureDirection : _ref9$gestureDirectio,_ref9$transitionSpec = _ref9.transitionSpec,_transitionSpec = _ref9$transitionSpec === void 0 ? defaultTransitionPreset.transitionSpec : _ref9$transitionSpec,_ref9$cardStyleInterp = _ref9.cardStyleInterpolator,_cardStyleInterpolator = _ref9$cardStyleInterp === void 0 ? _animationEnabled === false ? require("../../TransitionConfigs/CardStyleInterpolators").forNoAnimation : defaultTransitionPreset.cardStyleInterpolator : _ref9$cardStyleInterp,_ref9$headerStyleInte = _ref9.headerStyleInterpolator,_headerStyleInterpolator = _ref9$headerStyleInte === void 0 ? defaultTransitionPreset.headerStyleInterpolator : _ref9$headerStyleInte;
+              transitionConfig = {
+                gestureDirection: _gestureDirection,
+                transitionSpec: _transitionSpec,
+                cardStyleInterpolator: _cardStyleInterpolator,
+                headerStyleInterpolator: _headerStyleInterpolator };
+
+            }
+          }var _ref10 =
+
+
+
+
+
+
+          safeAreaInsets || {},_ref10$top = _ref10.top,safeAreaInsetTop = _ref10$top === void 0 ? insets.top : _ref10$top,_ref10$right = _ref10.right,safeAreaInsetRight = _ref10$right === void 0 ? insets.right : _ref10$right,_ref10$bottom = _ref10.bottom,safeAreaInsetBottom = _ref10$bottom === void 0 ? insets.bottom : _ref10$bottom,_ref10$left = _ref10.left,safeAreaInsetLeft = _ref10$left === void 0 ? insets.left : _ref10$left;
+          var headerHeight = headerMode !== 'none' && headerShown !== false ? headerHeights[route.key] : 0;
+          return React.createElement(require("../Screens").MaybeScreen, {
+            key: route.key,
+            style: require("react-native").StyleSheet.absoluteFill,
+            enabled: isScreensEnabled,
+            active: isScreenActive,
+            pointerEvents: "box-none" },
+          React.createElement(_CardContainer.default, _extends({
+            index: index,
+            active: index === self.length - 1,
+            focused: focused,
+            closing: closingRouteKeys.includes(route.key),
+            layout: layout,
+            gesture: gesture,
+            scene: scene,
+            safeAreaInsetTop: safeAreaInsetTop,
+            safeAreaInsetRight: safeAreaInsetRight,
+            safeAreaInsetBottom: safeAreaInsetBottom,
+            safeAreaInsetLeft: safeAreaInsetLeft,
+            cardOverlay: cardOverlay,
+            cardOverlayEnabled: cardOverlayEnabled,
+            cardShadowEnabled: cardShadowEnabled,
+            cardStyle: cardStyle,
+            onPageChangeStart: onPageChangeStart,
+            onPageChangeConfirm: onPageChangeConfirm,
+            onPageChangeCancel: onPageChangeCancel,
+            onGestureStart: onGestureStart,
+            onGestureCancel: onGestureCancel,
+            onGestureEnd: onGestureEnd,
+            gestureResponseDistance: gestureResponseDistance,
+            headerHeight: headerHeight,
+            onHeaderHeightChange: _this2.handleHeaderLayout,
+            getPreviousScene: _this2.getPreviousScene,
+            getFocusedRoute: _this2.getFocusedRoute,
+            mode: mode,
+            headerMode: headerMode,
+            headerShown: headerShown,
+            hasAbsoluteHeader: isFloatHeaderAbsolute && !headerTransparent,
+            renderHeader: renderHeader,
+            renderScene: renderScene,
+            onOpenRoute: onOpenRoute,
+            onCloseRoute: onCloseRoute,
+            onTransitionStart: onTransitionStart,
+            onTransitionEnd: onTransitionEnd,
+            gestureEnabled: index !== 0 && getGesturesEnabled({
+              route: route }),
+
+            gestureVelocityImpact: gestureVelocityImpact },
+          transitionConfig)));
+        })), isFloatHeaderAbsolute ? floatingHeader : null);
+      });
+    } }]);return CardStack;}(React.Component);
+
+
+
+exports.default = CardStack;
+
+var styles = require("react-native").StyleSheet.create({
+  container: {
+    flex: 1 },
+
+  absolute: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0 },
+
+  floating: {
+    zIndex: 1 } });

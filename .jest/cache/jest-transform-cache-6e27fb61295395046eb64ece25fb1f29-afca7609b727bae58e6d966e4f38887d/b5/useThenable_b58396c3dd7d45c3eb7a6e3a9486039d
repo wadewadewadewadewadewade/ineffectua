@@ -1,0 +1,49 @@
+775a50467f0cc85862674b94b6970b20
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = useThenable;
+
+var React = _interopRequireWildcard(require("react"));
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function useThenable(create) {var _React$useState =
+  React.useState(create),_React$useState2 = require("@babel/runtime/helpers/slicedToArray")(_React$useState, 1),promise = _React$useState2[0];
+
+  var resolved = false;
+  var value;
+  promise.then(function (result) {
+    resolved = true;
+    value = result;
+  });var _React$useState3 =
+  React.useState([resolved, value]),_React$useState4 = require("@babel/runtime/helpers/slicedToArray")(_React$useState3, 2),state = _React$useState4[0],setState = _React$useState4[1];
+  React.useEffect(function () {
+    var cancelled = false;
+
+    var resolve = function resolve() {var result;return require("@babel/runtime/regenerator").async(function resolve$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:_context.prev = 0;_context.next = 3;return require("@babel/runtime/regenerator").awrap(
+
+
+
+              promise);case 3:result = _context.sent;case 4:_context.prev = 4;
+
+              if (!cancelled) {
+                setState([true, result]);
+              }return _context.finish(4);case 7:case "end":return _context.stop();}}}, null, null, [[0,, 4, 7]], Promise);};
+
+
+
+    if (!resolved) {
+      resolve();
+    }
+
+    return function () {
+      cancelled = true;
+    };
+  }, [promise, resolved]);
+  return state;
+}

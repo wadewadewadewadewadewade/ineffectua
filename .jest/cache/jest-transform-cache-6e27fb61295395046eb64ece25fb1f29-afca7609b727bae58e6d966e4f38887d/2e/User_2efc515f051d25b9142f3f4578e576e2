@@ -1,0 +1,14 @@
+5f00ef28f7df2f1b4492aaeb03bcb52d
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const User_1 = require("../actions/User");
+function user(state = null, action) {
+    switch (action.type) {
+        case User_1.SET_AUTHED_USER:
+            return action.id;
+        default:
+            return state;
+    }
+}
+exports.default = user;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2FkZS9wcm9qZWN0cy9pbmVmZmVjdHVhL3NyYy9yZWR1Y2Vycy9Vc2VyLnRzIiwibWFwcGluZ3MiOiI7O0FBQUEsMENBQWlEO0FBRWpELFNBQXdCLElBQUksQ0FBRSxLQUFLLEdBQUcsSUFBSSxFQUFFLE1BQVc7SUFDckQsUUFBUSxNQUFNLENBQUMsSUFBSSxFQUFFO1FBQ25CLEtBQUssc0JBQWU7WUFDbEIsT0FBTyxNQUFNLENBQUMsRUFBRSxDQUFBO1FBQ2xCO1lBQ0UsT0FBTyxLQUFLLENBQUE7S0FDZjtBQUNILENBQUM7QUFQRCx1QkFPQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvaG9tZS93YWRlL3Byb2plY3RzL2luZWZmZWN0dWEvc3JjL3JlZHVjZXJzL1VzZXIudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgU0VUX0FVVEhFRF9VU0VSIH0gZnJvbSAnLi4vYWN0aW9ucy9Vc2VyJ1xuXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiB1c2VyIChzdGF0ZSA9IG51bGwsIGFjdGlvbjogYW55KSB7XG4gIHN3aXRjaCAoYWN0aW9uLnR5cGUpIHtcbiAgICBjYXNlIFNFVF9BVVRIRURfVVNFUiA6XG4gICAgICByZXR1cm4gYWN0aW9uLmlkXG4gICAgZGVmYXVsdCA6XG4gICAgICByZXR1cm4gc3RhdGVcbiAgfVxufSJdLCJ2ZXJzaW9uIjozfQ==

@@ -1,0 +1,70 @@
+5fbd9a40b1f8f56b6fa70619e7d66fe6
+"use strict";function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = require("@babel/runtime/helpers/getPrototypeOf")(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = require("@babel/runtime/helpers/getPrototypeOf")(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return require("@babel/runtime/helpers/possibleConstructorReturn")(this, result);};}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+
+
+var _reactNativeReanimated = _interopRequireDefault(require("react-native-reanimated"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var
+
+TabBarIcon = function (_react$default$Compon) {require("@babel/runtime/helpers/inherits")(TabBarIcon, _react$default$Compon);var _super = _createSuper(TabBarIcon);function TabBarIcon() {require("@babel/runtime/helpers/classCallCheck")(this, TabBarIcon);return _super.apply(this, arguments);}require("@babel/runtime/helpers/createClass")(TabBarIcon, [{ key: "render", value: function render()
+    {var _this$props =
+
+
+
+
+
+
+
+
+
+      this.props,route = _this$props.route,activeOpacity = _this$props.activeOpacity,inactiveOpacity = _this$props.inactiveOpacity,activeTintColor = _this$props.activeTintColor,inactiveTintColor = _this$props.inactiveTintColor,renderIcon = _this$props.renderIcon,horizontal = _this$props.horizontal,style = _this$props.style;
+
+
+      return _react.default.createElement(require("react-native").View, {
+        style: style },
+      _react.default.createElement(_reactNativeReanimated.default.View, {
+        style: [styles.icon, {
+          opacity: activeOpacity }] },
+
+      renderIcon({
+        route: route,
+        focused: true,
+        horizontal: horizontal,
+        tintColor: activeTintColor })),
+      _react.default.createElement(_reactNativeReanimated.default.View, {
+        style: [styles.icon, {
+          opacity: inactiveOpacity }] },
+
+      renderIcon({
+        route: route,
+        focused: false,
+        horizontal: horizontal,
+        tintColor: inactiveTintColor })));
+
+    } }]);return TabBarIcon;}(_react.default.Component);
+
+
+
+exports.default = TabBarIcon;
+
+var styles = require("react-native").StyleSheet.create({
+  icon: {
+
+
+
+    position: 'absolute',
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    width: '100%',
+
+    minWidth: 25 } });

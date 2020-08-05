@@ -1,0 +1,7 @@
+ddb866124c795133d9e984eb3255a872
+"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.UpdateEventType = void 0;var UpdateEventType;exports.UpdateEventType = UpdateEventType;
+(function (UpdateEventType) {
+  UpdateEventType["UPDATE_AVAILABLE"] = "updateAvailable";
+  UpdateEventType["NO_UPDATE_AVAILABLE"] = "noUpdateAvailable";
+  UpdateEventType["ERROR"] = "error";
+})(UpdateEventType || (exports.UpdateEventType = UpdateEventType = {}));

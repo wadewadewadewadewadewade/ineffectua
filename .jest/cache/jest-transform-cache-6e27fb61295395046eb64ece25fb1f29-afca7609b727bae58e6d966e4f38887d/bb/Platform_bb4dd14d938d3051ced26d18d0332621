@@ -1,0 +1,6 @@
+ba07c1992f255a18596cafa58f2374b3
+"use strict";Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _reactNative = require("react-native");
+var Platform = {
+  OS: _reactNative.Platform.OS };var _default =
+
+Platform;exports.default = _default;

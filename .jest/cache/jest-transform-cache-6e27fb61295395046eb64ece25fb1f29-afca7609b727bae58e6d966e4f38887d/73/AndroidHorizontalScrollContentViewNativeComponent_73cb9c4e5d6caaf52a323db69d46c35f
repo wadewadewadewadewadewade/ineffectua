@@ -1,0 +1,41 @@
+869ec612202e92cd0bde1eaf1ccc77d9
+
+
+
+
+
+
+
+
+
+
+'use strict';Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;
+
+
+
+
+
+
+
+var AndroidHorizontalScrollContentViewViewConfig = {
+  uiViewClassName: 'AndroidHorizontalScrollContentView',
+  bubblingEventTypes: {},
+  directEventTypes: {},
+  validAttributes: {} };
+
+
+var AndroidHorizontalScrollContentViewNativeComponent;
+if (global.RN$Bridgeless) {
+  require('../../Utilities/registerGeneratedViewConfig')(
+  'AndroidHorizontalScrollContentView',
+  AndroidHorizontalScrollContentViewViewConfig);
+
+  AndroidHorizontalScrollContentViewNativeComponent =
+  'AndroidHorizontalScrollContentView';
+} else {
+  AndroidHorizontalScrollContentViewNativeComponent = require('../../ReactNative/requireNativeComponent')(
+  'AndroidHorizontalScrollContentView');
+
+}var _default =
+
+AndroidHorizontalScrollContentViewNativeComponent;exports.default = _default;

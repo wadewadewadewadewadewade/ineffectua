@@ -1,0 +1,18 @@
+4204c963118639373cf4197fa1fb6a1e
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.useReduxDevToolsExtension = void 0;
+
+var noop = function noop() {};
+
+var useReduxDevToolsExtension;
+exports.useReduxDevToolsExtension = useReduxDevToolsExtension;
+
+if (process.env.NODE_ENV !== 'production') {
+  exports.useReduxDevToolsExtension = useReduxDevToolsExtension = require('./useReduxDevToolsExtension').default;
+} else {
+  exports.useReduxDevToolsExtension = useReduxDevToolsExtension = noop;
+}

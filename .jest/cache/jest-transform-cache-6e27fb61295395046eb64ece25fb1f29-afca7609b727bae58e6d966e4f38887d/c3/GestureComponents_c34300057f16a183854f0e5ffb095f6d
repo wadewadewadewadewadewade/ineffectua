@@ -1,0 +1,58 @@
+7f86310b6d90fdbfedd013498e6fd5d5
+"use strict";var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");var _extends2 = _interopRequireDefault(require("@babel/runtime/helpers/extends"));var _react = _interopRequireDefault(require("react"));
+var _reactNative = _interopRequireDefault(require("react-native"));
+
+var _createNativeWrapper = _interopRequireDefault(require("./createNativeWrapper"));var _jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native-gesture-handler/GestureComponents.js";
+
+var MEMOIZED = new WeakMap();
+
+function memoizeWrap(Component, config) {
+  if (Component == null) {
+    return null;
+  }
+  var memoized = MEMOIZED.get(Component);
+  if (!memoized) {
+    memoized = (0, _createNativeWrapper.default)(Component, config);
+    MEMOIZED.set(Component, memoized);
+  }
+  return memoized;
+}
+
+module.exports = {
+
+  get ScrollView() {
+    return memoizeWrap(_reactNative.default.ScrollView, {
+      disallowInterruption: true,
+      shouldCancelWhenOutside: false });
+
+  },
+  get Switch() {
+    return memoizeWrap(_reactNative.default.Switch, {
+      shouldCancelWhenOutside: false,
+      shouldActivateOnStart: true,
+      disallowInterruption: true });
+
+  },
+  get TextInput() {
+    return memoizeWrap(_reactNative.default.TextInput);
+  },
+  get DrawerLayoutAndroid() {
+    var DrawerLayoutAndroid = memoizeWrap(_reactNative.default.DrawerLayoutAndroid, {
+      disallowInterruption: true });
+
+    DrawerLayoutAndroid.positions = _reactNative.default.DrawerLayoutAndroid.positions;
+    return DrawerLayoutAndroid;
+  },
+  get FlatList() {var _this = this;
+    if (!MEMOIZED.FlatList) {
+      var ScrollView = this.ScrollView;
+      MEMOIZED.FlatList = _react.default.forwardRef(function (props, ref) {return (
+          _react.default.createElement(_reactNative.default.FlatList, (0, _extends2.default)({
+            ref: ref },
+          props, {
+            renderScrollComponent: function renderScrollComponent(scrollProps) {return _react.default.createElement(ScrollView, (0, _extends2.default)({}, scrollProps, { __self: _this, __source: { fileName: _jsxFileName, lineNumber: 52, columnNumber: 49 } }));}, __self: _this, __source: { fileName: _jsxFileName, lineNumber: 49, columnNumber: 9 } })));});
+
+
+    }
+    return MEMOIZED.FlatList;
+  } };

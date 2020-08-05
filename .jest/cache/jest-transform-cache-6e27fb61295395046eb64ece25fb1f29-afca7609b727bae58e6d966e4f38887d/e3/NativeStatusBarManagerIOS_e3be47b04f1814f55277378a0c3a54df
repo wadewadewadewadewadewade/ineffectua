@@ -1,0 +1,43 @@
+dfa0b9702c06622ad0cc5d786af1c193
+
+
+
+
+
+
+
+
+
+
+'use strict';var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;
+
+
+var TurboModuleRegistry = _interopRequireWildcard(require("../../TurboModule/TurboModuleRegistry"));var _default =
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TurboModuleRegistry.getEnforcing(
+'StatusBarManager');exports.default = _default;

@@ -1,0 +1,178 @@
+ed55568f562251dce46e6ba9508958e9
+"use strict";var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports, "__esModule", { value: true });exports.logEvent = logEvent;exports.setAnalyticsCollectionEnabled = setAnalyticsCollectionEnabled;exports.setCurrentScreen = setCurrentScreen;exports.setSessionTimeoutDuration = setSessionTimeoutDuration;exports.setUserId = setUserId;exports.setUserProperty = setUserProperty;exports.resetAnalyticsData = resetAnalyticsData;exports.setUserProperties = setUserProperties;exports.setUnavailabilityLogging = setUnavailabilityLogging;exports.setDebugModeEnabled = setDebugModeEnabled;Object.defineProperty(exports, "FirebaseAnalyticsJS", { enumerable: true, get: function get() {return _FirebaseAnalyticsJS.default;} });var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));var _core = require("@unimodules/core");
+var _ExpoFirebaseAnalytics = _interopRequireDefault(require("./ExpoFirebaseAnalytics"));
+var _FirebaseAnalyticsJS = _interopRequireDefault(require("./FirebaseAnalyticsJS"));
+if (!_ExpoFirebaseAnalytics.default) {
+  console.warn("No native ExpoFirebaseAnalytics module found, are you sure the expo-firebase-analytics's module is linked properly?");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function logEvent(name, properties) {return _regenerator.default.async(function logEvent$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:if (
+          _ExpoFirebaseAnalytics.default.logEvent) {_context.next = 2;break;}throw (
+            new _core.UnavailabilityError('expo-firebase-analytics', 'logEvent'));case 2:_context.next = 4;return _regenerator.default.awrap(
+
+          _ExpoFirebaseAnalytics.default.logEvent(name, properties));case 4:return _context.abrupt("return", _context.sent);case 5:case "end":return _context.stop();}}}, null, null, null, Promise);}
+
+
+
+
+
+
+
+function setAnalyticsCollectionEnabled(isEnabled) {return _regenerator.default.async(function setAnalyticsCollectionEnabled$(_context2) {while (1) {switch (_context2.prev = _context2.next) {case 0:if (
+          _ExpoFirebaseAnalytics.default.setAnalyticsCollectionEnabled) {_context2.next = 2;break;}throw (
+            new _core.UnavailabilityError('expo-firebase-analytics', 'setAnalyticsCollectionEnabled'));case 2:_context2.next = 4;return _regenerator.default.awrap(
+
+          _ExpoFirebaseAnalytics.default.setAnalyticsCollectionEnabled(isEnabled));case 4:return _context2.abrupt("return", _context2.sent);case 5:case "end":return _context2.stop();}}}, null, null, null, Promise);}
+
+
+
+
+
+
+
+
+
+
+
+function setCurrentScreen(screenName, screenClassOverride) {return _regenerator.default.async(function setCurrentScreen$(_context3) {while (1) {switch (_context3.prev = _context3.next) {case 0:if (
+          _ExpoFirebaseAnalytics.default.setCurrentScreen) {_context3.next = 2;break;}throw (
+            new _core.UnavailabilityError('expo-firebase-analytics', 'setCurrentScreen'));case 2:_context3.next = 4;return _regenerator.default.awrap(
+
+          _ExpoFirebaseAnalytics.default.setCurrentScreen(screenName, screenClassOverride));case 4:return _context3.abrupt("return", _context3.sent);case 5:case "end":return _context3.stop();}}}, null, null, null, Promise);}
+
+
+
+
+
+
+
+
+function setSessionTimeoutDuration(sessionTimeoutInterval) {return _regenerator.default.async(function setSessionTimeoutDuration$(_context4) {while (1) {switch (_context4.prev = _context4.next) {case 0:if (
+          _ExpoFirebaseAnalytics.default.setSessionTimeoutDuration) {_context4.next = 2;break;}throw (
+            new _core.UnavailabilityError('expo-firebase-analytics', 'setSessionTimeoutDuration'));case 2:_context4.next = 4;return _regenerator.default.awrap(
+
+          _ExpoFirebaseAnalytics.default.setSessionTimeoutDuration(sessionTimeoutInterval));case 4:return _context4.abrupt("return", _context4.sent);case 5:case "end":return _context4.stop();}}}, null, null, null, Promise);}
+
+
+
+
+
+
+
+
+function setUserId(userId) {return _regenerator.default.async(function setUserId$(_context5) {while (1) {switch (_context5.prev = _context5.next) {case 0:if (
+          _ExpoFirebaseAnalytics.default.setUserId) {_context5.next = 2;break;}throw (
+            new _core.UnavailabilityError('expo-firebase-analytics', 'setUserId'));case 2:_context5.next = 4;return _regenerator.default.awrap(
+
+          _ExpoFirebaseAnalytics.default.setUserId(userId));case 4:return _context5.abrupt("return", _context5.sent);case 5:case "end":return _context5.stop();}}}, null, null, null, Promise);}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function setUserProperty(name, value) {return _regenerator.default.async(function setUserProperty$(_context6) {while (1) {switch (_context6.prev = _context6.next) {case 0:_context6.next = 2;return _regenerator.default.awrap(
+          setUserProperties((0, _defineProperty2.default)({}, name, value)));case 2:return _context6.abrupt("return", _context6.sent);case 3:case "end":return _context6.stop();}}}, null, null, null, Promise);}
+
+
+
+
+function resetAnalyticsData() {return _regenerator.default.async(function resetAnalyticsData$(_context7) {while (1) {switch (_context7.prev = _context7.next) {case 0:if (
+          _ExpoFirebaseAnalytics.default.resetAnalyticsData) {_context7.next = 2;break;}throw (
+            new _core.UnavailabilityError('expo-firebase-analytics', 'resetAnalyticsData'));case 2:_context7.next = 4;return _regenerator.default.awrap(
+
+          _ExpoFirebaseAnalytics.default.resetAnalyticsData());case 4:return _context7.abrupt("return", _context7.sent);case 5:case "end":return _context7.stop();}}}, null, null, null, Promise);}
+
+
+
+
+
+
+function setUserProperties(properties) {return _regenerator.default.async(function setUserProperties$(_context8) {while (1) {switch (_context8.prev = _context8.next) {case 0:if (
+          _ExpoFirebaseAnalytics.default.setUserProperties) {_context8.next = 2;break;}throw (
+            new _core.UnavailabilityError('expo-firebase-analytics', 'setUserProperties'));case 2:_context8.next = 4;return _regenerator.default.awrap(
+
+          _ExpoFirebaseAnalytics.default.setUserProperties(properties));case 4:return _context8.abrupt("return", _context8.sent);case 5:case "end":return _context8.stop();}}}, null, null, null, Promise);}
+
+
+
+
+
+
+
+
+
+
+
+
+function setUnavailabilityLogging(isEnabled) {
+  if (!_ExpoFirebaseAnalytics.default.setUnavailabilityLogging) {
+    throw new _core.UnavailabilityError('expo-firebase-analytics', 'setUnavailabilityLogging');
+  }
+  _ExpoFirebaseAnalytics.default.setUnavailabilityLogging(isEnabled);
+}
+
+
+
+
+
+
+
+
+
+
+function setDebugModeEnabled(isEnabled) {return _regenerator.default.async(function setDebugModeEnabled$(_context9) {while (1) {switch (_context9.prev = _context9.next) {case 0:if (
+          _ExpoFirebaseAnalytics.default.setDebugModeEnabled) {_context9.next = 2;break;}throw (
+            new _core.UnavailabilityError('expo-firebase-analytics', 'setDebugModeEnabled'));case 2:_context9.next = 4;return _regenerator.default.awrap(
+
+          _ExpoFirebaseAnalytics.default.setDebugModeEnabled(isEnabled));case 4:return _context9.abrupt("return", _context9.sent);case 5:case "end":return _context9.stop();}}}, null, null, null, Promise);}

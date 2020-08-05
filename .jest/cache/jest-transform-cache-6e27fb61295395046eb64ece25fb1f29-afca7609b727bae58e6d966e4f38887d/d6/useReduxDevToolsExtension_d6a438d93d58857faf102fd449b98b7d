@@ -1,0 +1,90 @@
+7b559896f467001f727343485d7ca995
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true });
+
+exports.default = useReduxDevToolsExtension;
+
+var React = _interopRequireWildcard(require("react"));
+
+var _deepEqual = _interopRequireDefault(require("deep-equal"));
+
+function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+
+function _getRequireWildcardCache() {if (typeof WeakMap !== "function") return null;var cache = new WeakMap();_getRequireWildcardCache = function _getRequireWildcardCache() {return cache;};return cache;}
+
+function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;}if (obj === null || typeof obj !== "object" && typeof obj !== "function") {return { default: obj };}var cache = _getRequireWildcardCache();if (cache && cache.has(obj)) {return cache.get(obj);}var newObj = {};var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) {var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;if (desc && (desc.get || desc.set)) {Object.defineProperty(newObj, key, desc);} else {newObj[key] = obj[key];}}}newObj.default = obj;if (cache) {cache.set(obj, newObj);}return newObj;}
+
+function useReduxDevToolsExtension(ref) {
+  var devToolsRef = React.useRef();
+
+  if (devToolsRef.current === undefined && typeof __REDUX_DEVTOOLS_EXTENSION__ !== 'undefined') {
+    devToolsRef.current = __REDUX_DEVTOOLS_EXTENSION__.connect({
+      name: '@react-navigation/devtools' });
+
+  }
+
+  var lastStateRef = React.useRef();
+  var lastActionRef = React.useRef();
+  React.useEffect(function () {
+    var _devToolsRef$current;
+
+    return (_devToolsRef$current = devToolsRef.current) === null || _devToolsRef$current === void 0 ? void 0 : _devToolsRef$current.subscribe(function (message) {
+      if (message.type === 'DISPATCH' && message.state) {
+        var _ref$current;
+
+        var state = JSON.parse(message.state);
+        lastStateRef.current = state;
+        (_ref$current = ref.current) === null || _ref$current === void 0 ? void 0 : _ref$current.resetRoot(state);
+      }
+    });
+  }, [ref]);
+  React.useEffect(function () {
+    var devTools = devToolsRef.current;
+    var navigation = ref.current;
+
+    if (!navigation || !devTools) {
+      return;
+    }
+
+    if (lastStateRef.current === undefined) {
+      var state = navigation.getRootState();
+      devTools.init(state);
+      lastStateRef.current = state;
+    }
+
+    var unsubscribeAction = navigation.addListener('__unsafe_action__', function (e) {
+      var action = e.data.action;
+
+      if (e.data.noop) {
+
+        devTools.send(action, lastStateRef.current);
+      } else {
+        lastActionRef.current = action;
+      }
+    });
+    var unsubscribeState = navigation.addListener('state', function (e) {
+
+      if (lastStateRef.current === e.data.state) {
+        return;
+      }
+
+      var lastState = lastStateRef.current;
+      var state = navigation.getRootState();
+      var action = lastActionRef.current;
+      lastActionRef.current = undefined;
+      lastStateRef.current = state;
+
+      if (action === undefined && (0, _deepEqual.default)(state, lastState)) {
+        return;
+      }
+
+      devTools.send(action !== null && action !== void 0 ? action : '@@UNKNOWN', state);
+    });
+    return function () {
+      unsubscribeAction();
+      unsubscribeState();
+    };
+  });
+}

@@ -1,0 +1,220 @@
+fd6303d99ed5d27cab093d8f42f8c78e
+
+
+
+
+
+
+
+
+
+
+'use strict';var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;
+
+var React = _interopRequireWildcard(require("react"));
+var _Image = _interopRequireDefault(require("../../Image/Image"));
+var _StyleSheet = _interopRequireDefault(require("../../StyleSheet/StyleSheet"));
+var _Text = _interopRequireDefault(require("../../Text/Text"));
+var _View = _interopRequireDefault(require("../../Components/View/View"));
+var _LogBoxButton = _interopRequireDefault(require("./LogBoxButton"));
+var LogBoxStyle = _interopRequireWildcard(require("./LogBoxStyle"));
+var _LogBoxLog = _interopRequireDefault(require("../Data/LogBoxLog"));
+var _LogBoxMessage = _interopRequireDefault(require("./LogBoxMessage"));
+var LogBoxData = _interopRequireWildcard(require("../Data/LogBoxData"));var _jsxFileName = "/home/wade/projects/ineffectua/node_modules/react-native/Libraries/LogBox/UI/LogBoxNotification.js";
+
+
+
+
+
+
+
+
+
+function LogBoxLogNotification(props) {var
+  totalLogCount = props.totalLogCount,level = props.level,log = props.log;
+
+
+  React.useEffect(function () {
+    LogBoxData.symbolicateLogLazy(log);
+  }, [log]);
+
+  return (
+    React.createElement(_View.default, { style: toastStyles.container, __self: this, __source: { fileName: _jsxFileName, lineNumber: 41, columnNumber: 5 } },
+    React.createElement(_LogBoxButton.default, {
+      onPress: props.onPressOpen,
+      style: toastStyles.press,
+      backgroundColor: {
+        default: LogBoxStyle.getBackgroundColor(1),
+        pressed: LogBoxStyle.getBackgroundColor(0.9) }, __self: this, __source: { fileName: _jsxFileName, lineNumber: 42, columnNumber: 7 } },
+
+    React.createElement(_View.default, { style: toastStyles.content, __self: this, __source: { fileName: _jsxFileName, lineNumber: 49, columnNumber: 9 } },
+    React.createElement(CountBadge, { count: totalLogCount, level: level, __self: this, __source: { fileName: _jsxFileName, lineNumber: 50, columnNumber: 11 } }),
+    React.createElement(Message, { message: log.message, __self: this, __source: { fileName: _jsxFileName, lineNumber: 51, columnNumber: 11 } }),
+    React.createElement(DismissButton, { onPress: props.onPressDismiss, __self: this, __source: { fileName: _jsxFileName, lineNumber: 52, columnNumber: 11 } })))));
+
+
+
+
+}
+
+function CountBadge(props) {
+  return (
+    React.createElement(_View.default, { style: countStyles.outside, __self: this, __source: { fileName: _jsxFileName, lineNumber: 61, columnNumber: 5 } },
+    React.createElement(_View.default, { style: [countStyles.inside, countStyles[props.level]], __self: this, __source: { fileName: _jsxFileName, lineNumber: 62, columnNumber: 7 } },
+    React.createElement(_Text.default, { style: countStyles.text, __self: this, __source: { fileName: _jsxFileName, lineNumber: 63, columnNumber: 9 } },
+    props.count <= 1 ? '!' : props.count))));
+
+
+
+
+}
+
+function Message(props) {
+  return (
+    React.createElement(_View.default, { style: messageStyles.container, __self: this, __source: { fileName: _jsxFileName, lineNumber: 73, columnNumber: 5 } },
+    React.createElement(_Text.default, { numberOfLines: 1, style: messageStyles.text, __self: this, __source: { fileName: _jsxFileName, lineNumber: 74, columnNumber: 7 } },
+    props.message &&
+    React.createElement(_LogBoxMessage.default, {
+      plaintext: true,
+      message: props.message,
+      style: messageStyles.substitutionText, __self: this, __source: { fileName: _jsxFileName, lineNumber: 76, columnNumber: 11 } }))));
+
+
+
+
+
+}
+
+function DismissButton(props) {
+  return (
+    React.createElement(_View.default, { style: dismissStyles.container, __self: this, __source: { fileName: _jsxFileName, lineNumber: 89, columnNumber: 5 } },
+    React.createElement(_LogBoxButton.default, {
+      backgroundColor: {
+        default: LogBoxStyle.getTextColor(0.3),
+        pressed: LogBoxStyle.getTextColor(0.5) },
+
+      hitSlop: {
+        top: 12,
+        right: 10,
+        bottom: 12,
+        left: 10 },
+
+      onPress: props.onPress,
+      style: dismissStyles.press, __self: this, __source: { fileName: _jsxFileName, lineNumber: 90, columnNumber: 7 } },
+    React.createElement(_Image.default, {
+      source: require('./LogBoxImages/close.png'),
+      style: dismissStyles.image, __self: this, __source: { fileName: _jsxFileName, lineNumber: 103, columnNumber: 9 } }))));
+
+
+
+
+}
+
+var countStyles = _StyleSheet.default.create({
+  warn: {
+    backgroundColor: LogBoxStyle.getWarningColor(1) },
+
+  error: {
+    backgroundColor: LogBoxStyle.getErrorColor(1) },
+
+  log: {
+    backgroundColor: LogBoxStyle.getLogColor(1) },
+
+  outside: {
+    padding: 2,
+    borderRadius: 25,
+    backgroundColor: '#fff',
+    marginRight: 8 },
+
+  inside: {
+    minWidth: 18,
+    paddingLeft: 4,
+    paddingRight: 4,
+    borderRadius: 25,
+    fontWeight: '600' },
+
+  text: {
+    color: LogBoxStyle.getTextColor(1),
+    fontSize: 14,
+    lineHeight: 18,
+    textAlign: 'center',
+    fontWeight: '600',
+    textShadowColor: LogBoxStyle.getBackgroundColor(0.4),
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 3 } });
+
+
+
+var messageStyles = _StyleSheet.default.create({
+  container: {
+    alignSelf: 'stretch',
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 'auto',
+    borderLeftColor: LogBoxStyle.getTextColor(0.2),
+    borderLeftWidth: 1,
+    paddingLeft: 8 },
+
+  text: {
+    color: LogBoxStyle.getTextColor(1),
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 22 },
+
+  substitutionText: {
+    color: LogBoxStyle.getTextColor(0.6) } });
+
+
+
+var dismissStyles = _StyleSheet.default.create({
+  container: {
+    alignSelf: 'center',
+    flexDirection: 'row',
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: 'auto',
+    marginLeft: 5 },
+
+  press: {
+    height: 20,
+    width: 20,
+    borderRadius: 25,
+    alignSelf: 'flex-end',
+    alignItems: 'center',
+    justifyContent: 'center' },
+
+  image: {
+    height: 8,
+    width: 8,
+    tintColor: LogBoxStyle.getBackgroundColor(1) } });
+
+
+
+var toastStyles = _StyleSheet.default.create({
+  container: {
+    height: 48,
+    position: 'relative',
+    width: '100%',
+    justifyContent: 'center',
+    marginTop: 0.5,
+    backgroundColor: LogBoxStyle.getTextColor(1) },
+
+  press: {
+    height: 48,
+    position: 'relative',
+    width: '100%',
+    justifyContent: 'center',
+    marginTop: 0.5,
+    paddingHorizontal: 12 },
+
+  content: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    borderRadius: 8,
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: 'auto' } });var _default =
+
+
+
+LogBoxLogNotification;exports.default = _default;
