@@ -20,3 +20,21 @@ The intent of this app is to help people with chronic illnesses track their medi
 * https://docs.expo.io/guides/using-firebase/
 * https://redux.js.org/recipes/usage-with-typescript
 * https://github.com/wix/react-native-calendars
+
+I modified `node_modules/react-native-calendars/src/calendar/index.js` and `node_modules/react-native-calendars/src/agenda/index.js` to fix how ViewPropTypes isn't a thing in react anymore, changing instances of the following...
+
+```
+const viewPropTypes = ViewPropTypes || View.propTypes || PropTypes;
+...
+style: viewPropTypes.style,
+```
+
+...to...
+
+```
+//const viewPropTypes = ViewPropTypes || View.propTypes || PropTypes; // <--removed this
+...
+style: PropTypes.shape({
+  style: PropTypes.any,
+}),
+```
