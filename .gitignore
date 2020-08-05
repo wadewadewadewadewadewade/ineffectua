@@ -59,6 +59,6 @@ buck-out/
 /ios/Pods/
 
 # expo
-.expo/
+#.expo/
 
 google-services.json
