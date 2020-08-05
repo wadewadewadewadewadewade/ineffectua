@@ -78,11 +78,14 @@ const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => 
     let routeName = typeof route === 'string' ? route : route !== undefined && typeof route !== 'string' ? getFocusedRouteNameFromRoute(route) ?? 'Feed' : 'Feed';
 
     switch (routeName) {
-      case 'Agenda' || 'Feed':
+      case 'Agenda':
+      case 'Feed':
         return 'Agenda';
-      case 'CalendarEntry' || 'Calendar':
+      case 'CalendarEntry':
+      case 'Calendar':
         return 'Calendar';
-      case 'PainLogEntry' || 'PainLog':
+      case 'PainLogEntry':
+      case 'PainLog':
         return 'Pain Log';
       case 'Profile':
         return 'My Profile';
@@ -93,7 +96,7 @@ const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => 
     }
   }
 
-  React.useEffect(() => {
+  /*React.useEffect(() => {
     return auth().onAuthStateChanged(userState => {
         if (userState === null) {
           // user is not authenticated, so navigate
@@ -102,7 +105,7 @@ const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => 
           setUser(userState);
         }
       });
-  }, []);
+  }, []);*/
 
   let previousRouteName = 'Feed';
 
@@ -162,22 +165,17 @@ const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => 
         ref={navigationRef}
         initialState={initialState}
         onStateChange={(state) => {
-          const currentRoute = navigationRef.current?.getCurrentRoute();
-          let currentRouteName = previousRouteName;
-          if (currentRoute !== undefined) {
-            currentRouteName = getHeaderTitle(currentRoute.name) as string;
-          }
-
-          AsyncStorage.setItem(
-            NAVIGATION_PERSISTENCE_KEY,
-            JSON.stringify(state)
-          )
+          const currentRouteName = navigationRef.current?.getCurrentRoute()?.name;
 
           if (previousRouteName !== currentRouteName) {
             // The line below uses the expo-firebase-analytics tracker
             // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
             // Change this line to use another Mobile analytics SDK
             Analytics.setCurrentScreen(currentRouteName);
+            AsyncStorage.setItem(
+              NAVIGATION_PERSISTENCE_KEY,
+              JSON.stringify(state)
+            )
           }
 
           // Save the current route name for later comparision

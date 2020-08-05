@@ -1,21 +1,32 @@
 import React from 'react';
-import { firestore } from 'firebase';
+import { firestore, User } from 'firebase';
 import { CalendarList, DateObject } from 'react-native-calendars';
 import { StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
 import { State } from '../../Types';
+import { Theme } from '@react-navigation/native';
 
 const Calendar = (props: any) => {
   const { 
     authenticated,
     user,
     theme
+  } : {
+    authenticated: Boolean,
+    user:  User | undefined,
+    theme: Theme | undefined
   } = props;
   const calendarTheme = {
     ...theme,
-    arrowColor: theme.dark ? 'white' : ' black',
-    calendarBackground: theme.dark ? 'black' : 'white'
+    arrowColor: theme && theme.dark ? 'white' : ' black',
+    calendarBackground: theme && theme.dark ? 'black' : 'white'
   }
+  let dates: firestore.QueryDocumentSnapshot<firestore.DocumentData>[] = [];
+  /*if (user) {
+    firestore().collection('users/' + user.uid + '/calendar').get().then((querySnapshot) => {
+      dates = querySnapshot.docs
+    })
+  }*/
 
   return (
     <CalendarList

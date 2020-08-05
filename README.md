@@ -21,6 +21,10 @@ The intent of this app is to help people with chronic illnesses track their medi
 * https://redux.js.org/recipes/usage-with-typescript
 * https://github.com/wix/react-native-calendars
 
+# Updates to react-native-calendars
+
+## calendar and agenda
+
 I modified `node_modules/react-native-calendars/src/calendar/index.js` and `node_modules/react-native-calendars/src/agenda/index.js` to fix how ViewPropTypes isn't a thing in react anymore, changing instances of the following...
 
 ```
@@ -37,4 +41,15 @@ style: viewPropTypes.style,
 style: PropTypes.shape({
   style: PropTypes.any,
 }),
+```
+
+## calendar-list item
+
+In `node_modules/react-native-calendars/src/calendar-list/item.js` I had to make the changes to line 64 shown below:
+```
+style={[{height: this.props.calendarHeight, width: this.props.calendarWidth}, this.style.calendar, this.props.style]}
+
+became
+
+style={[{height: this.props.calendarHeight, width: this.props.calendarWidth}, this.style.calendar, this.props.style].reduce(((r, c) => Object.assign(r, c)), {})}
 ```
