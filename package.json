@@ -14,10 +14,12 @@
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint .",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "expo": "expo start"
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.11.0",
+    "@react-native-community/datetimepicker": "^2.6.1",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-navigation/bottom-tabs": "^5.7.3",
     "@react-navigation/drawer": "^5.8.7",

@@ -75,11 +75,11 @@ function ModalScreen(props : {
     route: RouteProp<RootStackParamList, "Tabs">
   }) {
     const { navigation, route } = props;
-    const { component } = route.params as any;
+    const { component, date } = route.params as any;
     return (
       <View>
-        <Text>{JSON.stringify(component)}</Text>
-        <Button onPress={() => navigation.goBack()}>Dismiss</Button>
+        {component}
+        <Button onPress={() => navigation.goBack()}><Text>Dismiss</Text></Button>
       </View>
     );
 }
@@ -98,6 +98,8 @@ const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => 
     let routeName = typeof route === 'string' ? route : route !== undefined && typeof route !== 'string' ? getFocusedRouteNameFromRoute(route) ?? 'Feed' : 'Feed';
 
     switch (routeName) {
+      case 'ModalScreen':
+        return ((route as RouteProp<RootStackParamList, "Tabs">)?.params as any).title
       case 'Agenda':
       case 'Feed':
         return 'Agenda';
@@ -192,10 +194,10 @@ const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => 
             // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
             // Change this line to use another Mobile analytics SDK
             Analytics.setCurrentScreen(currentRouteName);
-            AsyncStorage.setItem(
+            AsyncStorage ? AsyncStorage.setItem(
               NAVIGATION_PERSISTENCE_KEY,
               JSON.stringify(state)
-            )
+            ) : console.warn('AsyncStorage error - I bet you\'re in a web browser')
           }
 
           // Save the current route name for later comparision
@@ -268,6 +270,7 @@ const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => 
                 />
                 <Stack.Screen
                   name="ModalScreen"
+                  options={({route}) => ({ title: route.params && (route.params as any).title })}
                   component={ModalScreen}
                 />
                 <Stack.Screen
