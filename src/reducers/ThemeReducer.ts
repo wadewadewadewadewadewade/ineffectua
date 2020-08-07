@@ -42,11 +42,11 @@ export const paperTheme = (theme: Theme = CombinedLightTheme) => {
 };
 
 export type ThemeState = {
-  theme: Theme | undefined
+  theme: Theme
 }
 
 export const initialState: ThemeState = {
-  theme: undefined
+  theme: CombinedLightTheme
 }
 
 export default function ThemeReducer(prevState = initialState, action: Action): any {
@@ -54,7 +54,7 @@ export default function ThemeReducer(prevState = initialState, action: Action): 
     case TOGGLE_THEME:
       return {
         ...prevState,
-        theme: (prevState.theme !== undefined) ? prevState.theme.dark ? CombinedLightTheme : CombinedDarkTheme : CombinedLightTheme,
+        theme: prevState.theme && prevState.theme.dark ? CombinedLightTheme : CombinedDarkTheme,
       };
     default:
       return prevState

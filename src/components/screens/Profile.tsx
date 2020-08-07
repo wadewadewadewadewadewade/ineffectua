@@ -1,23 +1,34 @@
 import React, { memo } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { Subheading, Avatar, Button, Divider } from 'react-native-paper';
+import { Subheading, Avatar, Button, Divider, Text } from 'react-native-paper';
 
 import SettingsItem from '../shared/SettingsItem';
 
 import { connect } from 'react-redux';
 import { Action } from '../../reducers';
 import { SignOutAction } from '../../reducers/AuthReducer';
-import { State } from '../../Types';
+import { State, RootDrawerParamList } from '../../Types';
 import { ToggleThemeAction } from '../../reducers/ThemeReducer';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { Theme } from '@react-navigation/native';
+import { auth } from 'firebase';
 
 const Profile = memo(
-  (props: any) => {
+  (props: {
+    navigation: StackNavigationProp<RootDrawerParamList, "Another">,
+    authenticated: Boolean,
+    user: firebase.User | undefined,
+    theme: Theme,
+    toggleTheme: () => void,
+    signOut: () => void
+  }) => {
     const {
       navigation,
       authenticated,
       user,
       theme,
-      toggleTheme
+      toggleTheme,
+      signOut
     } = props
     const thumbnail = null //user !== null && user.photoURL !== null ? require(user.photoURL) : null;
 
@@ -28,19 +39,19 @@ const Profile = memo(
           <Subheading>Hi{user?.displayName ? ' ' + user?.displayName : null}!</Subheading>
           <SettingsItem
             label="Dark theme"
-            value={theme.dark}
+            value={theme && theme.dark ? true : false}
             onValueChange={() => toggleTheme()}
           />
           <Divider />
-          <Button onPress={() => navigation.navigate('AuthFlow', {action: 'SIGN_OUT'})} style={styles.button}>
+          <Button onPress={() => auth().signOut().then(signOut)} style={styles.button}>
             Sign Out
           </Button>
         </ScrollView>
       ) : (
         <ScrollView style={styles.content}>
-          <Button onPress={() => navigation.navigate('AuthFlow', {action: 'SIGN_IN'})} style={styles.button}>
+          <Text>
             Sign In
-          </Button>
+          </Text>
         </ScrollView>
       )
     );

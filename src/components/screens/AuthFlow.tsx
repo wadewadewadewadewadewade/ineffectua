@@ -3,12 +3,12 @@ import { View, TextInput, StyleSheet, Text } from 'react-native';
 import { Title, Button } from 'react-native-paper';
 import { useTheme } from '@react-navigation/native';
 import {
-  createStackNavigator,
+  createStackNavigator, StackNavigationProp,
 } from '@react-navigation/stack';
 import { User, auth } from 'firebase';
 import { connect } from 'react-redux';
 import { SignInAction, Action, SignOutAction } from '../../reducers/AuthReducer';
-import { State } from '../../Types'
+import { State, RootDrawerParamList } from '../../Types'
 
 type AuthStackParams = {
   SignIn: undefined;
@@ -23,7 +23,8 @@ type AuthStackParams = {
   );
 };*/
 
-const SignInScreen = (signIn: (user: User) => void) => {
+const SignInScreen = (props : { signIn: (user: User) => void }) => {
+  const { signIn } = props;
   const { colors } = useTheme();
   const [email, onChangeEmail] = React.useState('Email');
   const [password, onChangePassword] = React.useState('Password');
@@ -61,13 +62,12 @@ const SignInScreen = (signIn: (user: User) => void) => {
   );
 };
 
-const AuthenticationSuccessScreen = (signOut: () => void) => {
-  auth().signOut().then(() => signOut)
-  
+const AuthenticationSuccessScreen = (props: { signOut: () => void }) => {
+  const { signOut } = props;
   return (
     <View style={styles.content}>
       <Title style={styles.text}>Signed in successfully 🎉</Title>
-      <Button onPress={signOut} style={styles.button}>
+      <Button onPress={() => auth().signOut().then(() => signOut)} style={styles.button}>
         Sign out
       </Button>
     </View>
@@ -83,20 +83,26 @@ const SimpleStackScreen = (props: any) => {
     isSignout,
     signIn,
     signOut
+  } : {
+    navigation: StackNavigationProp<RootDrawerParamList, "Root"> | undefined,
+    authenticated: Boolean,
+    isSignout: Boolean,
+    signIn: (user: User) => void,
+    signOut: () => void
   } = props
-  React.useLayoutEffect(() => {
+  navigation && React.useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
   }, [navigation]);
 
-  if (authenticated) {
+  if (authenticated && navigation) {
     navigation.popToTop()
   }
 
   return (
     <SimpleStack.Navigator>
-      {authenticated ? (
+      {!authenticated ? (
         <SimpleStack.Screen
           name="SignIn"
           options={{
@@ -104,13 +110,13 @@ const SimpleStackScreen = (props: any) => {
             animationTypeForReplace: isSignout ? 'pop' : 'push',
             headerShown: false
           }}
-          component={SignInScreen} // TODO pass into sub-component the signIn function
+          component={() => <SignInScreen signIn={signIn} />}
         />
       ) : (
         <SimpleStack.Screen
           name="Success"
           options={{ title: 'Authentication Success' }}
-          component={AuthenticationSuccessScreen} // TODO pass into sub-component the signOut function
+          component={() => <AuthenticationSuccessScreen signOut={signOut} />}
         />
       )}
     </SimpleStack.Navigator>

@@ -17,3 +17,15 @@ export const initialState: State = {
   AuthReducer: authInitialState,
   ThemeReducer: themeInitialState
 }
+
+export type RootDrawerParamList = {
+  Root: undefined;
+  Another: undefined;
+};
+
+export type RootStackParamList = {
+  Tabs: undefined
+  AuthFlow: undefined;
+  NotFound: undefined;
+  ModalScreen: undefined;
+};
