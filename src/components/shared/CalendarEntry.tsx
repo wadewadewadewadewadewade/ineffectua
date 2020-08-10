@@ -1,57 +1,86 @@
 import React from 'react';
 import { firestore, User } from 'firebase';
 import { DateObject } from 'react-native-calendars';
-import { StyleSheet, Text, TimePickerAndroid, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { connect } from 'react-redux';
-import { State } from '../../Types';
+import { State, calendarTypeEntryConverter, CalendarEntryType } from '../../Types';
 import { Theme } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
-import DateTimePicker, { AndroidEvent } from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInput, Button } from 'react-native-paper';
 
-type DateTimePickerEvent = Event & {
-  nativeEvent: {
-    timestamp?: number,
-  },
-  type: 'dismissed' | 'set',
-}
+const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 
-const TimeSlot = (props : {
+const NewSlot = (props : {
     date: DateObject,
-    theme: Theme | undefined
+    theme: Theme | undefined,
+    user: firebase.User | undefined
   }): JSX.Element => {
-    const { date, theme } = props;
-    const [start, setStart] = React.useState(new Date(Date.parse(date.dateString)));
-    const [end, setEnd] = React.useState(new Date(Date.parse(date.dateString) + 3600));
-    const [description, setDescription] = React.useState('');
+    const { date, user } = props;
+    if (!user) {
+      return <View></View>
+    }
+    const [starts, setStart] = React.useState(new Date(Date.parse(date.dateString)));
+    const [ends, setEnd] = React.useState(new Date(Date.parse(date.dateString) + 3600));
+    const [title, setTitle] = React.useState('');
     const [showStart, setShowStart] = React.useState(false);
     const [showEnd, setShowEnd] = React.useState(false);
+    const [description, setDescription] = React.useState(undefined);
+    const [contacts, setContacts] = React.useState(new Array<string>());
+    const save = () => {
+      const entry: CalendarEntryType = {
+        starts,
+        ends,
+        title,
+        description,
+        contacts
+      }
+      return firestore().collection('users/' + user.uid + '/calendar').add(entry)
+    }
     return (
       <View>
-        <TextInput value={description} onChange={(ref) => console.log(ref)} placeholder="Add title" />
+        <TextInput value={title} onChangeText={(text) => setTitle(text)} placeholder="Add title" />
         <Button onPress={() => setShowStart(true)} style={styles.buttonRow}>
           <Text>From</Text>
-          <Text>{start.toLocaleTimeString()}</Text>
+          <Text>{starts.toLocaleTimeString()}</Text>
         </Button>
-        {showStart && <DateTimePicker mode="time" value={start} onChange={(e: Event, date?: Date) => {
+        {showStart && <DateTimePicker mode="time" value={starts} onChange={(e: Event, date?: Date) => {
           if (date) {
             setStart(date)
           }
         }}/>}
         <Button onPress={() => setShowEnd(true)} style={styles.buttonRow}>
           <Text>Ends</Text>
-          <Text>{end.toLocaleTimeString()}</Text>
+          <Text>{ends.toLocaleTimeString()}</Text>
         </Button>
-        {showEnd && <DateTimePicker mode="time" value={end} onChange={(e: Event, date?: Date) => {
+        {showEnd && <DateTimePicker mode="time" value={ends} onChange={(e: Event, date?: Date) => {
           if (date) {
             setEnd(date)
           }
         }}/>}
-        <Button onPress={() => setShowEnd(true)} style={styles.buttonRow}>
-          <Text>Contacts Involved</Text>
+        <Button onPress={() => save()} style={styles.buttonRow}>
+          <Text>Save</Text>
         </Button>
       </View>
     )
+}
+
+const TimeSlot = (props : {
+  date: CalendarEntryType,
+  windowStarts: Date,
+  windowEnds: Date,
+  index: number,
+  total: number
+}): JSX.Element => {
+  const { date, windowStarts, windowEnds } = props;
+  const dateIsContainedWithinDay = date.ends.getTime() < windowStarts.getTime() + oneDayInMilliseconds;
+  const marginTop = (date.starts.getTime() - windowStarts.getTime()) / oneDayInMilliseconds;
+  const marginBottom = dateIsContainedWithinDay ? (windowEnds.getTime() - date.ends.getTime()) / oneDayInMilliseconds : 0;
+  return (
+    <View style={{marginTop, marginBottom, backgroundColor: '#600'}}>
+      <Text style={{color: '#FFF'}}>{date.title}</Text>
+    </View>
+  )
 }
 
 const CalendarEntry = (props: {
@@ -71,16 +100,23 @@ const CalendarEntry = (props: {
       arrowColor: theme && theme.dark ? 'white' : ' black',
       calendarBackground: theme && theme.dark ? 'black' : 'white'
     }
-    let dates: firestore.QueryDocumentSnapshot<firestore.DocumentData>[] = [];
-    /*if (user) {
-      firestore().collection('users/' + user.uid + '/calendar').get().then((querySnapshot) => {
-        dates = querySnapshot.docs
-      })
-    }*/
+    const windowStart = new Date(Date.parse(date.year + '-' + date.month + '-' + date.day));
+    const windowEnd = new Date(windowStart.getTime() + 1000 * 60 * 60 * 24);
+    const [dates, setDates] = React.useState(new Array<CalendarEntryType>());
+    if (user) {
+      firestore().collection('users/' + user.uid + '/calendar')
+        .where('start', '>=', windowStart).where('start', '<=', windowEnd)
+        .orderBy('start')
+        .withConverter(calendarTypeEntryConverter)
+        .get().then((querySnapshot) => {
+          setDates(querySnapshot.docs.map(d => d.data()))
+        })
+    }
 
     return (
       <ScrollView>
-        <TimeSlot date={date} theme={theme} />
+        <NewSlot date={date} theme={theme} user={user} />
+        {dates.map((d: CalendarEntryType, i: number) => <TimeSlot date={d} windowStarts={windowStart} windowEnds={windowEnd} index={i} total={dates.length}/>)}
       </ScrollView>
     )
 }

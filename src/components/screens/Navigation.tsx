@@ -6,8 +6,6 @@ import {
   Dimensions,
   ScaledSize,
   Linking,
-  Text,
-  View,
 } from 'react-native';
 // eslint-disable-next-line import/no-unresolved
 import { enableScreens } from 'react-native-screens';
@@ -15,7 +13,6 @@ import {
   Provider as PaperProvider,
   Appbar,
   ActivityIndicator,
-  Button,
 } from 'react-native-paper';
 import {
   InitialState,
@@ -50,7 +47,6 @@ import Profile from './Profile';
 import { NAVIGATION_PERSISTENCE_KEY, State } from '../../Types';
 import { SignInAction, Action as AuthAction } from '../../reducers/AuthReducer';
 import { paperTheme, CombinedLightTheme } from '../../reducers/ThemeReducer';
-import { ScrollView } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 enableScreens();
@@ -69,20 +65,6 @@ type RootStackParamList = {
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
-
-function ModalScreen(props : {
-    navigation: NavigationContainerRef,
-    route: RouteProp<RootStackParamList, "Tabs">
-  }) {
-    const { navigation, route } = props;
-    const { component, date } = route.params as any;
-    return (
-      <View>
-        {component}
-        <Button onPress={() => navigation.goBack()}><Text>Dismiss</Text></Button>
-      </View>
-    );
-}
 
 const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => void}) => {
   const { theme, setUser } = props;
@@ -221,11 +203,9 @@ const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => 
                 path: '',
                 initialRouteName: 'Agenda',
                 screens: {
-                  Calendar: 'calendar/:id?',
-                  CalendarEntry: 'calendar/:id?',
-                  PainLog: 'pain-log/',
-                  PainLogEntry: 'pain-log/:id',
-                  Contacts: 'people',
+                  CalendarNavigator: 'calendar/',
+                  PainLogNavigator: 'pain-log/',
+                  ContactsNavigator: 'people',
                   Dialog: 'dialog',
                   Agenda: '',
                   NotFound: '.+',
@@ -267,11 +247,6 @@ const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => 
                 <Stack.Screen
                   name="AuthFlow"
                   component={AuthFlow}
-                />
-                <Stack.Screen
-                  name="ModalScreen"
-                  options={({route}) => ({ title: route.params && (route.params as any).title })}
-                  component={ModalScreen}
                 />
                 <Stack.Screen
                   name="NotFound"

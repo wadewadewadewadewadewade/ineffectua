@@ -40,7 +40,7 @@ const Calendar = (props: any) => {
         // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
         //maxDate={'2012-05-30'}
         // Handler which gets executed on day press. Default = undefined
-        onDayPress={(day: DateObject) => navigation.navigate('ModalScreen', { component: <CalendarEntry date={day}/>, title: 'Calendar: ' + new Date(Date.parse(day.dateString)).toDateString() })}
+        onDayPress={(day: DateObject) => navigation.navigate('CalendarEntry', { component: <CalendarEntry date={day}/>, title: 'Calendar: ' + new Date(Date.parse(day.dateString)).toDateString() })}
         // Handler which gets executed on day long press. Default = undefined
         //onDayLongPress={(day: DateObject) => navigation.navigate('ModalScreen', { component: CalendarEntry, date: day })}
         // Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
