@@ -44,30 +44,18 @@ import { User } from 'firebase';
 import * as Analytics from 'expo-firebase-analytics';
 import Profile from './Profile';
 
-import { NAVIGATION_PERSISTENCE_KEY, State } from '../../Types';
-import { SignInAction, Action as AuthAction } from '../../reducers/AuthReducer';
+import { NAVIGATION_PERSISTENCE_KEY, State, RootDrawerParamList, RootStackParamList } from '../../Types';
+import { SignInAction, Action as AuthAction, SIGN_IN } from '../../reducers/AuthReducer';
 import { paperTheme, CombinedLightTheme } from '../../reducers/ThemeReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 enableScreens();
 
-type RootDrawerParamList = {
-  Root: undefined;
-  Another: undefined;
-};
-
-type RootStackParamList = {
-  Tabs: undefined
-  AuthFlow: undefined;
-  NotFound: undefined;
-  ModalScreen: undefined;
-};
-
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
 
-const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => void}) => {
-  const { theme, setUser } = props;
+const Navigation = (props: { theme: Theme | undefined, user: firebase.User | undefined}) => {
+  const { theme, user } = props;
   const [isReady, setIsReady] = React.useState(Platform.OS === 'web');
   const [initialState, setInitialState] = React.useState<
     InitialState | undefined
@@ -220,6 +208,7 @@ const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => 
             `${options?.title ?? getHeaderTitle(route?.name)} - ineffectua`,
         }}
       >
+      {user ? (
         <Drawer.Navigator drawerType={isLargeScreen ? 'permanent' : undefined} drawerContent={props => <Profile {...props}/>}>
           <Drawer.Screen name="Root">
             {({ navigation }: DrawerScreenProps<RootDrawerParamList>) => (
@@ -257,6 +246,9 @@ const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => 
             )}
           </Drawer.Screen>
         </Drawer.Navigator>
+      ) : (
+        <AuthFlow />
+      )}
       </NavigationContainer>
     </PaperProvider>
   )
@@ -266,7 +258,8 @@ const Navigation = (props: { theme: Theme | undefined, setUser: (user: User) => 
 const mapStateToProps = (state: State) => {
   // Redux Store --> Component
   return {
-    theme: state.ThemeReducer.theme
+    theme: state.ThemeReducer.theme,
+    user: state.AuthReducer.user
   };
 };// Map Dispatch To Props (Dispatch Actions To Reducers. Reducers Then Modify The Data And Assign It To Your Props)
 const mapDispatchToProps = (dispatch: (value: AuthAction) => void) => {

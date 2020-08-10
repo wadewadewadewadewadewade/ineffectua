@@ -60,5 +60,6 @@ buck-out/
 
 # expo
 .expo/
+.expo/*.json
 
 google-services.json

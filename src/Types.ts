@@ -53,3 +53,15 @@ export const calendarTypeEntryConverter = {
     return new CalendarEntryType(data.starts, data.ends, data.title, data.description, data.contacts)
   }
 }
+
+export type RootDrawerParamList = {
+  Root: undefined;
+  Another: undefined;
+};
+
+export type RootStackParamList = {
+  Tabs: undefined
+  AuthFlow: undefined;
+  NotFound: undefined;
+  ModalScreen: undefined;
+};
