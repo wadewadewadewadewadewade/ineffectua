@@ -53,3 +53,7 @@ became
 
 style={[{height: this.props.calendarHeight, width: this.props.calendarWidth}, this.style.calendar, this.props.style].reduce(((r, c) => Object.assign(r, c)), {})}
 ```
+
+# TODO
+
+* Fork react-native-calendars, make the above changes, and add that fork to package.json
