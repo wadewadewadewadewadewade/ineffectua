@@ -4,10 +4,12 @@ import { DateObject } from 'react-native-calendars';
 import { StyleSheet, Text, View } from 'react-native';
 import { connect } from 'react-redux';
 import { State, calendarTypeEntryConverter, CalendarEntryType } from '../../Types';
-import { Theme } from '@react-navigation/native';
+import { Theme, RouteProp } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { TextInput, Button } from 'react-native-paper';
+import { TextInput, Button, FAB, Modal, Portal } from 'react-native-paper';
+import { CalendarStackParamList } from '../screens/CalendarNavigator';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 
@@ -83,24 +85,32 @@ const TimeSlot = (props : {
   )
 }
 
+export type CalendarEntryProps = {
+  date: DateObject
+}
+
 const CalendarEntry = (props: {
   authenticated: Boolean,
   user:  User | undefined,
   theme: Theme | undefined,
-  date: DateObject
+  route: RouteProp<CalendarStackParamList, 'CalendarEntry'>,
+  navigation: StackNavigationProp<CalendarStackParamList, 'CalendarEntry'>
   }) => {
+    const [visible, setVisible] = React.useState(false);
     const { 
       authenticated,
       user,
       theme,
-      date
+      route,
+      navigation
     } = props;
+    const { date } = route.params;
     const calendarTheme = {
       ...theme,
       arrowColor: theme && theme.dark ? 'white' : ' black',
       calendarBackground: theme && theme.dark ? 'black' : 'white'
     }
-    const windowStart = new Date(Date.parse(date.year + '-' + date.month + '-' + date.day));
+    const windowStart = new Date(Date.parse(date.dateString));
     const windowEnd = new Date(windowStart.getTime() + 1000 * 60 * 60 * 24);
     const [dates, setDates] = React.useState(new Array<CalendarEntryType>());
     if (user) {
@@ -115,7 +125,17 @@ const CalendarEntry = (props: {
 
     return (
       <ScrollView>
-        <NewSlot date={date} theme={theme} user={user} />
+        <FAB
+          style={styles.fab}
+          small
+          icon="plus"
+          onPress={() => setVisible(true)}
+        />
+        <Portal>
+          <Modal visible={visible} onDismiss={() => setVisible(false)}>
+            <NewSlot date={date} theme={theme} user={user} />
+          </Modal>
+        </Portal>
         {dates.map((d: CalendarEntryType, i: number) => <TimeSlot date={d} windowStarts={windowStart} windowEnds={windowEnd} index={i} total={dates.length}/>)}
       </ScrollView>
     )
@@ -132,6 +152,12 @@ const styles = StyleSheet.create({
   buttonRow: {
     fontSize: 12,
     justifyContent: 'space-between'
+  },
+  fab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    bottom: 0,
   },
 });
 

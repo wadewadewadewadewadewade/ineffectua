@@ -45,7 +45,7 @@ import * as Analytics from 'expo-firebase-analytics';
 import Profile from './Profile';
 
 import { NAVIGATION_PERSISTENCE_KEY, State, RootDrawerParamList, RootStackParamList } from '../../Types';
-import { SignInAction, Action as AuthAction, SIGN_IN } from '../../reducers/AuthReducer';
+import { SignInAction, Action as AuthAction } from '../../reducers/AuthReducer';
 import { paperTheme, CombinedLightTheme } from '../../reducers/ThemeReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 

@@ -1,10 +1,10 @@
 import React from 'react';
-import CalendarEntry from '../shared/CalendarEntry';
+import CalendarEntry, { CalendarEntryProps } from '../shared/CalendarEntry';
 import { createStackNavigator } from '@react-navigation/stack';
 import Calendar from './Calendar';
 
-type CalendarStackParamList = {
-  CalendarEntry: undefined
+export type CalendarStackParamList = {
+  CalendarEntry: CalendarEntryProps;
   Calendar: undefined;
   NotFound: undefined;
 };
