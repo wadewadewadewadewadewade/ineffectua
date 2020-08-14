@@ -226,7 +226,7 @@ const Navigation = (props: { theme: Theme | undefined, user: firebase.User | und
                       : () => (
                           <Appbar.Action
                             color={theme !== undefined ? theme.colors.text : CombinedLightTheme.colors.text}
-                            icon={() => <MaterialCommunityIcons name="folder" color={theme !== undefined ? theme.colors.text : CombinedLightTheme.colors.text} size={26} />}
+                            icon={() => <MaterialCommunityIcons name="settings" color={theme !== undefined ? theme.colors.text : CombinedLightTheme.colors.text} size={26} />}
                             onPress={() => navigation.toggleDrawer()}
                           />
                         ),

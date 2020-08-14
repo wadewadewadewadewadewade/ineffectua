@@ -10,6 +10,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInput, Button, FAB, Modal, Portal } from 'react-native-paper';
 import { CalendarStackParamList } from '../screens/CalendarNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
+import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 
@@ -40,30 +41,44 @@ const NewSlot = (props : {
       return firestore().collection('users/' + user.uid + '/calendar').add(entry)
     }
     return (
-      <View>
-        <TextInput value={title} onChangeText={(text) => setTitle(text)} placeholder="Add title" />
-        <Button onPress={() => setShowStart(true)} style={styles.buttonRow}>
-          <Text>From</Text>
-          <Text>{starts.toLocaleTimeString()}</Text>
-        </Button>
-        {showStart && <DateTimePicker mode="time" value={starts} onChange={(e: Event, date?: Date) => {
-          if (date) {
-            setStart(date)
-          }
-        }}/>}
-        <Button onPress={() => setShowEnd(true)} style={styles.buttonRow}>
-          <Text>Ends</Text>
-          <Text>{ends.toLocaleTimeString()}</Text>
-        </Button>
-        {showEnd && <DateTimePicker mode="time" value={ends} onChange={(e: Event, date?: Date) => {
-          if (date) {
-            setEnd(date)
-          }
-        }}/>}
-        <Button onPress={() => save()} style={styles.buttonRow}>
-          <Text>Save</Text>
-        </Button>
-      </View>
+      <ScrollView>
+        <Svg height="100%" width="100%" viewBox="0 0 100 100" style={{position:'absolute',left:0,right:0,top:0,bottom:0}}>
+          <Rect
+            width="154.74905"
+            height="0.8018086"
+            x="39.342342"
+            y="27.06852" />
+          <SvgText
+            fontSize="7"
+            fontFamily="sans-serif"
+            x="15.96937"
+            y="30.435143">8am</SvgText>
+        </Svg>
+        <View>
+          <TextInput value={title} onChangeText={(text) => setTitle(text)} placeholder="Add title" />
+          <Button onPress={() => setShowStart(true)} style={styles.buttonRow}>
+            <Text>From</Text>
+            <Text>{starts.toLocaleTimeString()}</Text>
+          </Button>
+          {showStart && <DateTimePicker mode="time" value={starts} onChange={(e: Event, date?: Date) => {
+            if (date) {
+              setStart(date)
+            }
+          }}/>}
+          <Button onPress={() => setShowEnd(true)} style={styles.buttonRow}>
+            <Text>Ends</Text>
+            <Text>{ends.toLocaleTimeString()}</Text>
+          </Button>
+          {showEnd && <DateTimePicker mode="time" value={ends} onChange={(e: Event, date?: Date) => {
+            if (date) {
+              setEnd(date)
+            }
+          }}/>}
+          <Button onPress={() => save()} style={styles.buttonRow}>
+            <Text>Save</Text>
+          </Button>
+        </View>
+      </ScrollView>
     )
 }
 
@@ -122,7 +137,6 @@ const CalendarEntry = (props: {
           setDates(querySnapshot.docs.map(d => d.data()))
         })
     }
-
     return (
       <ScrollView>
         <FAB

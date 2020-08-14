@@ -3,7 +3,7 @@ import { firestore, User } from 'firebase';
 import { CalendarList, DateObject } from 'react-native-calendars';
 import { StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
-import { State } from '../../Types';
+import { State, CalendarEntryType, calendarTypeEntryConverter } from '../../Types';
 import { Theme, NavigationContainerRef } from '@react-navigation/native';
 import CalendarEntry, { CalendarEntryProps } from '../shared/CalendarEntry';
 
@@ -24,11 +24,15 @@ const Calendar = (props: any) => {
     arrowColor: theme && theme.dark ? '#fff' : '#000',
     calendarBackground: theme && theme.dark ? '#000' : '#fff'
   }
-  let dates: firestore.QueryDocumentSnapshot<firestore.DocumentData>[] = [];
-  /*if (user) {
-    firestore().collection('users/' + user.uid + '/calendar').get().then((querySnapshot) => {
-      dates = querySnapshot.docs
-    })
+  /*const [dates, setDates] = React.useState(new Array<CalendarEntryType>());
+  if (user) {
+    firestore().collection('users/' + user.uid + '/calendar')
+      .where('start', '>=', windowStart).where('start', '<=', windowEnd)
+      .orderBy('start')
+      .withConverter(calendarTypeEntryConverter)
+      .get().then((querySnapshot) => {
+        setDates(querySnapshot.docs.map(d => d.data()))
+      })
   }*/
 
   return (
@@ -76,7 +80,7 @@ const Calendar = (props: any) => {
         //renderHeader={(date: Date) => {/*Return JSX*/}}
         theme={calendarTheme}
         // Callback which gets executed when visible months change in scroll view. Default = undefined
-        //onVisibleMonthsChange={(months) => {console.log('now these months are visible', months);}}
+        onVisibleMonthsChange={(months) => {console.log('now these months are visible', months);}}
         // Max amount of months allowed to scroll to the past. Default = 50
         pastScrollRange={50}
         // Max amount of months allowed to scroll to the future. Default = 50
