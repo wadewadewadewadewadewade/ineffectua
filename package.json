@@ -36,7 +36,7 @@
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
     "react-native": "^0.62.2",
-    "react-native-calendars": "^1.301.0",
+    "react-native-calendars": "git+https://github.com/wadewadewadewadewadewade/react-native-calendars.git",
     "react-native-gesture-handler": "~1.6.0",
     "react-native-paper": "^4.0.1",
     "react-native-reanimated": "~1.9.0",
