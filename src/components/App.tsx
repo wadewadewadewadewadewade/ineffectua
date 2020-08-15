@@ -2,9 +2,9 @@ import * as React from 'react';
 import { PersistGate } from 'redux-persist/integration/react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { store, persistor } from '../Store';
-import {
+/*import {
   YellowBox,
-} from 'react-native';
+} from 'react-native';*/
 // eslint-disable-next-line import/no-unresolved
 import { enableScreens } from 'react-native-screens';
 import * as firebase from 'firebase';
@@ -23,7 +23,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-YellowBox.ignoreWarnings(['Require cycle:', 'Warning: Async Storage']);
+//YellowBox.ignoreWarnings(['Require cycle:', 'Warning: Async Storage']);
 
 enableScreens();
 
