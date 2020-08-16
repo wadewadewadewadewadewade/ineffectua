@@ -70,6 +70,7 @@
     "expo-updates": "^0.2.13",
     "jest": "^26.1.0",
     "metro-react-native-babel-preset": "^0.59.0",
+    "react-native-clean-project": "^3.4.0",
     "react-native-typescript-transformer": "^1.2.13",
     "react-native-web": "^0.13.4",
     "react-refresh": "^0.8.3",
