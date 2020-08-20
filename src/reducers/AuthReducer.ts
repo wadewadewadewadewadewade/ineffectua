@@ -5,42 +5,33 @@ export const SIGN_IN = 'SIGN_IN';
 export const SIGN_OUT = 'SIGN_OUT';
 
 export type Action =
-  | { type: 'RESTORE_TOKEN'; token: undefined | User }
-  | { type: 'SIGN_IN'; token: undefined | User }
+  | { type: 'RESTORE_TOKEN'; token: false | User }
+  | { type: 'SIGN_IN'; token: false | User }
   | { type: 'SIGN_OUT' };
 
-export const SignInAction = (user: User): Action => ({ type: SIGN_IN, token: user })
+export const SignInAction = (user: AuthState['user']): Action => ({ type: SIGN_IN, token: user })
 export const SignOutAction = (): Action => ({ type: SIGN_OUT })
 
 export type AuthState = {
-  user: User | undefined
+  user: User | false
 }
 
 export const initialState: AuthState = {
-  user: undefined
+  user: false
 }
 
-export const isUserAuthenticated = (user: firebase.User | undefined): boolean => {
-  return user !== undefined && user.uid !== undefined
+export const isUserAuthenticated = (user: firebase.User | false): boolean => {
+  return user !== undefined && user !== false
 }
 
-export default function AuthReducer(prevState = initialState, action: Action): AuthState {
+export default function AuthReducer(prevState = initialState['user'], action: Action): AuthState['user'] {
   switch (action.type) {
     case RESTORE_TOKEN:
-      return {
-        ...prevState,
-        user: action.token,
-      };
+      return action.token;
     case SIGN_IN:
-      return {
-        ...prevState,
-        user: action.token,
-      };
+      return action.token;
     case SIGN_OUT:
-      return {
-        ...prevState,
-        user: undefined,
-      };
+      return false;
     default:
       return prevState
   }

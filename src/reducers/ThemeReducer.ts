@@ -6,7 +6,6 @@ import {
 import {
   DefaultTheme as PaperLightTheme,
   DarkTheme as PaperDarkTheme,
-  Colors as PaperColors
 } from 'react-native-paper';
 import { Theme as PaperTheme } from 'react-native-paper/src/types';
 
@@ -91,13 +90,14 @@ export const initialState: ThemeState = {
   theme: CombinedLightTheme
 }
 
-export default function ThemeReducer(prevState = initialState, action: Action): any {
+export default function ThemeReducer(prevState = initialState['theme'], action: Action): ThemeState['theme'] {
   switch (action.type) {
     case TOGGLE_THEME:
-      return {
-        ...prevState,
-        theme: prevState.theme && prevState.theme.paper.dark ? CombinedLightTheme : CombinedDarkTheme,
-      };
+      if (prevState && prevState.paper.dark) {
+        return CombinedLightTheme
+      } else {
+        return CombinedDarkTheme
+      }
     default:
       return prevState
   }

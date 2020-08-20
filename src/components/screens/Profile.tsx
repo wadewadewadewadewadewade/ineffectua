@@ -6,18 +6,18 @@ import SettingsItem from '../shared/SettingsItem';
 
 import { connect } from 'react-redux';
 import { Action } from '../../reducers';
-import { SignOutAction, isUserAuthenticated } from '../../reducers/AuthReducer';
+import { SignOutAction, isUserAuthenticated, AuthState } from '../../reducers/AuthReducer';
 import { State, RootDrawerParamList } from '../../Types';
-import { ToggleThemeAction } from '../../reducers/ThemeReducer';
+import { ToggleThemeAction, ThemeState } from '../../reducers/ThemeReducer';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { Theme, themeIsDark } from '../../reducers/ThemeReducer';
+import { themeIsDark } from '../../reducers/ThemeReducer';
 import { auth } from 'firebase';
 
 const Profile = memo(
   (props: {
     authenticated: Boolean,
-    user: firebase.User | undefined,
-    theme: Theme,
+    user: AuthState['user'],
+    theme: ThemeState['theme'],
     toggleTheme: () => void,
     signOut: () => void
   }) => {
@@ -34,7 +34,7 @@ const Profile = memo(
       authenticated ? (
         <ScrollView style={styles.content}>
           {thumbnail ? (<Avatar.Image source={thumbnail} style={styles.image} />) : null}
-          <Subheading>Hi{user?.displayName ? ' ' + user?.displayName : null}!</Subheading>
+          <Subheading>Hi{user ? ' ' + user?.displayName : null}!</Subheading>
           <SettingsItem
             label="Dark theme"
             value={themeIsDark(theme)}

@@ -1,5 +1,12 @@
 import { firestore } from 'firebase';
 
+type CalendarRecord = {
+  window: {
+    starts: Date,
+    ends: Date
+  }
+  items: Array<CalendarEntryType>
+}
 
 interface CalendarEntry {
   starts: Date,
@@ -41,15 +48,11 @@ export const GET_DATES= 'GET_DATES';
 export type Action =
   | {
     type: 'GET_DATES';
-    start: Date,
-    end: Date,
-    dates: Array<CalendarEntryType>
+    dates: CalendarRecord
   };
 
-export const GetDatesAction = (dates: Array<CalendarEntryType>, windowStart?: Date, windowEnd?: Date): Action => ({
+export const GetDatesAction = (dates: CalendarRecord): Action => ({
   type: GET_DATES,
-  start: windowStart || new Date(Date.now()),
-  end: windowEnd || windowStart && new Date(windowStart.getTime() + 1000 * 60 * 60 * 24) || new Date(Date.now() + 1000 * 60 * 60 * 24),
   dates
 });
 
@@ -57,8 +60,7 @@ export async function GetDates(
     user: firebase.User,
     windowStart: Date = new Date(Date.now()),
     windowEnd: Date = windowStart && new Date(windowStart.getTime() + 1000 * 60 * 60 * 24) || new Date(Date.now() + 1000 * 60 * 60 * 24)
-  ): Promise<Array<CalendarEntryType>> {
-    console.log('user', user);
+  ): Promise<CalendarRecord> {
     let dates: void | Array<CalendarEntryType> = await firestore().collection('users/' + user.uid + '/calendar')
       .where('start', '>=', windowStart).where('start', '<=', windowEnd)
       .orderBy('start')
@@ -70,23 +72,35 @@ export async function GetDates(
     if (!dates) {
       dates = new Array<CalendarEntryType>();
     }
-    return dates;
+    return {
+      window: {
+        starts: windowStart,
+        ends: windowEnd
+      },
+      items: dates
+    };
   }
 
 export type CalendarState = {
-  dates: Array<CalendarEntryType>
+  dates: CalendarRecord
 }
 
 export const initialState: CalendarState = {
-  dates: new Array<CalendarEntryType>()
+  dates: {
+    window: {
+      starts: new Date(0),
+      ends: new Date(0)
+    },
+    items: new Array<CalendarEntryType>()
+  }
 }
 
-export default function CalendarReducer(prevState = initialState, action: Action): any {
+export default function CalendarReducer(prevState = initialState['dates'], action: Action): CalendarState['dates'] {
   switch (action.type) {
-    case GET_DATES:
+    case GET_DATES: // TODO: make this an array of CalendarRecords so we can get chunks of data rather than one contigious window
       return {
         ...prevState,
-        dates: action.dates
+        ...action.dates
       };
     default:
       return prevState

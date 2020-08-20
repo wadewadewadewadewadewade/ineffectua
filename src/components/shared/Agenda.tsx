@@ -13,9 +13,9 @@ import {
   Text,
   Avatar,
   Subheading,
-  IconButton,
   Divider,
 } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Color from 'color';
 
 type Props = Partial<ScrollViewProps> & {
@@ -34,9 +34,9 @@ const Author = () => {
 const Footer = () => {
   return (
     <View style={styles.row}>
-      <IconButton style={styles.icon} size={16} icon="heart-outline" />
-      <IconButton style={styles.icon} size={16} icon="comment-outline" />
-      <IconButton style={styles.icon} size={16} icon="share-outline" />
+      <MaterialCommunityIcons style={styles.icon} size={16} name="heart-outline" />
+      <MaterialCommunityIcons style={styles.icon} size={16} name="comment-outline" />
+      <MaterialCommunityIcons style={styles.icon} size={16} name="share-outline" />
     </View>
   );
 };
@@ -141,5 +141,6 @@ const styles = StyleSheet.create({
   },
   icon: {
     flex: 1,
+    textAlign: 'center',
   },
 });

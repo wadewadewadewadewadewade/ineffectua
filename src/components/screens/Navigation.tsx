@@ -39,13 +39,13 @@ import MaterialBottomTabs from '../screens/MaterialBottomTabs';
 import NotFound from './NotFound';
 import AuthFlow from './AuthFlow';
 
-import { User } from 'firebase';
+import { User, auth } from 'firebase';
 import * as Analytics from 'expo-firebase-analytics';
 import Profile from './Profile';
 
 import { NAVIGATION_PERSISTENCE_KEY, State, RootDrawerParamList, RootStackParamList } from '../../Types';
-import { SignInAction, Action as AuthAction, isUserAuthenticated } from '../../reducers/AuthReducer';
-import { paperTheme, CombinedLightTheme, Theme, barClassName, paperColors } from '../../reducers/ThemeReducer';
+import { SignInAction, Action as AuthAction, isUserAuthenticated, AuthState } from '../../reducers/AuthReducer';
+import { paperTheme, CombinedLightTheme, Theme, barClassName, paperColors, ThemeState } from '../../reducers/ThemeReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 enableScreens();
@@ -53,8 +53,12 @@ enableScreens();
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
 
-const Navigation = (props: { theme: Theme, user: firebase.User | undefined}) => {
-  const { theme, user } = props;
+const Navigation = (props: {
+    theme: ThemeState['theme'],
+    user: AuthState['user'],
+    setUser: (user: AuthState['user']) => void
+  }) => {
+  const { theme, user, setUser } = props;
   const [isReady, setIsReady] = React.useState(Platform.OS === 'web');
   const [initialState, setInitialState] = React.useState<
     InitialState | undefined
@@ -87,7 +91,7 @@ const Navigation = (props: { theme: Theme, user: firebase.User | undefined}) => 
     }
   }
 
-  /*React.useEffect(() => {
+  React.useEffect(() => {
     return auth().onAuthStateChanged(userState => {
         if (userState === null) {
           // user is not authenticated, so navigate
@@ -96,7 +100,7 @@ const Navigation = (props: { theme: Theme, user: firebase.User | undefined}) => 
           setUser(userState);
         }
       });
-  }, []);*/
+  }, []);
 
   let previousRouteName = 'Feed';
 
@@ -256,7 +260,6 @@ const Navigation = (props: { theme: Theme, user: firebase.User | undefined}) => 
 // Map State To Props (Redux Store Passes State To Component)
 const mapStateToProps = (state: State) => {
   // Redux Store --> Component
-  console.log('user authenticated', state.user)
   return {
     theme: state.theme ? state.theme : CombinedLightTheme,
     user: state.user
@@ -266,7 +269,7 @@ const mapDispatchToProps = (dispatch: (value: AuthAction) => void) => {
   // Action
   return {
     // Login
-    setUser: (user: User) => dispatch(SignInAction(user)),
+    setUser: (user: AuthState['user']) => dispatch(SignInAction(user)),
   };
 };// Exports
 export default connect(mapStateToProps, mapDispatchToProps)(Navigation)

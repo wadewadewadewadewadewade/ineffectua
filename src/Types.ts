@@ -1,4 +1,3 @@
-import { firestore } from 'firebase';
 import { ThemeState, initialState as themeInitialState } from './reducers/ThemeReducer';
 import { AuthState, initialState as authInitialState } from './reducers/AuthReducer';
 import { CalendarState, initialState as calendarInitialState } from './reducers/CalendarReducer';
@@ -8,8 +7,6 @@ export const THEME_PERSISTENCE_KEY = 'THEME_TYPE';
 
 
 export type State = AuthState & ThemeState & CalendarState;
-
-export type SimpleState = AuthState & ThemeState
 
 // Initial State
 export const initialState: State = {

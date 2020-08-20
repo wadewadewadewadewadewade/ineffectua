@@ -117,7 +117,7 @@ const mapDispatchToProps = (dispatch: (value: Action) => void, ownProps: {user: 
   // Action
   return {
     // Login
-    getDates: (windowStart?: Date, windowEnd?: Date) => GetDates(ownProps.user, windowStart, windowEnd).then(d => d && dispatch(GetDatesAction(d, windowStart, windowEnd)))
+    getDates: (windowStart?: Date, windowEnd?: Date) => GetDates(ownProps.user, windowStart, windowEnd).then(d => d && dispatch(GetDatesAction(d)))
   };
 };// Exports
 export default connect(mapStateToProps, mapDispatchToProps)(Calendar);

@@ -12,14 +12,15 @@ import { CalendarStackParamList } from '../screens/CalendarNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import { CalendarEntryType, Action, GetDatesAction, GetDates } from '../../reducers/CalendarReducer';
-import { Theme } from '../../reducers/ThemeReducer';
+import { Theme, ThemeState } from '../../reducers/ThemeReducer';
+import { AuthState } from '../../reducers/AuthReducer';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 
 const NewSlot = (props : {
     date: DateObject,
-    theme: Theme | undefined,
-    user: firebase.User | undefined
+    theme: ThemeState['theme'],
+    user: AuthState['user']
   }): JSX.Element => {
     const { date, user } = props;
     if (!user) {
@@ -107,10 +108,10 @@ export type CalendarEntryProps = {
 }
 
 const CalendarEntry = (props: {
-    getDates: (user: firebase.User, callback: Function, windowStart?: Date, windowEnd?: Date) => Promise<void>,
+    getDates: (user: AuthState['user'], callback: Function, windowStart?: Date, windowEnd?: Date) => Promise<void>,
     authenticated: Boolean,
-    user:  User | undefined,
-    theme: Theme,
+    user: AuthState['user'],
+    theme: ThemeState['theme'],
     route: RouteProp<CalendarStackParamList, 'CalendarEntry'>,
     navigation: StackNavigationProp<CalendarStackParamList, 'CalendarEntry'>
   }) => {
@@ -172,7 +173,7 @@ const styles = StyleSheet.create({
 // Map State To Props (Redux Store Passes State To Component)
 const mapStateToProps = (state: State) => {
   return {
-    authenticated: state.user !== undefined,
+    authenticated: state.user !== false,
     user: state.user,
     theme: state.theme,
     dates: state.dates
@@ -182,9 +183,16 @@ const mapDispatchToProps = (dispatch: (value: Action) => void) => {
   // Action
   return {
     // Login
-    getDates: (user: firebase.User, callback: Function, windowStart?: Date, windowEnd?: Date) => GetDates(user, windowStart, windowEnd).then(d => {
-      dispatch(GetDatesAction(d, windowStart, windowEnd));
-      callback();
+    getDates: (user: AuthState['user'], callback: Function, windowStart?: Date, windowEnd?: Date) => new Promise<void>((success,fail) => {
+      if (user) {
+        GetDates(user, windowStart, windowEnd).then(d => {
+          dispatch(GetDatesAction(d));
+          callback();
+          success();
+        })
+      } else {
+        fail()
+      }
     })
   };
 };// Exports
