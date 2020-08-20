@@ -20,6 +20,10 @@ export const initialState: AuthState = {
   user: undefined
 }
 
+export const isUserAuthenticated = (user: firebase.User | undefined): boolean => {
+  return user !== undefined && user.uid !== undefined
+}
+
 export default function AuthReducer(prevState = initialState, action: Action): AuthState {
   switch (action.type) {
     case RESTORE_TOKEN:

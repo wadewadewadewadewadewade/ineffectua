@@ -6,7 +6,7 @@ import SettingsItem from '../shared/SettingsItem';
 
 import { connect } from 'react-redux';
 import { Action } from '../../reducers';
-import { SignOutAction } from '../../reducers/AuthReducer';
+import { SignOutAction, isUserAuthenticated } from '../../reducers/AuthReducer';
 import { State, RootDrawerParamList } from '../../Types';
 import { ToggleThemeAction } from '../../reducers/ThemeReducer';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state: State) => {
   // Redux Store --> Component
   return {
-    authenticated: state.user !== undefined,
+    authenticated: isUserAuthenticated(state.user),
     user: state.user,
     theme: state.theme
   };

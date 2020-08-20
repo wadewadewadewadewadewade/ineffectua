@@ -44,7 +44,7 @@ import * as Analytics from 'expo-firebase-analytics';
 import Profile from './Profile';
 
 import { NAVIGATION_PERSISTENCE_KEY, State, RootDrawerParamList, RootStackParamList } from '../../Types';
-import { SignInAction, Action as AuthAction } from '../../reducers/AuthReducer';
+import { SignInAction, Action as AuthAction, isUserAuthenticated } from '../../reducers/AuthReducer';
 import { paperTheme, CombinedLightTheme, Theme, barClassName, paperColors } from '../../reducers/ThemeReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -207,7 +207,7 @@ const Navigation = (props: { theme: Theme, user: firebase.User | undefined}) => 
             `${options?.title ?? getHeaderTitle(route?.name)} - ineffectua`,
         }}
       >
-      {user ? (
+      {isUserAuthenticated(user) ? (
         <Drawer.Navigator drawerType={isLargeScreen ? 'permanent' : undefined} drawerContent={props => <Profile />}>
           <Drawer.Screen name="Root">
             {({ navigation }: DrawerScreenProps<RootDrawerParamList>) => (
@@ -256,6 +256,7 @@ const Navigation = (props: { theme: Theme, user: firebase.User | undefined}) => 
 // Map State To Props (Redux Store Passes State To Component)
 const mapStateToProps = (state: State) => {
   // Redux Store --> Component
+  console.log('user authenticated', state.user)
   return {
     theme: state.theme ? state.theme : CombinedLightTheme,
     user: state.user

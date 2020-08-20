@@ -7,11 +7,7 @@ export const NAVIGATION_PERSISTENCE_KEY = 'NAVIGATION_STATE';
 export const THEME_PERSISTENCE_KEY = 'THEME_TYPE';
 
 
-export type State = {
-  user: AuthState['user'],
-  theme: ThemeState['theme'],
-  dates: CalendarState['dates']
-}
+export type State = AuthState & ThemeState & CalendarState;
 
 export type SimpleState = AuthState & ThemeState
 

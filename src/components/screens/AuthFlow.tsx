@@ -7,7 +7,7 @@ import {
 } from '@react-navigation/stack';
 import { User, auth } from 'firebase';
 import { connect } from 'react-redux';
-import { SignInAction, Action, SignOutAction } from '../../reducers/AuthReducer';
+import { SignInAction, Action, SignOutAction, isUserAuthenticated } from '../../reducers/AuthReducer';
 import { State, RootDrawerParamList } from '../../Types'
 
 type AuthStackParams = {
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state: State) => {
   // Redux Store --> Component
   return {
-    authenticated: state.user !== undefined,
+    authenticated: isUserAuthenticated(state.user),
     isSignout: true // TODO: make this tependant on the URL
   };
 };// Map Dispatch To Props (Dispatch Actions To Reducers. Reducers Then Modify The Data And Assign It To Your Props)

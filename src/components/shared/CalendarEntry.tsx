@@ -107,7 +107,7 @@ export type CalendarEntryProps = {
 }
 
 const CalendarEntry = (props: {
-    getDates: (callback: Function, windowStart?: Date, windowEnd?: Date) => Promise<void>,
+    getDates: (user: firebase.User, callback: Function, windowStart?: Date, windowEnd?: Date) => Promise<void>,
     authenticated: Boolean,
     user:  User | undefined,
     theme: Theme,
@@ -128,8 +128,8 @@ const CalendarEntry = (props: {
     const windowEnd = new Date(windowStart.getTime() + 1000 * 60 * 60 * 24);
     const [dates, setDates] = React.useState(new Array<CalendarEntryType>());
     const [loaded, setLoaded] = React.useState(false);
-    if (!loaded) {
-      getDates(() => setLoaded(true), windowStart, windowEnd);
+    if (!loaded && user) {
+      getDates(user, () => setLoaded(true), windowStart, windowEnd);
     }
     return (
       <ScrollView>
@@ -178,11 +178,11 @@ const mapStateToProps = (state: State) => {
     dates: state.dates
   };
 };
-const mapDispatchToProps = (dispatch: (value: Action) => void, ownProps: {user: firebase.User}) => {
+const mapDispatchToProps = (dispatch: (value: Action) => void) => {
   // Action
   return {
     // Login
-    getDates: (callback: Function, windowStart?: Date, windowEnd?: Date) => GetDates(ownProps.user, windowStart, windowEnd).then(d => {
+    getDates: (user: firebase.User, callback: Function, windowStart?: Date, windowEnd?: Date) => GetDates(user, windowStart, windowEnd).then(d => {
       dispatch(GetDatesAction(d, windowStart, windowEnd));
       callback();
     })

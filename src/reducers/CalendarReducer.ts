@@ -58,6 +58,7 @@ export async function GetDates(
     windowStart: Date = new Date(Date.now()),
     windowEnd: Date = windowStart && new Date(windowStart.getTime() + 1000 * 60 * 60 * 24) || new Date(Date.now() + 1000 * 60 * 60 * 24)
   ): Promise<Array<CalendarEntryType>> {
+    console.log('user', user);
     let dates: void | Array<CalendarEntryType> = await firestore().collection('users/' + user.uid + '/calendar')
       .where('start', '>=', windowStart).where('start', '<=', windowEnd)
       .orderBy('start')
