@@ -3,14 +3,16 @@ import { firestore, User } from 'firebase';
 import { DateObject } from 'react-native-calendars';
 import { StyleSheet, Text, View } from 'react-native';
 import { connect } from 'react-redux';
-import { State, calendarTypeEntryConverter, CalendarEntryType } from '../../Types';
-import { Theme, RouteProp } from '@react-navigation/native';
+import { State } from '../../Types';
+import { RouteProp } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInput, Button, FAB, Modal, Portal } from 'react-native-paper';
 import { CalendarStackParamList } from '../screens/CalendarNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
+import { CalendarEntryType, Action, GetDatesAction, GetDates } from '../../reducers/CalendarReducer';
+import { Theme } from '../../reducers/ThemeReducer';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 
@@ -105,14 +107,16 @@ export type CalendarEntryProps = {
 }
 
 const CalendarEntry = (props: {
-  authenticated: Boolean,
-  user:  User | undefined,
-  theme: Theme | undefined,
-  route: RouteProp<CalendarStackParamList, 'CalendarEntry'>,
-  navigation: StackNavigationProp<CalendarStackParamList, 'CalendarEntry'>
+    getDates: (callback: Function, windowStart?: Date, windowEnd?: Date) => Promise<void>,
+    authenticated: Boolean,
+    user:  User | undefined,
+    theme: Theme,
+    route: RouteProp<CalendarStackParamList, 'CalendarEntry'>,
+    navigation: StackNavigationProp<CalendarStackParamList, 'CalendarEntry'>
   }) => {
     const [visible, setVisible] = React.useState(false);
-    const { 
+    const {
+      getDates,
       authenticated,
       user,
       theme,
@@ -120,22 +124,12 @@ const CalendarEntry = (props: {
       navigation
     } = props;
     const { date } = route.params;
-    const calendarTheme = {
-      ...theme,
-      arrowColor: theme && theme.dark ? 'white' : ' black',
-      calendarBackground: theme && theme.dark ? 'black' : 'white'
-    }
     const windowStart = new Date(Date.parse(date.dateString));
     const windowEnd = new Date(windowStart.getTime() + 1000 * 60 * 60 * 24);
     const [dates, setDates] = React.useState(new Array<CalendarEntryType>());
-    if (user) {
-      firestore().collection('users/' + user.uid + '/calendar')
-        .where('start', '>=', windowStart).where('start', '<=', windowEnd)
-        .orderBy('start')
-        .withConverter(calendarTypeEntryConverter)
-        .get().then((querySnapshot) => {
-          setDates(querySnapshot.docs.map(d => d.data()))
-        })
+    const [loaded, setLoaded] = React.useState(false);
+    if (!loaded) {
+      getDates(() => setLoaded(true), windowStart, windowEnd);
     }
     return (
       <ScrollView>
@@ -178,10 +172,20 @@ const styles = StyleSheet.create({
 // Map State To Props (Redux Store Passes State To Component)
 const mapStateToProps = (state: State) => {
   return {
-    authenticated: state.AuthReducer.user !== undefined,
-    user: state.AuthReducer.user,
-    theme: state.ThemeReducer.theme
+    authenticated: state.user !== undefined,
+    user: state.user,
+    theme: state.theme,
+    dates: state.dates
   };
 };
-
-export default connect(mapStateToProps)(CalendarEntry);
+const mapDispatchToProps = (dispatch: (value: Action) => void, ownProps: {user: firebase.User}) => {
+  // Action
+  return {
+    // Login
+    getDates: (callback: Function, windowStart?: Date, windowEnd?: Date) => GetDates(ownProps.user, windowStart, windowEnd).then(d => {
+      dispatch(GetDatesAction(d, windowStart, windowEnd));
+      callback();
+    })
+  };
+};// Exports
+export default connect(mapStateToProps, mapDispatchToProps)(CalendarEntry);

@@ -8,10 +8,13 @@ The intent of this app is to help people with chronic illnesses track their medi
 
 # User Data
 
-``{
+```
+{
   theme: Theme,
   user: firebase.User
-}``
+  dates: Array<CalendarEntryType>
+}
+```
 
 # Notes to Self
 

@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state: State) => {
   // Redux Store --> Component
   return {
-    authenticated: state.AuthReducer.user !== undefined,
+    authenticated: state.user !== undefined,
     isSignout: true // TODO: make this tependant on the URL
   };
 };// Map Dispatch To Props (Dispatch Actions To Reducers. Reducers Then Modify The Data And Assign It To Your Props)

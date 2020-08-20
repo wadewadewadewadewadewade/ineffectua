@@ -10,12 +10,11 @@ import { SignOutAction } from '../../reducers/AuthReducer';
 import { State, RootDrawerParamList } from '../../Types';
 import { ToggleThemeAction } from '../../reducers/ThemeReducer';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { Theme } from '@react-navigation/native';
+import { Theme, themeIsDark } from '../../reducers/ThemeReducer';
 import { auth } from 'firebase';
 
 const Profile = memo(
   (props: {
-    navigation: StackNavigationProp<RootDrawerParamList, "Another">,
     authenticated: Boolean,
     user: firebase.User | undefined,
     theme: Theme,
@@ -23,7 +22,6 @@ const Profile = memo(
     signOut: () => void
   }) => {
     const {
-      navigation,
       authenticated,
       user,
       theme,
@@ -39,7 +37,7 @@ const Profile = memo(
           <Subheading>Hi{user?.displayName ? ' ' + user?.displayName : null}!</Subheading>
           <SettingsItem
             label="Dark theme"
-            value={theme && theme.dark ? true : false}
+            value={themeIsDark(theme)}
             onValueChange={() => toggleTheme()}
           />
           <Divider />
@@ -80,9 +78,9 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state: State) => {
   // Redux Store --> Component
   return {
-    authenticated: state.AuthReducer.user !== undefined,
-    user: state.AuthReducer.user,
-    theme: state.ThemeReducer.theme
+    authenticated: state.user !== undefined,
+    user: state.user,
+    theme: state.theme
   };
 };// Map Dispatch To Props (Dispatch Actions To Reducers. Reducers Then Modify The Data And Assign It To Your Props)
 const mapDispatchToProps = (dispatch: (value: Action) => void) => {

@@ -21,7 +21,14 @@ const firebaseConfig = {
   measurementId: "G-153557660"
 };
 
+try {
 firebase.initializeApp(firebaseConfig);
+} catch (err) {
+  // not an actual error when we're hot-reloading
+  if (!/already exists/.test(err.message)) {
+    console.error('Firebase initialization error', err.stack)
+  }
+}
 
 //YellowBox.ignoreWarnings(['Require cycle:', 'Warning: Async Storage']);
 

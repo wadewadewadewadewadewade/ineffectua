@@ -20,7 +20,6 @@ import {
   NavigationContainerRef,
   getFocusedRouteNameFromRoute,
   RouteProp,
-  Theme
 } from '@react-navigation/native';
 import {
   createDrawerNavigator,
@@ -46,7 +45,7 @@ import Profile from './Profile';
 
 import { NAVIGATION_PERSISTENCE_KEY, State, RootDrawerParamList, RootStackParamList } from '../../Types';
 import { SignInAction, Action as AuthAction } from '../../reducers/AuthReducer';
-import { paperTheme, CombinedLightTheme } from '../../reducers/ThemeReducer';
+import { paperTheme, CombinedLightTheme, Theme, barClassName, paperColors } from '../../reducers/ThemeReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 enableScreens();
@@ -54,7 +53,7 @@ enableScreens();
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
 
-const Navigation = (props: { theme: Theme | undefined, user: firebase.User | undefined}) => {
+const Navigation = (props: { theme: Theme, user: firebase.User | undefined}) => {
   const { theme, user } = props;
   const [isReady, setIsReady] = React.useState(Platform.OS === 'web');
   const [initialState, setInitialState] = React.useState<
@@ -151,7 +150,7 @@ const Navigation = (props: { theme: Theme | undefined, user: firebase.User | und
   return (
     <PaperProvider theme={paperTheme(theme)}>
       {Platform.OS === 'ios' && (
-        <StatusBar barStyle={theme !== undefined ? theme.dark ? 'light-content' : 'dark-content' : 'light-content'} />
+        <StatusBar barStyle={barClassName(theme)} />
       )}
       <NavigationContainer
         ref={navigationRef}
@@ -176,7 +175,7 @@ const Navigation = (props: { theme: Theme | undefined, user: firebase.User | und
           }
 
         }}
-        theme={theme}
+        theme={theme.navigation}
         linking={{
           // To test deep linking on, run the following in the Terminal:
           // Android: adb shell am start -a android.intent.action.VIEW -d "exp://127.0.0.1:19000/--/simple-stack"
@@ -209,7 +208,7 @@ const Navigation = (props: { theme: Theme | undefined, user: firebase.User | und
         }}
       >
       {user ? (
-        <Drawer.Navigator drawerType={isLargeScreen ? 'permanent' : undefined} drawerContent={props => <Profile {...props}/>}>
+        <Drawer.Navigator drawerType={isLargeScreen ? 'permanent' : undefined} drawerContent={props => <Profile />}>
           <Drawer.Screen name="Root">
             {({ navigation }: DrawerScreenProps<RootDrawerParamList>) => (
               <Stack.Navigator
@@ -225,8 +224,8 @@ const Navigation = (props: { theme: Theme | undefined, user: firebase.User | und
                       ? undefined
                       : () => (
                           <Appbar.Action
-                            color={theme !== undefined ? theme.colors.text : CombinedLightTheme.colors.text}
-                            icon={() => <MaterialCommunityIcons name="settings" color={theme !== undefined ? theme.colors.text : CombinedLightTheme.colors.text} size={26} />}
+                            color={paperColors(theme).text}
+                            icon={() => <MaterialCommunityIcons name="settings" color={paperColors(theme).text} size={26} />}
                             onPress={() => navigation.toggleDrawer()}
                           />
                         ),
@@ -258,8 +257,8 @@ const Navigation = (props: { theme: Theme | undefined, user: firebase.User | und
 const mapStateToProps = (state: State) => {
   // Redux Store --> Component
   return {
-    theme: state.ThemeReducer.theme,
-    user: state.AuthReducer.user
+    theme: state.theme ? state.theme : CombinedLightTheme,
+    user: state.user
   };
 };// Map Dispatch To Props (Dispatch Actions To Reducers. Reducers Then Modify The Data And Assign It To Your Props)
 const mapDispatchToProps = (dispatch: (value: AuthAction) => void) => {

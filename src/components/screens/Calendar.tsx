@@ -1,39 +1,38 @@
 import React from 'react';
-import { firestore, User } from 'firebase';
+import { User } from 'firebase';
 import { CalendarList, DateObject } from 'react-native-calendars';
 import { StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
-import { State, CalendarEntryType, calendarTypeEntryConverter } from '../../Types';
-import { Theme, NavigationContainerRef } from '@react-navigation/native';
+import { State } from '../../Types';
+import { NavigationContainerRef } from '@react-navigation/native';
 import CalendarEntry, { CalendarEntryProps } from '../shared/CalendarEntry';
+import { Action, GetDates, GetDatesAction } from '../../reducers/CalendarReducer';
+import { Theme, themeIsDark } from '../../reducers/ThemeReducer';
 
 const Calendar = (props: any) => {
   const {
+    getDates,
     navigation,
     authenticated,
     user,
     theme
   } : {
+    getDates: (windowStart?: Date, windowEnd?: Date) => Action,
     navigation: NavigationContainerRef,
     authenticated: Boolean,
     user:  User | undefined,
-    theme: Theme | undefined
+    theme: Theme
   } = props;
   const calendarTheme = {
     ...theme,
-    arrowColor: theme && theme.dark ? '#fff' : '#000',
-    calendarBackground: theme && theme.dark ? '#000' : '#fff'
+    arrowColor: themeIsDark(theme) ? '#fff' : '#000',
+    calendarBackground: themeIsDark(theme) ? '#000' : '#fff'
   }
-  /*const [dates, setDates] = React.useState(new Array<CalendarEntryType>());
-  if (user) {
-    firestore().collection('users/' + user.uid + '/calendar')
-      .where('start', '>=', windowStart).where('start', '<=', windowEnd)
-      .orderBy('start')
-      .withConverter(calendarTypeEntryConverter)
-      .get().then((querySnapshot) => {
-        setDates(querySnapshot.docs.map(d => d.data()))
-      })
-  }*/
+  const [loaded, setLoaded] = React.useState(false);
+  if (!loaded) {
+    getDates();
+    setLoaded(true);
+  }
 
   return (
     <CalendarList
@@ -109,10 +108,16 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state: State) => {
   // Redux Store --> Component
   return {
-    authenticated: state.AuthReducer.user !== undefined,
-    user: state.AuthReducer.user,
-    theme: state.ThemeReducer.theme
+    authenticated: state.user !== undefined,
+    user: state.user,
+    theme: state.theme
   };
 };
-
-export default connect(mapStateToProps)(Calendar);
+const mapDispatchToProps = (dispatch: (value: Action) => void, ownProps: {user: firebase.User}) => {
+  // Action
+  return {
+    // Login
+    getDates: (windowStart?: Date, windowEnd?: Date) => GetDates(ownProps.user, windowStart, windowEnd).then(d => d && dispatch(GetDatesAction(d, windowStart, windowEnd)))
+  };
+};// Exports
+export default connect(mapStateToProps, mapDispatchToProps)(Calendar);
