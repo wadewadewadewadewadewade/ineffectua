@@ -229,7 +229,7 @@ const Navigation = (props: {
                       : () => (
                           <Appbar.Action
                             color={paperColors(theme).text}
-                            icon={() => <MaterialCommunityIcons name="settings" color={paperColors(theme).text} size={26} />}
+                            icon={() => <MaterialCommunityIcons name="account" color={paperColors(theme).text} size={26} />}
                             onPress={() => navigation.toggleDrawer()}
                           />
                         ),

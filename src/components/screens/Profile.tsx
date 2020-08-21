@@ -34,7 +34,7 @@ const Profile = memo(
       authenticated ? (
         <ScrollView style={styles.content}>
           {thumbnail ? (<Avatar.Image source={thumbnail} style={styles.image} />) : null}
-          <Subheading>Hi{user ? ' ' + user?.displayName : null}!</Subheading>
+          <Subheading>Hi{user && user.displayName !== null ? ' ' + user.displayName : ''}!</Subheading>
           <SettingsItem
             label="Dark theme"
             value={themeIsDark(theme)}

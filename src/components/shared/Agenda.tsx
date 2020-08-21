@@ -1,146 +1,139 @@
-import * as React from 'react';
-import {
-  View,
-  TextInput,
-  Image,
-  ScrollView,
-  StyleSheet,
-  ScrollViewProps,
-} from 'react-native';
-import { useScrollToTop, useTheme } from '@react-navigation/native';
-import {
-  Card,
-  Text,
-  Avatar,
-  Subheading,
-  Divider,
-} from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import Color from 'color';
+import React from 'react';
+import { DateObject, Agenda as AgendaList } from 'react-native-calendars';
+import { StyleSheet, View } from 'react-native';
+import { connect } from 'react-redux';
+import { State } from '../../Types';
+import { NavigationContainerRef } from '@react-navigation/native';
+import CalendarEntry, { CalendarEntryProps } from '../shared/CalendarEntry';
+import { Action, GetDates, GetDatesAction, formatDates, CalendarState } from '../../reducers/CalendarReducer';
+import { Theme, themeIsDark } from '../../reducers/ThemeReducer';
+import { AuthState } from '../../reducers/AuthReducer';
 
-type Props = Partial<ScrollViewProps> & {
-  date?: number;
-};
+const Agenda = (props: any) => {
+  const {
+    getDates,
+    dates,
+    navigation,
+    user,
+    theme
+  } : {
+    getDates: (user: AuthState['user'], windowStart?: Date, windowEnd?: Date) => Action,
+    dates: CalendarState['dates'],
+    navigation: NavigationContainerRef,
+    authenticated: Boolean,
+    user:  AuthState['user'],
+    theme: Theme
+  } = props;
+  const calendarTheme = {
+    ...theme.paper,
+    agendaDayTextColor: themeIsDark(theme) ? '#666' : '#ccc',
+    agendaDayNumColor: 'green',
+    agendaTodayColor: 'red',
+    agendaKnobColor: 'blue'
+  }
+  const [loaded, setLoaded] = React.useState(false);
+  if (!loaded) {
+    getDates(user);
+    setLoaded(true);
+  }
 
-const Author = () => {
   return (
-    <View style={[styles.row, styles.attribution]}>
-      <Avatar.Image source={{ uri: "//static.invertase.io/assets/firebase/analytics.svg" }} size={32} />
-      <Subheading style={styles.author}>Joke bot</Subheading>
+    <View>
+      <AgendaList
+        // The list of items that have to be displayed in agenda. If you want to render item as empty date
+        // the value of date key has to be an empty array []. If there exists no value for date key it is
+        // considered that the date in question is not yet loaded
+        items={formatDates(dates.items)}
+        // Callback that gets called when items for a certain month should be loaded (month became visible)
+        loadItemsForMonth={(month) => {console.log('trigger items loading')}}
+        // Callback that fires when the calendar is opened or closed
+        onCalendarToggled={(calendarOpened) => {console.log(calendarOpened)}}
+        // Callback that gets called on day press
+        onDayPress={(day)=>{console.log('day pressed')}}
+        // Callback that gets called when day changes while scrolling agenda list
+        onDayChange={(day)=>{console.log('day changed')}}
+        // Initially selected day
+        selected={'2012-05-16'}
+        // Minimum date that can be selected, dates before minDate will be grayed out. Default = undefined
+        minDate={'2012-05-10'}
+        // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
+        maxDate={'2012-05-30'}
+        // Max amount of months allowed to scroll to the past. Default = 50
+        pastScrollRange={50}
+        // Max amount of months allowed to scroll to the future. Default = 50
+        futureScrollRange={50}
+        // Specify how each item should be rendered in agenda
+        renderItem={(item, firstItemInDay) => {return (<View />);}}
+        // Specify how each date should be rendered. day can be undefined if the item is not first in that day.
+        renderDay={(day, item) => {return (<View />);}}
+        // Specify how empty date content with no items should be rendered
+        renderEmptyDate={() => {return (<View />);}}
+        // Specify how agenda knob should look like
+        renderKnob={() => {return (<View />);}}
+        // Specify what should be rendered instead of ActivityIndicator
+        renderEmptyData = {() => {return (<View />);}}
+        // Specify your item comparison function for increased performance
+        rowHasChanged={(r1, r2) => {return r1.name !== r2.name}}
+        // Hide knob button. Default = false
+        hideKnob={true}
+        // By default, agenda dates are marked if they have at least one item, but you can override this if needed
+        /*markedDates={{
+          '2012-05-16': {selected: true, marked: true},
+          '2012-05-17': {marked: true},
+          '2012-05-18': {disabled: true}
+        }}*/
+        // If disabledByDefault={true} dates flagged as not disabled will be enabled. Default = false
+        //disabledByDefault={true}
+        // If provided, a standard RefreshControl will be added for "Pull to Refresh" functionality. Make sure to also set the refreshing prop correctly.
+        onRefresh={() => console.log('refreshing...')}
+        // Set this true while waiting for new data from a refresh
+        refreshing={false}
+        // Add a custom RefreshControl component, used to provide pull-to-refresh functionality for the ScrollView.
+        refreshControl={null}
+        // Agenda theme
+        theme={calendarTheme}
+        style={{
+          width: '100%',
+          maxWidth: '100%'
+        }}
+      />
     </View>
-  );
-};
-
-const Footer = () => {
-  return (
-    <View style={styles.row}>
-      <MaterialCommunityIcons style={styles.icon} size={16} name="heart-outline" />
-      <MaterialCommunityIcons style={styles.icon} size={16} name="comment-outline" />
-      <MaterialCommunityIcons style={styles.icon} size={16} name="share-outline" />
-    </View>
-  );
-};
-
-export default function Agenda(props: Props) {
-  const ref = React.useRef<ScrollView>(null);
-
-  useScrollToTop(ref);
-
-  const { colors } = useTheme();
-
-  return (
-    <ScrollView ref={ref} {...props}>
-      <Card style={styles.card}>
-        <TextInput
-          placeholder="What's on your mind?"
-          placeholderTextColor={Color(colors.text).alpha(0.5).rgb().string()}
-          style={styles.input}
-        />
-      </Card>
-      <Card style={styles.card}>
-        <Author />
-        <Card.Content style={styles.content}>
-          <Text>
-            If you aren&apos;t impressed with the picture of the first Black
-            Hole, you clearly don&apos;t understand the gravity of the
-            situation.
-          </Text>
-        </Card.Content>
-        <Divider />
-        <Footer />
-      </Card>
-      <Card style={styles.card}>
-        <Author />
-        <Card.Content style={styles.content}>
-          <Text>
-            I went to the zoo and I saw a baguette in a cage. I asked the
-            zookeeper about it and he said it was bread in captivity.
-          </Text>
-        </Card.Content>
-        <Image source={{ uri: "//static.invertase.io/assets/firebase/analytics.svg" }} style={styles.cover} />
-        <Footer />
-      </Card>
-      <Card style={styles.card}>
-        <Author />
-        <Card.Content style={styles.content}>
-          <Text>Why didn&apos;t 4 ask 5 out? Because he was 2².</Text>
-        </Card.Content>
-        <Divider />
-        <Footer />
-      </Card>
-      <Card style={styles.card}>
-        <Author />
-        <Card.Content style={styles.content}>
-          <Text>
-            What did Master Yoda say when he first saw himself in 4k? HDMI.
-          </Text>
-        </Card.Content>
-        <Divider />
-        <Footer />
-      </Card>
-      <Card style={styles.card}>
-        <Author />
-        <Card.Content style={styles.content}>
-          <Text>
-            Someone broke into my house and stole 20% of my couch. Ouch!
-          </Text>
-        </Card.Content>
-        <Divider />
-        <Footer />
-      </Card>
-    </ScrollView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
-  input: {
-    padding: 16,
-    backgroundColor: 'transparent',
-    margin: 0,
+  buttons: {
+    padding: 8,
   },
-  card: {
-    marginVertical: 8,
-    borderRadius: 0,
-  },
-  cover: {
-    height: 160,
-    borderRadius: 0,
-  },
-  content: {
-    marginBottom: 12,
-  },
-  attribution: {
-    margin: 12,
-  },
-  author: {
-    marginHorizontal: 8,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  icon: {
-    flex: 1,
-    textAlign: 'center',
+  button: {
+    margin: 8,
   },
 });
+
+// Map State To Props (Redux Store Passes State To Component)
+const mapStateToProps = (state: State) => {
+  // Redux Store --> Component
+  return {
+    user: state.user,
+    theme: state.theme,
+    dates: state.dates
+  };
+};
+const mapDispatchToProps = (dispatch: (value: Action) => void) => {
+  // Action
+  return {
+    // Login
+    getDates: (user: AuthState['user'], callback: Function, windowStart?: Date, windowEnd?: Date) => new Promise<void>((success,fail) => {
+      if (user) {
+        GetDates(user, windowStart, windowEnd).then(d => {
+          dispatch(GetDatesAction(d));
+          callback();
+          success();
+        })
+      } else {
+        fail()
+      }
+    })
+  };
+};// Exports
+export default connect(mapStateToProps, mapDispatchToProps)(Agenda);

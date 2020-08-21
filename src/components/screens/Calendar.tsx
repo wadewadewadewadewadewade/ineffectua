@@ -1,47 +1,52 @@
 import React from 'react';
 import { User } from 'firebase';
 import { CalendarList, DateObject } from 'react-native-calendars';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { connect } from 'react-redux';
 import { State } from '../../Types';
 import { NavigationContainerRef } from '@react-navigation/native';
 import CalendarEntry, { CalendarEntryProps } from '../shared/CalendarEntry';
-import { Action, GetDates, GetDatesAction } from '../../reducers/CalendarReducer';
-import { Theme, themeIsDark } from '../../reducers/ThemeReducer';
+import { Action, GetDates, GetDatesAction, CalendarState, formatDatesForMarking } from '../../reducers/CalendarReducer';
+import { Theme, themeIsDark, ThemeState } from '../../reducers/ThemeReducer';
+import { AuthState } from '../../reducers/AuthReducer';
+import { CalendarStackParamList } from './CalendarNavigator';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-const Calendar = (props: any) => {
+const Calendar = (props: {
+  getDates: (user: AuthState['user'], callback: Function, windowStart?: Date, windowEnd?: Date) => Promise<void>,
+  dates: CalendarState['dates'],
+  user: AuthState['user'],
+  theme: ThemeState['theme'],
+  navigation: StackNavigationProp<CalendarStackParamList, 'Calendar'>
+}) => {
   const {
     getDates,
+    dates,
     navigation,
-    authenticated,
     user,
     theme
-  } : {
-    getDates: (windowStart?: Date, windowEnd?: Date) => Action,
-    navigation: NavigationContainerRef,
-    authenticated: Boolean,
-    user:  User | undefined,
-    theme: Theme
   } = props;
   const calendarTheme = {
-    ...theme,
-    arrowColor: themeIsDark(theme) ? '#fff' : '#000',
+    ...theme.paper,
+    arrowColor: themeIsDark(theme) ? '#666' : '#ccc',
     calendarBackground: themeIsDark(theme) ? '#000' : '#fff'
   }
   const [loaded, setLoaded] = React.useState(false);
   if (!loaded) {
-    getDates();
+    getDates(user, () => setLoaded(true));
     setLoaded(true);
   }
 
   return (
-    <CalendarList
+    <View>
+      <CalendarList
         // Initially visible month. Default = Date()
         //current={'2012-03-01'}
         // Minimum date that can be selected, dates before minDate will be grayed out. Default = undefined
         //minDate={'2012-05-10'}
         // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
         //maxDate={'2012-05-30'}
+        markedDates={formatDatesForMarking(dates.items)}
         // Handler which gets executed on day press. Default = undefined
         onDayPress={(day: DateObject) => navigation.navigate('CalendarEntry', { date: day, title: 'Calendar: ' + new Date(Date.parse(day.dateString)).toDateString() })}
         // Handler which gets executed on day long press. Default = undefined
@@ -89,9 +94,11 @@ const Calendar = (props: any) => {
         // Enable or disable vertical scroll indicator. Default = false
         showScrollIndicator={true}
         style={{
-          height: '100%'
+          width: '100%',
+          maxWidth: '100%'
         }}
       />
+    </View>
   )
 }
 
@@ -108,16 +115,26 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state: State) => {
   // Redux Store --> Component
   return {
-    authenticated: state.user !== undefined,
     user: state.user,
-    theme: state.theme
+    theme: state.theme,
+    dates: state.dates
   };
 };
-const mapDispatchToProps = (dispatch: (value: Action) => void, ownProps: {user: firebase.User}) => {
+const mapDispatchToProps = (dispatch: (value: Action) => void) => {
   // Action
   return {
     // Login
-    getDates: (windowStart?: Date, windowEnd?: Date) => GetDates(ownProps.user, windowStart, windowEnd).then(d => d && dispatch(GetDatesAction(d)))
+    getDates: (user: AuthState['user'], callback: Function, windowStart?: Date, windowEnd?: Date) => new Promise<void>((success,fail) => {
+      if (user) {
+        GetDates(user, windowStart, windowEnd).then(d => {
+          dispatch(GetDatesAction(d));
+          callback();
+          success();
+        })
+      } else {
+        fail()
+      }
+    })
   };
 };// Exports
 export default connect(mapStateToProps, mapDispatchToProps)(Calendar);

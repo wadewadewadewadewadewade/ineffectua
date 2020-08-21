@@ -11,7 +11,7 @@ import { TextInput, Button, FAB, Modal, Portal } from 'react-native-paper';
 import { CalendarStackParamList } from '../screens/CalendarNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
-import { CalendarEntryType, Action, GetDatesAction, GetDates } from '../../reducers/CalendarReducer';
+import { CalendarEntryType, Action, GetDatesAction, GetDates, CalendarState } from '../../reducers/CalendarReducer';
 import { Theme, ThemeState } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
 
@@ -104,30 +104,34 @@ const TimeSlot = (props : {
 }
 
 export type CalendarEntryProps = {
-  date: DateObject
+  date: DateObject,
+  title: string
 }
 
 const CalendarEntry = (props: {
     getDates: (user: AuthState['user'], callback: Function, windowStart?: Date, windowEnd?: Date) => Promise<void>,
+    dates: CalendarState['dates'],
     authenticated: Boolean,
     user: AuthState['user'],
     theme: ThemeState['theme'],
     route: RouteProp<CalendarStackParamList, 'CalendarEntry'>,
-    navigation: StackNavigationProp<CalendarStackParamList, 'CalendarEntry'>
+    navigation: StackNavigationProp<CalendarStackParamList, 'CalendarEntry'>,
+    title: string
   }) => {
     const [visible, setVisible] = React.useState(false);
     const {
       getDates,
+      dates,
       authenticated,
       user,
       theme,
       route,
-      navigation
+      navigation,
+      title
     } = props;
     const { date } = route.params;
     const windowStart = new Date(Date.parse(date.dateString));
     const windowEnd = new Date(windowStart.getTime() + 1000 * 60 * 60 * 24);
-    const [dates, setDates] = React.useState(new Array<CalendarEntryType>());
     const [loaded, setLoaded] = React.useState(false);
     if (!loaded && user) {
       getDates(user, () => setLoaded(true), windowStart, windowEnd);
@@ -145,7 +149,7 @@ const CalendarEntry = (props: {
             <NewSlot date={date} theme={theme} user={user} />
           </Modal>
         </Portal>
-        {dates.map((d: CalendarEntryType, i: number) => <TimeSlot date={d} windowStarts={windowStart} windowEnds={windowEnd} index={i} total={dates.length}/>)}
+        {dates.items.map((d: CalendarEntryType, i: number) => <TimeSlot date={d} windowStarts={windowStart} windowEnds={windowEnd} index={i} total={dates.items.length}/>)}
       </ScrollView>
     )
 }

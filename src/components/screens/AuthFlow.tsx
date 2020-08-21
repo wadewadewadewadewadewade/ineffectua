@@ -28,7 +28,9 @@ const SignInScreen = (props : { signIn: (user: User) => void }) => {
   const { colors } = useTheme();
   const [email, onChangeEmail] = React.useState('Email');
   const [password, onChangePassword] = React.useState('Password');
+  const [passwordConfirm, onChangePasswordConfirm] = React.useState('Password Confirm');
   const [error, onChangeError] = React.useState('');
+  const [register, changeMode] = React.useState(false);
 
   return (
     <View style={styles.content}>
@@ -43,6 +45,7 @@ const SignInScreen = (props : { signIn: (user: User) => void }) => {
       />
       <TextInput
         placeholder="Password"
+        autoCompleteType="password"
         secureTextEntry
         style={[
           styles.input,
@@ -50,14 +53,43 @@ const SignInScreen = (props : { signIn: (user: User) => void }) => {
         ]}
         onChangeText={onChangePassword}
       />
+      {register && (<TextInput
+        placeholder="Confirm Password"
+        autoCompleteType="password"
+        secureTextEntry
+        style={[
+          styles.input,
+          { backgroundColor: colors.card, color: colors.text },
+        ]}
+        onChangeText={onChangePasswordConfirm}
+      />)}
       {error !== undefined ? (<Text style={{color: 'red'}}>{error}</Text>) : null}
       <Button mode="contained" onPress={() => {
-        auth().signInWithEmailAndPassword(email, password).then((user) => {
-          user.user && signIn(user.user)
-        }).catch((e) => onChangeError(e))
+        if (register) {
+          if (password === passwordConfirm) {
+            auth().createUserWithEmailAndPassword(email, password).then((user) => {
+              user.user && signIn(user.user)
+            }).catch((e) => onChangeError(e))
+          } else {
+            onChangeError('"Password" and "Confirm Password" values must match, so you know you\'re entering the password your\'e intending to enter')
+          }
+        } else {
+          auth().signInWithEmailAndPassword(email, password).then((user) => {
+            user.user && signIn(user.user)
+          }).catch((e) => onChangeError(e))
+        }
       }} style={styles.button}>
-        Sign in
+        <Text>Sign {register ? 'Up' : 'In'}</Text>
       </Button>
+      {register ? (
+        <Button mode="text" onPress={() => changeMode(false)}>
+          <Text>Sign In To Existing Account</Text>
+        </Button>
+      ) : (
+        <Button mode="text" onPress={() => changeMode(true)}>
+          <Text>Create New Account</Text>
+        </Button>
+      )}
     </View>
   );
 };
@@ -110,13 +142,13 @@ const SimpleStackScreen = (props: any) => {
             animationTypeForReplace: isSignout ? 'pop' : 'push',
             headerShown: false
           }}
-          component={() => <SignInScreen signIn={signIn} />}
+          children={() => <SignInScreen signIn={signIn} />}
         />
       ) : (
         <SimpleStack.Screen
           name="Success"
           options={{ title: 'Authentication Success' }}
-          component={() => <AuthenticationSuccessScreen signOut={signOut} />}
+          children={() => <AuthenticationSuccessScreen signOut={signOut} />}
         />
       )}
     </SimpleStack.Navigator>
