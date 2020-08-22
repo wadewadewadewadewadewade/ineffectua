@@ -1,3 +1,4 @@
+import { MaterialBottomTabParams } from './components/screens/MaterialBottomTabs';
 import { ThemeState, initialState as themeInitialState } from './reducers/ThemeReducer';
 import { AuthState, initialState as authInitialState } from './reducers/AuthReducer';
 import { CalendarState, initialState as calendarInitialState } from './reducers/CalendarReducer';
@@ -21,7 +22,7 @@ export type RootDrawerParamList = {
 };
 
 export type RootStackParamList = {
-  Tabs: undefined
+  Tabs: MaterialBottomTabParams
   AuthFlow: undefined;
   NotFound: undefined;
   ModalScreen: undefined;

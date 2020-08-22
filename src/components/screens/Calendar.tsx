@@ -1,13 +1,11 @@
 import React from 'react';
-import { User } from 'firebase';
 import { CalendarList, DateObject } from 'react-native-calendars';
 import { StyleSheet, View } from 'react-native';
 import { connect } from 'react-redux';
 import { State } from '../../Types';
-import { NavigationContainerRef } from '@react-navigation/native';
-import CalendarEntry, { CalendarEntryProps } from '../shared/CalendarEntry';
+import { CommonActions } from '@react-navigation/native';
 import { Action, getDates, CalendarState, formatDatesForMarking, CalendarWindow } from '../../reducers/CalendarReducer';
-import { Theme, themeIsDark, ThemeState } from '../../reducers/ThemeReducer';
+import { themeIsDark, ThemeState } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
 import { CalendarStackParamList } from './CalendarNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';

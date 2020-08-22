@@ -39,7 +39,7 @@ import MaterialBottomTabs from '../screens/MaterialBottomTabs';
 import NotFound from './NotFound';
 import AuthFlow from './AuthFlow';
 
-import { User, auth } from 'firebase';
+import { auth } from 'firebase';
 import * as Analytics from 'expo-firebase-analytics';
 import Profile from './Profile';
 
@@ -48,6 +48,7 @@ import { SignInAction, Action as AuthAction, isUserAuthenticated, AuthState } fr
 import { paperTheme, CombinedLightTheme, Theme, barClassName, paperColors, ThemeState } from '../../reducers/ThemeReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CalendarStackParamList } from './CalendarNavigator';
+import { CalendarEntryProps } from '../shared/CalendarEntry';
 
 enableScreens();
 
@@ -77,8 +78,10 @@ const Navigation = (props: {
     // If the focused route is not found, we need to assume it's the initial screen
     // This can happen during if there hasn't been any navigation inside the screen
     // In our case, it's "Feed" as that's the first screen inside the navigator
-    let routeName = savedStateName || options && options.title || route && getFocusedRouteNameFromRoute(route);
-    console.log(routeName, savedStateName, options, route);
+    let routeName = savedStateName
+      || options && options.title
+      || route && getFocusedRouteNameFromRoute(route);
+    
     switch (routeName) {
       case 'ModalScreen':
         return ((route as RouteProp<RootStackParamList, "Tabs">)?.params as any).title
@@ -87,7 +90,7 @@ const Navigation = (props: {
       case 'Feed':
         return 'Agenda';
       case 'CalendarEntry':
-        return 'CalendarEntry';
+        return (route?.params as CalendarEntryProps).title;
       case 'Calendar':
         return 'Calendar';
       case 'PainLogEntry':
@@ -172,8 +175,9 @@ const Navigation = (props: {
         ref={navigationRef}
         initialState={initialState}
         onStateChange={(state) => {
-          const currentRouteName = navigationRef.current?.getCurrentRoute()?.name;
-
+          const currentRoute = navigationRef.current?.getCurrentRoute();
+          const currentRouteName = currentRoute?.name;
+          
           if (previousRouteName !== currentRouteName) {
             // The line below uses the expo-firebase-analytics tracker
             // https://docs.expo.io/versions/latest/sdk/firebase-analytics/

@@ -167,6 +167,7 @@ export async function GetDates(
         ends: new Date(Date.now() + 1000 * 60 * 60 * 24)
       }
     }
+    //firestore.setLogLevel('debug');
     let dates: void | Array<CalendarEntryType> = await firestore().collection('users/' + user.uid + '/calendar')
       .where('start', '>=', window.starts).where('start', '<=', window.ends)
       .orderBy('start')
