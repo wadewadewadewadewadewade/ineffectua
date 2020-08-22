@@ -7,7 +7,7 @@ import Agenda from '../shared/Agenda';
 import CalendarNavigator from './CalendarNavigator';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-type MaterialBottomTabParams = {
+export type MaterialBottomTabParams = {
   Agenda: undefined;
   Calendar: undefined;
   PainLogEntry: undefined;
