@@ -9,6 +9,8 @@ import { User, auth } from 'firebase';
 import { connect } from 'react-redux';
 import { SignInAction, Action, SignOutAction, isUserAuthenticated } from '../../reducers/AuthReducer';
 import { State, RootDrawerParamList } from '../../Types'
+import { SvgXml } from 'react-native-svg';
+//import logoSvg from '../../../assets/splash.svg';
 
 type AuthStackParams = {
   SignIn: undefined;
@@ -34,6 +36,13 @@ const SignInScreen = (props : { signIn: (user: User) => void }) => {
 
   return (
     <View style={styles.content}>
+      <SvgXml width="200" height="200" xml={'../../../assets/logo.svg'} style={styles.logo} />
+      <Text style={styles.description}>
+        There are thousands of others around the world that also have invisible illnesses. Lupus,
+        fibromyalgia, and many varieties of auto-immune diseases abound, just to name a few classes 
+        of invisible illness.The intent of this app is to help people with chronic illnesses track 
+        their medical issues and appointments, to help them feel a bit of control in their treatment.
+      </Text>
       <TextInput
         placeholder="Email"
         autoCompleteType="email"
@@ -90,6 +99,10 @@ const SignInScreen = (props : { signIn: (user: User) => void }) => {
           <Text>Create New Account</Text>
         </Button>
       )}
+      <Text style={styles.smallprint}>
+        We don't share your information with anyone. but we do use Firebase to 
+        store your data...for now. The plan is to move to our own database eventually.
+      </Text>
     </View>
   );
 };
@@ -175,6 +188,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     margin: 8,
   },
+  logo: {
+    justifyContent: 'center',
+  },
+  description: {
+    textAlign: 'left',
+    margin: 8,
+  },
+  smallprint:{
+    textAlign: 'left',
+    margin: 8,
+    fontSize: 10
+  }
 });
 
 // Map State To Props (Redux Store Passes State To Component)
