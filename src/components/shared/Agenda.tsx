@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { State } from '../../Types';
 import { NavigationContainerRef } from '@react-navigation/native';
 import CalendarEntry, { CalendarEntryProps } from '../shared/CalendarEntry';
-import { Action, GetDates, GetDatesAction, formatDates, CalendarState } from '../../reducers/CalendarReducer';
+import { Action, getDates, formatDates, CalendarState, CalendarWindow } from '../../reducers/CalendarReducer';
 import { Theme, themeIsDark } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
 
@@ -17,7 +17,7 @@ const Agenda = (props: any) => {
     user,
     theme
   } : {
-    getDates: (user: AuthState['user'], windowStart?: Date, windowEnd?: Date) => Action,
+    getDates: (user: firebase.User, callback: () => void, window?: CalendarWindow) => Action,
     dates: CalendarState['dates'],
     navigation: NavigationContainerRef,
     authenticated: Boolean,
@@ -32,9 +32,8 @@ const Agenda = (props: any) => {
     agendaKnobColor: 'blue'
   }
   const [loaded, setLoaded] = React.useState(false);
-  if (!loaded) {
-    getDates(user);
-    setLoaded(true);
+  if (!loaded && user) {
+    getDates(user, () => setLoaded(true));
   }
 
   return (
@@ -122,18 +121,7 @@ const mapStateToProps = (state: State) => {
 const mapDispatchToProps = (dispatch: (value: Action) => void) => {
   // Action
   return {
-    // Login
-    getDates: (user: AuthState['user'], callback: Function, windowStart?: Date, windowEnd?: Date) => new Promise<void>((success,fail) => {
-      if (user) {
-        GetDates(user, windowStart, windowEnd).then(d => {
-          dispatch(GetDatesAction(d));
-          callback();
-          success();
-        })
-      } else {
-        fail()
-      }
-    })
+    getDates: (user: firebase.User, callback: () => void, window?: CalendarWindow) => getDates(dispatch, user, callback, window)
   };
 };// Exports
 export default connect(mapStateToProps, mapDispatchToProps)(Agenda);

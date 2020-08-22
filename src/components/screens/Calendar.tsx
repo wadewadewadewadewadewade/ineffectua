@@ -6,14 +6,14 @@ import { connect } from 'react-redux';
 import { State } from '../../Types';
 import { NavigationContainerRef } from '@react-navigation/native';
 import CalendarEntry, { CalendarEntryProps } from '../shared/CalendarEntry';
-import { Action, GetDates, GetDatesAction, CalendarState, formatDatesForMarking } from '../../reducers/CalendarReducer';
+import { Action, getDates, CalendarState, formatDatesForMarking, CalendarWindow } from '../../reducers/CalendarReducer';
 import { Theme, themeIsDark, ThemeState } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
 import { CalendarStackParamList } from './CalendarNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 const Calendar = (props: {
-  getDates: (user: AuthState['user'], callback: Function, windowStart?: Date, windowEnd?: Date) => Promise<void>,
+  getDates: (user: firebase.User, callback: () => void, window?: CalendarWindow) => Promise<void>,
   dates: CalendarState['dates'],
   user: AuthState['user'],
   theme: ThemeState['theme'],
@@ -32,9 +32,8 @@ const Calendar = (props: {
     calendarBackground: themeIsDark(theme) ? '#000' : '#fff'
   }
   const [loaded, setLoaded] = React.useState(false);
-  if (!loaded) {
+  if (!loaded && user) {
     getDates(user, () => setLoaded(true));
-    setLoaded(true);
   }
 
   return (
@@ -123,18 +122,7 @@ const mapStateToProps = (state: State) => {
 const mapDispatchToProps = (dispatch: (value: Action) => void) => {
   // Action
   return {
-    // Login
-    getDates: (user: AuthState['user'], callback: Function, windowStart?: Date, windowEnd?: Date) => new Promise<void>((success,fail) => {
-      if (user) {
-        GetDates(user, windowStart, windowEnd).then(d => {
-          dispatch(GetDatesAction(d));
-          callback();
-          success();
-        })
-      } else {
-        fail()
-      }
-    })
+    getDates: (user: firebase.User, callback: () => void, window?: CalendarWindow) => getDates(dispatch, user, callback, window)
   };
 };// Exports
 export default connect(mapStateToProps, mapDispatchToProps)(Calendar);

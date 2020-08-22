@@ -47,6 +47,7 @@ import { NAVIGATION_PERSISTENCE_KEY, State, RootDrawerParamList, RootStackParamL
 import { SignInAction, Action as AuthAction, isUserAuthenticated, AuthState } from '../../reducers/AuthReducer';
 import { paperTheme, CombinedLightTheme, Theme, barClassName, paperColors, ThemeState } from '../../reducers/ThemeReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { CalendarStackParamList } from './CalendarNavigator';
 
 enableScreens();
 
@@ -64,19 +65,29 @@ const Navigation = (props: {
     InitialState | undefined
   >();
 
-  function getHeaderTitle(route: RouteProp<RootStackParamList, "Tabs"> | string | undefined) {
+  function getHeaderTitle(
+    options: Record<string, any> | undefined,
+    route: Readonly<{
+      key: string;
+      name: string;
+      params?: object | undefined;
+    }> | undefined,
+    savedStateName?: string
+  ) {
     // If the focused route is not found, we need to assume it's the initial screen
     // This can happen during if there hasn't been any navigation inside the screen
     // In our case, it's "Feed" as that's the first screen inside the navigator
-    let routeName = typeof route === 'string' ? route : route !== undefined && typeof route !== 'string' ? getFocusedRouteNameFromRoute(route) ?? 'Feed' : 'Feed';
-
+    let routeName = savedStateName || options && options.title || route && getFocusedRouteNameFromRoute(route);
+    console.log(routeName, savedStateName, options, route);
     switch (routeName) {
       case 'ModalScreen':
         return ((route as RouteProp<RootStackParamList, "Tabs">)?.params as any).title
+      case 'Tabs':
       case 'Agenda':
       case 'Feed':
         return 'Agenda';
       case 'CalendarEntry':
+        return 'CalendarEntry';
       case 'Calendar':
         return 'Calendar';
       case 'PainLogEntry':
@@ -89,13 +100,14 @@ const Navigation = (props: {
       case 'Account':
         return 'My Account';
     }
+    return routeName;
   }
 
   React.useEffect(() => {
     return auth().onAuthStateChanged(userState => {
         if (userState === null) {
           // user is not authenticated, so navigate
-          navigationRef.current?.navigate('AuthFlow');
+          setUser(false);
         } else {
           setUser(userState);
         }
@@ -117,7 +129,7 @@ const Navigation = (props: {
           const state = savedState ? JSON.parse(savedState) : undefined;
 
           if (state !== undefined) {
-            previousRouteName = getHeaderTitle(state) as string;
+            previousRouteName = getHeaderTitle(undefined, undefined, state) as string;
             setInitialState(state);
           }
         }
@@ -207,10 +219,8 @@ const Navigation = (props: {
         }}
         fallback={<ActivityIndicator />}
         documentTitle={{
-          formatter: (options, route) =>
-            `${options?.title ?? getHeaderTitle(route?.name)} - ineffectua`,
-        }}
-      >
+          formatter: getHeaderTitle
+        }}>
       {isUserAuthenticated(user) ? (
         <Drawer.Navigator drawerType={isLargeScreen ? 'permanent' : undefined} drawerContent={props => <Profile />}>
           <Drawer.Screen name="Root">
@@ -223,7 +233,7 @@ const Navigation = (props: {
                 <Stack.Screen
                   name="Tabs"
                   options={({ route }) => ({
-                    headerTitle: getHeaderTitle(route),
+                    headerTitle: getHeaderTitle(undefined, route),
                     headerLeft: isLargeScreen
                       ? undefined
                       : () => (

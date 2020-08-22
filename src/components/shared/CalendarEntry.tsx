@@ -11,7 +11,7 @@ import { TextInput, Button, FAB, Modal, Portal } from 'react-native-paper';
 import { CalendarStackParamList } from '../screens/CalendarNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
-import { CalendarEntryType, Action, GetDatesAction, GetDates, CalendarState } from '../../reducers/CalendarReducer';
+import { CalendarEntryType, Action, getDates, CalendarState, CalendarWindow } from '../../reducers/CalendarReducer';
 import { Theme, ThemeState } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
 
@@ -87,15 +87,14 @@ const NewSlot = (props : {
 
 const TimeSlot = (props : {
   date: CalendarEntryType,
-  windowStarts: Date,
-  windowEnds: Date,
+  window: CalendarWindow,
   index: number,
   total: number
 }): JSX.Element => {
-  const { date, windowStarts, windowEnds } = props;
-  const dateIsContainedWithinDay = date.ends.getTime() < windowStarts.getTime() + oneDayInMilliseconds;
-  const marginTop = (date.starts.getTime() - windowStarts.getTime()) / oneDayInMilliseconds;
-  const marginBottom = dateIsContainedWithinDay ? (windowEnds.getTime() - date.ends.getTime()) / oneDayInMilliseconds : 0;
+  const { date, window } = props;
+  const dateIsContainedWithinDay = date.ends.getTime() < window.starts.getTime() + oneDayInMilliseconds;
+  const marginTop = (date.starts.getTime() - window.starts.getTime()) / oneDayInMilliseconds;
+  const marginBottom = dateIsContainedWithinDay ? (window.ends.getTime() - date.ends.getTime()) / oneDayInMilliseconds : 0;
   return (
     <View style={{marginTop, marginBottom, backgroundColor: '#600'}}>
       <Text style={{color: '#FFF'}}>{date.title}</Text>
@@ -109,14 +108,13 @@ export type CalendarEntryProps = {
 }
 
 const CalendarEntry = (props: {
-    getDates: (user: AuthState['user'], callback: Function, windowStart?: Date, windowEnd?: Date) => Promise<void>,
+    getDates: (user: firebase.User, callback: () => void, window?: CalendarWindow) => Promise<void>,
     dates: CalendarState['dates'],
     authenticated: Boolean,
     user: AuthState['user'],
     theme: ThemeState['theme'],
     route: RouteProp<CalendarStackParamList, 'CalendarEntry'>,
-    navigation: StackNavigationProp<CalendarStackParamList, 'CalendarEntry'>,
-    title: string
+    navigation: StackNavigationProp<CalendarStackParamList, 'CalendarEntry'>
   }) => {
     const [visible, setVisible] = React.useState(false);
     const {
@@ -126,15 +124,16 @@ const CalendarEntry = (props: {
       user,
       theme,
       route,
-      navigation,
-      title
+      navigation
     } = props;
     const { date } = route.params;
-    const windowStart = new Date(Date.parse(date.dateString));
-    const windowEnd = new Date(windowStart.getTime() + 1000 * 60 * 60 * 24);
+    const window: CalendarWindow = {
+      starts: new Date(Date.parse(date.dateString)),
+      ends: new Date(new Date(Date.parse(date.dateString)).getTime() + 1000 * 60 * 60 * 24)
+    }
     const [loaded, setLoaded] = React.useState(false);
     if (!loaded && user) {
-      getDates(user, () => setLoaded(true), windowStart, windowEnd);
+      getDates(user, () => setLoaded(true), window);
     }
     return (
       <ScrollView>
@@ -149,7 +148,7 @@ const CalendarEntry = (props: {
             <NewSlot date={date} theme={theme} user={user} />
           </Modal>
         </Portal>
-        {dates.items.map((d: CalendarEntryType, i: number) => <TimeSlot date={d} windowStarts={windowStart} windowEnds={windowEnd} index={i} total={dates.items.length}/>)}
+        {dates.items.map((d: CalendarEntryType, i: number) => <TimeSlot date={d} window={window} index={i} total={dates.items.length}/>)}
       </ScrollView>
     )
 }
@@ -186,18 +185,7 @@ const mapStateToProps = (state: State) => {
 const mapDispatchToProps = (dispatch: (value: Action) => void) => {
   // Action
   return {
-    // Login
-    getDates: (user: AuthState['user'], callback: Function, windowStart?: Date, windowEnd?: Date) => new Promise<void>((success,fail) => {
-      if (user) {
-        GetDates(user, windowStart, windowEnd).then(d => {
-          dispatch(GetDatesAction(d));
-          callback();
-          success();
-        })
-      } else {
-        fail()
-      }
-    })
+    getDates: (user: firebase.User, callback: () => void, window?: CalendarWindow) => getDates(dispatch, user, callback, window)
   };
 };// Exports
 export default connect(mapStateToProps, mapDispatchToProps)(CalendarEntry);

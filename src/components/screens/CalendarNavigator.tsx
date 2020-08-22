@@ -16,12 +16,10 @@ const CalendarNavigation = () => {
     <Stack.Navigator initialRouteName="Calendar">
       <Stack.Screen
         name="Calendar"
-        options={({route}) => ({ title: route.params && (route.params as any).title })}
         component={Calendar}
       />
       <Stack.Screen
         name="CalendarEntry"
-        options={({route}) => ({ title: route.params && (route.params as any).title })}
         component={CalendarEntry}
       />
     </Stack.Navigator>

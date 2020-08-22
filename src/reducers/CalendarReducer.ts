@@ -1,11 +1,14 @@
 import { firestore } from 'firebase';
 import { CustomMarking } from 'react-native-calendars';
+import { AuthState } from './AuthReducer';
+
+export type CalendarWindow = {
+  starts: Date,
+  ends: Date
+}
 
 type CalendarRecord = {
-  window: {
-    starts: Date,
-    ends: Date
-  }
+  window: CalendarWindow
   items: Array<CalendarEntryType>
 }
 
@@ -156,11 +159,16 @@ export const GetDatesAction = (dates: CalendarRecord): Action => ({
 
 export async function GetDates(
     user: firebase.User,
-    windowStart: Date = new Date(Date.now()),
-    windowEnd: Date = windowStart && new Date(windowStart.getTime() + 1000 * 60 * 60 * 24) || new Date(Date.now() + 1000 * 60 * 60 * 24)
+    window?: CalendarWindow,
   ): Promise<CalendarRecord> {
+    if (!window) {
+      window = {
+        starts: new Date(Date.now()),
+        ends: new Date(Date.now() + 1000 * 60 * 60 * 24)
+      }
+    }
     let dates: void | Array<CalendarEntryType> = await firestore().collection('users/' + user.uid + '/calendar')
-      .where('start', '>=', windowStart).where('start', '<=', windowEnd)
+      .where('start', '>=', window.starts).where('start', '<=', window.ends)
       .orderBy('start')
       .withConverter(calendarTypeEntryConverter)
       .get()
@@ -171,13 +179,22 @@ export async function GetDates(
       dates = new Array<CalendarEntryType>();
     }
     return {
-      window: {
-        starts: windowStart,
-        ends: windowEnd
-      },
+      window: window,
       items: dates
     };
   }
+
+export const getDates = (dispatch: (value: Action) => void, user: AuthState['user'], callback: Function, window?: CalendarWindow,) => new Promise<void>((success,fail) => {
+    if (user) {
+      GetDates(user, window).then(d => {
+        dispatch(GetDatesAction(d));
+        callback();
+        success();
+      })
+    } else {
+      fail()
+    }
+  })
 
 export type CalendarState = {
   dates: CalendarRecord
