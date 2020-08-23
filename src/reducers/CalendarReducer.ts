@@ -26,13 +26,27 @@ export class CalendarEntryType implements CalendarEntry {
   title: string = '';
   description: string | undefined;
   contacts: Array<string> | undefined;
-  constructor (starts: Date, ends: Date, title: string, description?: string, contacts?: Array<string>) {
-    const keys: Array<string> = Object.keys(arguments);
-    this.starts = starts;
-    this.ends = ends;
-    this.title = title;
-    this.description = description;
-    this.contacts = contacts;
+  constructor (starts: Date | CalendarEntryType, ends?: Date, title?: string, description?: string, contacts?: Array<string>) {
+    if (starts instanceof Date) {
+      const keys: Array<string> = Object.keys(arguments);
+      this.starts = starts;
+      if (ends) {
+        this.ends = ends;
+      }
+      if (title) {
+        this.title = title;
+      } else {
+        this.title = ''
+      }
+      this.description = description;
+      this.contacts = contacts;
+    } else {
+      this.starts = starts.starts;
+      this.ends = starts.ends;
+      this.title = starts.title;
+      this.description = starts.description;
+      this.contacts = starts.contacts;
+    }
   }
 }
 
@@ -145,9 +159,12 @@ export const formatDatesForMarking = (dates: Array<CalendarEntryType>): AgendaDa
 }
 
 export const GET_DATES= 'GET_DATES';
+export const SET_DATE= 'SET_DATE';
 
-export type Action =
-  | {
+export type Action = {
+    type: 'SET_DATE';
+    dates: CalendarRecord['items']
+  } | {
     type: 'GET_DATES';
     dates: CalendarRecord
   };
@@ -155,6 +172,11 @@ export type Action =
 export const GetDatesAction = (dates: CalendarRecord): Action => ({
   type: GET_DATES,
   dates
+});
+
+export const SetDateAction = (date: CalendarEntryType): Action => ({
+  type: SET_DATE,
+  dates: [date]
 });
 
 export async function GetDates(
@@ -168,7 +190,8 @@ export async function GetDates(
       }
     }
     //firestore.setLogLevel('debug');
-    let dates: void | Array<CalendarEntryType> = await firestore().collection('users/' + user.uid + '/calendar')
+    let dates: void | Array<CalendarEntryType> = await firestore().collection('users')
+      .doc(user.uid).collection('calendar')
       .where('start', '>=', window.starts).where('start', '<=', window.ends)
       .orderBy('start')
       .withConverter(calendarTypeEntryConverter)
@@ -191,6 +214,34 @@ export const getDates = (dispatch: (value: Action) => void, user: AuthState['use
         dispatch(GetDatesAction(d));
         callback();
         success();
+      })
+    } else {
+      fail()
+    }
+  })
+
+export async function SetDate(
+    user: firebase.User,
+    date: CalendarEntryType,
+  ): Promise<CalendarEntryType | undefined> {
+    //firestore.setLogLevel('debug');
+    return await firestore().collection('users')
+      .doc(user.uid).collection('calendar')
+      .withConverter(calendarTypeEntryConverter)
+      .add(date)
+      .then(snap => snap.get().then(doc => doc.data()));
+  }
+  
+export const setDate = (dispatch: (value: Action) => void, user: AuthState['user'], callback: Function, date: CalendarEntryType) => new Promise<void>((success,fail) => {
+    if (user) {
+      SetDate(user, date).then(d => {
+        if (d) {
+          dispatch(SetDateAction(d));
+          callback();
+          success();
+        } else {
+          fail()
+        }
       })
     } else {
       fail()
