@@ -23,3 +23,9 @@ The intent of this app is to help people with chronic illnesses track their medi
 * https://docs.expo.io/guides/using-firebase/
 * https://redux.js.org/recipes/usage-with-typescript
 * https://github.com/wix/react-native-calendars
+
+## Next
+
+* fix firestore auth error
+* style CalendarEntry
+* etc
