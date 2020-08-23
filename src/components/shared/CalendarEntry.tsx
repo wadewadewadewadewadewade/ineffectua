@@ -12,8 +12,9 @@ import { CalendarStackParamList } from '../screens/CalendarNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import { CalendarEntryType, Action, getDates, CalendarState, CalendarWindow } from '../../reducers/CalendarReducer';
-import { Theme, ThemeState } from '../../reducers/ThemeReducer';
+import { paperColors, ThemeState } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 
@@ -136,11 +137,11 @@ const CalendarEntry = (props: {
       getDates(user, () => setLoaded(true), window);
     }
     return (
-      <ScrollView>
+      <View style={styles.entry}>
         <FAB
           style={styles.fab}
           small
-          icon="plus"
+          icon={() => <MaterialCommunityIcons name="plus" size={24} />}
           onPress={() => setVisible(true)}
         />
         <Portal>
@@ -149,7 +150,7 @@ const CalendarEntry = (props: {
           </Modal>
         </Portal>
         {dates.items.map((d: CalendarEntryType, i: number) => <TimeSlot date={d} window={window} index={i} total={dates.items.length}/>)}
-      </ScrollView>
+      </View>
     )
 }
 
@@ -164,6 +165,10 @@ const styles = StyleSheet.create({
   buttonRow: {
     fontSize: 12,
     justifyContent: 'space-between'
+  },
+  entry: {
+    height: '100%',
+    position:'relative'
   },
   fab: {
     position: 'absolute',

@@ -36,7 +36,6 @@ export default function MaterialBottomTabsScreen() {
         name="Calendar"
         component={CalendarNavigator}
         options={{
-          tabBarLabel: 'Calendar',
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="calendar" color={color} size={26} />
           ),

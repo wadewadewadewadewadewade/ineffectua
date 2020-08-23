@@ -161,7 +161,7 @@ const Navigation = (props: {
   useReduxDevToolsExtension(navigationRef);
 
   if (!isReady) {
-    return null;
+    return <ActivityIndicator />;
   }
 
   const isLargeScreen = dimensions.width >= 1024;
@@ -249,10 +249,6 @@ const Navigation = (props: {
                         ),
                   })}
                   component={MaterialBottomTabs}
-                />
-                <Stack.Screen
-                  name="AuthFlow"
-                  component={AuthFlow}
                 />
                 <Stack.Screen
                   name="NotFound"
