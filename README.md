@@ -26,6 +26,7 @@ The intent of this app is to help people with chronic illnesses track their medi
 
 ## Next
 
-* fix firestore auth error
+* fix firestore auth error - including get gradle to build under WSL
+* fix header and document titling on navigation
 * style CalendarEntry
 * etc

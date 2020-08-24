@@ -1,26 +1,26 @@
-import { User } from 'firebase';
+import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 
 export const RESTORE_TOKEN = 'RESTORE_TOKEN';
 export const SIGN_IN = 'SIGN_IN';
 export const SIGN_OUT = 'SIGN_OUT';
 
 export type Action =
-  | { type: 'RESTORE_TOKEN'; token: false | User }
-  | { type: 'SIGN_IN'; token: false | User }
+  | { type: 'RESTORE_TOKEN'; token: false | FirebaseAuthTypes.User }
+  | { type: 'SIGN_IN'; token: false | FirebaseAuthTypes.User }
   | { type: 'SIGN_OUT' };
 
 export const SignInAction = (user: AuthState['user']): Action => ({ type: SIGN_IN, token: user })
 export const SignOutAction = (): Action => ({ type: SIGN_OUT })
 
 export type AuthState = {
-  user: User | false
+  user: FirebaseAuthTypes.User | false
 }
 
 export const initialState: AuthState = {
   user: false
 }
 
-export const isUserAuthenticated = (user: firebase.User | false): boolean => {
+export const isUserAuthenticated = (user: FirebaseAuthTypes.User | false): boolean => {
   return user !== undefined && user !== false
 }
 

@@ -11,7 +11,7 @@ import { State, RootDrawerParamList } from '../../Types';
 import { ToggleThemeAction, ThemeState } from '../../reducers/ThemeReducer';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { themeIsDark } from '../../reducers/ThemeReducer';
-import { auth } from 'firebase';
+import auth from '@react-native-firebase/auth';
 
 const Profile = memo(
   (props: {

@@ -1,65 +1,9 @@
-import { firestore } from 'firebase';
+import firestore from '@react-native-firebase/firestore';
 import { CustomMarking } from 'react-native-calendars';
 import { AuthState } from './AuthReducer';
-
-export type CalendarWindow = {
-  starts: Date,
-  ends: Date
-}
-
-type CalendarRecord = {
-  window: CalendarWindow
-  items: Array<CalendarEntryType>
-}
-
-interface CalendarEntry {
-  starts: Date,
-  ends: Date,
-  title: string,
-  description: string | undefined,
-  contacts: Array<string> | undefined
-}
-
-export class CalendarEntryType implements CalendarEntry {
-  starts: Date = new Date();
-  ends: Date = new Date();
-  title: string = '';
-  description: string | undefined;
-  contacts: Array<string> | undefined;
-  constructor (starts: Date | CalendarEntryType, ends?: Date, title?: string, description?: string, contacts?: Array<string>) {
-    if (starts instanceof Date) {
-      const keys: Array<string> = Object.keys(arguments);
-      this.starts = starts;
-      if (ends) {
-        this.ends = ends;
-      }
-      if (title) {
-        this.title = title;
-      } else {
-        this.title = ''
-      }
-      this.description = description;
-      this.contacts = contacts;
-    } else {
-      this.starts = starts.starts;
-      this.ends = starts.ends;
-      this.title = starts.title;
-      this.description = starts.description;
-      this.contacts = starts.contacts;
-    }
-  }
-}
-
-// Firestore data converter
-export const calendarTypeEntryConverter = {
-  toFirestore: function(date: CalendarEntryType) {
-    return date
-  },
-  fromFirestore: function(snapshot: firestore.QueryDocumentSnapshot<firestore.DocumentData>, options: any){
-    const data = snapshot.data(options);
-    return new CalendarEntryType(data.starts, data.ends, data.title, data.description, data.contacts)
-  }
-}
+import { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { CalendarEntry, CalendarWindow, CalendarRecord } from '../Types'
+//import { useEffect } from 'react';
 
 /*===== formatting tool ====*/
 type AgendaItem = {
@@ -127,13 +71,14 @@ function dateDiff(a: Date, b: Date): string {
   return response.toString()
 }
 
-export const formatDates = (dates: Array<CalendarEntryType>): AgendaDate => {
+export const formatDates = (dates: Array<CalendarEntry>): AgendaDate => {
   const response: AgendaDate = {};
   dates.forEach(date => {
-    const m = date.starts.getMonth();
-    const d = date.starts.getDay();
-    const isoDate = date.starts.getFullYear() + '-' + (m < 10 ? '0' + m.toString() : m.toString()) + '-' + (d < 10 ? '0' + d.toString() :d.toString());
-    const duration = dateDiff(date.ends, date.starts)
+    const { starts, ends } = date.window;
+    const m = starts.getMonth();
+    const d = starts.getDay();
+    const isoDate = starts.getFullYear() + '-' + (m < 10 ? '0' + m.toString() : m.toString()) + '-' + (d < 10 ? '0' + d.toString() :d.toString());
+    const duration = dateDiff(ends, starts)
     if (!response[isoDate]) {
       response[isoDate] = new Array<AgendaItem>()
     }
@@ -144,12 +89,13 @@ export const formatDates = (dates: Array<CalendarEntryType>): AgendaDate => {
   return response;
 }
 
-export const formatDatesForMarking = (dates: Array<CalendarEntryType>): AgendaDateMarking => {
+export const formatDatesForMarking = (dates: Array<CalendarEntry>): AgendaDateMarking => {
   const response: AgendaDateMarking = {};
   dates.forEach(date => {
-    const m = date.starts.getMonth();
-    const d = date.starts.getDay();
-    const isoDate = date.starts.getFullYear() + '-' + (m < 10 ? '0' + m.toString() : m.toString()) + '-' + (d < 10 ? '0' + d.toString() :d.toString());
+    const { starts, ends } = date.window;
+    const m = starts.getMonth();
+    const d = starts.getDay();
+    const isoDate = starts.getFullYear() + '-' + (m < 10 ? '0' + m.toString() : m.toString()) + '-' + (d < 10 ? '0' + d.toString() :d.toString());
     response[isoDate].customStyles = {
       container: { backgroundColor: 'rgba(255,0,0,0.5)'},
       text: { color: '#fff'}
@@ -174,79 +120,106 @@ export const GetDatesAction = (dates: CalendarRecord): Action => ({
   dates
 });
 
-export const SetDateAction = (date: CalendarEntryType): Action => ({
+export const SetDateAction = (date: CalendarEntry): Action => ({
   type: SET_DATE,
   dates: [date]
 });
 
 export async function GetDates(
-    user: firebase.User,
-    window?: CalendarWindow,
-  ): Promise<CalendarRecord> {
-    if (!window) {
-      window = {
-        starts: new Date(Date.now()),
-        ends: new Date(Date.now() + 1000 * 60 * 60 * 24)
-      }
+  user: FirebaseAuthTypes.User,
+  window?: CalendarWindow,
+): Promise<CalendarRecord> {
+  if (!window) {
+    window = {
+      starts: new Date(Date.now()),
+      ends: new Date(Date.now() + 1000 * 60 * 60 * 24)
     }
-    //firestore.setLogLevel('debug');
-    let dates: void | Array<CalendarEntryType> = await firestore().collection('users')
-      .doc(user.uid).collection('calendar')
-      .where('start', '>=', window.starts).where('start', '<=', window.ends)
-      .orderBy('start')
-      .withConverter(calendarTypeEntryConverter)
-      .get()
-      .then((querySnapshot) => {
-        (querySnapshot.docs.map(d => d.data()))
-      })
-    if (!dates) {
-      dates = new Array<CalendarEntryType>();
-    }
-    return {
-      window: window,
-      items: dates
-    };
   }
+  firestore.setLogLevel('debug');
+  console.log('user.uid', user.uid);
+  let dates: void | Array<CalendarEntry> = await firestore().collection('users')
+    .doc(user.uid).collection('calendar')
+    .where('start', '>=', window.starts).where('start', '<=', window.ends)
+    .orderBy('start')
+    .get()
+    .then((querySnapshot) => {
+      (querySnapshot.docs.map(d => d.data()))
+    })
+  if (!dates) {
+    dates = new Array<CalendarEntry>();
+  }
+  return {
+    window: window,
+    items: dates
+  };
+}
 
-export const getDates = (dispatch: (value: Action) => void, user: AuthState['user'], callback: Function, window?: CalendarWindow,) => new Promise<void>((success,fail) => {
-    if (user) {
-      GetDates(user, window).then(d => {
-        dispatch(GetDatesAction(d));
-        callback();
-        success();
-      })
-    } else {
-      fail()
-    }
-  })
+export function ObserveDates(
+  user: FirebaseAuthTypes.User,
+  observer: (dates: Array<CalendarEntry>) => void
+): () => void {
+  //firestore.setLogLevel('debug');
+  //useEffect(() => {
+    const subscriber = firestore()
+      .collection('users')
+      .doc(user.uid)
+      .collection('calendar')
+      .onSnapshot(documentSnapshot => {
+        observer(documentSnapshot.docs.map(snap => snap.data() as CalendarEntry));
+      });
+
+    // Stop listening for updates when no longer required
+    return () => subscriber();
+  //}, [user]);
+}
+
+export const getDates = (
+  dispatch: (value: Action) => void,
+  user: AuthState['user'],
+  callback: Function,
+  window?: CalendarWindow
+) => new Promise<void>((success,fail) => {
+  if (user) {
+    GetDates(user, window).then(d => {
+      dispatch(GetDatesAction(d));
+      callback();
+      success();
+    })
+  } else {
+    fail()
+  }
+})
 
 export async function SetDate(
-    user: firebase.User,
-    date: CalendarEntryType,
-  ): Promise<CalendarEntryType | undefined> {
-    //firestore.setLogLevel('debug');
-    return await firestore().collection('users')
-      .doc(user.uid).collection('calendar')
-      .withConverter(calendarTypeEntryConverter)
-      .add(date)
-      .then(snap => snap.get().then(doc => doc.data()));
-  }
+  user: FirebaseAuthTypes.User,
+  date: CalendarEntry,
+): Promise<CalendarEntry | undefined> {
+  //firestore.setLogLevel('debug');
+  return await firestore().collection('users')
+    .doc(user.uid).collection('calendar')
+    .add(date)
+    .then(snap => snap.get().then(doc => doc.data() as CalendarEntry));
+}
   
-export const setDate = (dispatch: (value: Action) => void, user: AuthState['user'], callback: Function, date: CalendarEntryType) => new Promise<void>((success,fail) => {
-    if (user) {
-      SetDate(user, date).then(d => {
-        if (d) {
-          dispatch(SetDateAction(d));
-          callback();
-          success();
-        } else {
-          fail()
-        }
-      })
-    } else {
-      fail()
-    }
-  })
+export const setDate = (
+  dispatch: (value: Action) => void,
+  user: AuthState['user'],
+  callback: Function, date: CalendarEntry
+) => new Promise<void>((success,fail) => {
+  if (user) {
+    SetDate(user, date).then(d => {
+      if (d) {
+        dispatch(SetDateAction(d));
+        callback();
+        success();
+      } else {
+        fail()
+      }
+    })
+  } else {
+    fail()
+  }
+})
 
 export type CalendarState = {
   dates: CalendarRecord
@@ -258,11 +231,14 @@ export const initialState: CalendarState = {
       starts: new Date(0),
       ends: new Date(0)
     },
-    items: new Array<CalendarEntryType>()
+    items: new Array<CalendarEntry>()
   }
 }
 
-export default function CalendarReducer(prevState = initialState['dates'], action: Action): CalendarState['dates'] {
+export default function CalendarReducer(
+  prevState = initialState['dates'],
+  action: Action
+): CalendarState['dates'] {
   switch (action.type) {
     case GET_DATES: // TODO: make this an array of CalendarRecords so we can get chunks of data rather than one contigious window
       return {

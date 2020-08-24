@@ -5,7 +5,7 @@ import { useTheme } from '@react-navigation/native';
 import {
   createStackNavigator, StackNavigationProp,
 } from '@react-navigation/stack';
-import { User, auth } from 'firebase';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { connect } from 'react-redux';
 import { SignInAction, Action, SignOutAction, isUserAuthenticated } from '../../reducers/AuthReducer';
 import { State, RootDrawerParamList } from '../../Types'
@@ -25,7 +25,7 @@ type AuthStackParams = {
   );
 };*/
 
-const SignInScreen = (props : { signIn: (user: User) => void }) => {
+const SignInScreen = (props : { signIn: (user: FirebaseAuthTypes.User) => void }) => {
   const { signIn } = props;
   const { colors } = useTheme();
   const [email, onChangeEmail] = React.useState('Email');
@@ -332,7 +332,7 @@ const SimpleStackScreen = (props: any) => {
     navigation: StackNavigationProp<RootDrawerParamList, "Root"> | undefined,
     authenticated: Boolean,
     isSignout: Boolean,
-    signIn: (user: User) => void,
+    signIn: (user: FirebaseAuthTypes.User) => void,
     signOut: () => void
   } = props
   navigation && React.useLayoutEffect(() => {
@@ -417,7 +417,7 @@ const mapDispatchToProps = (dispatch: (value: Action) => void) => {
   // Action
   return {
     // Login
-    signIn: (user: User) => dispatch(SignInAction(user)),
+    signIn: (user: FirebaseAuthTypes.User) => dispatch(SignInAction(user)),
     signOut: () => dispatch(SignOutAction()),
   };
 };// Exports

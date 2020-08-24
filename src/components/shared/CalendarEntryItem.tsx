@@ -1,9 +1,9 @@
 import React from 'react';
-import { firestore, User } from 'firebase';
+import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { DateObject } from 'react-native-calendars';
 import { StyleSheet, Text, View } from 'react-native';
 import { connect } from 'react-redux';
-import { State } from '../../Types';
+import { CalendarWindow, CalendarEntry, State } from '../../Types';
 import { RouteProp } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -11,7 +11,7 @@ import { TextInput, Button, FAB, Modal, Portal } from 'react-native-paper';
 import { CalendarStackParamList } from '../screens/CalendarNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
-import { CalendarEntryType, Action, getDates, CalendarState, CalendarWindow, setDate } from '../../reducers/CalendarReducer';
+import { Action, getDates, CalendarState, setDate } from '../../reducers/CalendarReducer';
 import { ThemeState } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -19,7 +19,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 
 const NewSlot = (props : {
-    setDate: (date: CalendarEntryType) => Promise<void>,
+    setDate: (date: CalendarEntry) => Promise<void>,
     date: DateObject,
     theme: ThemeState['theme'],
     user: AuthState['user']
@@ -36,9 +36,11 @@ const NewSlot = (props : {
     const [description, setDescription] = React.useState('');
     const [contacts, setContacts] = React.useState(new Array<string>());
     const save = () => {
-      const entry: CalendarEntryType = {
-        starts,
-        ends,
+      const entry: CalendarEntry = {
+        window: {
+          starts,
+          ends
+        },
         title,
         description,
         contacts
@@ -88,15 +90,16 @@ const NewSlot = (props : {
 }
 
 const TimeSlot = (props : {
-  date: CalendarEntryType,
+  date: CalendarEntry,
   window: CalendarWindow,
   index: number,
   total: number
 }): JSX.Element => {
   const { date, window } = props;
-  const dateIsContainedWithinDay = date.ends.getTime() < window.starts.getTime() + oneDayInMilliseconds;
-  const marginTop = (date.starts.getTime() - window.starts.getTime()) / oneDayInMilliseconds;
-  const marginBottom = dateIsContainedWithinDay ? (window.ends.getTime() - date.ends.getTime()) / oneDayInMilliseconds : 0;
+  const { starts, ends } = date.window;
+  const dateIsContainedWithinDay = ends.getTime() < window.starts.getTime() + oneDayInMilliseconds;
+  const marginTop = (starts.getTime() - window.starts.getTime()) / oneDayInMilliseconds;
+  const marginBottom = dateIsContainedWithinDay ? (window.ends.getTime() - ends.getTime()) / oneDayInMilliseconds : 0;
   return (
     <View style={{marginTop, marginBottom, backgroundColor: '#600'}}>
       <Text style={{color: '#FFF'}}>{date.title}</Text>
@@ -109,15 +112,15 @@ export type CalendarEntryProps = {
   title: string
 }
 
-const CalendarEntry = (props: {
-    getDates: (user: firebase.User, callback: () => void, window?: CalendarWindow) => Promise<void>,
-    setDate: (user: firebase.User, callback: () => void, date: CalendarEntryType) => Promise<void>,
+const CalendarEntryItem = (props: {
+    getDates: (user: FirebaseAuthTypes.User, callback: () => void, window?: CalendarWindow) => Promise<void>,
+    setDate: (user: FirebaseAuthTypes.User, callback: () => void, date: CalendarEntry) => Promise<void>,
     dates: CalendarState['dates'],
     authenticated: Boolean,
     user: AuthState['user'],
     theme: ThemeState['theme'],
-    route: RouteProp<CalendarStackParamList, 'CalendarEntry'>,
-    navigation: StackNavigationProp<CalendarStackParamList, 'CalendarEntry'>
+    route: RouteProp<CalendarStackParamList, 'CalendarEntryItem'>,
+    navigation: StackNavigationProp<CalendarStackParamList, 'CalendarEntryItem'>
   }) => {
     const [visible, setVisible] = React.useState(false);
     const {
@@ -155,7 +158,7 @@ const CalendarEntry = (props: {
             <NewSlot date={date} theme={theme} user={user} setDate={(date) => setDate(user, () => setVisible(false), date)} />
           </Modal>
         </Portal>
-        {dates.items.map((d: CalendarEntryType, i: number) => <TimeSlot date={d} window={window} index={i} total={dates.items.length}/>)}
+        {dates.items.map((d: CalendarEntry, i: number) => <TimeSlot date={d} window={window} index={i} total={dates.items.length}/>)}
       </View>
     )
 }
@@ -196,8 +199,8 @@ const mapStateToProps = (state: State) => {
 const mapDispatchToProps = (dispatch: (value: Action) => void) => {
   // Action
   return {
-    getDates: (user: firebase.User, callback: () => void, window?: CalendarWindow) => getDates(dispatch, user, callback, window),
-    setDate: (user: firebase.User, callback: () => void, date: CalendarEntryType) => setDate(dispatch, user, callback, date)
+    getDates: (user: FirebaseAuthTypes.User, callback: () => void, window?: CalendarWindow) => getDates(dispatch, user, callback, window),
+    setDate: (user: FirebaseAuthTypes.User, callback: () => void, date: CalendarEntry) => setDate(dispatch, user, callback, date)
   };
 };// Exports
-export default connect(mapStateToProps, mapDispatchToProps)(CalendarEntry);
+export default connect(mapStateToProps, mapDispatchToProps)(CalendarEntryItem);

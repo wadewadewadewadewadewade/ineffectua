@@ -7,10 +7,11 @@ import { store, persistor } from '../Store';
 } from 'react-native';*/
 // eslint-disable-next-line import/no-unresolved
 import { enableScreens } from 'react-native-screens';
-import * as firebase from 'firebase';
+import firebase from '@react-native-firebase/app';
 import Navigation from './screens/Navigation';
 
 const firebaseConfig = {
+  appId: 'com.ineffectua',
   apiKey: "AIzaSyAc7X0OaRKdN50CMAVQDu-EPrUBXhP58n4",
   authDomain: "ineffectua.firebaseapp.com",
   projectId: "ineffectua",
@@ -18,7 +19,7 @@ const firebaseConfig = {
 
 try {
   firebase.initializeApp(firebaseConfig);
-  firebase.firestore().enablePersistence()
+  /*firestore().enablePersistence()
     .catch(function(err) {
         if (err.code == 'failed-precondition') {
             // Multiple tabs open, persistence can only be enabled
@@ -30,7 +31,7 @@ try {
             // ...
         }
         console.warn(err);
-    });
+    });*/
 } catch (err) {
   // not an actual error when we're hot-reloading
   if (!/already exists/.test(err.message)) {

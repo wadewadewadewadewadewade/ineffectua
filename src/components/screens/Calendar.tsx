@@ -2,16 +2,16 @@ import React from 'react';
 import { CalendarList, DateObject } from 'react-native-calendars';
 import { StyleSheet, View } from 'react-native';
 import { connect } from 'react-redux';
-import { State } from '../../Types';
-import { CommonActions } from '@react-navigation/native';
-import { Action, getDates, CalendarState, formatDatesForMarking, CalendarWindow } from '../../reducers/CalendarReducer';
+import { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { State, CalendarWindow } from '../../Types';
+import { Action, getDates, CalendarState, formatDatesForMarking } from '../../reducers/CalendarReducer';
 import { themeIsDark, ThemeState } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
 import { CalendarStackParamList } from './CalendarNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 const Calendar = (props: {
-  getDates: (user: firebase.User, callback: () => void, window?: CalendarWindow) => Promise<void>,
+  getDates: (user: FirebaseAuthTypes.User, callback: () => void, window?: CalendarWindow) => Promise<void>,
   dates: CalendarState['dates'],
   user: AuthState['user'],
   theme: ThemeState['theme'],
@@ -45,7 +45,7 @@ const Calendar = (props: {
         //maxDate={'2012-05-30'}
         markedDates={formatDatesForMarking(dates.items)}
         // Handler which gets executed on day press. Default = undefined
-        onDayPress={(day: DateObject) => navigation.navigate('CalendarEntry', { date: day, title: 'Calendar: ' + new Date(Date.parse(day.dateString)).toDateString() })}
+        onDayPress={(day: DateObject) => navigation.navigate('CalendarEntryItem', { date: day, title: 'Calendar: ' + new Date(Date.parse(day.dateString)).toDateString() })}
         // Handler which gets executed on day long press. Default = undefined
         //onDayLongPress={(day: DateObject) => navigation.navigate('ModalScreen', { component: CalendarEntry, date: day })}
         // Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
@@ -120,7 +120,7 @@ const mapStateToProps = (state: State) => {
 const mapDispatchToProps = (dispatch: (value: Action) => void) => {
   // Action
   return {
-    getDates: (user: firebase.User, callback: () => void, window?: CalendarWindow) => getDates(dispatch, user, callback, window)
+    getDates: (user: FirebaseAuthTypes.User, callback: () => void, window?: CalendarWindow) => getDates(dispatch, user, callback, window)
   };
 };// Exports
 export default connect(mapStateToProps, mapDispatchToProps)(Calendar);

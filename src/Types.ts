@@ -27,3 +27,22 @@ export type RootStackParamList = {
   NotFound: undefined;
   ModalScreen: undefined;
 };
+
+/*==== Calendar ====*/
+
+export type CalendarWindow = {
+  starts: Date,
+  ends: Date
+}
+
+export interface CalendarEntry {
+  window: CalendarWindow,
+  title: string,
+  description: string | undefined,
+  contacts: Array<string> | undefined
+}
+
+export type CalendarRecord = {
+  window: CalendarWindow
+  items: Array<CalendarEntry>
+}

@@ -39,8 +39,8 @@ import MaterialBottomTabs from '../screens/MaterialBottomTabs';
 import NotFound from './NotFound';
 import AuthFlow from './AuthFlow';
 
-import { auth } from 'firebase';
-import * as Analytics from 'expo-firebase-analytics';
+import auth from '@react-native-firebase/auth';
+import analytics, { firebase as analyticsFirebase} from '@react-native-firebase/analytics';
 import Profile from './Profile';
 
 import { NAVIGATION_PERSISTENCE_KEY, State, RootDrawerParamList, RootStackParamList } from '../../Types';
@@ -48,7 +48,7 @@ import { SignInAction, Action as AuthAction, isUserAuthenticated, AuthState } fr
 import { paperTheme, CombinedLightTheme, Theme, barClassName, paperColors, ThemeState } from '../../reducers/ThemeReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CalendarStackParamList } from './CalendarNavigator';
-import { CalendarEntryProps } from '../shared/CalendarEntry';
+import { CalendarEntryProps } from '../shared/CalendarEntryItem';
 
 enableScreens();
 
@@ -119,6 +119,15 @@ const Navigation = (props: {
 
   let previousRouteName = 'Feed';
 
+  // this will allow us to re-enable analytics after user approves...once I create that user-flow
+  React.useEffect(() => {
+    const enableAnalytics = async () => {
+      await analyticsFirebase.analytics().setAnalyticsCollectionEnabled(true);
+    }
+
+    enableAnalytics()
+  }, [])
+
   React.useEffect(() => {
     const restoreState = async () => {
       try {
@@ -178,11 +187,11 @@ const Navigation = (props: {
           const currentRoute = navigationRef.current?.getCurrentRoute();
           const currentRouteName = currentRoute?.name;
           
-          if (previousRouteName !== currentRouteName) {
+          if (currentRouteName && previousRouteName !== currentRouteName) {
             // The line below uses the expo-firebase-analytics tracker
             // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
             // Change this line to use another Mobile analytics SDK
-            Analytics.setCurrentScreen(currentRouteName);
+            analytics().setCurrentScreen(currentRouteName);
             AsyncStorage ? AsyncStorage.setItem(
               NAVIGATION_PERSISTENCE_KEY,
               JSON.stringify(state)
