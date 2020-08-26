@@ -13,7 +13,7 @@ import { CalendarStackParamList } from './CalendarNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import { Action, getDates, CalendarState, setDate } from '../../reducers/CalendarReducer';
-import { ThemeState } from '../../reducers/ThemeReducer';
+import { ThemeState, themeIsDark } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -25,7 +25,7 @@ const NewSlot = (props : {
     theme: ThemeState['theme'],
     user: AuthState['user']
   }): JSX.Element => {
-    const { date, user, setDate } = props;
+    const { date, user, setDate, theme } = props;
     if (!user) {
       return <View></View>
     }
@@ -49,24 +49,12 @@ const NewSlot = (props : {
       return setDate(entry)
     }
     return (
-      <ScrollView>
-        <Svg height="100%" width="100%" viewBox="0 0 100 100" style={{position:'absolute',left:0,right:0,top:0,bottom:0}}>
-          <Rect
-            width="154.74905"
-            height="0.8018086"
-            x="39.342342"
-            y="27.06852" />
-          <SvgText
-            fontSize="7"
-            fontFamily="sans-serif"
-            x="15.96937"
-            y="30.435143">8am</SvgText>
-        </Svg>
+      <ScrollView style={{backgroundColor: theme.paper.colors.background}}>
         <View>
           <TextInput value={title} onChangeText={(text) => setTitle(text)} placeholder="Add title" />
           <Button onPress={() => setShowStart(true)} style={styles.buttonRow}>
-            <Text>From</Text>
-            <Text>{starts.toLocaleTimeString()}</Text>
+            <Text style={{color: theme.paper.colors.text}}>From</Text>
+            <Text style={styles.buttonRowValue}>{starts.toLocaleTimeString()}</Text>
           </Button>
           {showStart && <DateTimePicker mode="time" value={starts} onChange={(e: Event, date?: Date) => {
             if (date) {
@@ -74,15 +62,15 @@ const NewSlot = (props : {
             }
           }}/>}
           <Button onPress={() => setShowEnd(true)} style={styles.buttonRow}>
-            <Text>Ends</Text>
-            <Text>{ends.toLocaleTimeString()}</Text>
+            <Text style={{color: theme.paper.colors.text}}>Ends</Text>
+            <Text style={styles.buttonRowValue}>{ends.toLocaleTimeString()}</Text>
           </Button>
           {showEnd && <DateTimePicker mode="time" value={ends} onChange={(e: Event, date?: Date) => {
             if (date) {
               setEnd(date)
             }
           }}/>}
-          <Button onPress={save} style={styles.buttonRow}>
+          <Button onPress={save} style={styles.button}>
             <Text>Save</Text>
           </Button>
         </View>
@@ -148,6 +136,18 @@ const CalendarDay = (props: {
     }
     return (
       <View style={styles.entry}>
+        <Svg height="100%" width="100%" viewBox="0 0 100 100" style={{position:'absolute',left:0,right:0,top:0,bottom:0}}>
+          <Rect
+            width="154.74905"
+            height="0.8018086"
+            x="39.342342"
+            y="27.06852" />
+          <SvgText
+            fontSize="7"
+            fontFamily="sans-serif"
+            x="15.96937"
+            y="30.435143">8am</SvgText>
+        </Svg>
         {!visible && <FAB
           style={styles.fab}
           small
@@ -174,7 +174,12 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     fontSize: 12,
-    justifyContent: 'space-between'
+    flexDirection: 'row',
+    backgroundColor: 'blue',
+  },
+  buttonRowValue: {
+    flexGrow: 1,
+    backgroundColor: 'red'
   },
   entry: {
     height: '100%',
