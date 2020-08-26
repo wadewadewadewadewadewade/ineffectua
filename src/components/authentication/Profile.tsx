@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
+import { firebase } from '../../firebase/config';
 import { ScrollView, StyleSheet } from 'react-native';
 import { Subheading, Avatar, Button, Divider, Text } from 'react-native-paper';
-
 import SettingsItem from '../shared/SettingsItem';
 
 import { connect } from 'react-redux';
@@ -11,7 +11,6 @@ import { State, RootDrawerParamList } from '../../Types';
 import { ToggleThemeAction, ThemeState } from '../../reducers/ThemeReducer';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { themeIsDark } from '../../reducers/ThemeReducer';
-import auth from '@react-native-firebase/auth';
 
 const Profile = memo(
   (props: {
@@ -41,7 +40,7 @@ const Profile = memo(
             onValueChange={() => toggleTheme()}
           />
           <Divider />
-          <Button onPress={() => auth().signOut().then(signOut)} style={styles.button}>
+          <Button onPress={() => firebase.auth().signOut().then(signOut)} style={styles.button}>
             Sign Out
           </Button>
         </ScrollView>

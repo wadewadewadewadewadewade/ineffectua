@@ -187,7 +187,7 @@ const Navigation = (props: {
             // The line below uses the expo-firebase-analytics tracker
             // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
             // Change this line to use another Mobile analytics SDK
-            firebase.analytics().setCurrentScreen(currentRouteName);
+            //firebase.analytics().setCurrentScreen(currentRouteName);
             AsyncStorage ? AsyncStorage.setItem(
               NAVIGATION_PERSISTENCE_KEY,
               JSON.stringify(state)

@@ -135,8 +135,7 @@ export async function GetDates(
       ends: new Date(Date.now() + 1000 * 60 * 60 * 24)
     }
   }
-  firebase.firestore.setLogLevel('debug');
-  console.log('user.uid', user.uid);
+  //firebase.firestore.setLogLevel('debug');
   let dates: void | Array<CalendarEntry> = await firebase.firestore().collection('users')
     .doc(user.uid).collection('calendar')
     .where('start', '>=', window.starts).where('start', '<=', window.ends)

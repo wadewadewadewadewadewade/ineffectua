@@ -4,7 +4,6 @@ import { User } from 'firebase';
 import { View, TextInput, StyleSheet, Text, Keyboard } from 'react-native';
 import { Title, Button } from 'react-native-paper';
 import { useTheme } from '@react-navigation/native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
   createStackNavigator, StackNavigationProp,
 } from '@react-navigation/stack';
@@ -37,7 +36,7 @@ const SignInScreen = (props : { signIn: (user: User) => void }) => {
   const [register, changeMode] = React.useState(false);
 
   return (
-    <KeyboardAwareScrollView style={styles.content}>
+    <View style={styles.content}>
       <Svg x="0px" y="0px" viewBox="0 0 1257.9464 221.08823" fill='#000' style={styles.logo}>
         <G transform="translate(-13.053608,-222.11178)">
           <Path d="M760,269.6c-0.1,3.4,0.3,6.9-0.5,10.2c-0.6,2.6,3.4,5.1,0,7.7c-0.1,0.1,1.6,3.4,3.1,4.5c2.2,1.7,5,2.7,7.4,4.2
@@ -307,7 +306,7 @@ const SignInScreen = (props : { signIn: (user: User) => void }) => {
         We don't share your information with anyone. but we do use Firebase to 
         store your data...for now. The plan is to move to our own database eventually.
       </Text>
-    </KeyboardAwareScrollView>
+    </View>
   );
 };
 
@@ -376,7 +375,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 16,
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   input: {
     margin: 8,
