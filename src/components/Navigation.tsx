@@ -7,8 +7,8 @@ import {
   ScaledSize,
   Linking,
 } from 'react-native';
-// eslint-disable-next-line import/no-unresolved
-import { enableScreens } from 'react-native-screens';
+import { firebase } from '../firebase/config';
+import { User } from 'firebase';
 import {
   Provider as PaperProvider,
   Appbar,
@@ -34,23 +34,19 @@ import { useReduxDevToolsExtension } from '@react-navigation/devtools';
 // use this to restart the app for things like changing RTL to LTR
 //import { restartApp } from './Restart';
 import { AsyncStorage } from 'react-native';
-import LinkingPrefixes from '../LinkingPrefixes';
-import MaterialBottomTabs from '../screens/MaterialBottomTabs';
+import LinkingPrefixes from './LinkingPrefixes';
+import MaterialBottomTabs from './MaterialBottomTabs';
 import NotFound from './NotFound';
-import AuthFlow from './AuthFlow';
+import AuthFlow from './authentication/AuthFlow';
 
-import auth from '@react-native-firebase/auth';
-import analytics, { firebase as analyticsFirebase} from '@react-native-firebase/analytics';
-import Profile from './Profile';
+import Profile from './authentication/Profile';
 
-import { NAVIGATION_PERSISTENCE_KEY, State, RootDrawerParamList, RootStackParamList } from '../../Types';
-import { SignInAction, Action as AuthAction, isUserAuthenticated, AuthState } from '../../reducers/AuthReducer';
-import { paperTheme, CombinedLightTheme, Theme, barClassName, paperColors, ThemeState } from '../../reducers/ThemeReducer';
+import { NAVIGATION_PERSISTENCE_KEY, State, RootDrawerParamList, RootStackParamList } from '../Types';
+import { SignInAction, Action as AuthAction, isUserAuthenticated, AuthState } from '../reducers/AuthReducer';
+import { paperTheme, CombinedLightTheme, Theme, barClassName, paperColors, ThemeState } from '../reducers/ThemeReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { CalendarStackParamList } from './CalendarNavigator';
-import { CalendarEntryProps } from '../shared/CalendarEntryItem';
-
-enableScreens();
+import { CalendarStackParamList } from './calendar/CalendarNavigator';
+import { CalendarDayProps } from './calendar/CalendarDay';
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -90,7 +86,7 @@ const Navigation = (props: {
       case 'Feed':
         return 'Agenda';
       case 'CalendarEntry':
-        return (route?.params as CalendarEntryProps).title;
+        return (route?.params as CalendarDayProps).title;
       case 'Calendar':
         return 'Calendar';
       case 'PainLogEntry':
@@ -107,7 +103,7 @@ const Navigation = (props: {
   }
 
   React.useEffect(() => {
-    return auth().onAuthStateChanged(userState => {
+    return firebase.auth().onAuthStateChanged(userState => {
         if (userState === null) {
           // user is not authenticated, so navigate
           setUser(false);
@@ -122,7 +118,7 @@ const Navigation = (props: {
   // this will allow us to re-enable analytics after user approves...once I create that user-flow
   React.useEffect(() => {
     const enableAnalytics = async () => {
-      await analyticsFirebase.analytics().setAnalyticsCollectionEnabled(true);
+      await firebase.analytics().setAnalyticsCollectionEnabled(true);
     }
 
     enableAnalytics()
@@ -191,7 +187,7 @@ const Navigation = (props: {
             // The line below uses the expo-firebase-analytics tracker
             // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
             // Change this line to use another Mobile analytics SDK
-            analytics().setCurrentScreen(currentRouteName);
+            firebase.analytics().setCurrentScreen(currentRouteName);
             AsyncStorage ? AsyncStorage.setItem(
               NAVIGATION_PERSISTENCE_KEY,
               JSON.stringify(state)

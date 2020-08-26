@@ -8,10 +8,6 @@ target 'ineffectua' do
 
   use_react_native!(:path => config["reactNativePath"])
 
-  pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
-
-  pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
-
   target 'ineffectuaTests' do
     inherit! :complete
     # Pods for testing

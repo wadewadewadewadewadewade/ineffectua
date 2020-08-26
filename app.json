@@ -40,7 +40,7 @@
     },
     "android": {
       "googleServicesFile": "./google-services.json",
-      "package": "com.ineffectua",
+      "package": "com.ineffectua.mobile",
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyA8Wcik6dTuxBKolLSm5ONBvXNz8Z0T-6c"

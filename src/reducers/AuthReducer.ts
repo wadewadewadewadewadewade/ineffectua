@@ -1,30 +1,61 @@
-import { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { firebase } from '../firebase/config';
+import { User } from 'firebase';
 
 export const RESTORE_TOKEN = 'RESTORE_TOKEN';
 export const SIGN_IN = 'SIGN_IN';
 export const SIGN_OUT = 'SIGN_OUT';
 
 export type Action =
-  | { type: 'RESTORE_TOKEN'; token: false | FirebaseAuthTypes.User }
-  | { type: 'SIGN_IN'; token: false | FirebaseAuthTypes.User }
+  | { type: 'RESTORE_TOKEN'; token: false | User }
+  | { type: 'SIGN_IN'; token: false | User }
   | { type: 'SIGN_OUT' };
 
 export const SignInAction = (user: AuthState['user']): Action => ({ type: SIGN_IN, token: user })
 export const SignOutAction = (): Action => ({ type: SIGN_OUT })
 
 export type AuthState = {
-  user: FirebaseAuthTypes.User | false
+  user: User | false
 }
 
 export const initialState: AuthState = {
   user: false
 }
 
-export const isUserAuthenticated = (user: FirebaseAuthTypes.User | false): boolean => {
+export const isUserAuthenticated = (user: User | false): boolean => {
   return user !== undefined && user !== false
 }
 
-export default function AuthReducer(prevState = initialState['user'], action: Action): AuthState['user'] {
+export const storeUserData = async (response: firebase.auth.UserCredential, success: (user: User) => void) => {
+  if (response.user !== null) {
+    const {
+        uid,
+        email,
+        displayName,
+        photoURL
+    } = response.user;
+    const data = {
+      uid,
+      email,
+      displayName,
+      photoURL
+    }
+    const usersRef = firebase.firestore().collection('users')
+    return usersRef
+      .doc(uid)
+      .set(data)
+      .then(() => response.user && success(response.user))
+      .catch((error) => {
+          console.error(error)
+      });
+  } else {
+    return new Promise<void>((r,e) => { e() })
+  }
+}
+
+export default function AuthReducer(
+  prevState = initialState['user'],
+  action: Action
+): AuthState['user'] {
   switch (action.type) {
     case RESTORE_TOKEN:
       return action.token;

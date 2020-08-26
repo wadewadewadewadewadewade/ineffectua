@@ -1,11 +1,11 @@
 import React from 'react';
-import CalendarEntryItem, { CalendarEntryProps } from '../shared/CalendarEntryItem';
+import CalendarDay, { CalendarDayProps } from './CalendarDay';
 import { createStackNavigator } from '@react-navigation/stack';
 import Calendar from './Calendar';
 
 export type CalendarStackParamList = {
   Calendar: undefined;
-  CalendarEntryItem: CalendarEntryProps;
+  CalendarDay: CalendarDayProps;
   NotFound: undefined;
 };
 
@@ -19,8 +19,8 @@ const CalendarNavigation = () => {
         component={Calendar}
       />
       <Stack.Screen
-        name="CalendarEntryItem"
-        component={CalendarEntryItem}
+        name="CalendarDay"
+        component={CalendarDay}
       />
     </Stack.Navigator>
   )

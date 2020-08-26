@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { StyleSheet } from 'react-native';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-import PainLogEntry from '../shared/PainLogEntry';
-import Contacts from '../shared/Contacts';
-import Agenda from '../shared/Agenda';
-import CalendarNavigator, { CalendarStackParamList } from './CalendarNavigator';
+import PainLogEntry from './shared/PainLogEntry';
+import Contacts from './shared/Contacts';
+import Agenda from './shared/Agenda';
+import CalendarNavigator, { CalendarStackParamList } from './calendar/CalendarNavigator';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export type MaterialBottomTabParams = {

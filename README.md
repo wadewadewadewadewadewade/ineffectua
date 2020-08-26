@@ -12,7 +12,7 @@ The intent of this app is to help people with chronic illnesses track their medi
 {
   theme: Theme,
   user: firebase.User
-  dates: Array<CalendarEntryType>
+  dates: Array<CalendarEntry>
 }
 ```
 
@@ -23,6 +23,8 @@ The intent of this app is to help people with chronic illnesses track their medi
 * https://docs.expo.io/guides/using-firebase/
 * https://redux.js.org/recipes/usage-with-typescript
 * https://github.com/wix/react-native-calendars
+
+I had to edit /android/build.gradle to set the minSdkversion to 28 (>= 20) to [support multidex](https://developer.android.com/studio/build/multidex). 
 
 ## Next
 

@@ -1,13 +1,15 @@
 import * as React from 'react';
-import { View, TextInput, StyleSheet, Text } from 'react-native';
+import { firebase } from '../../firebase/config';
+import { User } from 'firebase';
+import { View, TextInput, StyleSheet, Text, Keyboard } from 'react-native';
 import { Title, Button } from 'react-native-paper';
 import { useTheme } from '@react-navigation/native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
   createStackNavigator, StackNavigationProp,
 } from '@react-navigation/stack';
-import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { connect } from 'react-redux';
-import { SignInAction, Action, SignOutAction, isUserAuthenticated } from '../../reducers/AuthReducer';
+import { SignInAction, Action, SignOutAction, isUserAuthenticated, storeUserData } from '../../reducers/AuthReducer';
 import { State, RootDrawerParamList } from '../../Types'
 import { Svg, G, Path } from 'react-native-svg';
 //import Logo from '../../../assets/logo.svg';
@@ -25,7 +27,7 @@ type AuthStackParams = {
   );
 };*/
 
-const SignInScreen = (props : { signIn: (user: FirebaseAuthTypes.User) => void }) => {
+const SignInScreen = (props : { signIn: (user: User) => void }) => {
   const { signIn } = props;
   const { colors } = useTheme();
   const [email, onChangeEmail] = React.useState('Email');
@@ -35,7 +37,7 @@ const SignInScreen = (props : { signIn: (user: FirebaseAuthTypes.User) => void }
   const [register, changeMode] = React.useState(false);
 
   return (
-    <View style={styles.content}>
+    <KeyboardAwareScrollView style={styles.content}>
       <Svg x="0px" y="0px" viewBox="0 0 1257.9464 221.08823" fill='#000' style={styles.logo}>
         <G transform="translate(-13.053608,-222.11178)">
           <Path d="M760,269.6c-0.1,3.4,0.3,6.9-0.5,10.2c-0.6,2.6,3.4,5.1,0,7.7c-0.1,0.1,1.6,3.4,3.1,4.5c2.2,1.7,5,2.7,7.4,4.2
@@ -274,18 +276,20 @@ const SignInScreen = (props : { signIn: (user: FirebaseAuthTypes.User) => void }
       />)}
       {error !== undefined ? (<Text style={{color: 'red'}}>{error}</Text>) : null}
       <Button mode="contained" onPress={() => {
+        Keyboard.dismiss();
         if (register) {
           if (password === passwordConfirm) {
-            auth().createUserWithEmailAndPassword(email, password).then((user) => {
-              user.user && signIn(user.user)
-            }).catch((e) => onChangeError(e))
+            firebase.auth()
+              .createUserWithEmailAndPassword(email, password)
+              .then((response) => storeUserData(response, signIn))
+              .catch((e) => onChangeError(e))
           } else {
             onChangeError('"Password" and "Confirm Password" values must match, so you know you\'re entering the password your\'e intending to enter')
           }
         } else {
-          auth().signInWithEmailAndPassword(email, password).then((user) => {
-            user.user && signIn(user.user)
-          }).catch((e) => onChangeError(e))
+          firebase.auth().signInWithEmailAndPassword(email, password)
+            .then((response) => storeUserData(response, signIn))
+            .catch((e) => onChangeError(e))
         }
       }} style={styles.button}>
         <Text>Sign {register ? 'Up' : 'In'}</Text>
@@ -303,7 +307,7 @@ const SignInScreen = (props : { signIn: (user: FirebaseAuthTypes.User) => void }
         We don't share your information with anyone. but we do use Firebase to 
         store your data...for now. The plan is to move to our own database eventually.
       </Text>
-    </View>
+    </KeyboardAwareScrollView>
   );
 };
 
@@ -312,7 +316,7 @@ const AuthenticationSuccessScreen = (props: { signOut: () => void }) => {
   return (
     <View style={styles.content}>
       <Title style={styles.text}>Signed in successfully 🎉</Title>
-      <Button onPress={() => auth().signOut().then(() => signOut)} style={styles.button}>
+      <Button onPress={() => firebase.auth().signOut().then(() => signOut)} style={styles.button}>
         Sign out
       </Button>
     </View>
@@ -332,7 +336,7 @@ const SimpleStackScreen = (props: any) => {
     navigation: StackNavigationProp<RootDrawerParamList, "Root"> | undefined,
     authenticated: Boolean,
     isSignout: Boolean,
-    signIn: (user: FirebaseAuthTypes.User) => void,
+    signIn: (user: User) => void,
     signOut: () => void
   } = props
   navigation && React.useLayoutEffect(() => {
@@ -417,7 +421,7 @@ const mapDispatchToProps = (dispatch: (value: Action) => void) => {
   // Action
   return {
     // Login
-    signIn: (user: FirebaseAuthTypes.User) => dispatch(SignInAction(user)),
+    signIn: (user: User) => dispatch(SignInAction(user)),
     signOut: () => dispatch(SignOutAction()),
   };
 };// Exports

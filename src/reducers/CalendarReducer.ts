@@ -1,8 +1,8 @@
-import firestore from '@react-native-firebase/firestore';
 import { CustomMarking } from 'react-native-calendars';
 import { AuthState } from './AuthReducer';
-import { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import { CalendarEntry, CalendarWindow, CalendarRecord } from '../Types'
+import { CalendarEntry, CalendarWindow, CalendarRecord } from '../Types';
+import { firebase } from '../firebase/config';
+import { User } from 'firebase';
 //import { useEffect } from 'react';
 
 /*===== formatting tool ====*/
@@ -126,7 +126,7 @@ export const SetDateAction = (date: CalendarEntry): Action => ({
 });
 
 export async function GetDates(
-  user: FirebaseAuthTypes.User,
+  user: User,
   window?: CalendarWindow,
 ): Promise<CalendarRecord> {
   if (!window) {
@@ -135,9 +135,9 @@ export async function GetDates(
       ends: new Date(Date.now() + 1000 * 60 * 60 * 24)
     }
   }
-  firestore.setLogLevel('debug');
+  firebase.firestore.setLogLevel('debug');
   console.log('user.uid', user.uid);
-  let dates: void | Array<CalendarEntry> = await firestore().collection('users')
+  let dates: void | Array<CalendarEntry> = await firebase.firestore().collection('users')
     .doc(user.uid).collection('calendar')
     .where('start', '>=', window.starts).where('start', '<=', window.ends)
     .orderBy('start')
@@ -155,12 +155,12 @@ export async function GetDates(
 }
 
 export function ObserveDates(
-  user: FirebaseAuthTypes.User,
+  user: User,
   observer: (dates: Array<CalendarEntry>) => void
 ): () => void {
   //firestore.setLogLevel('debug');
   //useEffect(() => {
-    const subscriber = firestore()
+    const subscriber = firebase.firestore()
       .collection('users')
       .doc(user.uid)
       .collection('calendar')
@@ -191,11 +191,11 @@ export const getDates = (
 })
 
 export async function SetDate(
-  user: FirebaseAuthTypes.User,
+  user: User,
   date: CalendarEntry,
 ): Promise<CalendarEntry | undefined> {
   //firestore.setLogLevel('debug');
-  return await firestore().collection('users')
+  return await firebase.firestore().collection('users')
     .doc(user.uid).collection('calendar')
     .add(date)
     .then(snap => snap.get().then(doc => doc.data() as CalendarEntry));

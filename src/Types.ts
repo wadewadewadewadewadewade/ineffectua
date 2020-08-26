@@ -1,4 +1,4 @@
-import { MaterialBottomTabParams } from './components/screens/MaterialBottomTabs';
+import { MaterialBottomTabParams } from './components/MaterialBottomTabs';
 import { ThemeState, initialState as themeInitialState } from './reducers/ThemeReducer';
 import { AuthState, initialState as authInitialState } from './reducers/AuthReducer';
 import { CalendarState, initialState as calendarInitialState } from './reducers/CalendarReducer';

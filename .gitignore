@@ -62,4 +62,7 @@ buck-out/
 .expo/
 .expo/*.json
 
+# old stuff I'm not ready to delete yet
+*.old
+
 google-services.json

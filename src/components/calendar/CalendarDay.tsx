@@ -1,5 +1,6 @@
 import React from 'react';
-import { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { firebase } from '../../firebase/config'
+import { User } from 'firebase';
 import { DateObject } from 'react-native-calendars';
 import { StyleSheet, Text, View } from 'react-native';
 import { connect } from 'react-redux';
@@ -8,7 +9,7 @@ import { RouteProp } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInput, Button, FAB, Modal, Portal } from 'react-native-paper';
-import { CalendarStackParamList } from '../screens/CalendarNavigator';
+import { CalendarStackParamList } from './CalendarNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import { Action, getDates, CalendarState, setDate } from '../../reducers/CalendarReducer';
@@ -107,20 +108,20 @@ const TimeSlot = (props : {
   )
 }
 
-export type CalendarEntryProps = {
+export type CalendarDayProps = {
   date: DateObject,
   title: string
 }
 
-const CalendarEntryItem = (props: {
-    getDates: (user: FirebaseAuthTypes.User, callback: () => void, window?: CalendarWindow) => Promise<void>,
-    setDate: (user: FirebaseAuthTypes.User, callback: () => void, date: CalendarEntry) => Promise<void>,
+const CalendarDay = (props: {
+    getDates: (user: User, callback: () => void, window?: CalendarWindow) => Promise<void>,
+    setDate: (user: User, callback: () => void, date: CalendarEntry) => Promise<void>,
     dates: CalendarState['dates'],
     authenticated: Boolean,
     user: AuthState['user'],
     theme: ThemeState['theme'],
-    route: RouteProp<CalendarStackParamList, 'CalendarEntryItem'>,
-    navigation: StackNavigationProp<CalendarStackParamList, 'CalendarEntryItem'>
+    route: RouteProp<CalendarStackParamList, 'CalendarDay'>,
+    navigation: StackNavigationProp<CalendarStackParamList, 'CalendarDay'>
   }) => {
     const [visible, setVisible] = React.useState(false);
     const {
@@ -199,8 +200,8 @@ const mapStateToProps = (state: State) => {
 const mapDispatchToProps = (dispatch: (value: Action) => void) => {
   // Action
   return {
-    getDates: (user: FirebaseAuthTypes.User, callback: () => void, window?: CalendarWindow) => getDates(dispatch, user, callback, window),
-    setDate: (user: FirebaseAuthTypes.User, callback: () => void, date: CalendarEntry) => setDate(dispatch, user, callback, date)
+    getDates: (user: User, callback: () => void, window?: CalendarWindow) => getDates(dispatch, user, callback, window),
+    setDate: (user: User, callback: () => void, date: CalendarEntry) => setDate(dispatch, user, callback, date)
   };
 };// Exports
-export default connect(mapStateToProps, mapDispatchToProps)(CalendarEntryItem);
+export default connect(mapStateToProps, mapDispatchToProps)(CalendarDay);
