@@ -141,9 +141,9 @@ export async function GetDates(
     .where('start', '>=', window.starts).where('start', '<=', window.ends)
     .orderBy('start')
     .get()
-    .then((querySnapshot) => {
-      (querySnapshot.docs.map(d => d.data()))
-    })
+    .then((querySnapshot) =>
+      (querySnapshot.docs.map(d => d.data() as CalendarEntry))
+    )
   if (!dates) {
     dates = new Array<CalendarEntry>();
   }
@@ -193,7 +193,7 @@ export async function SetDate(
   user: User,
   date: CalendarEntry,
 ): Promise<CalendarEntry | undefined> {
-  //firestore.setLogLevel('debug');
+  firebase.firestore.setLogLevel('debug');
   return await firebase.firestore().collection('users')
     .doc(user.uid).collection('calendar')
     .add(date)

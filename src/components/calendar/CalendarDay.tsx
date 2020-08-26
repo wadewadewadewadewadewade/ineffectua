@@ -5,7 +5,7 @@ import { StyleSheet, Text, ScaledSize, Dimensions, View } from 'react-native';
 import { connect } from 'react-redux';
 import { CalendarWindow, CalendarEntry, State } from '../../Types';
 import { RouteProp } from '@react-navigation/native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInput, Button, FAB, Modal, Portal } from 'react-native-paper';
 import { CalendarStackParamList } from './CalendarNavigator';
@@ -17,12 +17,12 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 
 const NewSlot = (props : {
-    setDate: (date: CalendarEntry) => Promise<void>,
+  newDate: (date: CalendarEntry) => Promise<void>,
     date: DateObject,
     theme: ThemeState['theme'],
     user: AuthState['user']
   }): JSX.Element => {
-    const { date, user, setDate, theme } = props;
+    const { date, user, newDate, theme } = props;
     if (!user) {
       return <View></View>
     }
@@ -32,6 +32,7 @@ const NewSlot = (props : {
     const [showStart, setShowStart] = React.useState(false);
     const [showEnd, setShowEnd] = React.useState(false);
     const [description, setDescription] = React.useState('');
+    const [descriptionHeight, setDescriptionHeight] = React.useState(45);
     const [contacts, setContacts] = React.useState(new Array<string>());
     const save = () => {
       const entry: CalendarEntry = {
@@ -43,35 +44,48 @@ const NewSlot = (props : {
         description,
         contacts
       }
-      return setDate(entry)
+      return newDate(entry)
     }
     return (
-      <ScrollView style={{backgroundColor: theme.paper.colors.background}}>
-        <View>
+      <View>
+        <ScrollView>
           <TextInput value={title} onChangeText={(text) => setTitle(text)} placeholder="Add title" />
-          <Button onPress={() => setShowStart(true)} style={styles.buttonRow}>
-            <Text style={{color: theme.paper.colors.text, ...styles.buttonRowLabel}}>From</Text>
-            <Text style={styles.buttonRowValue}>{starts.toLocaleTimeString()}</Text>
-          </Button>
+          <TouchableOpacity onPress={() => setShowStart(true)}>
+            <View  style={styles.buttonRow}>
+              <Text style={{color: theme.paper.colors.text}}>From</Text>
+              <Text>{starts.toLocaleTimeString()}</Text>
+            </View>
+          </TouchableOpacity>
           {showStart && <DateTimePicker mode="time" value={starts} onChange={(e: Event, d?: Date) => {
             if (d) {
               setStart(d)
             }
           }}/>}
-          <Button onPress={() => setShowEnd(true)} style={styles.buttonRow}>
-            <Text style={{color: theme.paper.colors.text, ...styles.buttonRowLabel}}>Ends</Text>
-            <Text style={styles.buttonRowValue}>{ends.toLocaleTimeString()}</Text>
-          </Button>
+          <TouchableOpacity onPress={() => setShowEnd(true)}>
+            <View style={styles.buttonRow}>
+              <Text style={{color: theme.paper.colors.text}}>Ends</Text>
+              <Text>{ends.toLocaleTimeString()}</Text>
+            </View>
+          </TouchableOpacity>
           {showEnd && <DateTimePicker mode="time" value={ends} onChange={(e: Event, d?: Date) => {
             if (d) {
               setEnd(d)
             }
           }}/>}
-          <Button onPress={save} style={styles.button}>
-            <Text>Save</Text>
-          </Button>
-        </View>
-      </ScrollView>
+          <TextInput
+            style={styles.description}
+            multiline={true}
+            value={description}
+            onContentSizeChange={(event) => {
+              setDescriptionHeight(Math.floor(event.nativeEvent.contentSize.height / styles.description.lineHeight));
+            }}
+            numberOfLines={descriptionHeight}
+            onChangeText={(text) => setDescription(text)} placeholder="Optional Description" />
+        </ScrollView>
+        <TouchableOpacity onPress={save} style={{backgroundColor: theme.paper.colors.accent, ...styles.button}}>
+          <Text style={styles.buttonContents}>Save</Text>
+        </TouchableOpacity>
+      </View>
     )
 }
 
@@ -99,8 +113,8 @@ export type CalendarDayProps = {
 }
 
 const CalendarDay = (props: {
-    getDates: (user: User, callback: () => void, window?: CalendarWindow) => Promise<void>,
-    setDate: (user: User, callback: () => void, date: CalendarEntry) => Promise<void>,
+    getDates: (user: User, callback: () => void, calendarWwindow?: CalendarWindow) => Promise<void>,
+    newDate: (user: User, callback: () => void, date: CalendarEntry) => Promise<void>,
     dates: CalendarState['dates'],
     user: AuthState['user'],
     theme: ThemeState['theme'],
@@ -119,7 +133,7 @@ const CalendarDay = (props: {
     }, []);
     const {
       getDates,
-      setDate,
+      newDate,
       dates,
       user,
       theme,
@@ -140,7 +154,7 @@ const CalendarDay = (props: {
     const dayGrid: Array<JSX.Element> = [];
     for(let i=1;i<24;i++) {
       dayGrid.push(
-        <View style={{backgroundColor: theme.paper.colors.disabled, ...styles.dayrow}}>
+        <View key={i} style={{backgroundColor: theme.paper.colors.disabled, ...styles.dayrow}}>
           <Text style={{backgroundColor: theme.paper.colors.background, color: theme.paper.colors.disabled, ...styles.gridtext}}>{i<=12?i:i-12}{i<=12?'am':'pm'}</Text>
         </View>
       )
@@ -163,7 +177,10 @@ const CalendarDay = (props: {
         />}
         <Portal>
           <Modal visible={visible} onDismiss={() => setVisible(false)}>
-            <NewSlot date={date} theme={theme} user={user} setDate={(d) => setDate(user, () => setVisible(false), d)} />
+            <View style={{backgroundColor: theme.paper.colors.surface}}>
+              <NewSlot date={date} theme={theme} user={user} newDate={(d) => newDate(user, () => setVisible(false), d)} />
+              <Button onPress={() => setVisible(false)}><Text>cancel</Text></Button>
+            </View>
           </Modal>
         </Portal>
       </View>
@@ -171,6 +188,10 @@ const CalendarDay = (props: {
 }
 
 const styles = StyleSheet.create({
+  description: {
+    fontSize: 16,
+    lineHeight: 22
+  },
   daygrid: {
     position: 'absolute',
     top: 0,
@@ -198,21 +219,20 @@ const styles = StyleSheet.create({
   },
   button: {
     padding: 8,
-    margin: 8
+    alignItems: 'center',
+  },
+  buttonContents : {
+    fontSize: 16,
+    textAlign: 'center',
+    textTransform: 'uppercase'
   },
   buttonRow: {
     fontSize: 12,
+    padding: 8,
     flexDirection: 'row',
+    justifyContent: 'space-between',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#AAA',
-    justifyContent: 'space-between'
-  },
-  buttonRowLabel: {
-    alignSelf: 'flex-start'
-  },
-  buttonRowValue: {
-    flex: 1,
-    backgroundColor: 'red'
   },
   entry: {
     position:'relative'
@@ -238,7 +258,7 @@ const mapDispatchToProps = (dispatch: (value: Action) => void) => {
   // Action
   return {
     getDates: (user: User, callback: () => void, window?: CalendarWindow) => getDates(dispatch, user, callback, window),
-    setDate: (user: User, callback: () => void, date: CalendarEntry) => setDate(dispatch, user, callback, date)
+    newDate: (user: User, callback: () => void, date: CalendarEntry) => setDate(dispatch, user, callback, date)
   };
 };// Exports
 export default connect(mapStateToProps, mapDispatchToProps)(CalendarDay);
