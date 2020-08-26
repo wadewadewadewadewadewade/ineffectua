@@ -15,7 +15,7 @@ const firebaseConfig = {
 if (!firebase.apps.length) {
   try {
     firebase.initializeApp(firebaseConfig);
-    firebase.firestore().enablePersistence()
+    /*firebase.firestore().enablePersistence()
       .catch(function(err) {
         if (err.code == 'failed-precondition') {
             // Multiple tabs open, persistence can only be enabled
@@ -27,7 +27,7 @@ if (!firebase.apps.length) {
             // ...
         }
         console.warn(err);
-    });
+    });*/
   } catch (err) {
     // not an actual error when we're hot-reloading
     if (!/(already exists|Setting a timer for a long period of time)/.test(err.message)) {

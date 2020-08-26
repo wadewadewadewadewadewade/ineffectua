@@ -1,8 +1,7 @@
 import React from 'react';
-import { firebase } from '../../firebase/config'
 import { User } from 'firebase';
 import { DateObject } from 'react-native-calendars';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, ScaledSize, Dimensions, View } from 'react-native';
 import { connect } from 'react-redux';
 import { CalendarWindow, CalendarEntry, State } from '../../Types';
 import { RouteProp } from '@react-navigation/native';
@@ -10,10 +9,8 @@ import { ScrollView } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInput, Button, FAB, Modal, Portal } from 'react-native-paper';
 import { CalendarStackParamList } from './CalendarNavigator';
-import { StackNavigationProp } from '@react-navigation/stack';
-import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import { Action, getDates, CalendarState, setDate } from '../../reducers/CalendarReducer';
-import { ThemeState, themeIsDark } from '../../reducers/ThemeReducer';
+import { ThemeState } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -53,21 +50,21 @@ const NewSlot = (props : {
         <View>
           <TextInput value={title} onChangeText={(text) => setTitle(text)} placeholder="Add title" />
           <Button onPress={() => setShowStart(true)} style={styles.buttonRow}>
-            <Text style={{color: theme.paper.colors.text}}>From</Text>
+            <Text style={{color: theme.paper.colors.text, ...styles.buttonRowLabel}}>From</Text>
             <Text style={styles.buttonRowValue}>{starts.toLocaleTimeString()}</Text>
           </Button>
-          {showStart && <DateTimePicker mode="time" value={starts} onChange={(e: Event, date?: Date) => {
-            if (date) {
-              setStart(date)
+          {showStart && <DateTimePicker mode="time" value={starts} onChange={(e: Event, d?: Date) => {
+            if (d) {
+              setStart(d)
             }
           }}/>}
           <Button onPress={() => setShowEnd(true)} style={styles.buttonRow}>
-            <Text style={{color: theme.paper.colors.text}}>Ends</Text>
+            <Text style={{color: theme.paper.colors.text, ...styles.buttonRowLabel}}>Ends</Text>
             <Text style={styles.buttonRowValue}>{ends.toLocaleTimeString()}</Text>
           </Button>
-          {showEnd && <DateTimePicker mode="time" value={ends} onChange={(e: Event, date?: Date) => {
-            if (date) {
-              setEnd(date)
+          {showEnd && <DateTimePicker mode="time" value={ends} onChange={(e: Event, d?: Date) => {
+            if (d) {
+              setEnd(d)
             }
           }}/>}
           <Button onPress={save} style={styles.button}>
@@ -105,22 +102,28 @@ const CalendarDay = (props: {
     getDates: (user: User, callback: () => void, window?: CalendarWindow) => Promise<void>,
     setDate: (user: User, callback: () => void, date: CalendarEntry) => Promise<void>,
     dates: CalendarState['dates'],
-    authenticated: Boolean,
     user: AuthState['user'],
     theme: ThemeState['theme'],
-    route: RouteProp<CalendarStackParamList, 'CalendarDay'>,
-    navigation: StackNavigationProp<CalendarStackParamList, 'CalendarDay'>
+    route: RouteProp<CalendarStackParamList, 'CalendarDay'>
   }) => {
     const [visible, setVisible] = React.useState(false);
+    const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
+    React.useEffect(() => {
+      const onDimensionsChange = ({ window, screen }: { window: ScaledSize, screen: ScaledSize }) => {
+        setDimensions(window);
+      };
+  
+      Dimensions.addEventListener('change', onDimensionsChange);
+  
+      return () => Dimensions.removeEventListener('change', onDimensionsChange);
+    }, []);
     const {
       getDates,
       setDate,
       dates,
-      authenticated,
       user,
       theme,
-      route,
-      navigation
+      route
     } = props;
     const { date } = route.params;
     const window: CalendarWindow = {
@@ -134,20 +137,24 @@ const CalendarDay = (props: {
     if (!loaded && user) {
       getDates(user, () => setLoaded(true), window);
     }
+    const dayGrid: Array<JSX.Element> = [];
+    for(let i=1;i<24;i++) {
+      dayGrid.push(
+        <View style={{backgroundColor: theme.paper.colors.disabled, ...styles.dayrow}}>
+          <Text style={{backgroundColor: theme.paper.colors.background, color: theme.paper.colors.disabled, ...styles.gridtext}}>{i<=12?i:i-12}{i<=12?'am':'pm'}</Text>
+        </View>
+      )
+    }
     return (
-      <View style={styles.entry}>
-        <Svg height="100%" width="100%" viewBox="0 0 100 100" style={{position:'absolute',left:0,right:0,top:0,bottom:0}}>
-          <Rect
-            width="154.74905"
-            height="0.8018086"
-            x="39.342342"
-            y="27.06852" />
-          <SvgText
-            fontSize="7"
-            fontFamily="sans-serif"
-            x="15.96937"
-            y="30.435143">8am</SvgText>
-        </Svg>
+      <View>
+        <ScrollView contentOffset={{x: dimensions.height * 0.2, y: 0}}>
+          <View style={{ height: dimensions.height * 1.2, ...styles.entry }}>
+            <View style={styles.daygrid}>
+              {dayGrid}
+            </View>
+          </View>
+          {dates.items.map((d: CalendarEntry, i: number) => <TimeSlot date={d} window={window} index={i} total={dates.items.length}/>)}
+        </ScrollView>
         {!visible && <FAB
           style={styles.fab}
           small
@@ -156,15 +163,36 @@ const CalendarDay = (props: {
         />}
         <Portal>
           <Modal visible={visible} onDismiss={() => setVisible(false)}>
-            <NewSlot date={date} theme={theme} user={user} setDate={(date) => setDate(user, () => setVisible(false), date)} />
+            <NewSlot date={date} theme={theme} user={user} setDate={(d) => setDate(user, () => setVisible(false), d)} />
           </Modal>
         </Portal>
-        {dates.items.map((d: CalendarEntry, i: number) => <TimeSlot date={d} window={window} index={i} total={dates.items.length}/>)}
       </View>
     )
 }
 
 const styles = StyleSheet.create({
+  daygrid: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'column',
+    justifyContent: 'space-evenly'
+  },
+  dayrow: {
+    height: 1,
+    overflow: 'visible',
+    alignItems: 'center',
+    marginRight: 8,
+    flexDirection: 'row'
+  },
+  gridtext: {
+    padding: 8,
+    fontSize: 12,
+    textAlign: 'right',
+    lineHeight: 12
+  },
   buttons: {
     padding: 8,
   },
@@ -175,14 +203,18 @@ const styles = StyleSheet.create({
   buttonRow: {
     fontSize: 12,
     flexDirection: 'row',
-    backgroundColor: 'blue',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#AAA',
+    justifyContent: 'space-between'
+  },
+  buttonRowLabel: {
+    alignSelf: 'flex-start'
   },
   buttonRowValue: {
-    flexGrow: 1,
+    flex: 1,
     backgroundColor: 'red'
   },
   entry: {
-    height: '100%',
     position:'relative'
   },
   fab: {

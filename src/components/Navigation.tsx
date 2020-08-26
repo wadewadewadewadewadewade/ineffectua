@@ -8,7 +8,6 @@ import {
   Linking,
 } from 'react-native';
 import { firebase } from '../firebase/config';
-import { User } from 'firebase';
 import {
   Provider as PaperProvider,
   Appbar,
@@ -43,9 +42,8 @@ import Profile from './authentication/Profile';
 
 import { NAVIGATION_PERSISTENCE_KEY, State, RootDrawerParamList, RootStackParamList } from '../Types';
 import { SignInAction, Action as AuthAction, isUserAuthenticated, AuthState } from '../reducers/AuthReducer';
-import { paperTheme, CombinedLightTheme, Theme, barClassName, paperColors, ThemeState } from '../reducers/ThemeReducer';
+import { paperTheme, CombinedLightTheme, barClassName, paperColors, ThemeState } from '../reducers/ThemeReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { CalendarStackParamList } from './calendar/CalendarNavigator';
 import { CalendarDayProps } from './calendar/CalendarDay';
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
@@ -116,13 +114,13 @@ const Navigation = (props: {
   let previousRouteName = 'Feed';
 
   // this will allow us to re-enable analytics after user approves...once I create that user-flow
-  React.useEffect(() => {
+  /*React.useEffect(() => {
     const enableAnalytics = async () => {
-      await firebase.analytics().setAnalyticsCollectionEnabled(true);
+      firebase.analytics().setAnalyticsCollectionEnabled(true);
     }
 
     enableAnalytics()
-  }, [])
+  }, [])*/
 
   React.useEffect(() => {
     const restoreState = async () => {
