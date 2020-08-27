@@ -1,5 +1,4 @@
 import React from 'react';
-import { User } from 'firebase';
 import { DateObject } from 'react-native-calendars';
 import { StyleSheet, Text, ScaledSize, Dimensions, View } from 'react-native';
 import { connect } from 'react-redux';

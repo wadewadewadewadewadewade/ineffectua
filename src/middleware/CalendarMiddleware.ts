@@ -1,10 +1,9 @@
 import { State } from './../Types';
-import { SetDatesAction } from './../reducers/CalendarReducer';
+import { GetDatesAction, ReplaceDatesAction } from './../reducers/CalendarReducer';
 import { Action } from './../reducers';
-import { AuthState } from '../reducers/AuthReducer';
 import { firebase } from '../firebase/config';
 import { User } from 'firebase';
-import { CalendarWindow, CalendarEntry, CalendarRecord } from '../Types';
+import { CalendarEntry } from '../Types';
 import { CustomMarking } from 'react-native-calendars';
 
 /*===== formatting tool ====*/
@@ -43,7 +42,7 @@ function dateDiff(a: Date, b: Date): string {
     hours: 0,
     minutes: 0,
     toString: () => {
-      const r = new Array<String>();
+      const r = new Array<string>();
       if (response.years > 0) {
         r.push(response.years.toString() + ' years')
       }
@@ -94,7 +93,7 @@ export const formatDates = (dates: Array<CalendarEntry>): AgendaDate => {
 export const formatDatesForMarking = (dates: Array<CalendarEntry>): AgendaDateMarking => {
   const response: AgendaDateMarking = {};
   dates.forEach(date => {
-    const { starts, ends } = date.window;
+    const { starts } = date.window;
     const m = starts.getMonth();
     const d = starts.getDay();
     const isoDate = starts.getFullYear() + '-' + (m < 10 ? '0' + m.toString() : m.toString()) + '-' + (d < 10 ? '0' + d.toString() :d.toString());
@@ -106,35 +105,29 @@ export const formatDatesForMarking = (dates: Array<CalendarEntry>): AgendaDateMa
   return response;
 }
 
-/*export async function GetDates(
-  user: User,
-  window?: CalendarWindow,
-): Promise<CalendarRecord> {
-  if (!window) {
-    window = {
-      starts: new Date(Date.now()),
-      ends: new Date(Date.now() + 1000 * 60 * 60 * 24)
-    }
+export function getDates(
+  dispatch: (action: Action) => void,
+  state: State
+) {
+  const { user } = state;
+  if (user) {
+    //firebase.firestore.setLogLevel('debug');
+    firebase.firestore().collection('users')
+      .doc(user.uid).collection('calendar')
+      .orderBy('start')
+      .get()
+      .then((querySnapshot) =>
+        dispatch(
+          GetDatesAction(querySnapshot.docs.map(d => d.data() as CalendarEntry))
+        )
+      )
   }
-  //firebase.firestore.setLogLevel('debug');
-  let dates: void | Array<CalendarEntry> = await firebase.firestore().collection('users')
-    .doc(user.uid).collection('calendar')
-    .where('start', '>=', window.starts).where('start', '<=', window.ends)
-    .orderBy('start')
-    .get()
-    .then((querySnapshot) =>
-      (querySnapshot.docs.map(d => d.data() as CalendarEntry))
-    )
-  if (!dates) {
-    dates = new Array<CalendarEntry>();
-  }
-  return {
-    window: window,
-    items: dates
-  };
-}*/
+}
 
-export function watchDates(dispatch: (action: Action) => void, state: State): () => void {
+export function watchDates(
+  dispatch: (action: Action) => void,
+  state: State
+): () => void {
   const { user, dates } = state;
   if (user) {
     //firestore.setLogLevel('debug');
@@ -144,7 +137,7 @@ export function watchDates(dispatch: (action: Action) => void, state: State): ()
       .collection('calendar')
       .onSnapshot(documentSnapshot => {
         dispatch(
-          SetDatesAction(
+          ReplaceDatesAction(
             Object.assign(dates, documentSnapshot.docs.map(snap => snap.data() as CalendarEntry)
           )
         ));
@@ -156,12 +149,13 @@ export function watchDates(dispatch: (action: Action) => void, state: State): ()
 }
 
 export async function addDate(
-  user: User,
-  date: CalendarEntry,
-): Promise<CalendarEntry | undefined> {
-  firebase.firestore.setLogLevel('debug');
-  return await firebase.firestore().collection('users')
-    .doc(user.uid).collection('calendar')
-    .add(date)
-    .then(snap => snap.get().then(doc => doc.data() as CalendarEntry));
+  user: User | false,
+  date: CalendarEntry
+) {
+  if (user) {
+    firebase.firestore.setLogLevel('debug');
+    return await firebase.firestore().collection('users')
+      .doc(user.uid).collection('calendar')
+      .add(date)
+  }
 }

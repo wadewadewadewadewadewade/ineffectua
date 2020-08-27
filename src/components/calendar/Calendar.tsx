@@ -2,25 +2,21 @@ import React from 'react';
 import { CalendarList, DateObject } from 'react-native-calendars';
 import { StyleSheet, View } from 'react-native';
 import { connect } from 'react-redux';
-import { User } from 'firebase';
 import { State, CalendarWindow } from '../../Types';
 import { Action, CalendarState } from '../../reducers/CalendarReducer';
 import { formatDatesForMarking } from '../../middleware/CalendarMiddleware';
 import { themeIsDark, ThemeState } from '../../reducers/ThemeReducer';
-import { AuthState } from '../../reducers/AuthReducer';
 import { CalendarStackParamList } from './CalendarNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 const Calendar = (props: {
   dates: CalendarState['dates'],
-  user: AuthState['user'],
   theme: ThemeState['theme'],
   navigation: StackNavigationProp<CalendarStackParamList, 'Calendar'>
 }) => {
   const {
     dates,
     navigation,
-    user,
     theme
   } = props;
   const calendarTheme = {
@@ -36,7 +32,7 @@ const Calendar = (props: {
       starts: new Date(year, month, 1),
       ends: new Date(year, month, lastDay)
     };
-console.log(year + '-' + (month < 10 ? '0' + month : month) + '-01');
+console.log('dates', dates);
   return (
     <View>
       <CalendarList
@@ -54,7 +50,7 @@ console.log(year + '-' + (month < 10 ? '0' + month : month) + '-01');
         // Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
         monthFormat={'yyyy MM'}
         // Handler which gets executed when visible month changes in calendar. Default = undefined
-        onMonthChange={(month: DateObject) => {console.log('month changed', month)}}
+        onMonthChange={(mo: DateObject) => {console.log('month changed', mo)}}
         // Hide month navigation arrows. Default = false
         //hideArrows={true}
         // Replace default arrows with custom ones (direction can be 'left' or 'right')
