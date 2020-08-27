@@ -4,21 +4,20 @@ import { StyleSheet, View } from 'react-native';
 import { connect } from 'react-redux';
 import { User } from 'firebase';
 import { State, CalendarWindow } from '../../Types';
-import { Action, getDates, CalendarState, formatDatesForMarking } from '../../reducers/CalendarReducer';
+import { Action, CalendarState } from '../../reducers/CalendarReducer';
+import { formatDatesForMarking } from '../../middleware/CalendarMiddleware';
 import { themeIsDark, ThemeState } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
 import { CalendarStackParamList } from './CalendarNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 const Calendar = (props: {
-  getDates: (user: User, callback: () => void, window?: CalendarWindow) => Promise<void>,
   dates: CalendarState['dates'],
   user: AuthState['user'],
   theme: ThemeState['theme'],
   navigation: StackNavigationProp<CalendarStackParamList, 'Calendar'>
 }) => {
   const {
-    getDates,
     dates,
     navigation,
     user,
@@ -29,21 +28,25 @@ const Calendar = (props: {
     arrowColor: themeIsDark(theme) ? '#666' : '#ccc',
     calendarBackground: themeIsDark(theme) ? '#000' : '#fff'
   }
-  const [loaded, setLoaded] = React.useState(false);
-  if (!loaded && user) {
-    getDates(user, () => setLoaded(true));
-  }
-
+  const current = new Date(),
+    month = current.getMonth() + 1,
+    year = current.getFullYear(),
+    lastDay = new Date(year, month + 1, 0).getDay(),
+    window: CalendarWindow = {
+      starts: new Date(year, month, 1),
+      ends: new Date(year, month, lastDay)
+    };
+console.log(year + '-' + (month < 10 ? '0' + month : month) + '-01');
   return (
     <View>
       <CalendarList
         // Initially visible month. Default = Date()
-        //current={'2012-03-01'}
+        current={year + '-' + (month < 10 ? '0' + month : month) + '-01'}
         // Minimum date that can be selected, dates before minDate will be grayed out. Default = undefined
         //minDate={'2012-05-10'}
         // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
         //maxDate={'2012-05-30'}
-        markedDates={formatDatesForMarking(dates.items)}
+        markedDates={formatDatesForMarking(dates.items.filter((d) => d.window.starts <= window.starts && d.window.starts <= window.ends))}
         // Handler which gets executed on day press. Default = undefined
         onDayPress={(day: DateObject) => navigation.navigate('CalendarDay', { date: day, title: 'Calendar: ' + new Date(Date.parse(day.dateString)).toDateString() })}
         // Handler which gets executed on day long press. Default = undefined
@@ -120,7 +123,6 @@ const mapStateToProps = (state: State) => {
 const mapDispatchToProps = (dispatch: (value: Action) => void) => {
   // Action
   return {
-    getDates: (user: User, callback: () => void, window?: CalendarWindow) => getDates(dispatch, user, callback, window)
   };
 };// Exports
 export default connect(mapStateToProps, mapDispatchToProps)(Calendar);

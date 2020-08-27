@@ -8,7 +8,7 @@ import {
   createStackNavigator, StackNavigationProp,
 } from '@react-navigation/stack';
 import { connect } from 'react-redux';
-import { SignInAction, Action, SignOutAction, isUserAuthenticated, storeUserData } from '../../reducers/AuthReducer';
+import { SignInAction, Action, SignOutAction, isUserAuthenticated } from '../../reducers/AuthReducer';
 import { State, RootDrawerParamList } from '../../Types'
 import { Svg, G, Path } from 'react-native-svg';
 //import Logo from '../../../assets/logo.svg';
@@ -26,8 +26,7 @@ type AuthStackParams = {
   );
 };*/
 
-const SignInScreen = (props : { signIn: (user: User) => void }) => {
-  const { signIn } = props;
+const SignInScreen = () => {
   const { colors } = useTheme();
   const [email, onChangeEmail] = React.useState('Email');
   const [password, onChangePassword] = React.useState('Password');
@@ -280,14 +279,12 @@ const SignInScreen = (props : { signIn: (user: User) => void }) => {
           if (password === passwordConfirm) {
             firebase.auth()
               .createUserWithEmailAndPassword(email, password)
-              .then((response) => storeUserData(response, signIn))
               .catch((e) => onChangeError(e))
           } else {
             onChangeError('"Password" and "Confirm Password" values must match, so you know you\'re entering the password your\'e intending to enter')
           }
         } else {
           firebase.auth().signInWithEmailAndPassword(email, password)
-            .then((response) => storeUserData(response, signIn))
             .catch((e) => onChangeError(e))
         }
       }} style={styles.button}>
@@ -310,12 +307,11 @@ const SignInScreen = (props : { signIn: (user: User) => void }) => {
   );
 };
 
-const AuthenticationSuccessScreen = (props: { signOut: () => void }) => {
-  const { signOut } = props;
+const AuthenticationSuccessScreen = () => {
   return (
     <View style={styles.content}>
       <Title style={styles.text}>Signed in successfully 🎉</Title>
-      <Button onPress={() => firebase.auth().signOut().then(() => signOut)} style={styles.button}>
+      <Button onPress={() => firebase.auth().signOut()} style={styles.button}>
         Sign out
       </Button>
     </View>
@@ -329,14 +325,10 @@ const SimpleStackScreen = (props: any) => {
     navigation,
     authenticated,
     isSignout,
-    signIn,
-    signOut
   } : {
     navigation: StackNavigationProp<RootDrawerParamList, "Root"> | undefined,
     authenticated: Boolean,
     isSignout: Boolean,
-    signIn: (user: User) => void,
-    signOut: () => void
   } = props
   navigation && React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -358,13 +350,13 @@ const SimpleStackScreen = (props: any) => {
             animationTypeForReplace: isSignout ? 'pop' : 'push',
             headerShown: false
           }}
-          children={() => <SignInScreen signIn={signIn} />}
+          children={() => <SignInScreen />}
         />
       ) : (
         <SimpleStack.Screen
           name="Success"
           options={{ title: 'Authentication Success' }}
-          children={() => <AuthenticationSuccessScreen signOut={signOut} />}
+          children={() => <AuthenticationSuccessScreen />}
         />
       )}
     </SimpleStack.Navigator>

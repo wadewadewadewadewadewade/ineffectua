@@ -18,14 +18,12 @@ const Profile = memo(
     user: AuthState['user'],
     theme: ThemeState['theme'],
     toggleTheme: () => void,
-    signOut: () => void
   }) => {
     const {
       authenticated,
       user,
       theme,
       toggleTheme,
-      signOut
     } = props
     const thumbnail = null //user !== null && user.photoURL !== null ? require(user.photoURL) : null;
 
@@ -40,7 +38,7 @@ const Profile = memo(
             onValueChange={() => toggleTheme()}
           />
           <Divider />
-          <Button onPress={() => firebase.auth().signOut().then(signOut)} style={styles.button}>
+          <Button onPress={() => firebase.auth().signOut()} style={styles.button}>
             Sign Out
           </Button>
         </ScrollView>
@@ -85,8 +83,6 @@ const mapStateToProps = (state: State) => {
 const mapDispatchToProps = (dispatch: (value: Action) => void) => {
   // Action
   return {
-    // Login
-    signOut: () => dispatch(SignOutAction()),
     toggleTheme: () =>  dispatch(ToggleThemeAction())
   };
 };// Exports

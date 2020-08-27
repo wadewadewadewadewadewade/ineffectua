@@ -29,6 +29,8 @@ import {
   HeaderStyleInterpolators,
 } from '@react-navigation/stack';
 import { useReduxDevToolsExtension } from '@react-navigation/devtools';
+import { Action } from '../reducers';
+import { watchDates } from '../middleware/CalendarMiddleware';
 
 // use this to restart the app for things like changing RTL to LTR
 //import { restartApp } from './Restart';
@@ -41,7 +43,7 @@ import AuthFlow from './authentication/AuthFlow';
 import Profile from './authentication/Profile';
 
 import { NAVIGATION_PERSISTENCE_KEY, State, RootDrawerParamList, RootStackParamList } from '../Types';
-import { SignInAction, Action as AuthAction, isUserAuthenticated, AuthState } from '../reducers/AuthReducer';
+import { SignInAction, Action as AuthAction, isUserAuthenticated, AuthState, SignOutAction } from '../reducers/AuthReducer';
 import { paperTheme, CombinedLightTheme, barClassName, paperColors, ThemeState } from '../reducers/ThemeReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CalendarDayProps } from './calendar/CalendarDay';
@@ -99,17 +101,6 @@ const Navigation = (props: {
     }
     return routeName;
   }
-
-  React.useEffect(() => {
-    return firebase.auth().onAuthStateChanged(userState => {
-        if (userState === null) {
-          // user is not authenticated, so navigate
-          setUser(false);
-        } else {
-          setUser(userState);
-        }
-      });
-  }, []);
 
   let previousRouteName = 'Feed';
 
@@ -271,18 +262,25 @@ const Navigation = (props: {
 }
 
 // Map State To Props (Redux Store Passes State To Component)
-const mapStateToProps = (state: State) => {
+const mapStateToProps = (state: State): State => {
   // Redux Store --> Component
   return {
+    ...state,
     theme: state.theme ? state.theme : CombinedLightTheme,
-    user: state.user
   };
-};// Map Dispatch To Props (Dispatch Actions To Reducers. Reducers Then Modify The Data And Assign It To Your Props)
-const mapDispatchToProps = (dispatch: (value: AuthAction) => void) => {
-  // Action
+};
+const mapDispatchToProps = (dispatch: (value: Action) => void, state: State) => {
+  watchDates(dispatch, state)
+  firebase.auth().onAuthStateChanged(userState => {
+    if (userState === null) {
+      // user is not authenticated, so navigate
+      dispatch(SignOutAction())
+    } else {
+      dispatch(SignInAction(userState));
+    }
+  });
   return {
-    // Login
-    setUser: (user: AuthState['user']) => dispatch(SignInAction(user)),
+    // nothing to return in this case
   };
 };// Exports
 export default connect(mapStateToProps, mapDispatchToProps)(Navigation)

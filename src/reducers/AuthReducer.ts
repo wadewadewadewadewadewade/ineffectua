@@ -1,4 +1,3 @@
-import { firebase } from '../firebase/config';
 import { User } from 'firebase';
 
 export const RESTORE_TOKEN = 'RESTORE_TOKEN';
@@ -23,33 +22,6 @@ export const initialState: AuthState = {
 
 export const isUserAuthenticated = (user: User | false): boolean => {
   return user !== undefined && user !== false
-}
-
-export const storeUserData = async (response: firebase.auth.UserCredential, success: (user: User) => void) => {
-  if (response.user !== null) {
-    const {
-        uid,
-        email,
-        displayName,
-        photoURL
-    } = response.user;
-    const data = {
-      uid,
-      email,
-      displayName,
-      photoURL
-    }
-    const usersRef = firebase.firestore().collection('users')
-    return usersRef
-      .doc(uid)
-      .set(data)
-      .then(() => response.user && success(response.user))
-      .catch((error) => {
-          console.error(error)
-      });
-  } else {
-    return new Promise<void>((r,e) => { e() })
-  }
 }
 
 export default function AuthReducer(

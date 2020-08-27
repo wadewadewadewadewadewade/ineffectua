@@ -9,7 +9,8 @@ import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInput, Button, FAB, Modal, Portal } from 'react-native-paper';
 import { CalendarStackParamList } from './CalendarNavigator';
-import { Action, getDates, CalendarState, setDate } from '../../reducers/CalendarReducer';
+import { Action, CalendarState } from '../../reducers/CalendarReducer';
+import { addDate } from '../../middleware/CalendarMiddleware';
 import { ThemeState } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -17,12 +18,12 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 
 const NewSlot = (props : {
-  newDate: (date: CalendarEntry) => Promise<void>,
+    onComplete: () => void,
     date: DateObject,
     theme: ThemeState['theme'],
     user: AuthState['user']
   }): JSX.Element => {
-    const { date, user, newDate, theme } = props;
+    const { date, user, theme, onComplete } = props;
     if (!user) {
       return <View></View>
     }
@@ -44,7 +45,7 @@ const NewSlot = (props : {
         description,
         contacts
       }
-      return newDate(entry)
+      return addDate(user, entry).then(onComplete)
     }
     return (
       <View>
@@ -113,8 +114,6 @@ export type CalendarDayProps = {
 }
 
 const CalendarDay = (props: {
-    getDates: (user: User, callback: () => void, calendarWwindow?: CalendarWindow) => Promise<void>,
-    newDate: (user: User, callback: () => void, date: CalendarEntry) => Promise<void>,
     dates: CalendarState['dates'],
     user: AuthState['user'],
     theme: ThemeState['theme'],
@@ -132,8 +131,6 @@ const CalendarDay = (props: {
       return () => Dimensions.removeEventListener('change', onDimensionsChange);
     }, []);
     const {
-      getDates,
-      newDate,
       dates,
       user,
       theme,
@@ -144,12 +141,8 @@ const CalendarDay = (props: {
       starts: new Date(Date.parse(date.dateString)),
       ends: new Date(new Date(Date.parse(date.dateString)).getTime() + 1000 * 60 * 60 * 24)
     }
-    const [loaded, setLoaded] = React.useState(false);
     if (!user) {
       return <View></View>
-    }
-    if (!loaded && user) {
-      getDates(user, () => setLoaded(true), window);
     }
     const dayGrid: Array<JSX.Element> = [];
     for(let i=1;i<24;i++) {
@@ -167,7 +160,10 @@ const CalendarDay = (props: {
               {dayGrid}
             </View>
           </View>
-          {dates.items.map((d: CalendarEntry, i: number) => <TimeSlot date={d} window={window} index={i} total={dates.items.length}/>)}
+          {dates.items
+            .filter((d) => d.window.starts >= window.starts && d.window.ends <= window.ends)
+            .map((d: CalendarEntry, i: number) => <TimeSlot date={d} window={window} index={i} total={dates.items.length}/>)
+          }
         </ScrollView>
         {!visible && <FAB
           style={styles.fab}
@@ -178,7 +174,7 @@ const CalendarDay = (props: {
         <Portal>
           <Modal visible={visible} onDismiss={() => setVisible(false)}>
             <View style={{backgroundColor: theme.paper.colors.surface}}>
-              <NewSlot date={date} theme={theme} user={user} newDate={(d) => newDate(user, () => setVisible(false), d)} />
+              <NewSlot date={date} theme={theme} user={user} onComplete={() => setVisible(false)} />
               <Button onPress={() => setVisible(false)}><Text>cancel</Text></Button>
             </View>
           </Modal>
@@ -257,8 +253,6 @@ const mapStateToProps = (state: State) => {
 const mapDispatchToProps = (dispatch: (value: Action) => void) => {
   // Action
   return {
-    getDates: (user: User, callback: () => void, window?: CalendarWindow) => getDates(dispatch, user, callback, window),
-    newDate: (user: User, callback: () => void, date: CalendarEntry) => setDate(dispatch, user, callback, date)
   };
 };// Exports
 export default connect(mapStateToProps, mapDispatchToProps)(CalendarDay);
