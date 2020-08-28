@@ -1,11 +1,10 @@
-import { AnyAction } from 'redux';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
-import { isFetching } from '../reducers';
+import { isFetching, Action } from '../reducers';
 import { SignInAction, SignOutAction } from './../reducers/AuthReducer';
 import { State } from './../Types';
 
-export const authenticate = (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean): ThunkAction<Promise<void>, State, {}, AnyAction> => {
-  return async (dispatch: ThunkDispatch<State, {}, AnyAction>, getState: () => State, firebase: any): Promise<void> => {
+export const authenticate = (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean): ThunkAction<Promise<void>, State, {}, Action> => {
+  return async (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
     return new Promise<void>((resolve) => {
       dispatch(isFetching(true))
       if (isCreation) {
@@ -54,8 +53,8 @@ export const authenticate = (email: string, password: string, errorCallback?: (e
   }
 }
 
-export const signOut = (): ThunkAction<Promise<void>, State, {}, AnyAction> => {
-  return async (dispatch: ThunkDispatch<State, {}, AnyAction>, getState: () => State, firebase: any): Promise<void> => {
+export const signOut = (): ThunkAction<Promise<void>, State, {}, Action> => {
+  return async (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
     return new Promise<void>((resolve) => {
       firebase.auth().signOut()
         .then(() => {

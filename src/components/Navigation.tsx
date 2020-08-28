@@ -30,7 +30,7 @@ import {
 } from '@react-navigation/stack';
 import { useReduxDevToolsExtension } from '@react-navigation/devtools';
 import { Action } from '../reducers';
-import { watchDates } from '../middleware/CalendarMiddleware';
+import { getDates, watchDates } from '../middleware/CalendarMiddleware';
 
 // use this to restart the app for things like changing RTL to LTR
 //import { restartApp } from './Restart';
@@ -48,6 +48,7 @@ import { paperTheme, CombinedLightTheme, barClassName, paperColors, ThemeState }
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CalendarDayProps } from './calendar/CalendarDay';
 import { ThunkDispatch } from 'redux-thunk';
+import { store } from '../Store';
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -154,7 +155,7 @@ const Navigation = (props: {
 
   useReduxDevToolsExtension(navigationRef);
 
-  if (!isReady) {
+  if (!isReady || !store.getState()._persist.rehydrated) {
     return <ActivityIndicator />;
   }
 

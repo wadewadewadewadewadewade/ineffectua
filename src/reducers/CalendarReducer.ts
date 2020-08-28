@@ -1,4 +1,4 @@
-import { CalendarEntry, CalendarRecord } from '../Types';
+import { CalendarEntry } from '../Types';
 
 export const GET_DATES= 'GET_DATES';
 export const SET_DATES= 'SET_DATES';
@@ -6,70 +6,52 @@ export const REPLACE_DATES= 'SET_DATES';
 
 export type Action = {
     type: 'SET_DATES';
-    dates: CalendarRecord['items']
+    dates: Array<CalendarEntry>
   } | {
     type: 'GET_DATES';
-    dates: CalendarRecord['items']
+    dates: Array<CalendarEntry>
   } | {
     type: 'REPLACE_DATES';
-    dates: CalendarRecord['items']
+    dates: Array<CalendarEntry>
   };
 
-export const GetDatesAction = (dates: CalendarRecord['items']): Action => ({
+export const GetDatesAction = (dates: Array<CalendarEntry>): Action => ({
   type: GET_DATES,
   dates
 });
 
-export const SetDatesAction = (dates: CalendarRecord['items']): Action => ({
+export const SetDatesAction = (dates: Array<CalendarEntry>): Action => ({
   type: SET_DATES,
   dates
 });
 
-export const ReplaceDatesAction = (dates: CalendarRecord['items']): Action => ({
+export const ReplaceDatesAction = (dates: Array<CalendarEntry>): Action => ({
   type: SET_DATES,
   dates
 });
 
 export type CalendarState = {
-  dates: CalendarRecord
+  dates: Array<CalendarEntry>
 }
 
-export const initialState: CalendarState = {
-  dates: {
-    window: {
-      starts: new Date(0),
-      ends: new Date(0)
-    },
-    items: new Array<CalendarEntry>()
-  }
-}
+export const initialState = new Array<CalendarEntry>();
 
 export default function CalendarReducer(
-  prevState = initialState['dates'],
+  prevState = initialState,
   action: Action
-): CalendarState['dates'] {
+): Array<CalendarEntry> {
   if (!action.dates) {
     return prevState
   }
   switch (action.type) {
     case GET_DATES:
+    case SET_DATES:
       return {
         ...prevState,
         ...action.dates
       };
-    case SET_DATES:
-      return {
-        ...prevState,
-        items: [
-          ...prevState.items,
-          ...action.dates
-        ]
-      };
     case REPLACE_DATES:
-      return {
-        window: prevState.window,
-        items: action.dates
-      };
+      return action.dates;
     default:
       return prevState
   }

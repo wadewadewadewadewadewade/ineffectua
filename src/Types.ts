@@ -13,7 +13,7 @@ export type State = AuthState & ThemeState & CalendarState;
 export const initialState: State = {
   user: authInitialState['user'],
   theme: themeInitialState['theme'],
-  dates: calendarInitialState['dates']
+  dates: calendarInitialState
 }
 
 export type RootDrawerParamList = {
@@ -36,6 +36,7 @@ export type CalendarWindow = {
 }
 
 export interface CalendarEntry {
+  key?: string,
   window: CalendarWindow,
   title: string,
   description: string | undefined,

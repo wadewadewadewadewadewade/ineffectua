@@ -1,10 +1,9 @@
 import { State } from './../Types';
 import { GetDatesAction, ReplaceDatesAction } from './../reducers/CalendarReducer';
-import { isFetching } from './../reducers';
+import { Action, isFetching } from './../reducers';
 import { CalendarEntry } from '../Types';
 import { CustomMarking } from 'react-native-calendars';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
-import { AnyAction } from 'redux';
 
 /*===== formatting tool ====*/
 type AgendaItem = {
@@ -74,7 +73,7 @@ function dateDiff(a: Date, b: Date): string {
 
 export const formatDates = (dates: Array<CalendarEntry>): AgendaDate => {
   const response: AgendaDate = {};
-  dates.forEach(date => {
+  dates && dates.length > 0 && dates.forEach(date => {
     const { starts, ends } = date.window;
     const m = starts.getMonth();
     const d = starts.getDay();
@@ -105,8 +104,8 @@ export const formatDatesForMarking = (dates: Array<CalendarEntry>): AgendaDateMa
   return response;
 }
 
-export const getDates = (): ThunkAction<Promise<void>, State, {}, AnyAction> => {
-  return async (dispatch: ThunkDispatch<State, {}, AnyAction>, getState: () => State, firebase: any): Promise<void> => {
+export const getDates = (): ThunkAction<Promise<void>, State, {}, Action> => {
+  return async (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {
@@ -117,19 +116,23 @@ export const getDates = (): ThunkAction<Promise<void>, State, {}, AnyAction> => 
           .orderBy('start')
           .get()
           .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-              dispatch(
-                GetDatesAction(querySnapshot.docs.map(d => d.data() as CalendarEntry))
-              )
-              dispatch(isFetching(false))
-              resolve()
-            })
+            dispatch(
+              GetDatesAction(querySnapshot.docs.map(d => {
+                const val: CalendarEntry = d.data() as CalendarEntry;
+                val.key = d.id;
+                return val
+              }))
+            )
+            dispatch(isFetching(false))
+            resolve()
+          })
       }
     })
   }
 }
 
-export const watchDates = (): ThunkAction<Promise<void>, State, {}, AnyAction> => {
-  return async (dispatch: ThunkDispatch<State, {}, AnyAction>, getState: () => State, firebase: any): Promise<void> => {
+export const watchDates = (): ThunkAction<Promise<void>, State, {}, Action> => {
+  return async (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
     return new Promise<void>((resolve) => {
       const { user, dates } = getState();
       if (user) {
@@ -141,29 +144,47 @@ export const watchDates = (): ThunkAction<Promise<void>, State, {}, AnyAction> =
           .onSnapshot((documentSnapshot: firebase.firestore.QuerySnapshot) => {
             dispatch(
               ReplaceDatesAction(
-                Object.assign(dates, documentSnapshot.docs.map(snap => snap.data() as CalendarEntry)
+                documentSnapshot.docs.map(d => {
+                  const val: CalendarEntry = d.data() as CalendarEntry;
+                  val.key = d.id;
+                  return val
+                })
               )
-            ));
+            );
           });
       }
     })
   }
 }
 
-export const addDates = (date: CalendarEntry): ThunkAction<Promise<void>, State, {}, AnyAction> => {
-  return async (dispatch: ThunkDispatch<State, {}, AnyAction>, getState: () => State, firebase: any): Promise<void> => {
+export const addDates = (date: CalendarEntry, onComplete?: () => void): ThunkAction<Promise<void>, State, {}, Action> => {
+  return async (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {
         //firebase.firestore.setLogLevel('debug');
         dispatch(isFetching(true))
-        firebase.firestore().collection('users')
-          .doc(user.uid).collection('calendar')
-          .add(date)
-          .then(() => {
-            dispatch(GetDatesAction([date]))
-            dispatch(isFetching(true))
+        if (date.key) {
+          // its an update
+          firebase.firestore().collection('users')
+            .doc(user.uid).collection('calendar')
+            .update(date.key, date)
+            .then(() => {
+              dispatch(GetDatesAction([date]))
+              dispatch(isFetching(true))
+              onComplete && onComplete()
           })
+        } else {
+          // it's a new record
+          firebase.firestore().collection('users')
+            .doc(user.uid).collection('calendar')
+            .add(date)
+            .then(() => {
+              dispatch(GetDatesAction([date]))
+              dispatch(isFetching(true))
+              onComplete && onComplete()
+            })
+        }
       }
     })
   }

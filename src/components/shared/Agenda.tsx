@@ -1,10 +1,9 @@
 import React from 'react';
-import { DateObject, Agenda as AgendaList } from 'react-native-calendars';
+import { Agenda as AgendaList } from 'react-native-calendars';
 import { StyleSheet, View } from 'react-native';
 import { connect } from 'react-redux';
 import { State } from '../../Types';
 import { NavigationContainerRef } from '@react-navigation/native';
-import { CalendarWindow } from '../../Types';
 import { Action, CalendarState } from '../../reducers/CalendarReducer';
 import { formatDates } from '../../middleware/CalendarMiddleware';
 import { Theme, themeIsDark } from '../../reducers/ThemeReducer';
@@ -37,7 +36,7 @@ const Agenda = (props: any) => {
         // The list of items that have to be displayed in agenda. If you want to render item as empty date
         // the value of date key has to be an empty array []. If there exists no value for date key it is
         // considered that the date in question is not yet loaded
-        items={formatDates(dates.items)}
+        items={formatDates(dates)}
         // Callback that gets called when items for a certain month should be loaded (month became visible)
         loadItemsForMonth={(month) => {console.log('trigger items loading')}}
         // Callback that fires when the calendar is opened or closed

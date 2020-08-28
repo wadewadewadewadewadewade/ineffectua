@@ -42,7 +42,7 @@ console.log('dates', dates);
         //minDate={'2012-05-10'}
         // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
         //maxDate={'2012-05-30'}
-        markedDates={formatDatesForMarking(dates.items.filter((d) => d.window.starts <= window.starts && d.window.starts <= window.ends))}
+        markedDates={formatDatesForMarking(dates.filter((d) => d.window.starts <= window.starts && d.window.starts <= window.ends))}
         // Handler which gets executed on day press. Default = undefined
         onDayPress={(day: DateObject) => navigation.navigate('CalendarDay', { date: day, title: 'Calendar: ' + new Date(Date.parse(day.dateString)).toDateString() })}
         // Handler which gets executed on day long press. Default = undefined
@@ -109,7 +109,6 @@ const styles = StyleSheet.create({
 
 // Map State To Props (Redux Store Passes State To Component)
 const mapStateToProps = (state: State) => {
-  // Redux Store --> Component
   return {
     user: state.user,
     theme: state.theme,

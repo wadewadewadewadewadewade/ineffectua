@@ -8,21 +8,22 @@ import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInput, Button, FAB, Modal, Portal } from 'react-native-paper';
 import { CalendarStackParamList } from './CalendarNavigator';
-import { Action, CalendarState } from '../../reducers/CalendarReducer';
-import { addDate } from '../../middleware/CalendarMiddleware';
+import { CalendarState } from '../../reducers/CalendarReducer';
+import { addDates } from '../../middleware/CalendarMiddleware';
 import { ThemeState } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { ThunkDispatch } from 'redux-thunk';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 
 const NewSlot = (props : {
-    onComplete: () => void,
+    addDate: (entry: CalendarEntry) => void,
     date: DateObject,
     theme: ThemeState['theme'],
     user: AuthState['user']
   }): JSX.Element => {
-    const { date, user, theme, onComplete } = props;
+    const { date, user, theme, addDate } = props;
     if (!user) {
       return <View></View>
     }
@@ -36,6 +37,7 @@ const NewSlot = (props : {
     const [contacts, setContacts] = React.useState(new Array<string>());
     const save = () => {
       const entry: CalendarEntry = {
+        key: undefined,
         window: {
           starts,
           ends
@@ -44,7 +46,7 @@ const NewSlot = (props : {
         description,
         contacts
       }
-      return addDate(user, entry).then(onComplete)
+      return addDate(entry)
     }
     return (
       <View>
@@ -116,7 +118,8 @@ const CalendarDay = (props: {
     dates: CalendarState['dates'],
     user: AuthState['user'],
     theme: ThemeState['theme'],
-    route: RouteProp<CalendarStackParamList, 'CalendarDay'>
+    route: RouteProp<CalendarStackParamList, 'CalendarDay'>,
+    addDates: (entry: CalendarEntry, onComplete: () => void) => void
   }) => {
     const [visible, setVisible] = React.useState(false);
     const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
@@ -133,7 +136,8 @@ const CalendarDay = (props: {
       dates,
       user,
       theme,
-      route
+      route,
+      addDates
     } = props;
     const { date } = route.params;
     const window: CalendarWindow = {
@@ -159,9 +163,9 @@ const CalendarDay = (props: {
               {dayGrid}
             </View>
           </View>
-          {dates.items
+          {dates
             .filter((d) => d.window.starts >= window.starts && d.window.ends <= window.ends)
-            .map((d: CalendarEntry, i: number) => <TimeSlot date={d} window={window} index={i} total={dates.items.length}/>)
+            .map((d: CalendarEntry, i: number) => <TimeSlot date={d} window={window} index={i} total={dates.length}/>)
           }
         </ScrollView>
         {!visible && <FAB
@@ -173,7 +177,7 @@ const CalendarDay = (props: {
         <Portal>
           <Modal visible={visible} onDismiss={() => setVisible(false)}>
             <View style={{backgroundColor: theme.paper.colors.surface}}>
-              <NewSlot date={date} theme={theme} user={user} onComplete={() => setVisible(false)} />
+              <NewSlot date={date} theme={theme} user={user} addDate={(entry: CalendarEntry) => {addDates(entry, () => setVisible(false))}} />
               <Button onPress={() => setVisible(false)}><Text>cancel</Text></Button>
             </View>
           </Modal>
@@ -240,7 +244,13 @@ const styles = StyleSheet.create({
   },
 });
 
-// Map State To Props (Redux Store Passes State To Component)
+interface OwnProps {
+}
+
+interface DispatchProps {
+  addDates: (entry: CalendarEntry, onComplete: () => void) => void
+}
+
 const mapStateToProps = (state: State) => {
   return {
     authenticated: state.user !== false,
@@ -249,9 +259,11 @@ const mapStateToProps = (state: State) => {
     dates: state.dates
   };
 };
-const mapDispatchToProps = (dispatch: (value: Action) => void) => {
-  // Action
+const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
   return {
+    addDates: (entry: CalendarEntry, onComplete: () => void) => {
+      dispatch(addDates(entry, onComplete))
+    }
   };
 };// Exports
 export default connect(mapStateToProps, mapDispatchToProps)(CalendarDay);
