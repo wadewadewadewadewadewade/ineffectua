@@ -276,6 +276,7 @@ const mapStateToProps = (state: State): State => {
   };
 };
 const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
+  dispatch(getDates())
   dispatch(watchDates())
   firebase.auth().onAuthStateChanged(userState => {
     if (userState === null) {

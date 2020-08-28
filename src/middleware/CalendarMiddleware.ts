@@ -1,5 +1,5 @@
 import { State } from './../Types';
-import { GetDatesAction, ReplaceDatesAction } from './../reducers/CalendarReducer';
+import { GetDatesAction, ReplaceDatesAction, CalendarState } from './../reducers/CalendarReducer';
 import { Action, isFetching } from './../reducers';
 import { CalendarEntry } from '../Types';
 import { CustomMarking } from 'react-native-calendars';
@@ -71,37 +71,72 @@ function dateDiff(a: Date, b: Date): string {
   return response.toString()
 }
 
-export const formatDates = (dates: Array<CalendarEntry>): AgendaDate => {
+export const datesToArray = (dates: CalendarState['dates'], oldest?: Date, newest?: Date): Array<CalendarEntry> => {
+  const response = new Array<CalendarEntry>();
+  const keys = Object.keys(dates);
+  for(let i = 0;i<keys.length;i++) {
+    const date = dates[keys[i]];
+    const { starts } = date.window;
+    if ((oldest && newest && (starts >= oldest && starts < newest)) || !(oldest && newest))  {
+      response.push(date)
+    }
+  }
+  return response
+}
+
+export const formatDates = (dates: CalendarState['dates']): AgendaDate => {
   const response: AgendaDate = {};
-  dates && dates.length > 0 && dates.forEach(date => {
+  const keys: Array<string> = Object.keys(dates);
+  for(let i = 0;i<keys.length;i++) {
+    const date = dates[keys[i]];
     const { starts, ends } = date.window;
-    const m = starts.getMonth();
-    const d = starts.getDay();
+    const duration = dateDiff(ends, starts);
+    const m = starts.getMonth() + 1;
+    const d = starts.getDate();
     const isoDate = starts.getFullYear() + '-' + (m < 10 ? '0' + m.toString() : m.toString()) + '-' + (d < 10 ? '0' + d.toString() :d.toString());
-    const duration = dateDiff(ends, starts)
     if (!response[isoDate]) {
       response[isoDate] = new Array<AgendaItem>()
     }
     response[isoDate].push({
       name: date.title + ' - ' + duration
     })
-  })
+  }
   return response;
 }
 
-export const formatDatesForMarking = (dates: Array<CalendarEntry>): AgendaDateMarking => {
+export const formatDatesForMarking = (dates: CalendarState['dates'], oldest?: Date, newest?: Date): AgendaDateMarking => {
   const response: AgendaDateMarking = {};
-  dates.forEach(date => {
+  const keys = Object.keys(dates);
+  for(let i = 0;i<keys.length;i++) {
+    const date = dates[keys[i]];
     const { starts } = date.window;
-    const m = starts.getMonth();
-    const d = starts.getDay();
-    const isoDate = starts.getFullYear() + '-' + (m < 10 ? '0' + m.toString() : m.toString()) + '-' + (d < 10 ? '0' + d.toString() :d.toString());
-    response[isoDate].customStyles = {
-      container: { backgroundColor: 'rgba(255,0,0,0.5)'},
-      text: { color: '#fff'}
+    if ((oldest && newest && (starts >= oldest && starts < newest)) || !(oldest && newest))  {
+      const m = starts.getMonth() + 1;
+      const d = starts.getDate();
+      const isoDate = starts.getFullYear() + '-' + (m < 10 ? '0' + m.toString() : m.toString()) + '-' + (d < 10 ? '0' + d.toString() :d.toString());
+      response[isoDate] = {
+        customStyles: {
+          container: { backgroundColor: 'rgba(255,0,0,0.5)'},
+          text: { color: '#fff'}
+        }
+      }
     }
-  })
+  }
   return response;
+}
+
+const convertDocumentDataToCalendarEntry = (data: firebase.firestore.DocumentData): CalendarEntry => {
+  const doc = data.data()
+  return {
+    key: data.id,
+    window: {
+      starts: new Date(doc.window.starts.seconds * 1000),
+      ends: new Date(doc.window.ends.seconds * 1000)
+    },
+    title: doc.title,
+    description: doc.description,
+    contacts: doc.contacts
+  }
 }
 
 export const getDates = (): ThunkAction<Promise<void>, State, {}, Action> => {
@@ -113,16 +148,16 @@ export const getDates = (): ThunkAction<Promise<void>, State, {}, Action> => {
         dispatch(isFetching(true))
         firebase.firestore().collection('users')
           .doc(user.uid).collection('calendar')
-          .orderBy('start')
+          .orderBy('window.starts')
           .get()
           .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-            dispatch(
-              GetDatesAction(querySnapshot.docs.map(d => {
-                const val: CalendarEntry = d.data() as CalendarEntry;
-                val.key = d.id;
-                return val
-              }))
-            )
+            const dates: CalendarState['dates'] = {};
+            const arr = querySnapshot.docs.map(d => {
+              const val = convertDocumentDataToCalendarEntry(d);
+              return val
+            })
+            arr.forEach(d => { if (d.key) dates[d.key] = d })
+            dispatch(GetDatesAction(dates))
             dispatch(isFetching(false))
             resolve()
           })
@@ -134,23 +169,22 @@ export const getDates = (): ThunkAction<Promise<void>, State, {}, Action> => {
 export const watchDates = (): ThunkAction<Promise<void>, State, {}, Action> => {
   return async (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
     return new Promise<void>((resolve) => {
-      const { user, dates } = getState();
+      const { user } = getState();
       if (user) {
         //firestore.setLogLevel('debug');
         firebase.firestore()
           .collection('users')
           .doc(user.uid)
           .collection('calendar')
+          .orderBy('window.starts')
           .onSnapshot((documentSnapshot: firebase.firestore.QuerySnapshot) => {
-            dispatch(
-              ReplaceDatesAction(
-                documentSnapshot.docs.map(d => {
-                  const val: CalendarEntry = d.data() as CalendarEntry;
-                  val.key = d.id;
-                  return val
-                })
-              )
-            );
+            const dates: CalendarState['dates'] = {};
+            const arr = documentSnapshot.docs.map(d => {
+              const val = convertDocumentDataToCalendarEntry(d);
+              return val
+            })
+            arr.forEach(d => { if (d.key) dates[d.key] = d })
+            dispatch(ReplaceDatesAction(dates));
           });
       }
     })
@@ -170,7 +204,8 @@ export const addDates = (date: CalendarEntry, onComplete?: () => void): ThunkAct
             .doc(user.uid).collection('calendar')
             .update(date.key, date)
             .then(() => {
-              dispatch(GetDatesAction([date]))
+              const dates: CalendarState['dates'] = {date};
+              dispatch(GetDatesAction(dates))
               dispatch(isFetching(true))
               onComplete && onComplete()
           })
@@ -179,8 +214,10 @@ export const addDates = (date: CalendarEntry, onComplete?: () => void): ThunkAct
           firebase.firestore().collection('users')
             .doc(user.uid).collection('calendar')
             .add(date)
-            .then(() => {
-              dispatch(GetDatesAction([date]))
+            .then((d: firebase.firestore.QuerySnapshot) => {
+              const dates: CalendarState['dates'] = {date}
+              dates.key = d.docs[0].data().id;
+              dispatch(GetDatesAction(dates))
               dispatch(isFetching(true))
               onComplete && onComplete()
             })

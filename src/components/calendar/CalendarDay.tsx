@@ -9,7 +9,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInput, Button, FAB, Modal, Portal } from 'react-native-paper';
 import { CalendarStackParamList } from './CalendarNavigator';
 import { CalendarState } from '../../reducers/CalendarReducer';
-import { addDates } from '../../middleware/CalendarMiddleware';
+import { addDates, datesToArray } from '../../middleware/CalendarMiddleware';
 import { ThemeState } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -147,6 +147,7 @@ const CalendarDay = (props: {
     if (!user) {
       return <View></View>
     }
+    const datesArray = datesToArray(dates, window.starts, window.ends);
     const dayGrid: Array<JSX.Element> = [];
     for(let i=1;i<24;i++) {
       dayGrid.push(
@@ -163,9 +164,8 @@ const CalendarDay = (props: {
               {dayGrid}
             </View>
           </View>
-          {dates
-            .filter((d) => d.window.starts >= window.starts && d.window.ends <= window.ends)
-            .map((d: CalendarEntry, i: number) => <TimeSlot date={d} window={window} index={i} total={dates.length}/>)
+          {datesArray
+            .map((d: CalendarEntry, i: number) => <TimeSlot date={d} window={window} index={i} total={datesArray.length}/>)
           }
         </ScrollView>
         {!visible && <FAB

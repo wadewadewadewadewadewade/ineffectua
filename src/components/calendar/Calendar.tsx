@@ -3,7 +3,7 @@ import { CalendarList, DateObject } from 'react-native-calendars';
 import { StyleSheet, View } from 'react-native';
 import { connect } from 'react-redux';
 import { State, CalendarWindow } from '../../Types';
-import { Action, CalendarState } from '../../reducers/CalendarReducer';
+import { CalendarState } from '../../reducers/CalendarReducer';
 import { formatDatesForMarking } from '../../middleware/CalendarMiddleware';
 import { themeIsDark, ThemeState } from '../../reducers/ThemeReducer';
 import { CalendarStackParamList } from './CalendarNavigator';
@@ -26,13 +26,12 @@ const Calendar = (props: {
   }
   const current = new Date(),
     month = current.getMonth() + 1,
-    year = current.getFullYear(),
-    lastDay = new Date(year, month + 1, 0).getDay(),
-    window: CalendarWindow = {
-      starts: new Date(year, month, 1),
-      ends: new Date(year, month, lastDay)
-    };
-console.log('dates', dates);
+    year = current.getFullYear()/*,
+    lastDay = new Date(year, month + 1, 0).getDay()*/;
+  /*const window: CalendarWindow = {
+    starts: new Date(year, month, 1),
+    ends: new Date(year, month, lastDay)
+  };*/
   return (
     <View>
       <CalendarList
@@ -42,7 +41,7 @@ console.log('dates', dates);
         //minDate={'2012-05-10'}
         // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
         //maxDate={'2012-05-30'}
-        markedDates={formatDatesForMarking(dates.filter((d) => d.window.starts <= window.starts && d.window.starts <= window.ends))}
+        markedDates={formatDatesForMarking(dates)}
         // Handler which gets executed on day press. Default = undefined
         onDayPress={(day: DateObject) => navigation.navigate('CalendarDay', { date: day, title: 'Calendar: ' + new Date(Date.parse(day.dateString)).toDateString() })}
         // Handler which gets executed on day long press. Default = undefined
@@ -107,7 +106,6 @@ const styles = StyleSheet.create({
   },
 });
 
-// Map State To Props (Redux Store Passes State To Component)
 const mapStateToProps = (state: State) => {
   return {
     user: state.user,
@@ -115,9 +113,4 @@ const mapStateToProps = (state: State) => {
     dates: state.dates
   };
 };
-const mapDispatchToProps = (dispatch: (value: Action) => void) => {
-  // Action
-  return {
-  };
-};// Exports
-export default connect(mapStateToProps, mapDispatchToProps)(Calendar);
+export default connect(mapStateToProps)(Calendar);

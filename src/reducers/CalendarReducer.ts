@@ -6,43 +6,42 @@ export const REPLACE_DATES= 'SET_DATES';
 
 export type Action = {
     type: 'SET_DATES';
-    dates: Array<CalendarEntry>
+    dates: CalendarState['dates']
   } | {
     type: 'GET_DATES';
-    dates: Array<CalendarEntry>
+    dates: CalendarState['dates']
   } | {
     type: 'REPLACE_DATES';
-    dates: Array<CalendarEntry>
+    dates: CalendarState['dates']
   };
 
-export const GetDatesAction = (dates: Array<CalendarEntry>): Action => ({
+export const GetDatesAction = (dates: CalendarState['dates']): Action => ({
   type: GET_DATES,
   dates
 });
 
-export const SetDatesAction = (dates: Array<CalendarEntry>): Action => ({
+export const SetDatesAction = (dates: CalendarState['dates']): Action => ({
   type: SET_DATES,
   dates
 });
 
-export const ReplaceDatesAction = (dates: Array<CalendarEntry>): Action => ({
+export const ReplaceDatesAction = (dates: CalendarState['dates']): Action => ({
   type: SET_DATES,
   dates
 });
 
 export type CalendarState = {
-  dates: Array<CalendarEntry>
+  dates: {
+    [id: string]: CalendarEntry
+  }
 }
 
-export const initialState = new Array<CalendarEntry>();
+export const initialState = {};
 
 export default function CalendarReducer(
   prevState = initialState,
   action: Action
-): Array<CalendarEntry> {
-  if (!action.dates) {
-    return prevState
-  }
+): CalendarState['dates'] {
   switch (action.type) {
     case GET_DATES:
     case SET_DATES:
