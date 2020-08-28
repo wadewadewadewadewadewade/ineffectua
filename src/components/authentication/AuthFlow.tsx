@@ -1,6 +1,4 @@
 import * as React from 'react';
-import { firebase } from '../../firebase/config';
-import { User } from 'firebase';
 import { View, TextInput, StyleSheet, Text, Keyboard } from 'react-native';
 import { Title, Button } from 'react-native-paper';
 import { useTheme } from '@react-navigation/native';
@@ -8,25 +6,21 @@ import {
   createStackNavigator, StackNavigationProp,
 } from '@react-navigation/stack';
 import { connect } from 'react-redux';
-import { SignInAction, Action, SignOutAction, isUserAuthenticated } from '../../reducers/AuthReducer';
+import { isUserAuthenticated } from '../../reducers/AuthReducer';
+import { authenticate, signOut } from '../../middleware/AuthMiddleware';
 import { State, RootDrawerParamList } from '../../Types'
 import { Svg, G, Path } from 'react-native-svg';
-//import Logo from '../../../assets/logo.svg';
+import { ThunkDispatch } from 'redux-thunk';
 
 type AuthStackParams = {
   SignIn: undefined;
   Success: undefined;
 };
 
-/*const SplashScreen = () => {
-  return (
-    <View style={styles.content}>
-      <ActivityIndicator />
-    </View>
-  );
-};*/
-
-const SignInScreen = () => {
+const SignInScreen = (props: {
+  authenticate: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => void
+}) => {
+  const { authenticate } = props;
   const { colors } = useTheme();
   const [email, onChangeEmail] = React.useState('Email');
   const [password, onChangePassword] = React.useState('Password');
@@ -277,15 +271,12 @@ const SignInScreen = () => {
         Keyboard.dismiss();
         if (register) {
           if (password === passwordConfirm) {
-            firebase.auth()
-              .createUserWithEmailAndPassword(email, password)
-              .catch((e) => onChangeError(e))
+            authenticate(email, password, (e) => onChangeError(e), true)
           } else {
             onChangeError('"Password" and "Confirm Password" values must match, so you know you\'re entering the password your\'e intending to enter')
           }
         } else {
-          firebase.auth().signInWithEmailAndPassword(email, password)
-            .catch((e) => onChangeError(e))
+          authenticate(email, password, (e) => onChangeError(e))
         }
       }} style={styles.button}>
         <Text>Sign {register ? 'Up' : 'In'}</Text>
@@ -307,11 +298,14 @@ const SignInScreen = () => {
   );
 };
 
-const AuthenticationSuccessScreen = () => {
+const AuthenticationSuccessScreen = (props: {
+  signOut: () => void
+}) => {
+  const { signOut } = props;
   return (
     <View style={styles.content}>
       <Title style={styles.text}>Signed in successfully 🎉</Title>
-      <Button onPress={() => firebase.auth().signOut()} style={styles.button}>
+      <Button onPress={() => signOut()} style={styles.button}>
         Sign out
       </Button>
     </View>
@@ -324,11 +318,15 @@ const SimpleStackScreen = (props: any) => {
   const {
     navigation,
     authenticated,
-    isSignout,
+    authenticate,
+    signOut,
+    isSignout
   } : {
     navigation: StackNavigationProp<RootDrawerParamList, "Root"> | undefined,
-    authenticated: Boolean,
-    isSignout: Boolean,
+    authenticated: boolean,
+    authenticate: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => void,
+    signOut: () => void,
+    isSignout: boolean
   } = props
   navigation && React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -350,13 +348,13 @@ const SimpleStackScreen = (props: any) => {
             animationTypeForReplace: isSignout ? 'pop' : 'push',
             headerShown: false
           }}
-          children={() => <SignInScreen />}
+          children={() => <SignInScreen authenticate={authenticate} />}
         />
       ) : (
         <SimpleStack.Screen
           name="Success"
           options={{ title: 'Authentication Success' }}
-          children={() => <AuthenticationSuccessScreen />}
+          children={() => <AuthenticationSuccessScreen signOut={signOut} />}
         />
       )}
     </SimpleStack.Navigator>
@@ -400,20 +398,28 @@ const styles = StyleSheet.create({
   }
 });
 
-// Map State To Props (Redux Store Passes State To Component)
-const mapStateToProps = (state: State) => {
-  // Redux Store --> Component
+interface OwnProps {
+}
+
+interface DispatchProps {
+  authenticate: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => void,
+  signOut: () => void,
+}
+
+const mapStateToProps = (state: State, ownProps: OwnProps): {authenticated: boolean, isSignout: boolean} => {
   return {
     authenticated: isUserAuthenticated(state.user),
-    isSignout: true // TODO: make this tependant on the URL
+    isSignout: false
   };
-};// Map Dispatch To Props (Dispatch Actions To Reducers. Reducers Then Modify The Data And Assign It To Your Props)
-const mapDispatchToProps = (dispatch: (value: Action) => void) => {
-  // Action
+};
+const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
   return {
-    // Login
-    signIn: (user: User) => dispatch(SignInAction(user)),
-    signOut: () => dispatch(SignOutAction()),
+    authenticate: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => {
+      dispatch(authenticate(email, password, errorCallback, isCreation))
+    },
+    signOut: () => {
+      dispatch(signOut())
+    },
   };
-};// Exports
+};
 export default connect(mapStateToProps, mapDispatchToProps)(SimpleStackScreen)

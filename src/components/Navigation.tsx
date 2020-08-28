@@ -47,16 +47,16 @@ import { SignInAction, Action as AuthAction, isUserAuthenticated, AuthState, Sig
 import { paperTheme, CombinedLightTheme, barClassName, paperColors, ThemeState } from '../reducers/ThemeReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CalendarDayProps } from './calendar/CalendarDay';
+import { ThunkDispatch } from 'redux-thunk';
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
 
 const Navigation = (props: {
     theme: ThemeState['theme'],
-    user: AuthState['user'],
-    setUser: (user: AuthState['user']) => void
+    user: AuthState['user']
   }) => {
-  const { theme, user, setUser } = props;
+  const { theme, user } = props;
   const [isReady, setIsReady] = React.useState(Platform.OS === 'web');
   const [initialState, setInitialState] = React.useState<
     InitialState | undefined
@@ -261,16 +261,21 @@ const Navigation = (props: {
   )
 }
 
-// Map State To Props (Redux Store Passes State To Component)
+interface OwnProps {
+}
+
+interface DispatchProps {
+
+}
+
 const mapStateToProps = (state: State): State => {
-  // Redux Store --> Component
   return {
     ...state,
     theme: state.theme ? state.theme : CombinedLightTheme,
   };
 };
-const mapDispatchToProps = (dispatch: (value: Action) => void, state: State) => {
-  watchDates(dispatch, state)
+const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
+  dispatch(watchDates())
   firebase.auth().onAuthStateChanged(userState => {
     if (userState === null) {
       // user is not authenticated, so navigate
@@ -282,5 +287,5 @@ const mapDispatchToProps = (dispatch: (value: Action) => void, state: State) => 
   return {
     // nothing to return in this case
   };
-};// Exports
+};
 export default connect(mapStateToProps, mapDispatchToProps)(Navigation)

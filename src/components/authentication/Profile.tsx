@@ -6,11 +6,12 @@ import SettingsItem from '../shared/SettingsItem';
 
 import { connect } from 'react-redux';
 import { Action } from '../../reducers';
-import { SignOutAction, isUserAuthenticated, AuthState } from '../../reducers/AuthReducer';
+import { isUserAuthenticated, AuthState } from '../../reducers/AuthReducer';
 import { State, RootDrawerParamList } from '../../Types';
 import { ToggleThemeAction, ThemeState } from '../../reducers/ThemeReducer';
-import { StackNavigationProp } from '@react-navigation/stack';
 import { themeIsDark } from '../../reducers/ThemeReducer';
+import { signOut } from '../../middleware/AuthMiddleware';
+import { ThunkDispatch } from 'redux-thunk';
 
 const Profile = memo(
   (props: {
@@ -18,12 +19,14 @@ const Profile = memo(
     user: AuthState['user'],
     theme: ThemeState['theme'],
     toggleTheme: () => void,
+    signOut: () => void,
   }) => {
     const {
       authenticated,
       user,
       theme,
       toggleTheme,
+      signOut
     } = props
     const thumbnail = null //user !== null && user.photoURL !== null ? require(user.photoURL) : null;
 
@@ -38,7 +41,7 @@ const Profile = memo(
             onValueChange={() => toggleTheme()}
           />
           <Divider />
-          <Button onPress={() => firebase.auth().signOut()} style={styles.button}>
+          <Button onPress={() => signOut()} style={styles.button}>
             Sign Out
           </Button>
         </ScrollView>
@@ -71,19 +74,28 @@ const styles = StyleSheet.create({
   }
 });
 
-// Map State To Props (Redux Store Passes State To Component)
+interface OwnProps {
+}
+
+interface DispatchProps {
+  toggleTheme: () => void,
+  signOut: () => void,
+}
+
 const mapStateToProps = (state: State) => {
-  // Redux Store --> Component
   return {
     authenticated: isUserAuthenticated(state.user),
     user: state.user,
     theme: state.theme
   };
-};// Map Dispatch To Props (Dispatch Actions To Reducers. Reducers Then Modify The Data And Assign It To Your Props)
-const mapDispatchToProps = (dispatch: (value: Action) => void) => {
+};
+const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
   // Action
   return {
-    toggleTheme: () =>  dispatch(ToggleThemeAction())
+    toggleTheme: () => dispatch(ToggleThemeAction()),
+    signOut: () => {
+      dispatch(signOut())
+    },
   };
 };// Exports
 export default connect(mapStateToProps, mapDispatchToProps)(Profile)

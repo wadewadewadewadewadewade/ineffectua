@@ -48,6 +48,9 @@ export default function CalendarReducer(
   prevState = initialState['dates'],
   action: Action
 ): CalendarState['dates'] {
+  if (!action.dates) {
+    return prevState
+  }
   switch (action.type) {
     case GET_DATES:
       return {

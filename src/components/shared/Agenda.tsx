@@ -19,7 +19,7 @@ const Agenda = (props: any) => {
   } : {
     dates: CalendarState['dates'],
     navigation: NavigationContainerRef,
-    authenticated: Boolean,
+    authenticated: boolean,
     user:  AuthState['user'],
     theme: Theme
   } = props;

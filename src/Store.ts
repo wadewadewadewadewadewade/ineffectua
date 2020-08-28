@@ -1,5 +1,3 @@
-import thunk from 'redux-thunk';
-// Imports: Dependencies
 import AsyncStorage from '@react-native-community/async-storage';
 import { createStore } from 'redux';
 import { persistStore, persistReducer } from 'redux-persist'; // Imports: Redux
