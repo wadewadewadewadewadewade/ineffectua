@@ -2,7 +2,7 @@ import { State } from './../Types';
 import { GetDatesAction, ReplaceDatesAction, CalendarState } from './../reducers/CalendarReducer';
 import { Action, isFetching } from './../reducers';
 import { CalendarEntry } from '../Types';
-import { CustomMarking } from 'react-native-calendars';
+import { CalendarDot, MultiDotMarking } from 'react-native-calendars';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 
 /*===== formatting tool ====*/
@@ -16,7 +16,7 @@ type AgendaDate = {
 }
 
 type AgendaDateMarking = {
-  [isoDate: string]: CustomMarking
+  [isoDate: string]: MultiDotMarking
 }
 
 type DateSpan = {
@@ -68,6 +68,7 @@ function dateDiff(a: Date, b: Date): string {
   if (response.hours > 0) {
     span = span - (response.hours * (_MS_PER_DAY / 24))
   }
+  response.minutes = Math.floor(span / (_MS_PER_DAY / (24 * 60)))
   return response.toString()
 }
 
@@ -92,7 +93,7 @@ export const formatDates = (dates: CalendarState['dates']): AgendaDate => {
     const { starts, ends } = date.window;
     const duration = dateDiff(ends, starts);
     const m = starts.getMonth() + 1;
-    const d = starts.getDate();
+    const d = starts.getDate() + 1;
     const isoDate = starts.getFullYear() + '-' + (m < 10 ? '0' + m.toString() : m.toString()) + '-' + (d < 10 ? '0' + d.toString() :d.toString());
     if (!response[isoDate]) {
       response[isoDate] = new Array<AgendaItem>()
@@ -112,14 +113,13 @@ export const formatDatesForMarking = (dates: CalendarState['dates'], oldest?: Da
     const { starts } = date.window;
     if ((oldest && newest && (starts >= oldest && starts < newest)) || !(oldest && newest))  {
       const m = starts.getMonth() + 1;
-      const d = starts.getDate();
+      const d = starts.getDate() + 1;
       const isoDate = starts.getFullYear() + '-' + (m < 10 ? '0' + m.toString() : m.toString()) + '-' + (d < 10 ? '0' + d.toString() :d.toString());
-      response[isoDate] = {
-        customStyles: {
-          container: { backgroundColor: 'rgba(255,0,0,0.5)'},
-          text: { color: '#fff'}
-        }
+      const dot: CalendarDot = {
+        key: 'primary', 
+        color: '#f00'
       }
+      response[isoDate] ? response[isoDate].dots.push(dot) : response[isoDate] = { dots: [dot] }
     }
   }
   return response;
@@ -140,7 +140,7 @@ const convertDocumentDataToCalendarEntry = (data: firebase.firestore.DocumentDat
 }
 
 export const getDates = (): ThunkAction<Promise<void>, State, {}, Action> => {
-  return async (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
+  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {
@@ -167,7 +167,7 @@ export const getDates = (): ThunkAction<Promise<void>, State, {}, Action> => {
 }
 
 export const watchDates = (): ThunkAction<Promise<void>, State, {}, Action> => {
-  return async (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
+  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {
@@ -192,7 +192,7 @@ export const watchDates = (): ThunkAction<Promise<void>, State, {}, Action> => {
 }
 
 export const addDates = (date: CalendarEntry, onComplete?: () => void): ThunkAction<Promise<void>, State, {}, Action> => {
-  return async (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
+  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {

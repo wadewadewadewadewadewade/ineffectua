@@ -100,11 +100,11 @@ const TimeSlot = (props : {
   const { date, window } = props;
   const { starts, ends } = date.window;
   const dateIsContainedWithinDay = ends.getTime() < window.starts.getTime() + oneDayInMilliseconds;
-  const marginTop = (starts.getTime() - window.starts.getTime()) / oneDayInMilliseconds;
-  const marginBottom = dateIsContainedWithinDay ? (window.ends.getTime() - ends.getTime()) / oneDayInMilliseconds : 0;
+  const top = ((starts.getTime() - window.starts.getTime()) / oneDayInMilliseconds * 100) + '%';
+  const bottom = dateIsContainedWithinDay ? (100 - (window.ends.getTime() - ends.getTime()) / oneDayInMilliseconds * 100) + '%' : 0;
   return (
-    <View style={{marginTop, marginBottom, backgroundColor: '#600'}}>
-      <Text style={{color: '#FFF'}}>{date.title}</Text>
+    <View style={{top, bottom, backgroundColor: '#600', ...styles.timeslot}}>
+      <Text style={{color: '#FFF'}}>{date.title} - {starts.toTimeString()} - {dateIsContainedWithinDay ? ends.toTimeString() : ends.toDateString() + ' ' + ends.toLocaleTimeString()} </Text>
     </View>
   )
 }
@@ -142,7 +142,7 @@ const CalendarDay = (props: {
     const { date } = route.params;
     const window: CalendarWindow = {
       starts: new Date(Date.parse(date.dateString)),
-      ends: new Date(new Date(Date.parse(date.dateString)).getTime() + 1000 * 60 * 60 * 24)
+      ends: new Date((new Date(Date.parse(date.dateString)).getTime() - 1) + 1000 * 60 * 60 * 24)
     }
     if (!user) {
       return <View></View>
@@ -158,14 +158,14 @@ const CalendarDay = (props: {
     }
     return (
       <View>
-        <ScrollView contentOffset={{x: dimensions.height * 0.2, y: 0}}>
+        <ScrollView contentOffset={{x: dimensions.height * 0.2, y: 0}} style={{position: 'relative'}}>
           <View style={{ height: dimensions.height * 1.2, ...styles.entry }}>
             <View style={styles.daygrid}>
               {dayGrid}
             </View>
           </View>
           {datesArray
-            .map((d: CalendarEntry, i: number) => <TimeSlot date={d} window={window} index={i} total={datesArray.length}/>)
+            .map((d: CalendarEntry, i: number) => <TimeSlot key={d.key} date={d} window={window} index={i} total={datesArray.length}/>)
           }
         </ScrollView>
         {!visible && <FAB
@@ -242,6 +242,12 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
+  timeslot: {
+    position: 'absolute',
+    width: '80%',
+    left: '10%',
+    padding: 8
+  }
 });
 
 interface OwnProps {

@@ -28,7 +28,7 @@ I had to edit /android/build.gradle to set the minSdkversion to 28 (>= 20) to [s
 
 ## Next
 
-* fix firestore auth error - including get gradle to build under WSL
+* Add CalendarTypes for classification of diffferent stymptoms
 * fix header and document titling on navigation
 * style CalendarEntry
 * etc

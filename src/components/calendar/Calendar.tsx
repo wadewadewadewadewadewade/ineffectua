@@ -2,12 +2,14 @@ import React from 'react';
 import { CalendarList, DateObject } from 'react-native-calendars';
 import { StyleSheet, View } from 'react-native';
 import { connect } from 'react-redux';
-import { State, CalendarWindow } from '../../Types';
+import { State } from '../../Types';
 import { CalendarState } from '../../reducers/CalendarReducer';
 import { formatDatesForMarking } from '../../middleware/CalendarMiddleware';
 import { themeIsDark, ThemeState } from '../../reducers/ThemeReducer';
 import { CalendarStackParamList } from './CalendarNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
+
+let temp = 0;
 
 const Calendar = (props: {
   dates: CalendarState['dates'],
@@ -24,24 +26,23 @@ const Calendar = (props: {
     arrowColor: themeIsDark(theme) ? '#666' : '#ccc',
     calendarBackground: themeIsDark(theme) ? '#000' : '#fff'
   }
-  const current = new Date(),
+  /*const current = new Date(),
     month = current.getMonth() + 1,
-    year = current.getFullYear()/*,
-    lastDay = new Date(year, month + 1, 0).getDay()*/;
-  /*const window: CalendarWindow = {
-    starts: new Date(year, month, 1),
-    ends: new Date(year, month, lastDay)
-  };*/
+    year = current.getFullYear(),
+    lastDay = new Date(year, month + 1, 0).getDate()*/;
+
   return (
     <View>
       <CalendarList
         // Initially visible month. Default = Date()
-        current={year + '-' + (month < 10 ? '0' + month : month) + '-01'}
+        //current={year + '-' + (month < 10 ? '0' + month : month) + '-01'}
         // Minimum date that can be selected, dates before minDate will be grayed out. Default = undefined
         //minDate={'2012-05-10'}
         // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
         //maxDate={'2012-05-30'}
         markedDates={formatDatesForMarking(dates)}
+        markingType='multi-dot'
+        //displayLoadingIndicator={true}
         // Handler which gets executed on day press. Default = undefined
         onDayPress={(day: DateObject) => navigation.navigate('CalendarDay', { date: day, title: 'Calendar: ' + new Date(Date.parse(day.dateString)).toDateString() })}
         // Handler which gets executed on day long press. Default = undefined
@@ -55,7 +56,7 @@ const Calendar = (props: {
         // Replace default arrows with custom ones (direction can be 'left' or 'right')
         //renderArrow={(direction: string) => (<Arrow/>)}
         // Do not show days of other months in month page. Default = false
-        hideExtraDays={true}
+        //ideExtraDays={true}
         // If hideArrows=false and hideExtraDays=false do not switch month when tapping on greyed out
         // day from another month that is visible in calendar page. Default = false
         //disableMonthChange={true}

@@ -6,6 +6,7 @@ import {
   Dimensions,
   ScaledSize,
   Linking,
+  View
 } from 'react-native';
 import { firebase } from '../firebase/config';
 import {
@@ -55,9 +56,10 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 const Navigation = (props: {
     theme: ThemeState['theme'],
-    user: AuthState['user']
+    user: AuthState['user'],
+    getDates: () => Promise<void>
   }) => {
-  const { theme, user } = props;
+  const { theme, user, getDates } = props;
   const [isReady, setIsReady] = React.useState(Platform.OS === 'web');
   const [initialState, setInitialState] = React.useState<
     InitialState | undefined
@@ -117,6 +119,8 @@ const Navigation = (props: {
   React.useEffect(() => {
     const restoreState = async () => {
       try {
+        await getDates();
+
         const initialUrl = await Linking.getInitialURL();
 
         if (Platform.OS !== 'web' || initialUrl === null) {
@@ -156,7 +160,11 @@ const Navigation = (props: {
   useReduxDevToolsExtension(navigationRef);
 
   if (!isReady || !store.getState()._persist.rehydrated) {
-    return <ActivityIndicator />;
+    return (
+      <View style={{justifyContent:'center'}}>
+        <ActivityIndicator />
+      </View>
+    );
   }
 
   const isLargeScreen = dimensions.width >= 1024;
@@ -266,7 +274,7 @@ interface OwnProps {
 }
 
 interface DispatchProps {
-
+  getDates: () => Promise<void>
 }
 
 const mapStateToProps = (state: State): State => {
@@ -275,19 +283,18 @@ const mapStateToProps = (state: State): State => {
     theme: state.theme ? state.theme : CombinedLightTheme,
   };
 };
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
-  dispatch(getDates())
-  dispatch(watchDates())
+const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, Action>, ownProps: OwnProps): DispatchProps => {
   firebase.auth().onAuthStateChanged(userState => {
     if (userState === null) {
       // user is not authenticated, so navigate
       dispatch(SignOutAction())
     } else {
       dispatch(SignInAction(userState));
+      dispatch(watchDates())
     }
   });
   return {
-    // nothing to return in this case
+    getDates: () => dispatch(getDates())
   };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Navigation)
