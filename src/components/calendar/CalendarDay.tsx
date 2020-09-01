@@ -58,7 +58,7 @@ const NewSlot = (props : {
               <Text>{starts.toLocaleTimeString()}</Text>
             </View>
           </TouchableOpacity>
-          {showStart && <DateTimePicker mode="time" value={starts} onChange={(e: Event, d?: Date) => {
+          {showStart && <DateTimePicker mode="time" value={starts} maximumDate={ends} onChange={(e: Event, d?: Date) => {
             if (d) {
               setStart(d)
             }
@@ -69,7 +69,7 @@ const NewSlot = (props : {
               <Text>{ends.toLocaleTimeString()}</Text>
             </View>
           </TouchableOpacity>
-          {showEnd && <DateTimePicker mode="time" value={ends} onChange={(e: Event, d?: Date) => {
+          {showEnd && <DateTimePicker mode="time" value={ends} minimumDate={starts} onChange={(e: Event, d?: Date) => {
             if (d) {
               setEnd(d)
             }
@@ -104,7 +104,7 @@ const TimeSlot = (props : {
   const bottom = dateIsContainedWithinDay ? (100 - (window.ends.getTime() - ends.getTime()) / oneDayInMilliseconds * 100) + '%' : 0;
   return (
     <View style={{top, bottom, backgroundColor: '#600', ...styles.timeslot}}>
-      <Text style={{color: '#FFF'}}>{date.title} - {starts.toTimeString()} - {dateIsContainedWithinDay ? ends.toTimeString() : ends.toDateString() + ' ' + ends.toLocaleTimeString()} </Text>
+      <Text style={{color: '#FFF'}}>{date.key} {starts.getTime()} - {window.starts.getTime()} - {date.title} - {starts.toTimeString()} - {dateIsContainedWithinDay ? ends.toTimeString() : ends.toDateString() + ' ' + ends.toLocaleTimeString()} </Text>
     </View>
   )
 }
@@ -141,8 +141,8 @@ const CalendarDay = (props: {
     } = props;
     const { date } = route.params;
     const window: CalendarWindow = {
-      starts: new Date(Date.parse(date.dateString)),
-      ends: new Date((new Date(Date.parse(date.dateString)).getTime() - 1) + 1000 * 60 * 60 * 24)
+      starts: new Date(date.timestamp),
+      ends: new Date((new Date(date.timestamp).getTime() - 1) + 1000 * 60 * 60 * 24)
     }
     if (!user) {
       return <View></View>

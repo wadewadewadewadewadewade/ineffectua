@@ -93,7 +93,7 @@ export const formatDates = (dates: CalendarState['dates']): AgendaDate => {
     const { starts, ends } = date.window;
     const duration = dateDiff(ends, starts);
     const m = starts.getMonth() + 1;
-    const d = starts.getDate() + 1;
+    const d = starts.getDate();
     const isoDate = starts.getFullYear() + '-' + (m < 10 ? '0' + m.toString() : m.toString()) + '-' + (d < 10 ? '0' + d.toString() :d.toString());
     if (!response[isoDate]) {
       response[isoDate] = new Array<AgendaItem>()
@@ -113,7 +113,7 @@ export const formatDatesForMarking = (dates: CalendarState['dates'], oldest?: Da
     const { starts } = date.window;
     if ((oldest && newest && (starts >= oldest && starts < newest)) || !(oldest && newest))  {
       const m = starts.getMonth() + 1;
-      const d = starts.getDate() + 1;
+      const d = starts.getDate();
       const isoDate = starts.getFullYear() + '-' + (m < 10 ? '0' + m.toString() : m.toString()) + '-' + (d < 10 ? '0' + d.toString() :d.toString());
       const dot: CalendarDot = {
         key: 'primary', 
