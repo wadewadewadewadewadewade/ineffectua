@@ -158,7 +158,102 @@ I'd like to add a social feature to this app; the intent of which is twofold:
  
 ##### <span style="color:red">Status:</span>
 * Calendar dates and some user data are all that is currently stored in a Firebase back-end
- 
+
+### NoSQL database structure
+* {UserID}
+  * email
+  * photoUrl
+  * themeName
+  * tags
+    * {TagID}
+      * name
+  * types
+    * {TypeID}
+      * title
+      * color
+  * calendars
+    * {CalendarID}
+      * typeId
+      * title
+      * starts (timestamp)
+      * ends (timestamp)
+      * description
+      * contacts
+        * contactId 1
+        * contactId 2
+        * etc
+  * meds
+    * {MedID}
+      * typeId
+      * name
+      * prescribed (timestamp)
+      * lastFilled (timestamp)
+      * refillsRemaining (number)
+      * contacts
+        * contactId 1
+        * contactId 2
+        * etc
+  * contacts
+    * {ContactID}
+      * typeId
+      * name
+      * phoneNumber
+      * email
+      * description
+      * location
+  * painlog
+    * {ISO DateTime} <-- for versioning - [see description below](#description-of-painlog-versioning)
+      * {LocationID}
+        * typeId
+        * x (percentage)
+        * y (percentage)
+        * title
+        * active (boolean)
+        * description
+        * severity (number)
+        * medId
+
+#### Description of Painlog Versioning
+
+To support versioning, take this set of records below as an example:
+* painlog
+  * 2020-08-30T00:00:00Z
+    * aaa111
+      * typeId:1
+      * x:30.000 (30% into figure image from left edge)
+      * y:17.000 (17% down into firgure image from top edge)
+      * title:'toothache'
+      * active:true
+      * severity:6
+  * 2020-08-31T00:00:00Z
+    * bbb222
+      * typeId:1
+      * x:30.000 (30% into figure image from left edge)
+      * y:17.000 (17% down into firgure image from top edge)
+      * title:'headache'
+      * active:true
+      * severity:7
+    * ccc333
+      * typeId:2
+      * x: 10.000
+      * y: 90.000
+      * title:'twisted ankle'
+      * active:true
+      * severity:4
+  * 2020-09-01T00:00:00Z
+    * bbb222
+      * active:false
+    * ccc333
+      * severity: 2
+
+So using the data above:
+1. one location was entered on 8/30
+2. two locations were enterd on 8/31, with no changes to the location entered on 8/30
+3. one location was changed to inactive on 9/1, and another location had it's severity reduced on that same day
+4. so on 9/1 the only locations left active are aaa111 and ccc333, and ccc333 has a reduced severity
+
+I dom't know if that versioning system will work well while allowing the user to scrub through them - I'm hoping that most lookups have an O(1) time complexity - but we'll see I suppose
+
 ### Notes to Self
  
 * https://callstack.github.io/react-native-paper/theming.html
