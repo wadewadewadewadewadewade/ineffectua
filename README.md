@@ -175,8 +175,9 @@ I'd like to add a social feature to this app; the intent of which is twofold:
     * {CalendarID}
       * typeId
       * title
-      * starts (timestamp)
-      * ends (timestamp)
+      * window
+        * starts (timestamp)
+        * ends (timestamp)
       * description
       * contacts
         * contactId 1

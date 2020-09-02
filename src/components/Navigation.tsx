@@ -159,7 +159,7 @@ const Navigation = (props: {
 
   useReduxDevToolsExtension(navigationRef);
   
-  if (!isReady || !store.getState()._persist.rehydrated) {
+  if (!isReady) {
     return (
       <View style={{justifyContent:'center'}}>
         <ActivityIndicator />

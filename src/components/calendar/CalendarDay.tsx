@@ -4,7 +4,7 @@ import { StyleSheet, Text, ScaledSize, Dimensions, View } from 'react-native';
 import { connect } from 'react-redux';
 import { CalendarWindow, CalendarEntry, State } from '../../Types';
 import { RouteProp } from '@react-navigation/native';
-import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
+import { ScrollView, TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInput, Button, FAB, Modal, Portal } from 'react-native-paper';
 import { CalendarStackParamList } from './CalendarNavigator';
@@ -16,28 +16,31 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ThunkDispatch } from 'redux-thunk';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
+const screenHeightMultiplier = 1.2;
 
 const NewSlot = (props : {
     addDate: (entry: CalendarEntry) => void,
     date: DateObject,
     theme: ThemeState['theme'],
-    user: AuthState['user']
+    user: AuthState['user'],
+    passedEntry?: CalendarEntry
   }): JSX.Element => {
-    const { date, user, theme, addDate } = props;
+    const { date, user, theme, addDate, passedEntry } = props;
+    console.log(passedEntry)
     if (!user) {
       return <View></View>
     }
-    const [starts, setStart] = React.useState(new Date(Date.parse(date.dateString)));
-    const [ends, setEnd] = React.useState(new Date(Date.parse(date.dateString) + 3600));
-    const [title, setTitle] = React.useState('');
+    const [starts, setStart] = React.useState(passedEntry?.window.starts || new Date(Date.parse(date.dateString)));
+    const [ends, setEnd] = React.useState(passedEntry?.window.ends || new Date(Date.parse(date.dateString) + 3600));
+    const [title, setTitle] = React.useState(passedEntry?.title || '');
     const [showStart, setShowStart] = React.useState(false);
     const [showEnd, setShowEnd] = React.useState(false);
-    const [description, setDescription] = React.useState('');
+    const [description, setDescription] = React.useState(passedEntry?.description || '');
     const [descriptionHeight, setDescriptionHeight] = React.useState(45);
-    const [contacts, setContacts] = React.useState(new Array<string>());
+    const [contacts, setContacts] = React.useState(passedEntry?.contacts || new Array<string>());
     const save = () => {
       const entry: CalendarEntry = {
-        key: undefined,
+        key: passedEntry ? passedEntry.key : undefined,
         window: {
           starts,
           ends
@@ -95,16 +98,21 @@ const TimeSlot = (props : {
   date: CalendarEntry,
   window: CalendarWindow,
   index: number,
-  total: number
+  total: number,
+  screenHeight: number,
+  openModal: (entry: CalendarEntry) => void
 }): JSX.Element => {
-  const { date, window } = props;
+  const { date, window, screenHeight, openModal } = props;
   const { starts, ends } = date.window;
   const dateIsContainedWithinDay = ends.getTime() < window.starts.getTime() + oneDayInMilliseconds;
-  const top = ((starts.getTime() - window.starts.getTime()) / oneDayInMilliseconds * 100) + '%';
-  const bottom = dateIsContainedWithinDay ? (100 - (window.ends.getTime() - ends.getTime()) / oneDayInMilliseconds * 100) + '%' : 0;
+  const heightInPercentage = ((starts.getTime() - window.starts.getTime()) / oneDayInMilliseconds);
+  const marginTop = heightInPercentage * screenHeight;
+  const height = !dateIsContainedWithinDay ? (100 - heightInPercentage) * screenHeight : (ends.getTime() - starts.getTime()) / oneDayInMilliseconds * screenHeight;
   return (
-    <View style={{top, bottom, backgroundColor: '#600', ...styles.timeslot}}>
-      <Text style={{color: '#FFF'}}>{date.key} {starts.getTime()} - {window.starts.getTime()} - {date.title} - {starts.toTimeString()} - {dateIsContainedWithinDay ? ends.toTimeString() : ends.toDateString() + ' ' + ends.toLocaleTimeString()} </Text>
+    <View style={{marginTop, height, backgroundColor: '#600', ...styles.timeslot}}>
+      <TouchableWithoutFeedback onPress={() => openModal(date)} style={{width:'100%',height:'100%'}}>
+        <Text style={{color: '#FFF', ...styles.timeslotText}}>{date.title} - {starts.toTimeString()} - {dateIsContainedWithinDay ? ends.toTimeString() : ends.toDateString() + ' ' + ends.toLocaleTimeString()} </Text>
+      </TouchableWithoutFeedback>
     </View>
   )
 }
@@ -124,8 +132,8 @@ const CalendarDay = (props: {
     const [visible, setVisible] = React.useState(false);
     const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
     React.useEffect(() => {
-      const onDimensionsChange = ({ window, screen }: { window: ScaledSize, screen: ScaledSize }) => {
-        setDimensions(window);
+      const onDimensionsChange = (p2: { window: ScaledSize, screen: ScaledSize }) => {
+        setDimensions(p2.window);
       };
   
       Dimensions.addEventListener('change', onDimensionsChange);
@@ -140,9 +148,10 @@ const CalendarDay = (props: {
       addDates
     } = props;
     const { date } = route.params;
+    const thisDate = new Date(date.year, date.month - 1, date.day);
     const window: CalendarWindow = {
-      starts: new Date(date.timestamp),
-      ends: new Date((new Date(date.timestamp).getTime() - 1) + 1000 * 60 * 60 * 24)
+      starts: thisDate,
+      ends: new Date((thisDate.getTime() - 1) + 1000 * 60 * 60 * 24)
     }
     if (!user) {
       return <View></View>
@@ -156,29 +165,44 @@ const CalendarDay = (props: {
         </View>
       )
     }
+    let entryPassedToModal = undefined;
+    const openModal = (entry?: CalendarEntry) => {
+      if (entry) {
+        entryPassedToModal = entry
+      } else {
+        entryPassedToModal = undefined
+      }
+      setVisible(true)
+    }
+    const closeModal = () => {
+      entryPassedToModal = undefined;
+      setVisible(false);
+    }
     return (
       <View>
         <ScrollView contentOffset={{x: dimensions.height * 0.2, y: 0}} style={{position: 'relative'}}>
-          <View style={{ height: dimensions.height * 1.2, ...styles.entry }}>
+          <View style={{ height: dimensions.height * screenHeightMultiplier, ...styles.entry }}>
             <View style={styles.daygrid}>
               {dayGrid}
             </View>
           </View>
-          {datesArray
-            .map((d: CalendarEntry, i: number) => <TimeSlot key={d.key} date={d} window={window} index={i} total={datesArray.length}/>)
-          }
+          <View style={styles.timeslots}>
+            {datesArray
+              .map((d: CalendarEntry, i: number) => <TimeSlot key={d.key} date={d} window={window} index={i} total={datesArray.length} screenHeight={dimensions.height * screenHeightMultiplier} openModal={(slot: CalendarEntry) => openModal(slot)}/>)
+            }
+          </View>
         </ScrollView>
         {!visible && <FAB
           style={styles.fab}
           small
           icon={() => <MaterialCommunityIcons name="plus" size={24} />}
-          onPress={() => setVisible(true)}
+          onPress={() => openModal()}
         />}
         <Portal>
-          <Modal visible={visible} onDismiss={() => setVisible(false)}>
+          <Modal visible={visible} onDismiss={() => closeModal()}>
             <View style={{backgroundColor: theme.paper.colors.surface}}>
-              <NewSlot date={date} theme={theme} user={user} addDate={(entry: CalendarEntry) => {addDates(entry, () => setVisible(false))}} />
-              <Button onPress={() => setVisible(false)}><Text>cancel</Text></Button>
+              <NewSlot passedEntry={entryPassedToModal} date={date} theme={theme} user={user} addDate={(entry: CalendarEntry) => {addDates(entry, () => closeModal())}} />
+              <Button onPress={() => closeModal()}><Text>cancel</Text></Button>
             </View>
           </Modal>
         </Portal>
@@ -242,11 +266,20 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-  timeslot: {
+  timeslots: {
     position: 'absolute',
-    width: '80%',
-    left: '10%',
-    padding: 8
+    flexDirection: 'row',
+    paddingLeft: 40,
+  },
+  timeslot: {
+    flexDirection: 'column',
+    flexGrow: 1,
+    flexShrink: 1,
+    padding:8,
+    marginRight:8
+  },
+  timeslotText: {
+    overflow: 'hidden',
   }
 });
 
