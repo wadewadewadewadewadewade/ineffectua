@@ -3,39 +3,43 @@ import { isFetching, Action } from '../reducers';
 import { SignInAction, SignOutAction } from './../reducers/AuthReducer';
 import { State } from './../Types';
 
-export const authenticate = (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean): ThunkAction<Promise<void>, State, {}, Action> => {
-  return async (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
-    return new Promise<void>((resolve) => {
+export const authenticate = (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
+  return async (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
+    return new Promise<void>((resolve, reject) => {
       dispatch(isFetching(true))
       if (isCreation) {
         firebase.auth()
           .createUserWithEmailAndPassword(email, password)
           .catch(errorCallback)
-          .then((response: firebase.auth.UserCredential) => {
-            const { user } = response
-            if (user) {
-              const { 
-                uid,
-                displayName,
-                photoURL
-              } = user;
-              const data = {
-                uid,
-                email,
-                displayName,
-                photoURL
+          .then((response: void | firebase.auth.UserCredential) => {
+            if (response) {
+              const { user } = response
+              if (user) {
+                const { 
+                  uid,
+                  displayName,
+                  photoURL
+                } = user;
+                const data = {
+                  uid,
+                  email,
+                  displayName,
+                  photoURL
+                }
+                firebase.firestore().collection('users')
+                  .doc(uid)
+                  .set(data)
+                  .catch(errorCallback)
+                .then(() => {
+                  dispatch(SignInAction(user))
+                  dispatch(isFetching(false))
+                  resolve();
+                })
               }
-              firebase.firestore().collection('users')
-                .doc(uid)
-                .set(data)
-                .catch(errorCallback)
-              .then(() => {
-                dispatch(SignInAction(user))
-                resolve();
-              })
+            } else {
+              reject('No response from firebase')
             }
           })
-          .then(dispatch(isFetching(false)))
       } else {
         firebase.auth()
           .signInWithEmailAndPassword(email, password)
@@ -53,8 +57,8 @@ export const authenticate = (email: string, password: string, errorCallback?: (e
   }
 }
 
-export const signOut = (): ThunkAction<Promise<void>, State, {}, Action> => {
-  return async (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
+export const signOut = (): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
+  return async (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
     return new Promise<void>((resolve) => {
       firebase.auth().signOut()
         .then(() => {

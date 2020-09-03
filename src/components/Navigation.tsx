@@ -44,12 +44,11 @@ import AuthFlow from './authentication/AuthFlow';
 import Profile from './authentication/Profile';
 
 import { NAVIGATION_PERSISTENCE_KEY, State, RootDrawerParamList, RootStackParamList } from '../Types';
-import { SignInAction, Action as AuthAction, isUserAuthenticated, AuthState, SignOutAction } from '../reducers/AuthReducer';
+import { SignInAction, isUserAuthenticated, AuthState, SignOutAction } from '../reducers/AuthReducer';
 import { paperTheme, CombinedLightTheme, barClassName, paperColors, ThemeState } from '../reducers/ThemeReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CalendarDayProps } from './calendar/CalendarDay';
 import { ThunkDispatch } from 'redux-thunk';
-import { store } from '../Store';
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -70,7 +69,7 @@ const Navigation = (props: {
     route: Readonly<{
       key: string;
       name: string;
-      params?: object | undefined;
+      params?: object;
     }> | undefined,
     savedStateName?: string
   ) {
@@ -161,7 +160,7 @@ const Navigation = (props: {
 
   if (!isReady) {
     return (
-      <View style={{justifyContent:'center'}}>
+      <View style={{height: '100%', justifyContent:'center'}}>
         <ActivityIndicator />
       </View>
     );
@@ -229,7 +228,7 @@ const Navigation = (props: {
           formatter: getHeaderTitle
         }}>
       {isUserAuthenticated(user) ? (
-        <Drawer.Navigator drawerType={isLargeScreen ? 'permanent' : undefined} drawerContent={props => <Profile />}>
+        <Drawer.Navigator drawerType={isLargeScreen ? 'permanent' : undefined} drawerContent={() => <Profile />}>
           <Drawer.Screen name="Root">
             {({ navigation }: DrawerScreenProps<RootDrawerParamList>) => (
               <Stack.Navigator
@@ -283,7 +282,7 @@ const mapStateToProps = (state: State): State => {
     theme: state.theme ? state.theme : CombinedLightTheme,
   };
 };
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, Action>, ownProps: OwnProps): DispatchProps => {
+const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, Action>, ownProps: OwnProps): DispatchProps => {
   firebase.auth().onAuthStateChanged(userState => {
     if (userState === null) {
       // user is not authenticated, so navigate

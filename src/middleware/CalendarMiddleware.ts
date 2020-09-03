@@ -4,6 +4,7 @@ import { Action, isFetching } from './../reducers';
 import { CalendarEntry } from '../Types';
 import { CalendarDot, MultiDotMarking } from 'react-native-calendars';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
+import { DocumentData, DocumentReference } from '@firebase/firestore-types';
 
 /*===== formatting tool ====*/
 type AgendaItem = {
@@ -146,8 +147,8 @@ const convertDocumentDataToCalendarEntry = (data: firebase.firestore.DocumentDat
   }
 }
 
-export const getDates = (): ThunkAction<Promise<void>, State, {}, Action> => {
-  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
+export const getDates = (): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
+  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {
@@ -173,8 +174,8 @@ export const getDates = (): ThunkAction<Promise<void>, State, {}, Action> => {
   }
 }
 
-export const watchDates = (): ThunkAction<Promise<void>, State, {}, Action> => {
-  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
+export const watchDates = (): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
+  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {
@@ -198,8 +199,8 @@ export const watchDates = (): ThunkAction<Promise<void>, State, {}, Action> => {
   }
 }
 
-export const addDates = (date: CalendarEntry, onComplete?: () => void): ThunkAction<Promise<void>, State, {}, Action> => {
-  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: any): Promise<void> => {
+export const addDates = (date: CalendarEntry, onComplete?: () => void): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
+  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {
@@ -222,10 +223,11 @@ export const addDates = (date: CalendarEntry, onComplete?: () => void): ThunkAct
           firebase.firestore().collection('users')
             .doc(user.uid).collection('calendar')
             .add(date)
-            .then((d: firebase.firestore.QuerySnapshot) => {
+            .then((value: DocumentReference<DocumentData>) => {
+              /* rely on watchDates to pull new data
               const dates: CalendarState['dates'] = {date}
-              dates.key = d.docs[0].data().id;
-              dispatch(GetDatesAction(dates))
+              dates.key = value.id;
+              dispatch(GetDatesAction(dates))*/
               dispatch(isFetching(true))
               onComplete && onComplete()
             })

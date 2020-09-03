@@ -5,9 +5,8 @@ import { Subheading, Avatar, Button, Divider, Text } from 'react-native-paper';
 import SettingsItem from '../shared/SettingsItem';
 
 import { connect } from 'react-redux';
-import { Action } from '../../reducers';
 import { isUserAuthenticated, AuthState } from '../../reducers/AuthReducer';
-import { State, RootDrawerParamList } from '../../Types';
+import { State } from '../../Types';
 import { ToggleThemeAction, ThemeState } from '../../reducers/ThemeReducer';
 import { themeIsDark } from '../../reducers/ThemeReducer';
 import { signOut } from '../../middleware/AuthMiddleware';
@@ -15,18 +14,18 @@ import { ThunkDispatch } from 'redux-thunk';
 
 const Profile = memo(
   (props: {
-    authenticated: Boolean,
+    authenticated: boolean,
     user: AuthState['user'],
     theme: ThemeState['theme'],
     toggleTheme: () => void,
-    signOut: () => void,
+    logout: () => void,
   }) => {
     const {
       authenticated,
       user,
       theme,
       toggleTheme,
-      signOut
+      logout
     } = props
     const thumbnail = null //user !== null && user.photoURL !== null ? require(user.photoURL) : null;
 
@@ -41,7 +40,7 @@ const Profile = memo(
             onValueChange={() => toggleTheme()}
           />
           <Divider />
-          <Button onPress={() => signOut()} style={styles.button}>
+          <Button onPress={() => logout()} style={styles.button}>
             Sign Out
           </Button>
         </ScrollView>
@@ -79,7 +78,7 @@ interface OwnProps {
 
 interface DispatchProps {
   toggleTheme: () => void,
-  signOut: () => void,
+  logout: () => void,
 }
 
 const mapStateToProps = (state: State) => {
@@ -89,11 +88,11 @@ const mapStateToProps = (state: State) => {
     theme: state.theme
   };
 };
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
+const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
   // Action
   return {
     toggleTheme: () => dispatch(ToggleThemeAction()),
-    signOut: () => {
+    logout: () => {
       dispatch(signOut())
     },
   };

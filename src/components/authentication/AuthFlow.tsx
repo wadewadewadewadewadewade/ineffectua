@@ -18,9 +18,9 @@ type AuthStackParams = {
 };
 
 const SignInScreen = (props: {
-  authenticate: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => void
+  auth: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => void
 }) => {
-  const { authenticate } = props;
+  const { auth } = props;
   const { colors } = useTheme();
   const [email, onChangeEmail] = React.useState('Email');
   const [password, onChangePassword] = React.useState('Password');
@@ -271,12 +271,12 @@ const SignInScreen = (props: {
         Keyboard.dismiss();
         if (register) {
           if (password === passwordConfirm) {
-            authenticate(email, password, (e) => onChangeError(e), true)
+            auth(email, password, (e) => onChangeError(e), true)
           } else {
             onChangeError('"Password" and "Confirm Password" values must match, so you know you\'re entering the password your\'e intending to enter')
           }
         } else {
-          authenticate(email, password, (e) => onChangeError(e))
+          auth(email, password, (e) => onChangeError(e))
         }
       }} style={styles.button}>
         <Text>Sign {register ? 'Up' : 'In'}</Text>
@@ -299,13 +299,13 @@ const SignInScreen = (props: {
 };
 
 const AuthenticationSuccessScreen = (props: {
-  signOut: () => void
+  logout: () => void
 }) => {
-  const { signOut } = props;
+  const { logout } = props;
   return (
     <View style={styles.content}>
       <Title style={styles.text}>Signed in successfully 🎉</Title>
-      <Button onPress={() => signOut()} style={styles.button}>
+      <Button onPress={() => logout()} style={styles.button}>
         Sign out
       </Button>
     </View>
@@ -318,14 +318,14 @@ const SimpleStackScreen = (props: any) => {
   const {
     navigation,
     authenticated,
-    authenticate,
-    signOut,
+    auth,
+    logout,
     isSignout
   } : {
     navigation: StackNavigationProp<RootDrawerParamList, "Root"> | undefined,
     authenticated: boolean,
-    authenticate: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => void,
-    signOut: () => void,
+    auth: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => void,
+    logout: () => void,
     isSignout: boolean
   } = props
   navigation && React.useLayoutEffect(() => {
@@ -348,13 +348,13 @@ const SimpleStackScreen = (props: any) => {
             animationTypeForReplace: isSignout ? 'pop' : 'push',
             headerShown: false
           }}
-          children={() => <SignInScreen authenticate={authenticate} />}
+          children={() => <SignInScreen auth={auth} />}
         />
       ) : (
         <SimpleStack.Screen
           name="Success"
           options={{ title: 'Authentication Success' }}
-          children={() => <AuthenticationSuccessScreen signOut={signOut} />}
+          children={() => <AuthenticationSuccessScreen logout={logout} />}
         />
       )}
     </SimpleStack.Navigator>
@@ -403,7 +403,7 @@ interface OwnProps {
 
 interface DispatchProps {
   authenticate: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => void,
-  signOut: () => void,
+  logout: () => void,
 }
 
 const mapStateToProps = (state: State, ownProps: OwnProps): {authenticated: boolean, isSignout: boolean} => {
@@ -412,12 +412,12 @@ const mapStateToProps = (state: State, ownProps: OwnProps): {authenticated: bool
     isSignout: false
   };
 };
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
+const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
   return {
     authenticate: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => {
       dispatch(authenticate(email, password, errorCallback, isCreation))
     },
-    signOut: () => {
+    logout: () => {
       dispatch(signOut())
     },
   };
