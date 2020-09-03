@@ -39,8 +39,8 @@ export interface CalendarEntry {
   key?: string,
   window: CalendarWindow,
   title: string,
-  description: string | undefined,
-  contacts: Array<string> | undefined
+  description?: string,
+  contacts?: Array<string>
 }
 
 export type CalendarRecord = {

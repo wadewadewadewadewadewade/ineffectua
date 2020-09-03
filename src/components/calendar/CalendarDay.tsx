@@ -19,73 +19,58 @@ const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 const screenHeightMultiplier = 1.2;
 
 const NewSlot = (props : {
-    addDate: (entry: CalendarEntry) => void,
+    saveDate: () => void,
     date: DateObject,
     theme: ThemeState['theme'],
     user: AuthState['user'],
-    passedEntry?: CalendarEntry
+    passedEntry: CalendarEntry,
+    setEntry: (entry: CalendarEntry) => void
   }): JSX.Element => {
-    const { date, user, theme, addDate, passedEntry } = props;
-    console.log(passedEntry)
+    const { date, user, theme, saveDate, passedEntry, setEntry } = props;
+    const [showStart, setShowStart] = React.useState(false);
+    const [showEnd, setShowEnd] = React.useState(false);
     if (!user) {
       return <View></View>
     }
-    const [starts, setStart] = React.useState(passedEntry?.window.starts || new Date(Date.parse(date.dateString)));
-    const [ends, setEnd] = React.useState(passedEntry?.window.ends || new Date(Date.parse(date.dateString) + 3600));
-    const [title, setTitle] = React.useState(passedEntry?.title || '');
-    const [showStart, setShowStart] = React.useState(false);
-    const [showEnd, setShowEnd] = React.useState(false);
-    const [description, setDescription] = React.useState(passedEntry?.description || '');
     const [descriptionHeight, setDescriptionHeight] = React.useState(45);
-    const [contacts, setContacts] = React.useState(passedEntry?.contacts || new Array<string>());
     const save = () => {
-      const entry: CalendarEntry = {
-        key: passedEntry ? passedEntry.key : undefined,
-        window: {
-          starts,
-          ends
-        },
-        title,
-        description,
-        contacts
-      }
-      return addDate(entry)
+      return saveDate()
     }
     return (
       <View>
         <ScrollView>
-          <TextInput value={title} onChangeText={(text) => setTitle(text)} placeholder="Add title" />
+          <TextInput value={passedEntry.title} onChangeText={(text) => setEntry({...passedEntry, title: text})} placeholder="Add title" />
           <TouchableOpacity onPress={() => setShowStart(true)}>
             <View  style={styles.buttonRow}>
               <Text style={{color: theme.paper.colors.text}}>From</Text>
-              <Text>{starts.toLocaleTimeString()}</Text>
+              <Text>{passedEntry.window.starts.toLocaleTimeString()}</Text>
             </View>
           </TouchableOpacity>
-          {showStart && <DateTimePicker mode="time" value={starts} maximumDate={ends} onChange={(e: Event, d?: Date) => {
+          {showStart && <DateTimePicker mode="time" value={passedEntry.window.starts} maximumDate={passedEntry.window.ends} onChange={(e: Event, d?: Date) => {
             if (d) {
-              setStart(d)
+              setEntry({...passedEntry, window: { starts: d, ends: passedEntry.window.ends }})
             }
           }}/>}
           <TouchableOpacity onPress={() => setShowEnd(true)}>
             <View style={styles.buttonRow}>
               <Text style={{color: theme.paper.colors.text}}>Ends</Text>
-              <Text>{ends.toLocaleTimeString()}</Text>
+              <Text>{passedEntry.window.ends.toLocaleTimeString()}</Text>
             </View>
           </TouchableOpacity>
-          {showEnd && <DateTimePicker mode="time" value={ends} minimumDate={starts} onChange={(e: Event, d?: Date) => {
+          {showEnd && <DateTimePicker mode="time" value={passedEntry.window.ends} minimumDate={passedEntry.window.starts} onChange={(e: Event, d?: Date) => {
             if (d) {
-              setEnd(d)
+              setEntry({...passedEntry, window: { starts: passedEntry.window.starts, ends: d }})
             }
           }}/>}
           <TextInput
             style={styles.description}
             multiline={true}
-            value={description}
+            value={passedEntry.description}
             onContentSizeChange={(event) => {
               setDescriptionHeight(Math.floor(event.nativeEvent.contentSize.height / styles.description.lineHeight));
             }}
             numberOfLines={descriptionHeight}
-            onChangeText={(text) => setDescription(text)} placeholder="Optional Description" />
+            onChangeText={(text) => setEntry({...passedEntry, description: text})} placeholder="Optional Description" />
         </ScrollView>
         <TouchableOpacity onPress={save} style={{backgroundColor: theme.paper.colors.accent, ...styles.button}}>
           <Text style={styles.buttonContents}>Save</Text>
@@ -100,18 +85,19 @@ const TimeSlot = (props : {
   index: number,
   total: number,
   screenHeight: number,
+  borderRadius: number,
   openModal: (entry: CalendarEntry) => void
 }): JSX.Element => {
-  const { date, window, screenHeight, openModal } = props;
+  const { date, window, screenHeight, borderRadius, openModal } = props;
   const { starts, ends } = date.window;
   const dateIsContainedWithinDay = ends.getTime() < window.starts.getTime() + oneDayInMilliseconds;
   const heightInPercentage = ((starts.getTime() - window.starts.getTime()) / oneDayInMilliseconds);
   const marginTop = heightInPercentage * screenHeight;
   const height = !dateIsContainedWithinDay ? (100 - heightInPercentage) * screenHeight : (ends.getTime() - starts.getTime()) / oneDayInMilliseconds * screenHeight;
   return (
-    <View style={{marginTop, height, backgroundColor: '#600', ...styles.timeslot}}>
+    <View style={{marginTop, height, backgroundColor: '#600', borderRadius, ...styles.timeslot}}>
       <TouchableWithoutFeedback onPress={() => openModal(date)} style={{width:'100%',height:'100%'}}>
-        <Text style={{color: '#FFF', ...styles.timeslotText}}>{date.title} - {starts.toTimeString()} - {dateIsContainedWithinDay ? ends.toTimeString() : ends.toDateString() + ' ' + ends.toLocaleTimeString()} </Text>
+        <Text style={{color: '#FFF', ...styles.timeslotText}}>{date.title}</Text>
       </TouchableWithoutFeedback>
     </View>
   )
@@ -131,6 +117,14 @@ const CalendarDay = (props: {
   }) => {
     const [visible, setVisible] = React.useState(false);
     const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
+    const emptyCalendarEntry: CalendarEntry = {
+      title: '',
+      window: {
+        starts: new Date(),
+        ends: new Date()
+      }
+    }
+    const [newCalendarEntry, setNewCalendarEntry] = React.useState(emptyCalendarEntry);
     React.useEffect(() => {
       const onDimensionsChange = (p2: { window: ScaledSize, screen: ScaledSize }) => {
         setDimensions(p2.window);
@@ -165,17 +159,14 @@ const CalendarDay = (props: {
         </View>
       )
     }
-    let entryPassedToModal = undefined;
     const openModal = (entry?: CalendarEntry) => {
       if (entry) {
-        entryPassedToModal = entry
-      } else {
-        entryPassedToModal = undefined
+        setNewCalendarEntry(entry)
       }
       setVisible(true)
     }
     const closeModal = () => {
-      entryPassedToModal = undefined;
+      setNewCalendarEntry(emptyCalendarEntry);
       setVisible(false);
     }
     return (
@@ -188,7 +179,15 @@ const CalendarDay = (props: {
           </View>
           <View style={styles.timeslots}>
             {datesArray
-              .map((d: CalendarEntry, i: number) => <TimeSlot key={d.key} date={d} window={window} index={i} total={datesArray.length} screenHeight={dimensions.height * screenHeightMultiplier} openModal={(slot: CalendarEntry) => openModal(slot)}/>)
+              .map((d: CalendarEntry, i: number) => <TimeSlot
+                key={d.key}
+                date={d}
+                window={window}
+                index={i}
+                total={datesArray.length}
+                screenHeight={dimensions.height * screenHeightMultiplier}
+                borderRadius={theme.paper.roundness}
+                openModal={(slot: CalendarEntry) => openModal(slot)}/>)
             }
           </View>
         </ScrollView>
@@ -201,7 +200,13 @@ const CalendarDay = (props: {
         <Portal>
           <Modal visible={visible} onDismiss={() => closeModal()}>
             <View style={{backgroundColor: theme.paper.colors.surface}}>
-              <NewSlot passedEntry={entryPassedToModal} date={date} theme={theme} user={user} addDate={(entry: CalendarEntry) => {addDates(entry, () => closeModal())}} />
+              <NewSlot
+                passedEntry={newCalendarEntry}
+                setEntry={(entry: CalendarEntry) => setNewCalendarEntry(entry)}
+                saveDate={() => {addDates(newCalendarEntry, () => closeModal())}}
+                date={date}
+                theme={theme}
+                user={user} />
               <Button onPress={() => closeModal()}><Text>cancel</Text></Button>
             </View>
           </Modal>

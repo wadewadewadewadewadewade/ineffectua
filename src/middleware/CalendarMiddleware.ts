@@ -125,6 +125,13 @@ export const formatDatesForMarking = (dates: CalendarState['dates'], oldest?: Da
   return response;
 }
 
+const formatTimeString = (d: Date) => {
+  const hour = d.getHours() > 12 ? d.getHours() - 12 : d.getHours(),
+    minutes = d.getMinutes(),
+    meridian = d.getHours() > 12 ? 'pm' : 'am';
+  return `${hour}:${minutes}${meridian}`;
+}
+
 const convertDocumentDataToCalendarEntry = (data: firebase.firestore.DocumentData): CalendarEntry => {
   const doc = data.data()
   return {
@@ -200,9 +207,10 @@ export const addDates = (date: CalendarEntry, onComplete?: () => void): ThunkAct
         dispatch(isFetching(true))
         if (date.key) {
           // its an update
+          const { key, ...data } = date;
           firebase.firestore().collection('users')
             .doc(user.uid).collection('calendar')
-            .update(date.key, date)
+            .doc(key).update(data)
             .then(() => {
               const dates: CalendarState['dates'] = {date};
               dispatch(GetDatesAction(dates))

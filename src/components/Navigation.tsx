@@ -158,7 +158,7 @@ const Navigation = (props: {
   const navigationRef = React.useRef<NavigationContainerRef>(null);
 
   useReduxDevToolsExtension(navigationRef);
-  
+
   if (!isReady) {
     return (
       <View style={{justifyContent:'center'}}>
