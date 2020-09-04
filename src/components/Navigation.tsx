@@ -56,9 +56,9 @@ const Stack = createStackNavigator<RootStackParamList>();
 const Navigation = (props: {
     theme: ThemeState['theme'],
     user: AuthState['user'],
-    getDates: () => Promise<void>
+    getDatesForLoad: () => Promise<void>
   }) => {
-  const { theme, user, getDates } = props;
+  const { theme, user, getDatesForLoad } = props;
   const [isReady, setIsReady] = React.useState(Platform.OS === 'web');
   const [initialState, setInitialState] = React.useState<
     InitialState | undefined
@@ -118,7 +118,7 @@ const Navigation = (props: {
   React.useEffect(() => {
     const restoreState = async () => {
       try {
-        await getDates();
+        await getDatesForLoad();
 
         const initialUrl = await Linking.getInitialURL();
 
@@ -273,7 +273,7 @@ interface OwnProps {
 }
 
 interface DispatchProps {
-  getDates: () => Promise<void>
+  getDatesForLoad: () => Promise<void>
 }
 
 const mapStateToProps = (state: State): State => {
@@ -293,7 +293,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, Act
     }
   });
   return {
-    getDates: () => dispatch(getDates())
+    getDatesForLoad: () => dispatch(getDates())
   };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Navigation)

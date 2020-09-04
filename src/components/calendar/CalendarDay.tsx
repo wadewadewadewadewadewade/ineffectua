@@ -14,8 +14,7 @@ import { ThemeState } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ThunkDispatch } from 'redux-thunk';
-import TypesSelector from '../shared/TypesSelector';
-import { DataTypesState } from '../../reducers/DataTypesReducer';
+import TypesSelector from '../shared/DataTypes';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 const screenHeightMultiplier = 1.2;
@@ -148,7 +147,7 @@ const CalendarDay = (props: {
     user: AuthState['user'],
     theme: ThemeState['theme'],
     route: RouteProp<CalendarStackParamList, 'CalendarDay'>,
-    addDates: (entry: CalendarEntry, onComplete: () => void) => void
+    saveDates: (entry: CalendarEntry, onComplete: () => void) => void
   }) => {
     const [visible, setVisible] = React.useState(false);
     const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
@@ -164,7 +163,7 @@ const CalendarDay = (props: {
       user,
       theme,
       route,
-      addDates
+      saveDates
     } = props;
     const { date } = route.params;
     const thisDate = new Date(date.year, date.month - 1, date.day);
@@ -239,7 +238,7 @@ const CalendarDay = (props: {
               <NewSlot
                 currentDay={window}
                 entry={newCalendarEntry}
-                saveEntry={(entry: CalendarEntry) => {addDates(entry, () => closeModal())}}
+                saveEntry={(entry: CalendarEntry) => {saveDates(entry, () => closeModal())}}
                 theme={theme}
                 user={user} />
               <Button onPress={() => closeModal()}><Text>cancel</Text></Button>
@@ -327,7 +326,7 @@ interface OwnProps {
 }
 
 interface DispatchProps {
-  addDates: (entry: CalendarEntry, onComplete: () => void) => void
+  saveDates: (entry: CalendarEntry, onComplete: () => void) => void
 }
 
 const mapStateToProps = (state: State) => {
@@ -340,7 +339,7 @@ const mapStateToProps = (state: State) => {
 };
 const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
   return {
-    addDates: (entry: CalendarEntry, onComplete: () => void) => {
+    saveDates: (entry: CalendarEntry, onComplete: () => void) => {
       dispatch(addDates(entry, onComplete))
     }
   };

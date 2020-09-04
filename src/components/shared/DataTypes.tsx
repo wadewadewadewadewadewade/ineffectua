@@ -1,20 +1,19 @@
 import * as React from 'react';
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import {Picker} from '@react-native-community/picker';
 import { Text, Button, Modal, Portal, TextInput } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { addDataType } from '../../middleware/DataTypesMiddleware';
+import { addDataType, dataTypeIsValid, newTypeTitle, defaultTypeTitle, emptyDataType, datatypesToArray } from '../../middleware/DataTypesMiddleware';
 import { DataType, State } from '../../Types';
 import { ThemeState } from '../../reducers/ThemeReducer';
 import { DataTypesState } from '../../reducers/DataTypesReducer';
-import { AuthState } from '../../reducers/AuthReducer';
 import { ColorPicker } from 'react-native-color-picker';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 type Props = {
   value?: DataType;
   onValueChange: (datatype: DataType) => void;
-  user: AuthState['user'],
   theme: ThemeState['theme'],
   datatypes: DataTypesState['datatypes'],
   addDataTypes: (datatype: DataType, onComplete: (datatype: DataType) => void) => void
@@ -23,27 +22,16 @@ type Props = {
 const DataTypes = ({
   value,
   onValueChange,
-  user,
   theme,
   datatypes,
   addDataTypes
 }: Props) => {
-  const newTypeTitle = '+ Add New Type';
-  const emptyDataType = {title:'',color:'#000'};
   const [newDataType, setNewDataType] = React.useState(emptyDataType);
   const [visible, setVisible] = React.useState(false);
   const [selected, setSelected] = React.useState(value?.title || '');
-  const datatypesArray = React.useMemo(() => {
-    const arr = new Array<DataType>({title:'Default',color:'#600'});
-    const keys = Object.keys(datatypes);
-    for(let i=0;i<keys.length;i++) {
-      const dt = datatypes[keys[i]];
-      dt.key = keys[i]
-      arr.push(dt);
-    }
-    arr.push({title:newTypeTitle,color:''})
-    return arr;
-  }, [datatypes])
+  const newDataTypeIsValid = dataTypeIsValid(newDataType, datatypes)
+  const datatypesArray = datatypesToArray(datatypes);
+  //<Button onPress={() => setVisible(true)}><Text>testing</Text></Button>
   return (
     <View
       style={{
@@ -56,12 +44,13 @@ const DataTypes = ({
     >
       <Text style={{color: theme.paper.colors.text}}>Type</Text>
       <Picker
+        accessibilityLabel='Type of data'
         selectedValue={selected}
         onValueChange={(itemValue, itemIndex) => {
           const sel = datatypesArray.filter(dt => dt.title === itemValue.toString())[0];
           if (sel.title === newTypeTitle) {
             setVisible(true)
-          } else {
+          } else if (sel.title !== defaultTypeTitle) {
             setSelected(sel.title);
             onValueChange(sel);
           }
@@ -71,22 +60,32 @@ const DataTypes = ({
       </Picker>
       <Portal>
         <Modal visible={visible}>
-          <View style={{backgroundColor: theme.paper.colors.surface}}>
+          <View style={{backgroundColor: theme.paper.colors.surface, height:'90%'}}>
             <TextInput
               value={newDataType.title}
-              onChangeText={(text) => setNewDataType({...newDataType, title: text})}
-              placeholder="Add title" />
+              onChangeText={(text) => {
+                const datatype: DataType = {...newDataType, title: text}
+                setNewDataType(datatype)
+              }}
+              placeholder="Add title of data type" />
             <ColorPicker
-              onColorSelected={color => setNewDataType({...newDataType, color: color})}
+              hideSliders={true}
+              onColorSelected={color => {
+                const datatype: DataType = {...newDataType, color: color}
+                setNewDataType(datatype)
+              }}
               style={{flex: 1}}
             />
-            <Button onPress={() => addDataTypes(newDataType, (datatype) => {
+            <TouchableOpacity
+              disabled={!newDataTypeIsValid}
+              style={{backgroundColor: newDataTypeIsValid ? theme.paper.colors.accent : theme.paper.colors.disabled, ...styles.button}}
+              onPress={() => addDataTypes(newDataType, (datatype) => {
               setNewDataType(emptyDataType);
               setVisible(false);
               onValueChange(datatype);
             })}>
               <Text>SAVE</Text>
-            </Button>
+            </TouchableOpacity>
             <Button onPress={() => {
               setNewDataType(emptyDataType);
               setVisible(false)}
@@ -97,6 +96,16 @@ const DataTypes = ({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  buttons: {
+    padding: 8,
+  },
+  button: {
+    padding: 8,
+    alignItems: 'center',
+  },
+});
 
 interface OwnProps {
 }

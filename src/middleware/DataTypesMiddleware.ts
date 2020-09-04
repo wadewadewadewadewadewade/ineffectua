@@ -1,9 +1,42 @@
+import * as React from 'react';
 import { State } from './../Types';
 import { GetDataTypesAction, ReplaceDataTypesAction, DataTypesState } from '../reducers/DataTypesReducer';
 import { Action, isFetching } from './../reducers';
 import { DataType } from '../Types';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { DocumentData, DocumentReference } from '@firebase/firestore-types';
+
+export const newTypeTitle = '+ Add New Type';
+export const defaultTypeTitle = 'Default';
+export const emptyDataType = {title:'',color:'#000'};
+
+export const datatypesToArray = (datatypes: DataTypesState['datatypes']) => {
+  const datatypesArray = React.useMemo(() => {
+    const arr = new Array<DataType>({title:defaultTypeTitle,color:'#600'});
+    const keys = Object.keys(datatypes);
+    for(let i=0;i<keys.length;i++) {
+      const dt = datatypes[keys[i]];
+      dt.key = keys[i]
+      arr.push(dt);
+    }
+    arr.push({title:newTypeTitle,color:''})
+    return arr;
+  }, [datatypes])
+  return datatypesArray
+}
+
+export const dataTypeIsValid = (datatype: DataType, datatypes: DataTypesState['datatypes']): boolean => {
+  const { title, color } = datatype;
+  if (title && title.trim().length > 0 && color && color.trim().length > 0) { // no null or empty titles or colors
+    if (title.trim() !== newTypeTitle && title.trim() !== defaultTypeTitle) { // no reserved titles
+      const preexistingDataTypesByTitle = datatypesToArray(datatypes).filter(dt => dt.title = title.trim())
+      if (preexistingDataTypesByTitle.length === 0) { // no duplicate titles
+        return true      
+      }
+    }
+  }
+  return false
+}
 
 const convertDocumentDataToDataType = (data: firebase.firestore.DocumentData): DataType => {
   const doc = data.data()

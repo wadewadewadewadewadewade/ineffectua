@@ -8,18 +8,21 @@ import { formatDatesForMarking } from '../../middleware/CalendarMiddleware';
 import { themeIsDark, ThemeState } from '../../reducers/ThemeReducer';
 import { CalendarStackParamList } from './CalendarNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { DataTypesState } from '../../reducers/DataTypesReducer';
 
 let temp = 0;
 
 const Calendar = (props: {
   dates: CalendarState['dates'],
   theme: ThemeState['theme'],
+  datatypes: DataTypesState['datatypes'],
   navigation: StackNavigationProp<CalendarStackParamList, 'Calendar'>
 }) => {
   const {
     dates,
     navigation,
-    theme
+    theme,
+    datatypes
   } = props;
   const calendarTheme = {
     ...theme.paper,
@@ -40,7 +43,7 @@ const Calendar = (props: {
         //minDate={'2012-05-10'}
         // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
         //maxDate={'2012-05-30'}
-        markedDates={formatDatesForMarking(dates)}
+        markedDates={formatDatesForMarking(dates, datatypes)}
         markingType='multi-dot'
         //displayLoadingIndicator={true}
         // Handler which gets executed on day press. Default = undefined
@@ -80,7 +83,7 @@ const Calendar = (props: {
         //renderHeader={(date: Date) => {/*Return JSX*/}}
         theme={calendarTheme}
         // Callback which gets executed when visible months change in scroll view. Default = undefined
-        onVisibleMonthsChange={(months) => {console.log('now these months are visible', months);}}
+        //onVisibleMonthsChange={(months) => {console.log('now these months are visible', months);}}
         // Max amount of months allowed to scroll to the past. Default = 50
         pastScrollRange={50}
         // Max amount of months allowed to scroll to the future. Default = 50
@@ -111,7 +114,8 @@ const mapStateToProps = (state: State) => {
   return {
     user: state.user,
     theme: state.theme,
-    dates: state.dates
+    dates: state.dates,
+    datatypes: state.datatypes
   };
 };
 export default connect(mapStateToProps)(Calendar);
