@@ -167,8 +167,8 @@ I'd like to add a social feature to this app; the intent of which is twofold:
   * tags
     * {TagID}
       * name
-  * types
-    * {TypeID}
+  * datatypes
+    * {DataTypeID}
       * title
       * color
   * calendars

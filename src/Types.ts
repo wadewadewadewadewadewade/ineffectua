@@ -2,18 +2,20 @@ import { MaterialBottomTabParams } from './components/MaterialBottomTabs';
 import { ThemeState, initialState as themeInitialState } from './reducers/ThemeReducer';
 import { AuthState, initialState as authInitialState } from './reducers/AuthReducer';
 import { CalendarState, initialState as calendarInitialState } from './reducers/CalendarReducer';
+import { DataTypesState, initialState as datatypesInitialState } from './reducers/DataTypesReducer';
 
 export const NAVIGATION_PERSISTENCE_KEY = 'NAVIGATION_STATE';
 export const THEME_PERSISTENCE_KEY = 'THEME_TYPE';
 
 
-export type State = AuthState & ThemeState & CalendarState;
+export type State = AuthState & ThemeState & CalendarState & DataTypesState;
 
 // Initial State
 export const initialState: State = {
   user: authInitialState['user'],
   theme: themeInitialState['theme'],
-  dates: calendarInitialState
+  dates: calendarInitialState,
+  datatypes: datatypesInitialState
 }
 
 export type RootDrawerParamList = {
@@ -37,6 +39,7 @@ export type CalendarWindow = {
 
 export interface CalendarEntry {
   key?: string,
+  typeId?: string,
   window: CalendarWindow,
   title: string,
   description?: string,
@@ -46,4 +49,12 @@ export interface CalendarEntry {
 export type CalendarRecord = {
   window: CalendarWindow
   items: Array<CalendarEntry>
+}
+
+/*==== DataTypes ====*/
+
+export type DataType = {
+  key?: string,
+  title: string,
+  color: string
 }

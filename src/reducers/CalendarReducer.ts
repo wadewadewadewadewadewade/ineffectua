@@ -2,7 +2,7 @@ import { CalendarEntry } from '../Types';
 
 export const GET_DATES= 'GET_DATES';
 export const SET_DATES= 'SET_DATES';
-export const REPLACE_DATES= 'SET_DATES';
+export const REPLACE_DATES= 'REPLACE_DATES';
 
 export type Action = {
     type: 'SET_DATES';

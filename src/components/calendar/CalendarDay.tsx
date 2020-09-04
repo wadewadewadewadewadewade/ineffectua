@@ -1,37 +1,64 @@
 import React from 'react';
 import { DateObject } from 'react-native-calendars';
-import { StyleSheet, Text, ScaledSize, Dimensions, View } from 'react-native';
+import { StyleSheet, ScaledSize, Dimensions, View } from 'react-native';
 import { connect } from 'react-redux';
 import { CalendarWindow, CalendarEntry, State } from '../../Types';
 import { RouteProp } from '@react-navigation/native';
 import { ScrollView, TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { TextInput, Button, FAB, Modal, Portal } from 'react-native-paper';
+import { TextInput, Text, Button, FAB, Modal, Portal } from 'react-native-paper';
 import { CalendarStackParamList } from './CalendarNavigator';
 import { CalendarState } from '../../reducers/CalendarReducer';
-import { addDates, datesToArray } from '../../middleware/CalendarMiddleware';
+import { addDates, datesToArray, formatTime, formatDateAndTime } from '../../middleware/CalendarMiddleware';
 import { ThemeState } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ThunkDispatch } from 'redux-thunk';
+import TypesSelector from '../shared/TypesSelector';
+import { DataTypesState } from '../../reducers/DataTypesReducer';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 const screenHeightMultiplier = 1.2;
 
+const Picker = (props : { value: Date, onResult: (d?: Date) => void, minimum?: Date }) => {
+  const { value, minimum, onResult } = props;
+  const [phase, setPhase] = React.useState('date' as "time" | "date" | "datetime" | "countdown" | undefined);
+  const [datetime, setDateTime] = React.useState(value);
+  return (
+    <DateTimePicker mode={phase} value={datetime} minimumDate={minimum} onChange={(e: Event, d?: Date) => {
+      if (d) {
+        setDateTime(d);
+        if (phase === 'date') {
+          setPhase('time')
+        } else {
+          onResult(d)
+        }
+      } else {
+        onResult()
+      }
+    }}/>)
+}
+
+enum PickerPhases {
+  Hidden,
+  Starts,
+  Ends
+}
+
 const NewSlot = (props : {
+    currentDay: CalendarWindow,
     saveEntry: (entry: CalendarEntry) => void,
     theme: ThemeState['theme'],
     user: AuthState['user'],
     entry: CalendarEntry
   }): JSX.Element => {
-    const { user, theme, saveEntry, entry } = props;
+    const { user, theme, currentDay, saveEntry, entry } = props;
     const [newCalendarEntry, setNewCalendarEntry] = React.useState(entry);
-    const [showStart, setShowStart] = React.useState(false);
-    const [showEnd, setShowEnd] = React.useState(false);
+    const [pickerPhase, setPickerPhase] = React.useState(PickerPhases.Hidden);
     if (!user) {
       return <View></View>
     }
-    const [descriptionHeight, setDescriptionHeight] = React.useState(45);
+    const [descriptionHeight, setDescriptionHeight] = React.useState(1);
     const save = () => {
       return saveEntry(newCalendarEntry)
     }
@@ -39,27 +66,35 @@ const NewSlot = (props : {
       <View>
         <ScrollView>
           <TextInput value={newCalendarEntry.title} onChangeText={(text) => setNewCalendarEntry({...newCalendarEntry, title: text})} placeholder="Add title" />
-          <TouchableOpacity onPress={() => setShowStart(true)}>
-            <View  style={styles.buttonRow}>
+          <TypesSelector onValueChange={(datatype) => setNewCalendarEntry({...newCalendarEntry, typeId: datatype.key})} />
+          <TouchableOpacity onPress={() => setPickerPhase(PickerPhases.Starts)}>
+            <View style={styles.buttonRow}>
               <Text style={{color: theme.paper.colors.text}}>From</Text>
               <Text>{newCalendarEntry.window.starts.toLocaleTimeString()}</Text>
             </View>
           </TouchableOpacity>
-          {showStart && <DateTimePicker mode="time" value={newCalendarEntry.window.starts} maximumDate={newCalendarEntry.window.ends} onChange={(e: Event, d?: Date) => {
-            if (d) {
-              setNewCalendarEntry({...newCalendarEntry, window: { starts: d, ends: newCalendarEntry.window.ends }})
-            }
+          {pickerPhase === PickerPhases.Starts && <Picker
+            value={newCalendarEntry.window.starts}
+            onResult={(d?: Date) => {
+              if (d) {
+                setNewCalendarEntry({...newCalendarEntry, window: { starts: d, ends: newCalendarEntry.window.ends }})
+              }
+              setPickerPhase(PickerPhases.Hidden)
           }}/>}
-          <TouchableOpacity onPress={() => setShowEnd(true)}>
+          <TouchableOpacity onPress={() => setPickerPhase(PickerPhases.Ends)}>
             <View style={styles.buttonRow}>
               <Text style={{color: theme.paper.colors.text}}>Ends</Text>
-              <Text>{newCalendarEntry.window.ends.toLocaleTimeString()}</Text>
+              <Text>{newCalendarEntry.window.ends <= currentDay.ends ? formatTime(newCalendarEntry.window.ends) : formatDateAndTime(newCalendarEntry.window.ends)}</Text>
             </View>
           </TouchableOpacity>
-          {showEnd && <DateTimePicker mode="time" value={newCalendarEntry.window.ends} minimumDate={newCalendarEntry.window.starts} onChange={(e: Event, d?: Date) => {
-            if (d) {
-              setNewCalendarEntry({...newCalendarEntry, window: { starts: newCalendarEntry.window.starts, ends: d }})
-            }
+          {pickerPhase === PickerPhases.Ends && <Picker
+            value={newCalendarEntry.window.ends}
+            minimum={newCalendarEntry.window.starts}
+            onResult={(d?: Date) => {
+              if (d) {
+                setNewCalendarEntry({...newCalendarEntry, window: { starts: newCalendarEntry.window.starts, ends: d }})
+              }
+              setPickerPhase(PickerPhases.Hidden)
           }}/>}
           <TextInput
             style={styles.description}
@@ -202,6 +237,7 @@ const CalendarDay = (props: {
           <Modal visible={visible} onDismiss={() => closeModal()}>
             <View style={{backgroundColor: theme.paper.colors.surface}}>
               <NewSlot
+                currentDay={window}
                 entry={newCalendarEntry}
                 saveEntry={(entry: CalendarEntry) => {addDates(entry, () => closeModal())}}
                 theme={theme}
@@ -299,7 +335,7 @@ const mapStateToProps = (state: State) => {
     authenticated: state.user !== false,
     user: state.user,
     theme: state.theme,
-    dates: state.dates
+    dates: state.dates,
   };
 };
 const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
