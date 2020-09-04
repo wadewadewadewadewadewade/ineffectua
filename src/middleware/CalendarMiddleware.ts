@@ -4,7 +4,7 @@ import { Action, isFetching } from './../reducers';
 import { CalendarEntry } from '../Types';
 import { CalendarDot, MultiDotMarking } from 'react-native-calendars';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
-import { DocumentData, DocumentReference } from '@firebase/firestore-types';
+import { DataTypesState } from '../reducers/DataTypesReducer';
 
 /*===== formatting tool ====*/
 type AgendaItem = {
@@ -106,19 +106,20 @@ export const formatDates = (dates: CalendarState['dates']): AgendaDate => {
   return response;
 }
 
-export const formatDatesForMarking = (dates: CalendarState['dates'], oldest?: Date, newest?: Date): AgendaDateMarking => {
+export const formatDatesForMarking = (dates: CalendarState['dates'], datatypes: DataTypesState['datatypes'], oldest?: Date, newest?: Date): AgendaDateMarking => {
   const response: AgendaDateMarking = {};
   const keys = Object.keys(dates);
   for(let i = 0;i<keys.length;i++) {
     const date = dates[keys[i]];
+    const datatype = date.typeId ? datatypes[date.typeId] : undefined;
     const { starts } = date.window;
     if ((oldest && newest && (starts >= oldest && starts < newest)) || !(oldest && newest))  {
       const m = starts.getMonth() + 1;
       const d = starts.getDate();
       const isoDate = starts.getFullYear() + '-' + (m < 10 ? '0' + m.toString() : m.toString()) + '-' + (d < 10 ? '0' + d.toString() :d.toString());
       const dot: CalendarDot = {
-        key: 'primary', 
-        color: '#f00'
+        key: datatype && datatype.key ? datatype.key : 'default-' + i, 
+        color: datatype ? datatype.color : '#600'
       }
       response[isoDate] ? response[isoDate].dots.push(dot) : response[isoDate] = { dots: [dot] }
     }
@@ -236,7 +237,7 @@ export const addDates = (date: CalendarEntry, onComplete?: () => void): ThunkAct
           firebase.firestore().collection('users')
             .doc(user.uid).collection('calendar')
             .add(date)
-            .then((value: DocumentReference<DocumentData>) => {
+            .then((value: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>) => {
               /* rely on watchDates to pull new data
               const dates: CalendarState['dates'] = {date}
               dates.key = value.id;
