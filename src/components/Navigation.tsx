@@ -132,8 +132,6 @@ const Navigation = (props: {
             setInitialState(state);
           }
         }
-        
-        await getDatesForLoad();
 
       } finally {
         setIsReady(true);
@@ -290,6 +288,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, Act
       dispatch(SignOutAction())
     } else {
       dispatch(SignInAction(userState));
+      dispatch(getDates())
       dispatch(watchDates())
     }
   });

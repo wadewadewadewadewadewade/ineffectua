@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { View, StyleSheet } from 'react-native';
-import RNPickerSelect from 'react-native-picker-select';
+import { View, StyleSheet, TextInput as TextInputType } from 'react-native';
+import RNPickerSelect, { PickerStyle } from 'react-native-picker-select';
 import { Text, Button, Modal, Portal, TextInput } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
@@ -8,7 +8,7 @@ import { addDataType, dataTypeIsValid, newTypeTitle, defaultTypeTitle, emptyData
 import { DataType, State } from '../../Types';
 import { ThemeState } from '../../reducers/ThemeReducer';
 import { DataTypesState } from '../../reducers/DataTypesReducer';
-import { ColorPicker } from 'react-native-color-picker';
+import { ColorPicker, fromHsv } from 'react-native-color-picker';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 type Props = {
@@ -26,11 +26,14 @@ const DataTypes = ({
   datatypes,
   addDataTypes
 }: Props) => {
-  const [newDataType, setNewDataType] = React.useState(emptyDataType);
+  const [newTitle, setNewTitle] = React.useState(value?.title ||'');
+  const [newColor, setNewColor] = React.useState(value?.color || '');
   const [visible, setVisible] = React.useState(false);
-  const [selected, setSelected] = React.useState(value?.title || '');
-  const newDataTypeIsValid = dataTypeIsValid(newDataType, datatypes)
+  const newDataType = {title:newTitle,color:newColor};
+  const newDataTypeIsValid = dataTypeIsValid(newDataType, datatypes);
+  const [selected, setSelected] = React.useState(value?.title || defaultTypeTitle);
   const datatypesArray = datatypesToArray(datatypes);
+  let newDatatypeRef: TextInputType | null = null;
   //<Button onPress={() => setVisible(true)}><Text>testing</Text></Button>
   return (
     <View
@@ -43,49 +46,49 @@ const DataTypes = ({
       }}
     >
       <Text style={{color: theme.paper.colors.text}}>Type</Text>
-      <RNPickerSelect
-        items={datatypesArray.map(dt => ({label:dt.title,value:dt.title}))}
-        value={selected}
-        onValueChange={(itemValue, itemIndex) => {
-          const sel = datatypesArray.filter(dt => dt.title === itemValue.toString())[0];
-          if (sel.title === newTypeTitle) {
-            setVisible(true)
-          } else if (sel.title !== defaultTypeTitle) {
-            setSelected(sel.title);
-            onValueChange(sel);
-          }
-        }}
-        />
+      <View style={{flex:1,marginLeft:20}}>
+        <RNPickerSelect
+          style={pickerStyles}
+          items={datatypesArray.map(dt => ({label:dt.title,value:dt.title}))}
+          value={selected}
+          onValueChange={(itemValue, itemIndex) => {
+            const sel = datatypesArray.filter(dt => dt.title === itemValue.toString())[0];
+            if (sel.title === newTypeTitle) {
+              setVisible(true);
+              newDatatypeRef?.focus();
+            } else if (sel.title !== defaultTypeTitle) {
+              setSelected(sel.title);
+              onValueChange(sel);
+            }
+          }}
+          />
+      </View>
       <Portal>
         <Modal visible={visible}>
           <View style={{backgroundColor: theme.paper.colors.surface, height:'90%'}}>
             <TextInput
-              value={newDataType.title}
-              onChangeText={(text) => {
-                const datatype: DataType = {...newDataType, title: text}
-                setNewDataType(datatype)
-              }}
+              ref={(input) => { newDatatypeRef = input; }}
+              value={newTitle}
+              onChangeText={(text) => setNewTitle(text)}
               placeholder="Add title of data type" />
             <ColorPicker
+              //color={newColor}
               hideSliders={true}
-              onColorSelected={color => {
-                const datatype: DataType = {...newDataType, color: color}
-                setNewDataType(datatype)
-              }}
+              onColorChange={color => setNewColor(fromHsv(color))}
               style={{flex: 1}}
             />
             <TouchableOpacity
               disabled={!newDataTypeIsValid}
               style={{backgroundColor: newDataTypeIsValid ? theme.paper.colors.accent : theme.paper.colors.disabled, ...styles.button}}
               onPress={() => addDataTypes(newDataType, (datatype) => {
-              setNewDataType(emptyDataType);
               setVisible(false);
               onValueChange(datatype);
             })}>
               <Text>SAVE</Text>
             </TouchableOpacity>
             <Button onPress={() => {
-              setNewDataType(emptyDataType);
+              setNewTitle(value?.title || '');
+              setNewColor(value?.color || '');
               setVisible(false)}
             }><Text>cancel</Text></Button>
           </View>
@@ -95,17 +98,27 @@ const DataTypes = ({
   );
 }
 
+const pickerStyles: PickerStyle = {
+  inputIOS: {
+    textAlign: 'right',
+  },
+  inputAndroid: {
+    textAlign: 'right',
+  }
+}
+
 const styles = StyleSheet.create({
   select: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#AAA',
   },
   buttons: {
-    padding: 8,
+    paddingHorizontal: 8,
   },
   button: {
     padding: 16,
     alignItems: 'center',
+    paddingVertical: 16
   },
 });
 

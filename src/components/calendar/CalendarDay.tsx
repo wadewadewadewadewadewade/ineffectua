@@ -241,7 +241,7 @@ const CalendarDay = (props: {
                 saveEntry={(entry: CalendarEntry) => {saveDates(entry, () => closeModal())}}
                 theme={theme}
                 user={user} />
-              <Button onPress={() => closeModal()}><Text>cancel</Text></Button>
+              <Button onPress={() => closeModal()} style={{paddingVertical:8}}><Text>cancel</Text></Button>
             </View>
           </Modal>
         </Portal>
@@ -278,20 +278,23 @@ const styles = StyleSheet.create({
     lineHeight: 12
   },
   buttons: {
-    padding: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 16
   },
   button: {
-    padding: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 16,
     alignItems: 'center',
   },
   buttonContents : {
     fontSize: 16,
     textAlign: 'center',
-    textTransform: 'uppercase'
+    textTransform: 'uppercase',
   },
   buttonRow: {
     fontSize: 12,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical:24,
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderBottomWidth: StyleSheet.hairlineWidth,
