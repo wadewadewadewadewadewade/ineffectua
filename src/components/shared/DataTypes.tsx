@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View, StyleSheet } from 'react-native';
-import {Picker} from '@react-native-community/picker';
+import RNPickerSelect from 'react-native-picker-select';
 import { Text, Button, Modal, Portal, TextInput } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
@@ -43,9 +43,9 @@ const DataTypes = ({
       }}
     >
       <Text style={{color: theme.paper.colors.text}}>Type</Text>
-      <Picker
-        accessibilityLabel='Type of data'
-        selectedValue={selected}
+      <RNPickerSelect
+        items={datatypesArray.map(dt => ({label:dt.title,value:dt.title}))}
+        value={selected}
         onValueChange={(itemValue, itemIndex) => {
           const sel = datatypesArray.filter(dt => dt.title === itemValue.toString())[0];
           if (sel.title === newTypeTitle) {
@@ -55,9 +55,7 @@ const DataTypes = ({
             onValueChange(sel);
           }
         }}
-        >
-          {datatypesArray.map(dt => <Picker.Item label={dt.title} value={dt.title} />)}
-      </Picker>
+        />
       <Portal>
         <Modal visible={visible}>
           <View style={{backgroundColor: theme.paper.colors.surface, height:'90%'}}>
@@ -98,11 +96,15 @@ const DataTypes = ({
 }
 
 const styles = StyleSheet.create({
+  select: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#AAA',
+  },
   buttons: {
     padding: 8,
   },
   button: {
-    padding: 8,
+    padding: 16,
     alignItems: 'center',
   },
 });

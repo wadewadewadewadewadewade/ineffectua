@@ -402,7 +402,7 @@ interface OwnProps {
 }
 
 interface DispatchProps {
-  authenticate: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => void,
+  auth: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => void,
   logout: () => void,
 }
 
@@ -414,7 +414,7 @@ const mapStateToProps = (state: State, ownProps: OwnProps): {authenticated: bool
 };
 const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
   return {
-    authenticate: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => {
+    auth: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => {
       dispatch(authenticate(email, password, errorCallback, isCreation))
     },
     logout: () => {

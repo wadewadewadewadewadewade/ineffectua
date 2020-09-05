@@ -118,10 +118,8 @@ const Navigation = (props: {
   React.useEffect(() => {
     const restoreState = async () => {
       try {
-        await getDatesForLoad();
-
         const initialUrl = await Linking.getInitialURL();
-
+        
         if (Platform.OS !== 'web' || initialUrl === null) {
           const savedState = await AsyncStorage.getItem(
             NAVIGATION_PERSISTENCE_KEY
@@ -134,6 +132,9 @@ const Navigation = (props: {
             setInitialState(state);
           }
         }
+        
+        await getDatesForLoad();
+
       } finally {
         setIsReady(true);
       }

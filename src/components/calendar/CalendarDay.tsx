@@ -67,7 +67,7 @@ const NewSlot = (props : {
           <TextInput value={newCalendarEntry.title} onChangeText={(text) => setNewCalendarEntry({...newCalendarEntry, title: text})} placeholder="Add title" />
           <TypesSelector onValueChange={(datatype) => setNewCalendarEntry({...newCalendarEntry, typeId: datatype.key})} />
           <TouchableOpacity onPress={() => setPickerPhase(PickerPhases.Starts)}>
-            <View style={styles.buttonRow}>
+            <View style={{...styles.buttonRow, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#AAA'}}>
               <Text style={{color: theme.paper.colors.text}}>From</Text>
               <Text>{newCalendarEntry.window.starts.toLocaleTimeString()}</Text>
             </View>
@@ -252,7 +252,8 @@ const CalendarDay = (props: {
 const styles = StyleSheet.create({
   description: {
     fontSize: 16,
-    lineHeight: 22
+    lineHeight: 22,
+    padding:3
   },
   daygrid: {
     position: 'absolute',
@@ -290,7 +291,7 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     fontSize: 12,
-    padding: 8,
+    padding: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderBottomWidth: StyleSheet.hairlineWidth,
