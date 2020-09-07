@@ -15,6 +15,8 @@ import { AuthState } from '../../reducers/AuthReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ThunkDispatch } from 'redux-thunk';
 import TypesSelector from '../shared/DataTypes';
+import { DataTypesState } from '../../reducers/DataTypesReducer';
+import { defaultColor, contrast } from '../../middleware/DataTypesMiddleware';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 const screenHeightMultiplier = 1.2;
@@ -114,6 +116,7 @@ const NewSlot = (props : {
 
 const TimeSlot = (props : {
   date: CalendarEntry,
+  color: string,
   window: CalendarWindow,
   index: number,
   total: number,
@@ -121,17 +124,18 @@ const TimeSlot = (props : {
   borderRadius: number,
   openModal: (entry: CalendarEntry) => void
 }): JSX.Element => {
-  const { date, window, total, screenHeight, borderRadius, openModal } = props;
+  const { date, color, window, total, screenHeight, borderRadius, openModal } = props;
   const { starts, ends } = date.window;
   const dateIsContainedWithinDay = ends.getTime() < window.starts.getTime() + oneDayInMilliseconds;
   const heightInPercentage = ((starts.getTime() - window.starts.getTime()) / oneDayInMilliseconds);
   const marginTop = heightInPercentage * screenHeight;
-  const height = !dateIsContainedWithinDay ? (100 - heightInPercentage) * screenHeight : (ends.getTime() - starts.getTime()) / oneDayInMilliseconds * screenHeight;
-  const width = 1 / total * 100 + '%'
+  const height = !dateIsContainedWithinDay ? (1 - heightInPercentage) * screenHeight : (ends.getTime() - starts.getTime()) / oneDayInMilliseconds * screenHeight;
+  const width = 1 / total * 100 + '%';
+  console.log({date, color})
   return (
-    <View style={{width, marginTop, height, backgroundColor: '#600', borderRadius, ...styles.timeslot}}>
+    <View style={{width, marginTop, height, backgroundColor: color, borderRadius, ...styles.timeslot}}>
       <TouchableWithoutFeedback onPress={() => openModal(date)} style={{width:'100%',height:'100%'}}>
-        <Text style={{color: '#FFF', ...styles.timeslotText}}>{date.title}</Text>
+        <Text style={{color: contrast(color), ...styles.timeslotText}}>{date.title}</Text>
       </TouchableWithoutFeedback>
     </View>
   )
@@ -146,6 +150,7 @@ const CalendarDay = (props: {
     dates: CalendarState['dates'],
     user: AuthState['user'],
     theme: ThemeState['theme'],
+    datatypes: DataTypesState['datatypes'],
     route: RouteProp<CalendarStackParamList, 'CalendarDay'>,
     saveDates: (entry: CalendarEntry, onComplete: () => void) => void
   }) => {
@@ -162,6 +167,7 @@ const CalendarDay = (props: {
       dates,
       user,
       theme,
+      datatypes,
       route,
       saveDates
     } = props;
@@ -217,6 +223,7 @@ const CalendarDay = (props: {
               .map((d: CalendarEntry, i: number) => <TimeSlot
                 key={d.key}
                 date={d}
+                color={d.typeId ? datatypes[d.typeId].color : defaultColor}
                 window={window}
                 index={i}
                 total={datesArray.length}

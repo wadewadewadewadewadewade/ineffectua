@@ -266,7 +266,7 @@ const SignInScreen = (props: {
         ]}
         onChangeText={onChangePasswordConfirm}
       />)}
-      {error !== undefined ? (<Text style={{color: 'red'}}>{error}</Text>) : null}
+      {error !== undefined ? <Text style={{color: 'red'}}>{error.message}</Text> : null}
       <Button mode="contained" onPress={() => {
         Keyboard.dismiss();
         if (register) {

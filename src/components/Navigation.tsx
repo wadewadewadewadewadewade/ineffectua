@@ -31,7 +31,6 @@ import {
 } from '@react-navigation/stack';
 import { useReduxDevToolsExtension } from '@react-navigation/devtools';
 import { Action } from '../reducers';
-import { getDates, watchDates } from '../middleware/CalendarMiddleware';
 
 // use this to restart the app for things like changing RTL to LTR
 //import { restartApp } from './Restart';
@@ -49,6 +48,7 @@ import { paperTheme, CombinedLightTheme, barClassName, paperColors, ThemeState }
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CalendarDayProps } from './calendar/CalendarDay';
 import { ThunkDispatch } from 'redux-thunk';
+import { getAndWatchData } from '../middleware';
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -56,9 +56,8 @@ const Stack = createStackNavigator<RootStackParamList>();
 const Navigation = (props: {
     theme: ThemeState['theme'],
     user: AuthState['user'],
-    getDatesForLoad: () => Promise<void>
   }) => {
-  const { theme, user, getDatesForLoad } = props;
+  const { theme, user } = props;
   const [isReady, setIsReady] = React.useState(Platform.OS === 'web');
   const [initialState, setInitialState] = React.useState<
     InitialState | undefined
@@ -272,7 +271,6 @@ interface OwnProps {
 }
 
 interface DispatchProps {
-  getDatesForLoad: () => Promise<void>
 }
 
 const mapStateToProps = (state: State): State => {
@@ -288,12 +286,9 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, Act
       dispatch(SignOutAction())
     } else {
       dispatch(SignInAction(userState));
-      dispatch(getDates())
-      dispatch(watchDates())
+      getAndWatchData(dispatch)
     }
   });
-  return {
-    getDatesForLoad: () => dispatch(getDates())
-  };
+  return {};
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Navigation)
