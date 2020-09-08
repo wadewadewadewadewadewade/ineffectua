@@ -8,6 +8,7 @@ import {
   Linking,
   View
 } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { firebase } from '../firebase/config';
 import {
   Provider as PaperProvider,
@@ -56,8 +57,9 @@ const Stack = createStackNavigator<RootStackParamList>();
 const Navigation = (props: {
     theme: ThemeState['theme'],
     user: AuthState['user'],
+    getAndWatchAll: () => Promise<any>
   }) => {
-  const { theme, user } = props;
+  const { theme, user, getAndWatchAll } = props;
   const [isReady, setIsReady] = React.useState(Platform.OS === 'web');
   const [initialState, setInitialState] = React.useState<
     InitialState | undefined
@@ -132,6 +134,8 @@ const Navigation = (props: {
           }
         }
 
+        await getAndWatchAll();
+
       } finally {
         setIsReady(true);
       }
@@ -171,98 +175,100 @@ const Navigation = (props: {
       {Platform.OS === 'ios' && (
         <StatusBar barStyle={barClassName(theme)} />
       )}
-      <NavigationContainer
-        ref={navigationRef}
-        initialState={initialState}
-        onStateChange={(state) => {
-          const currentRoute = navigationRef.current?.getCurrentRoute();
-          const currentRouteName = currentRoute?.name;
-          
-          if (currentRouteName && previousRouteName !== currentRouteName) {
-            // The line below uses the expo-firebase-analytics tracker
-            // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
-            // Change this line to use another Mobile analytics SDK
-            //firebase.analytics().setCurrentScreen(currentRouteName);
-            AsyncStorage ? AsyncStorage.setItem(
-              NAVIGATION_PERSISTENCE_KEY,
-              JSON.stringify(state)
-            ) : console.warn('AsyncStorage error - I bet you\'re in a web browser')
-          }
+      <SafeAreaProvider>
+        <NavigationContainer
+          ref={navigationRef}
+          initialState={initialState}
+          onStateChange={(state) => {
+            const currentRoute = navigationRef.current?.getCurrentRoute();
+            const currentRouteName = currentRoute?.name;
+            
+            if (currentRouteName && previousRouteName !== currentRouteName) {
+              // The line below uses the expo-firebase-analytics tracker
+              // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
+              // Change this line to use another Mobile analytics SDK
+              //firebase.analytics().setCurrentScreen(currentRouteName);
+              AsyncStorage ? AsyncStorage.setItem(
+                NAVIGATION_PERSISTENCE_KEY,
+                JSON.stringify(state)
+              ) : console.warn('AsyncStorage error - I bet you\'re in a web browser')
+            }
 
-          // Save the current route name for later comparision
-          if (currentRouteName) {
-            previousRouteName = currentRouteName;
-          }
+            // Save the current route name for later comparision
+            if (currentRouteName) {
+              previousRouteName = currentRouteName;
+            }
 
-        }}
-        theme={theme.navigation}
-        linking={{
-          // To test deep linking on, run the following in the Terminal:
-          // Android: adb shell am start -a android.intent.action.VIEW -d "exp://127.0.0.1:19000/--/simple-stack"
-          // iOS: xcrun simctl openurl booted exp://127.0.0.1:19000/--/simple-stack
-          // Android (bare): adb shell am start -a android.intent.action.VIEW -d "rne://127.0.0.1:19000/--/simple-stack"
-          // iOS (bare): xcrun simctl openurl booted rne://127.0.0.1:19000/--/simple-stack
-          // The first segment of the link is the the scheme + host (returned by `Linking.makeUrl`)
-          prefixes: LinkingPrefixes,
-          config: {
-            screens: {
-              Root: {
-                path: '',
-                initialRouteName: 'Agenda',
-                screens: {
-                  CalendarNavigator: 'calendar/',
-                  PainLogNavigator: 'pain-log/',
-                  ContactsNavigator: 'people',
-                  Dialog: 'dialog',
-                  Agenda: '',
-                  NotFound: '.+',
+          }}
+          theme={theme.navigation}
+          linking={{
+            // To test deep linking on, run the following in the Terminal:
+            // Android: adb shell am start -a android.intent.action.VIEW -d "exp://127.0.0.1:19000/--/simple-stack"
+            // iOS: xcrun simctl openurl booted exp://127.0.0.1:19000/--/simple-stack
+            // Android (bare): adb shell am start -a android.intent.action.VIEW -d "rne://127.0.0.1:19000/--/simple-stack"
+            // iOS (bare): xcrun simctl openurl booted rne://127.0.0.1:19000/--/simple-stack
+            // The first segment of the link is the the scheme + host (returned by `Linking.makeUrl`)
+            prefixes: LinkingPrefixes,
+            config: {
+              screens: {
+                Root: {
+                  path: '',
+                  initialRouteName: 'Agenda',
+                  screens: {
+                    CalendarNavigator: 'calendar/',
+                    PainLogNavigator: 'pain-log/',
+                    ContactsNavigator: 'people',
+                    Dialog: 'dialog',
+                    Agenda: '',
+                    NotFound: '.+',
+                  },
                 },
               },
             },
-          },
-        }}
-        fallback={<ActivityIndicator />}
-        documentTitle={{
-          formatter: getHeaderTitle
-        }}>
-      {isUserAuthenticated(user) ? (
-        <Drawer.Navigator drawerType={isLargeScreen ? 'permanent' : undefined} drawerContent={() => <Profile />}>
-          <Drawer.Screen name="Root">
-            {({ navigation }: DrawerScreenProps<RootDrawerParamList>) => (
-              <Stack.Navigator
-                screenOptions={{
-                  headerStyleInterpolator: HeaderStyleInterpolators.forUIKit,
-                }}
-              >
-                <Stack.Screen
-                  name="Tabs"
-                  options={({ route }) => ({
-                    headerTitle: getHeaderTitle(undefined, route),
-                    headerLeft: isLargeScreen
-                      ? undefined
-                      : () => (
-                          <Appbar.Action
-                            color={paperColors(theme).text}
-                            icon={() => <MaterialCommunityIcons name="account" color={paperColors(theme).text} size={26} />}
-                            onPress={() => navigation.toggleDrawer()}
-                          />
-                        ),
-                  })}
-                  component={MaterialBottomTabs}
-                />
-                <Stack.Screen
-                  name="NotFound"
-                  component={NotFound}
-                  options={{ title: 'Oops!' }}
-                />
-              </Stack.Navigator>
-            )}
-          </Drawer.Screen>
-        </Drawer.Navigator>
-      ) : (
-        <AuthFlow />
-      )}
-      </NavigationContainer>
+          }}
+          fallback={<ActivityIndicator />}
+          documentTitle={{
+            formatter: getHeaderTitle
+          }}>
+        {isUserAuthenticated(user) ? (
+          <Drawer.Navigator drawerType={isLargeScreen ? 'permanent' : undefined} drawerContent={() => <Profile />}>
+            <Drawer.Screen name="Root">
+              {({ navigation }: DrawerScreenProps<RootDrawerParamList>) => (
+                <Stack.Navigator
+                  screenOptions={{
+                    headerStyleInterpolator: HeaderStyleInterpolators.forUIKit,
+                  }}
+                >
+                  <Stack.Screen
+                    name="Tabs"
+                    options={({ route }) => ({
+                      headerTitle: getHeaderTitle(undefined, route),
+                      headerLeft: isLargeScreen
+                        ? undefined
+                        : () => (
+                            <Appbar.Action
+                              color={paperColors(theme).text}
+                              icon={() => <MaterialCommunityIcons name="account" color={paperColors(theme).text} size={26} />}
+                              onPress={() => navigation.toggleDrawer()}
+                            />
+                          ),
+                    })}
+                    component={MaterialBottomTabs}
+                  />
+                  <Stack.Screen
+                    name="NotFound"
+                    component={NotFound}
+                    options={{ title: 'Oops!' }}
+                  />
+                </Stack.Navigator>
+              )}
+            </Drawer.Screen>
+          </Drawer.Navigator>
+        ) : (
+          <AuthFlow />
+        )}
+        </NavigationContainer>
+      </SafeAreaProvider>
     </PaperProvider>
   )
 }
@@ -271,6 +277,7 @@ interface OwnProps {
 }
 
 interface DispatchProps {
+  getAndWatchAll: () => Promise<any>
 }
 
 const mapStateToProps = (state: State): State => {
@@ -286,9 +293,10 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, Act
       dispatch(SignOutAction())
     } else {
       dispatch(SignInAction(userState));
-      getAndWatchData(dispatch)
     }
   });
-  return {};
+  return {
+    getAndWatchAll: () => getAndWatchData(dispatch)
+  };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Navigation)

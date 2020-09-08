@@ -69,6 +69,9 @@ export const getContacts = (): ThunkAction<Promise<void>, State, firebase.app.Ap
             arr.forEach(d => { if (d.key) contacts[d.key] = d })
             dispatch(GetContactsAction(contacts))
             dispatch(isFetching(false))
+          })
+          .finally(() => {
+            //console.log('resolving getContacts')
             resolve()
           })
       }

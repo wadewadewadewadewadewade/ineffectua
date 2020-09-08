@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { View, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import RNPickerSelect, { PickerStyle } from 'react-native-picker-select';
 import { Text, Button, Modal, Portal, TextInput } from 'react-native-paper';
 import { connect } from 'react-redux';
@@ -18,13 +19,13 @@ const NewDataType = (props: {
   saveNewDataType: (datatype?: DataType) => void
 }) => {
   const { value, datatypes, theme, saveNewDataType } = props;
-  const [newTitle, setNewTitle] = React.useState(value?.title || '');
+  const [newTitle, setNewTitle] = React.useState(value?.title ||'');
   const [newColor, setNewColor] = React.useState(value?.color || '');
   const newDataType = {title:newTitle,color:newColor};
   const datatypesArray = datatypesToArray(datatypes);
   const newTitleExists = datatypesArray.filter(dt => dt.title === newTitle);
   return (
-    <View style={{backgroundColor: theme.paper.colors.surface, height:'90%'}}>
+    <SafeAreaView style={{backgroundColor: theme.paper.colors.surface, height:'90%'}}>
       <TextInput
         ref={(input) => {
           input?.focus();
@@ -46,11 +47,12 @@ const NewDataType = (props: {
         <Text>SAVE</Text>
       </TouchableOpacity>
       <Button onPress={() => saveNewDataType()}><Text>cancel</Text></Button>
-    </View>
+    </SafeAreaView>
   )
 }
 
 type Props = {
+  dataTypeId?: string,
   value?: DataType;
   onValueChange: (datatype: DataType) => void;
   theme: ThemeState['theme'],
@@ -59,6 +61,7 @@ type Props = {
 };
 
 const DataTypes = ({
+  dataTypeId,
   value,
   onValueChange,
   theme,
@@ -66,7 +69,7 @@ const DataTypes = ({
   addDataTypes
 }: Props) => {
   const [visible, setVisible] = React.useState(false);
-  const [selected, setSelected] = React.useState(value?.title || defaultTypeTitle);
+  const [selected, setSelected] = React.useState(value?.title || datatypes && dataTypeId && datatypes[dataTypeId].title || defaultTypeTitle);
   const datatypesArray = datatypesToArray(datatypes);
   //<Button onPress={() => setVisible(true)}><Text>testing</Text></Button>
   return (
@@ -80,7 +83,7 @@ const DataTypes = ({
       }}
     >
       <Text style={{color: theme.paper.colors.text}}>Type</Text>
-      <View style={{flex:1,marginLeft:20}}>
+      <View style={{flex:1,marginLeft:20,maxWidth:'80%'}}>
         <RNPickerSelect
           style={pickerStyles}
           items={datatypesArray.map(dt => ({label:dt.title,value:dt.title}))}

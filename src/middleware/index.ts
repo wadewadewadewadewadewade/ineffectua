@@ -6,14 +6,19 @@ import { State } from '../Types';
 import { Action } from '../reducers';
 import { getDates, watchDates } from './CalendarMiddleware';
 import { getDataTypes, watchDataTypes } from './DataTypesMiddleware';
+import { getContacts, watchContacts } from './ContactsMiddleware';
 //import AuthMiddleware from './AuthMiddleware';
 //import CalendarMiddleware from './CalendarMiddleware';
 
 export const getAndWatchData = (dispatch: ThunkDispatch<State, firebase.app.App, Action>) => {
-  dispatch(getDates())
-  dispatch(watchDates())
-  dispatch(getDataTypes())
-  dispatch(watchDataTypes())
+  dispatch(watchDates());
+  dispatch(watchDataTypes());
+  dispatch(watchContacts());
+  return Promise.all([
+    dispatch(getDates()),
+    dispatch(getDataTypes()),
+    dispatch(getContacts()),
+  ])
 }
 
 export default applyMiddleware(

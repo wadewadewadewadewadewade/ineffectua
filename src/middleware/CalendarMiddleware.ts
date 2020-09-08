@@ -181,6 +181,9 @@ export const getDates = (): ThunkAction<Promise<void>, State, firebase.app.App, 
             arr.forEach(d => { if (d.key) dates[d.key] = d })
             dispatch(GetDatesAction(dates))
             dispatch(isFetching(false))
+          })
+          .finally(() => {
+            //console.log('resolving getDates')
             resolve()
           })
       }

@@ -107,6 +107,9 @@ export const getDataTypes = (): ThunkAction<Promise<void>, State, firebase.app.A
             arr.forEach(d => { if (d.key) datatypes[d.key] = d })
             dispatch(GetDataTypesAction(datatypes))
             dispatch(isFetching(false))
+          })
+          .finally(() => {
+            //console.log('resolving getDataTypes')
             resolve()
           })
       }

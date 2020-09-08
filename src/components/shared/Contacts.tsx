@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { View, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import RNPickerSelect, { PickerStyle } from 'react-native-picker-select';
 import { Text, Button, Modal, Portal, TextInput } from 'react-native-paper';
 import { connect } from 'react-redux';
@@ -27,7 +28,7 @@ const NewContact = (props: {
   const nameExists = ContactsArray.filter(c => c.name === name);
   const [descriptionHeight, setDescriptionHeight] = React.useState(1);
   return (
-    <View style={{backgroundColor: theme.paper.colors.surface, height:'90%'}}>
+    <SafeAreaView style={{backgroundColor: theme.paper.colors.surface}}>
       <TextInput
         ref={(input) => {
           input?.focus();
@@ -67,7 +68,7 @@ const NewContact = (props: {
         <Text>SAVE</Text>
       </TouchableOpacity>
       <Button onPress={() => saveNewContact()}><Text>cancel</Text></Button>
-    </View>
+    </SafeAreaView>
   )
 }
 
@@ -100,18 +101,20 @@ const Contacts = ({
       }}
     >
       <Text style={{color: theme.paper.colors.text}}>Contact</Text>
-      <View style={{flex:1,marginLeft:20}}>
+      <View style={{flex:1,marginLeft:20,maxWidth:'80%'}}>
         <RNPickerSelect
           style={pickerStyles}
           items={contactsArray.map(c => ({label:c.name,value:c.name}))}
           value={selected}
           onValueChange={(itemValue, itemIndex) => {
-            const sel = contactsArray.filter(c => c.name === itemValue.toString())[0];
-            if (sel.name === newContactName) {
-              setVisible(true);
-            } else {
-              setSelected(sel.name);
-              onValueChange(sel);
+            if (itemValue) {
+              const sel = contactsArray.filter(c => c.name === itemValue.toString())[0];
+              if (sel.name === newContactName) {
+                setVisible(true);
+              } else {
+                setSelected(sel.name);
+                onValueChange(sel);
+              }
             }
           }}
           />

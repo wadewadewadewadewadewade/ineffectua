@@ -77,7 +77,10 @@ const NewSlot = (props : {
       <View>
         <ScrollView>
           <TextInput value={newCalendarEntry.title} onChangeText={(text) => setNewCalendarEntry({...newCalendarEntry, title: text})} placeholder="Add title" />
-          <TypesSelector onValueChange={(datatype) => setNewCalendarEntry({...newCalendarEntry, typeId: datatype.key})} />
+          <TypesSelector 
+            dataTypeId={entry.typeId}
+            onValueChange={(datatype) => setNewCalendarEntry({...newCalendarEntry, typeId: datatype.key})} />
+          <View style={{height:StyleSheet.hairlineWidth,backgroundColor:'#AAA'}}></View>
           <ContactsSelector onValueChange={(contact) => setNewCalendarEntry({...newCalendarEntry, ...insertIf(newCalendarEntry, contact.key)})} />
           <TouchableOpacity onPress={() => setPickerPhase(PickerPhases.Starts)}>
             <View style={{...styles.buttonRow, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#AAA'}}>
@@ -109,7 +112,7 @@ const NewSlot = (props : {
               setPickerPhase(PickerPhases.Hidden)
           }}/>}
           <TextInput
-            style={styles.description}
+            style={{...styles.description,backgroundColor: theme.paper.colors.surface}}
             multiline={true}
             value={newCalendarEntry.description}
             onContentSizeChange={(event) => {
@@ -142,7 +145,6 @@ const TimeSlot = (props : {
   const marginTop = heightInPercentage * screenHeight;
   const height = !dateIsContainedWithinDay ? (1 - heightInPercentage) * screenHeight : (ends.getTime() - starts.getTime()) / oneDayInMilliseconds * screenHeight;
   const width = 1 / total * 100 + '%';
-  console.log({date, color})
   return (
     <View style={{width, marginTop, height, backgroundColor: color, borderRadius, ...styles.timeslot}}>
       <TouchableWithoutFeedback onPress={() => openModal(date)} style={{width:'100%',height:'100%'}}>
@@ -234,7 +236,7 @@ const CalendarDay = (props: {
               .map((d: CalendarEntry, i: number) => <TimeSlot
                 key={d.key}
                 date={d}
-                color={d.typeId && datatypes ? datatypes[d.typeId].color : defaultColor}
+                color={d.typeId && datatypes && datatypes[d.typeId] ? datatypes[d.typeId].color : defaultColor}
                 window={window}
                 index={i}
                 total={datesArray.length}
@@ -297,11 +299,11 @@ const styles = StyleSheet.create({
   },
   buttons: {
     paddingHorizontal: 8,
-    paddingVertical: 16
+    paddingVertical: 20
   },
   button: {
     paddingHorizontal: 8,
-    paddingVertical: 16,
+    paddingVertical: 20,
     alignItems: 'center',
   },
   buttonContents : {
