@@ -17,6 +17,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import TypesSelector from '../shared/DataTypes';
 import { DataTypesState } from '../../reducers/DataTypesReducer';
 import { defaultColor, contrast } from '../../middleware/DataTypesMiddleware';
+import ContactsSelector from '../shared/Contacts';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 const screenHeightMultiplier = 1.2;
@@ -63,11 +64,21 @@ const NewSlot = (props : {
     const save = () => {
       return saveEntry(newCalendarEntry)
     }
+    const insertIf = (existing: CalendarEntry, newContactKey?: string): {contacts: Array<string>} | undefined => {
+      if (existing.contacts && newContactKey) {
+        return {contacts: [...existing.contacts, newContactKey]}
+      } else if (newContactKey) {
+        return {contacts: [newContactKey]}
+      } else {
+        return undefined
+      }
+    }
     return (
       <View>
         <ScrollView>
           <TextInput value={newCalendarEntry.title} onChangeText={(text) => setNewCalendarEntry({...newCalendarEntry, title: text})} placeholder="Add title" />
           <TypesSelector onValueChange={(datatype) => setNewCalendarEntry({...newCalendarEntry, typeId: datatype.key})} />
+          <ContactsSelector onValueChange={(contact) => setNewCalendarEntry({...newCalendarEntry, ...insertIf(newCalendarEntry, contact.key)})} />
           <TouchableOpacity onPress={() => setPickerPhase(PickerPhases.Starts)}>
             <View style={{...styles.buttonRow, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#AAA'}}>
               <Text style={{color: theme.paper.colors.text}}>From</Text>
@@ -223,13 +234,13 @@ const CalendarDay = (props: {
               .map((d: CalendarEntry, i: number) => <TimeSlot
                 key={d.key}
                 date={d}
-                color={d.typeId ? datatypes[d.typeId].color : defaultColor}
+                color={d.typeId && datatypes ? datatypes[d.typeId].color : defaultColor}
                 window={window}
                 index={i}
                 total={datesArray.length}
                 screenHeight={dimensions.height * screenHeightMultiplier}
                 borderRadius={theme.paper.roundness}
-                openModal={(entry: CalendarEntry) => openModal(entry)}/>)
+              openModal={(entry: CalendarEntry) => openModal(entry)}/>)
             }
           </View>
         </ScrollView>
@@ -346,6 +357,7 @@ const mapStateToProps = (state: State) => {
     user: state.user,
     theme: state.theme,
     dates: state.dates,
+    datatypes: state.datatypes,
   };
 };
 const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {

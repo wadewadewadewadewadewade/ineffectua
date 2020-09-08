@@ -3,19 +3,21 @@ import { ThemeState, initialState as themeInitialState } from './reducers/ThemeR
 import { AuthState, initialState as authInitialState } from './reducers/AuthReducer';
 import { CalendarState, initialState as calendarInitialState } from './reducers/CalendarReducer';
 import { DataTypesState, initialState as datatypesInitialState } from './reducers/DataTypesReducer';
+import { ContactsState, initialState as contactsInitialState } from './reducers/ContactsReducer';
 
 export const NAVIGATION_PERSISTENCE_KEY = 'NAVIGATION_STATE';
 export const THEME_PERSISTENCE_KEY = 'THEME_TYPE';
 
 
-export type State = AuthState & ThemeState & CalendarState & DataTypesState;
+export type State = AuthState & ThemeState & CalendarState & DataTypesState & ContactsState;
 
 // Initial State
 export const initialState: State = {
   user: authInitialState['user'],
   theme: themeInitialState['theme'],
   dates: calendarInitialState,
-  datatypes: datatypesInitialState
+  datatypes: datatypesInitialState,
+  contacts: contactsInitialState
 }
 
 export type RootDrawerParamList = {
@@ -57,4 +59,16 @@ export type DataType = {
   key?: string,
   title: string,
   color: string
+}
+
+/*==== Contacts ====*/
+
+export type Contact = {
+  key?: string,
+  typeId?: string,
+  name: string,
+  number?: string,
+  email?: string,
+  location?: string,
+  description?: string
 }

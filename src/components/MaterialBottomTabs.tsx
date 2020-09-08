@@ -2,7 +2,7 @@ import * as React from 'react';
 import { StyleSheet } from 'react-native';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import PainLogEntry from './shared/PainLogEntry';
-import Contacts from './shared/Contacts';
+import ContactList from './Contacts/ContactList';
 import Agenda from './shared/Agenda';
 import CalendarNavigator, { CalendarStackParamList } from './calendar/CalendarNavigator';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -11,7 +11,7 @@ export type MaterialBottomTabParams = {
   Agenda: undefined;
   Calendar: CalendarStackParamList;
   PainLogEntry: undefined;
-  Contacts: undefined;
+  ContactList: undefined;
 };
 
 const MaterialBottomTabs = createMaterialBottomTabNavigator<
@@ -43,8 +43,8 @@ export default function MaterialBottomTabsScreen() {
         }}
       />
       <MaterialBottomTabs.Screen
-        name="Contacts"
-        component={Contacts}
+        name="ContactList"
+        component={ContactList}
         options={{
           tabBarLabel: 'Contacts',
           tabBarIcon: ({ color }) => (

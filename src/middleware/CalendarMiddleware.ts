@@ -150,6 +150,7 @@ const convertDocumentDataToCalendarEntry = (data: firebase.firestore.DocumentDat
   const doc = data.data()
   return {
     key: data.id,
+    typeId: doc.typeId,
     window: {
       starts: new Date(doc.window.starts.seconds * 1000),
       ends: new Date(doc.window.ends.seconds * 1000)
