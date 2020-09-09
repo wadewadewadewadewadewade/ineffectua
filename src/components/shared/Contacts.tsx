@@ -5,7 +5,7 @@ import RNPickerSelect, { PickerStyle } from 'react-native-picker-select';
 import { Text, Button, Modal, Portal, TextInput } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { addContact, emptyContact, ContactsToArray, newContactName } from '../../middleware/ContactsMiddleware';
+import { addContact, emptyContact, contactsToArray, newContactName } from '../../middleware/ContactsMiddleware';
 import { Contact, State } from '../../Types';
 import { ThemeState } from '../../reducers/ThemeReducer';
 import { ContactsState } from '../../reducers/ContactsReducer';
@@ -19,22 +19,36 @@ const NewContact = (props: {
 }) => {
   const { value, contacts, theme, saveNewContact } = props;
   const [name, setName] = React.useState(value?.name || '');
+  const [nameTouched, setNameTouched] = React.useState(false);
   const [number, setNumber] = React.useState(value?.number || '');
   const [email, setEmail] = React.useState(value?.email || '');
   const [location, setLocation] = React.useState(value?.location || '');
   const [description, setDescription] = React.useState(value?.description || '');
-  const newContact = emptyContact;
-  const ContactsArray = ContactsToArray(contacts);
-  const nameExists = ContactsArray.filter(c => c.name === name);
+  const newContact: Contact = {
+    name,
+    number,
+    email,
+    location,
+    description
+  };
+  const contactsArray = contactsToArray(contacts);
+  const nameExists = contactsArray.filter(c => c.name === name);
   const [descriptionHeight, setDescriptionHeight] = React.useState(1);
   return (
     <SafeAreaView style={{backgroundColor: theme.paper.colors.surface}}>
       <TextInput
         ref={(input) => {
-          input?.focus();
+          if (!nameTouched) {
+            input?.focus();
+          }
         }}
         value={name}
-        onChangeText={(text) => setName(text)}
+        onChangeText={(text) => {
+          setName(text)
+          if (!nameTouched) {
+            setNameTouched(true)
+          }
+        }}
         placeholder="Name" />
       <TextInput
         value={number}
@@ -42,6 +56,7 @@ const NewContact = (props: {
         onChangeText={(text) => setNumber(text)}
         placeholder="Optional Phone Number" />
       <TextInput
+        autoCapitalize="none"
         value={email}
         keyboardType="email-address"
         onChangeText={(text) => setEmail(text)}
@@ -77,6 +92,7 @@ type Props = {
   onValueChange: (Contact: Contact) => void;
   theme: ThemeState['theme'],
   contacts: ContactsState['contacts'],
+  selectedContacts?: Array<string>,
   addNewContact: (contact: Contact, onComplete: (contact: Contact) => void) => void
 };
 
@@ -85,23 +101,25 @@ const Contacts = ({
   onValueChange,
   theme,
   contacts,
+  selectedContacts,
   addNewContact
 }: Props) => {
   const [visible, setVisible] = React.useState(false);
   const [selected, setSelected] = React.useState(value?.name);
-  const contactsArray = ContactsToArray(contacts);
+  const contactsArray = contactsToArray(contacts);
   return (
     <View
       style={{
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
         justifyContent: 'space-between',
         paddingHorizontal: 16,
         paddingVertical: 12,
       }}
     >
-      <Text style={{color: theme.paper.colors.text}}>Contact</Text>
-      <View style={{flex:1,marginLeft:20,maxWidth:'80%'}}>
+      <Text style={{color: theme.paper.colors.text,flex:1}}>Contact</Text>
+      {selectedContacts && selectedContacts.map((cId: string) => contacts[cId] && <View style={{width:'80%',alignItems:'flex-start',alignSelf:'flex-end'}}><Text>{contacts[cId].name}</Text></View>)}
+      <View style={{flex:1,marginLeft:20,width:'80%', alignSelf:'flex-end'}}>
         <RNPickerSelect
           style={pickerStyles}
           items={contactsArray.map(c => ({label:c.name,value:c.name}))}
@@ -179,7 +197,7 @@ const mapStateToProps = (state: State) => {
 };
 const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
   return {
-    addNewContact: (contact: Contact, onComplete: (Contact: Contact) => void) => {
+    addNewContact: (contact: Contact, onComplete: (contact: Contact) => void) => {
       dispatch(addContact(contact, onComplete))
     }
   };

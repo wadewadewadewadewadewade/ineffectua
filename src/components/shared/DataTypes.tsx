@@ -69,7 +69,7 @@ const DataTypes = ({
   addDataTypes
 }: Props) => {
   const [visible, setVisible] = React.useState(false);
-  const [selected, setSelected] = React.useState(value?.title || datatypes && dataTypeId && datatypes[dataTypeId].title || defaultTypeTitle);
+  const [selected, setSelected] = React.useState(value?.title || datatypes && dataTypeId && datatypes[dataTypeId] && datatypes[dataTypeId].title || defaultTypeTitle);
   const datatypesArray = datatypesToArray(datatypes);
   //<Button onPress={() => setVisible(true)}><Text>testing</Text></Button>
   return (

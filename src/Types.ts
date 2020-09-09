@@ -64,6 +64,7 @@ export type DataType = {
 /*==== Contacts ====*/
 
 export type Contact = {
+  created?: Date,
   key?: string,
   typeId?: string,
   name: string,

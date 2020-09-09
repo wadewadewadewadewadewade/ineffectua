@@ -155,7 +155,7 @@ export const addDataType = (dataType: DataType, onComplete?: (datatype: DataType
             .doc(user.uid).collection('datatypes')
             .doc(key).update(data)
             .then(() => {
-              dispatch(isFetching(true))
+              dispatch(isFetching(false))
               onComplete && onComplete(dataType)
           })
         } else {
@@ -164,7 +164,7 @@ export const addDataType = (dataType: DataType, onComplete?: (datatype: DataType
             .doc(user.uid).collection('datatypes')
             .add(dataType)
             .then((value: DocumentReference<DocumentData>) => {
-              dispatch(isFetching(true))
+              dispatch(isFetching(false))
               const data = {...dataType, key: value.id}
               onComplete && onComplete(data)
             })

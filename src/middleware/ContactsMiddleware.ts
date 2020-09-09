@@ -9,7 +9,7 @@ import { DocumentData, DocumentReference } from '@firebase/firestore-types';
 export const newContactName = '+ Add New Contact';
 export const emptyContact: Contact = {name:'',};
 
-export const ContactsToArray = (Contacts: ContactsState['contacts']) => {
+export const contactsToArray = (Contacts: ContactsState['contacts']) => {
   const ContactsArray = React.useMemo(() => {
     const arr = new Array<Contact>();
     const keys = Object.keys(Contacts);
@@ -24,11 +24,11 @@ export const ContactsToArray = (Contacts: ContactsState['contacts']) => {
   return ContactsArray
 }
 
-export const ContactIsValid = (contact: Contact, Contacts: ContactsState['contacts']): boolean => {
+export const contactIsValid = (contact: Contact, Contacts: ContactsState['contacts']): boolean => {
   const { name } = contact;
   if (name && name.trim().length > 0) { // no null or empty names or colors
     if (name.trim() !== newContactName) { // no reserved names
-      const preexistingContactsByname = ContactsToArray(Contacts).filter(dt => dt.name = name.trim())
+      const preexistingContactsByname = contactsToArray(Contacts).filter(dt => dt.name = name.trim())
       if (preexistingContactsByname.length === 0) { // no duplicate names
         return true      
       }
@@ -39,7 +39,7 @@ export const ContactIsValid = (contact: Contact, Contacts: ContactsState['contac
 
 const convertDocumentDataToContact = (data: firebase.firestore.DocumentData): Contact => {
   const doc = data.data()
-  return {
+  const contactData: Contact = {
     key: data.id,
     typeId: doc.typeId,
     name: doc.name,
@@ -48,6 +48,10 @@ const convertDocumentDataToContact = (data: firebase.firestore.DocumentData): Co
     location: doc.location,
     description: doc.description
   }
+  if (doc.created && doc.created.seconds) {
+    contactData.created = new Date(doc.created.seconds * 1000)
+  }
+  return contactData
 }
 
 export const getContacts = (): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
@@ -88,8 +92,8 @@ export const watchContacts = (): ThunkAction<Promise<void>, State, firebase.app.
         firebase.firestore()
           .collection('users')
           .doc(user.uid)
-          .collection('calendar')
-          .orderBy('window.starts')
+          .collection('contacts')
+          .orderBy('name')
           .onSnapshot((documentSnapshot: firebase.firestore.QuerySnapshot) => {
             const contacts: ContactsState['contacts'] = {};
             const arr = documentSnapshot.docs.map(d => {
@@ -122,6 +126,7 @@ export const addContact = (contact: Contact, onComplete?: (Contact: Contact) => 
           })
         } else {
           // it's a new record
+          contact.created = new Date(Date.now())
           firebase.firestore().collection('users')
             .doc(user.uid).collection('contacts')
             .add(contact)

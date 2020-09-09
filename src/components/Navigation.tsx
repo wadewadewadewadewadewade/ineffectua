@@ -57,9 +57,8 @@ const Stack = createStackNavigator<RootStackParamList>();
 const Navigation = (props: {
     theme: ThemeState['theme'],
     user: AuthState['user'],
-    getAndWatchAll: () => Promise<any>
   }) => {
-  const { theme, user, getAndWatchAll } = props;
+  const { theme, user } = props;
   const [isReady, setIsReady] = React.useState(Platform.OS === 'web');
   const [initialState, setInitialState] = React.useState<
     InitialState | undefined
@@ -133,8 +132,6 @@ const Navigation = (props: {
             setInitialState(state);
           }
         }
-
-        await getAndWatchAll();
 
       } finally {
         setIsReady(true);
@@ -277,7 +274,6 @@ interface OwnProps {
 }
 
 interface DispatchProps {
-  getAndWatchAll: () => Promise<any>
 }
 
 const mapStateToProps = (state: State): State => {
@@ -293,10 +289,10 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, Act
       dispatch(SignOutAction())
     } else {
       dispatch(SignInAction(userState));
+      getAndWatchData(dispatch);
     }
   });
   return {
-    getAndWatchAll: () => getAndWatchData(dispatch)
   };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Navigation)

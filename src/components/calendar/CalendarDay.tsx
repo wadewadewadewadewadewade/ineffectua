@@ -81,7 +81,9 @@ const NewSlot = (props : {
             dataTypeId={entry.typeId}
             onValueChange={(datatype) => setNewCalendarEntry({...newCalendarEntry, typeId: datatype.key})} />
           <View style={{height:StyleSheet.hairlineWidth,backgroundColor:'#AAA'}}></View>
-          <ContactsSelector onValueChange={(contact) => setNewCalendarEntry({...newCalendarEntry, ...insertIf(newCalendarEntry, contact.key)})} />
+          <ContactsSelector
+            selectedContacts={entry.contacts}
+            onValueChange={(contact) => setNewCalendarEntry({...newCalendarEntry, ...insertIf(newCalendarEntry, contact.key)})} />
           <TouchableOpacity onPress={() => setPickerPhase(PickerPhases.Starts)}>
             <View style={{...styles.buttonRow, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#AAA'}}>
               <Text style={{color: theme.paper.colors.text}}>From</Text>

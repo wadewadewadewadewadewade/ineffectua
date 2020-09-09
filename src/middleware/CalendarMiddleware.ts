@@ -233,7 +233,7 @@ export const addDates = (date: CalendarEntry, onComplete?: () => void): ThunkAct
               /* rely on watchDates to pull new data
               const dates: CalendarState['dates'] = {date};
               dispatch(GetDatesAction(dates))*/
-              dispatch(isFetching(true))
+              dispatch(isFetching(false))
               onComplete && onComplete()
           })
         } else {
@@ -246,7 +246,7 @@ export const addDates = (date: CalendarEntry, onComplete?: () => void): ThunkAct
               const dates: CalendarState['dates'] = {date}
               dates.key = value.id;
               dispatch(GetDatesAction(dates))*/
-              dispatch(isFetching(true))
+              dispatch(isFetching(false))
               onComplete && onComplete()
             })
         }
