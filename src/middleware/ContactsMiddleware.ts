@@ -9,18 +9,20 @@ import { DocumentData, DocumentReference } from '@firebase/firestore-types';
 export const newContactName = '+ Add New Contact';
 export const emptyContact: Contact = {name:'',};
 
-export const contactsToArray = (Contacts: ContactsState['contacts']) => {
+export const contactsToArray = (contacts: ContactsState['contacts'], includeNewContactitem?: boolean) => {
   const ContactsArray = React.useMemo(() => {
     const arr = new Array<Contact>();
-    const keys = Object.keys(Contacts);
+    const keys = Object.keys(contacts);
     for(let i=0;i<keys.length;i++) {
-      const dt = Contacts[keys[i]];
+      const dt = contacts[keys[i]];
       dt.key = keys[i]
       arr.push(dt);
     }
-    arr.push({name:newContactName})
+    if (includeNewContactitem) {
+      arr.push({name:newContactName})
+    }
     return arr;
-  }, [Contacts])
+  }, [contacts])
   return ContactsArray
 }
 

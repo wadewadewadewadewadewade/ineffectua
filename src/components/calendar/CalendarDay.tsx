@@ -116,7 +116,7 @@ const NewSlot = (props : {
             onChangeText={(text) => setNewCalendarEntry({...newCalendarEntry, description: text})} placeholder="Optional Description" />
         </ScrollView>
         <TouchableOpacity onPress={save} style={{backgroundColor: theme.paper.colors.accent, ...styles.button}}>
-          <Text style={styles.buttonContents}>Save</Text>
+          <Text style={styles.buttonContents}>Add New Calendar Event</Text>
         </TouchableOpacity>
       </SafeAreaView>
     )
@@ -218,7 +218,7 @@ const CalendarDay = (props: {
       setVisible(false);
     }
     return (
-      <View>
+      <View style={styles.container}>
         <ScrollView contentOffset={{x: dimensions.height * 0.2, y: 0}} style={{position: 'relative'}}>
           <View style={{ height: dimensions.height * screenHeightMultiplier, ...styles.entry }}>
             <View style={styles.daygrid}>
@@ -264,6 +264,11 @@ const CalendarDay = (props: {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    height:'100%'
+  },
   description: {
     fontSize: 16,
     lineHeight: 22,

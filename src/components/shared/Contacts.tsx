@@ -12,7 +12,7 @@ import { ContactsState } from '../../reducers/ContactsReducer';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-const NewContact = (props: {
+export const NewContact = (props: {
   value?: Contact
   contacts: ContactsState['contacts'],
   theme: ThemeState['theme'],
@@ -32,6 +32,7 @@ const NewContact = (props: {
     location,
     description
   };
+  const buttonLabel = !value || value === emptyContact ? 'Add New' : 'Edit';
   const contactsArray = contactsToArray(contacts);
   const nameExists = contactsArray.filter(c => c.name === name);
   const [descriptionHeight, setDescriptionHeight] = React.useState(1);
@@ -81,9 +82,9 @@ const NewContact = (props: {
         onPress={() => {
           typeof name === 'string' && name.length && nameExists.length === 0 && saveNewContact(newContact)
         }}>
-        <Text>SAVE</Text>
+        <Text style={styles.buttonContents}>{buttonLabel} Contact</Text>
       </TouchableOpacity>
-      <Button onPress={() => saveNewContact()}><Text>cancel</Text></Button>
+      <Button onPress={() => saveNewContact()} style={{paddingVertical:8}}><Text>Cancel</Text></Button>
     </SafeAreaView>
   )
 }
@@ -105,7 +106,7 @@ const Contacts = ({
 }: Props) => {
   const [visible, setVisible] = React.useState(false);
   const [newContacts, setNewContacts] = React.useState(value || new Array<string>());
-  const contactsArray = contactsToArray(contacts);
+  const contactsArray = contactsToArray(contacts, true);
   let pickerRef: RNPickerSelect | null = null;
   return (
     <View
@@ -217,7 +218,12 @@ const styles = StyleSheet.create({
     flex:1,
     width:'80%',
     alignSelf:'flex-end'
-  }
+  },
+  buttonContents : {
+    fontSize: 16,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+  },
 });
 
 interface OwnProps {
