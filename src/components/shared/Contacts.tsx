@@ -7,9 +7,10 @@ import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { addContact, emptyContact, contactsToArray, newContactName } from '../../middleware/ContactsMiddleware';
 import { Contact, State } from '../../Types';
-import { ThemeState } from '../../reducers/ThemeReducer';
+import { ThemeState, paperColors } from '../../reducers/ThemeReducer';
 import { ContactsState } from '../../reducers/ContactsReducer';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const NewContact = (props: {
   value?: Contact
@@ -88,11 +89,10 @@ const NewContact = (props: {
 }
 
 type Props = {
-  value?: Contact;
-  onValueChange: (Contact: Contact) => void;
+  value?: Array<string>;
+  onValueChange: (contacts: Array<string>) => void;
   theme: ThemeState['theme'],
   contacts: ContactsState['contacts'],
-  selectedContacts?: Array<string>,
   addNewContact: (contact: Contact, onComplete: (contact: Contact) => void) => void
 };
 
@@ -101,12 +101,12 @@ const Contacts = ({
   onValueChange,
   theme,
   contacts,
-  selectedContacts,
   addNewContact
 }: Props) => {
   const [visible, setVisible] = React.useState(false);
-  const [selected, setSelected] = React.useState(value?.name);
+  const [newContacts, setNewContacts] = React.useState(value || new Array<string>());
   const contactsArray = contactsToArray(contacts);
+  let pickerRef: RNPickerSelect | null = null;
   return (
     <View
       style={{
@@ -117,21 +117,31 @@ const Contacts = ({
         paddingVertical: 12,
       }}
     >
-      <Text style={{color: theme.paper.colors.text,flex:1}}>Contact</Text>
-      {selectedContacts && selectedContacts.map((cId: string) => contacts[cId] && <View style={{width:'80%',alignItems:'flex-start',alignSelf:'flex-end'}}><Text>{contacts[cId].name}</Text></View>)}
-      <View style={{flex:1,marginLeft:20,width:'80%', alignSelf:'flex-end'}}>
+      <Text style={{color: theme.paper.colors.text}}>Contact</Text>
+      {newContacts && newContacts.map((cId: string) => contacts[cId] && 
+        <View style={styles.existingContacts}>
+          <Text style={styles.existingContactsText}>{contacts[cId].name}</Text>
+          <MaterialCommunityIcons onPress={() => {
+            setNewContacts(newContacts.filter(c => c !== cId))
+          }} style={styles.existingContactsIcon} name="delete" color={paperColors(theme).text} size={26} />
+        </View>)}
+      <View style={styles.pickerView}>
         <RNPickerSelect
+          ref={(r) => pickerRef = r}
           style={pickerStyles}
           items={contactsArray.map(c => ({label:c.name,value:c.name}))}
-          value={selected}
           onValueChange={(itemValue, itemIndex) => {
             if (itemValue) {
               const sel = contactsArray.filter(c => c.name === itemValue.toString())[0];
               if (sel.name === newContactName) {
                 setVisible(true);
-              } else {
-                setSelected(sel.name);
-                onValueChange(sel);
+              } else if (sel.key) {
+                setNewContacts([...newContacts, sel.key]);
+                if (pickerRef) {
+                  pickerRef.setState({value:undefined})
+                  pickerRef.forceUpdate()
+                }
+                onValueChange([...newContacts, sel.key]);
               }
             }
           }}
@@ -146,8 +156,11 @@ const Contacts = ({
             saveNewContact={(contact?: Contact)=> {
               if (contact) {
                 addNewContact(contact, (c: Contact) => {
-                  setVisible(false);
-                  onValueChange(c);
+                  if (c.key) {
+                    setVisible(false);
+                    setNewContacts([...newContacts, c.key]);
+                    onValueChange(newContacts);
+                  }
                 })
               } else {
                 setVisible(false)
@@ -172,13 +185,39 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     lineHeight: 22,
-    padding:3
+    padding:3,
   },
   button: {
     padding: 16,
     alignItems: 'center',
-    paddingVertical: 16
+    paddingVertical: 16,
   },
+  existingContacts: {
+    flexDirection: 'row',
+    paddingVertical: 8,
+    paddingHorizontal:8,
+    fontSize: 20,
+    justifyContent:'flex-end',
+    marginLeft:'20%'
+  },
+  existingContactsText: {
+    flex:1,
+    fontSize: 16,
+    width:'90%',
+    alignSelf:'flex-start',
+    paddingVertical: 8,
+  },
+  existingContactsIcon: {
+    fontSize: 20,
+    width:'10%',
+    paddingVertical: 8,
+    paddingHorizontal:4,
+  },
+  pickerView: {
+    flex:1,
+    width:'80%',
+    alignSelf:'flex-end'
+  }
 });
 
 interface OwnProps {

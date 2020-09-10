@@ -1,6 +1,7 @@
 import React from 'react';
 import { DateObject } from 'react-native-calendars';
 import { StyleSheet, ScaledSize, Dimensions, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { connect } from 'react-redux';
 import { CalendarWindow, CalendarEntry, State } from '../../Types';
 import { RouteProp } from '@react-navigation/native';
@@ -64,17 +65,8 @@ const NewSlot = (props : {
     const save = () => {
       return saveEntry(newCalendarEntry)
     }
-    const insertIf = (existing: CalendarEntry, newContactKey?: string): {contacts: Array<string>} | undefined => {
-      if (existing.contacts && newContactKey) {
-        return {contacts: [...existing.contacts, newContactKey]}
-      } else if (newContactKey) {
-        return {contacts: [newContactKey]}
-      } else {
-        return undefined
-      }
-    }
     return (
-      <View>
+      <SafeAreaView>
         <ScrollView>
           <TextInput value={newCalendarEntry.title} onChangeText={(text) => setNewCalendarEntry({...newCalendarEntry, title: text})} placeholder="Add title" />
           <TypesSelector 
@@ -82,8 +74,8 @@ const NewSlot = (props : {
             onValueChange={(datatype) => setNewCalendarEntry({...newCalendarEntry, typeId: datatype.key})} />
           <View style={{height:StyleSheet.hairlineWidth,backgroundColor:'#AAA'}}></View>
           <ContactsSelector
-            selectedContacts={entry.contacts}
-            onValueChange={(contact) => setNewCalendarEntry({...newCalendarEntry, ...insertIf(newCalendarEntry, contact.key)})} />
+            value={newCalendarEntry.contacts}
+            onValueChange={(contacts) => setNewCalendarEntry({...newCalendarEntry, contacts})} />
           <TouchableOpacity onPress={() => setPickerPhase(PickerPhases.Starts)}>
             <View style={{...styles.buttonRow, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#AAA'}}>
               <Text style={{color: theme.paper.colors.text}}>From</Text>
@@ -126,7 +118,7 @@ const NewSlot = (props : {
         <TouchableOpacity onPress={save} style={{backgroundColor: theme.paper.colors.accent, ...styles.button}}>
           <Text style={styles.buttonContents}>Save</Text>
         </TouchableOpacity>
-      </View>
+      </SafeAreaView>
     )
 }
 
