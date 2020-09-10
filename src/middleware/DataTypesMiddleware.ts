@@ -54,11 +54,13 @@ export function contrast(colorHex: string | undefined, threshold: number = 128):
 export const datatypesToArray = (datatypes: DataTypesState['datatypes']) => {
   const datatypesArray = React.useMemo(() => {
     const arr = new Array<DataType>({title:defaultTypeTitle,color:'#600'});
-    const keys = Object.keys(datatypes);
-    for(let i=0;i<keys.length;i++) {
-      const dt = datatypes[keys[i]];
-      dt.key = keys[i]
-      arr.push(dt);
+    if (datatypes) {
+      const keys = Object.keys(datatypes);
+      for(let i=0;i<keys.length;i++) {
+        const dt = datatypes[keys[i]];
+        dt.key = keys[i]
+        arr.push(dt);
+      }
     }
     arr.push({title:newTypeTitle,color:''})
     return arr;
@@ -126,7 +128,7 @@ export const watchDataTypes = (): ThunkAction<Promise<void>, State, firebase.app
         firebase.firestore()
           .collection('users')
           .doc(user.uid)
-          .collection('calendar')
+          .collection('datatypes')
           .orderBy('window.starts')
           .onSnapshot((documentSnapshot: firebase.firestore.QuerySnapshot) => {
             const datatypes: DataTypesState['datatypes'] = {};

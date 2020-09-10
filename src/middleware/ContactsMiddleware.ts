@@ -12,11 +12,13 @@ export const emptyContact: Contact = {name:'',};
 export const contactsToArray = (contacts: ContactsState['contacts'], includeNewContactitem?: boolean) => {
   const ContactsArray = React.useMemo(() => {
     const arr = new Array<Contact>();
-    const keys = Object.keys(contacts);
-    for(let i=0;i<keys.length;i++) {
-      const dt = contacts[keys[i]];
-      dt.key = keys[i]
-      arr.push(dt);
+    if (contacts) {
+      const keys = Object.keys(contacts);
+      for(let i=0;i<keys.length;i++) {
+        const dt = contacts[keys[i]];
+        dt.key = keys[i]
+        arr.push(dt);
+      }
     }
     if (includeNewContactitem) {
       arr.push({name:newContactName})

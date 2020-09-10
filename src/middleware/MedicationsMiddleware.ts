@@ -12,11 +12,13 @@ export const emptyMedication: Medication = {name:'',active:true};
 export const medicationsToArray = (medication: MedicationsState['medications'], includeNewMedicationitem?: boolean) => {
   const medicationsArray = React.useMemo(() => {
     const arr = new Array<Medication>();
-    const keys = Object.keys(medication);
-    for(let i=0;i<keys.length;i++) {
-      const dt = medication[keys[i]];
-      dt.key = keys[i]
-      arr.push(dt);
+    if (medication) {
+      const keys = Object.keys(medication);
+      for(let i=0;i<keys.length;i++) {
+        const dt = medication[keys[i]];
+        dt.key = keys[i]
+        arr.push(dt);
+      }
     }
     if (includeNewMedicationitem) {
       arr.push({name:newMedicationName,active:true})
@@ -66,7 +68,7 @@ export const getMedications = (): ThunkAction<Promise<void>, State, firebase.app
         //firebase.firestore.setLogLevel('debug');
         dispatch(isFetching(true))
         firebase.firestore().collection('users')
-          .doc(user.uid).collection('medication')
+          .doc(user.uid).collection('medications')
           .get()
           .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
             const medication: MedicationsState['medications'] = {};
@@ -96,7 +98,7 @@ export const watchMedications = (): ThunkAction<Promise<void>, State, firebase.a
         firebase.firestore()
           .collection('users')
           .doc(user.uid)
-          .collection('medication')
+          .collection('medications')
           .orderBy('name')
           .onSnapshot((documentSnapshot: firebase.firestore.QuerySnapshot) => {
             const medications: MedicationsState['medications'] = {};
@@ -122,7 +124,7 @@ export const addMedication = (medicaiton: Medication, onComplete?: (Medication: 
           // its an update
           const { key, ...data } = medicaiton;
           firebase.firestore().collection('users')
-            .doc(user.uid).collection('medication')
+            .doc(user.uid).collection('medications')
             .doc(key).update(data)
             .then(() => {
               dispatch(isFetching(true))
@@ -132,7 +134,7 @@ export const addMedication = (medicaiton: Medication, onComplete?: (Medication: 
           // it's a new record
           medicaiton.created = new Date(Date.now())
           firebase.firestore().collection('users')
-            .doc(user.uid).collection('medication')
+            .doc(user.uid).collection('medications')
             .add(medicaiton)
             .then((value: DocumentReference<DocumentData>) => {
               dispatch(isFetching(true))

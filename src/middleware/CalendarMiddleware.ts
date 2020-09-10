@@ -75,12 +75,14 @@ function dateDiff(a: Date, b: Date): string {
 
 export const datesToArray = (dates: CalendarState['dates'], oldest?: Date, newest?: Date): Array<CalendarEntry> => {
   const response = new Array<CalendarEntry>();
-  const keys = Object.keys(dates);
-  for(let i = 0;i<keys.length;i++) {
-    const date = dates[keys[i]];
-    const { starts } = date.window;
-    if ((oldest && newest && (starts >= oldest && starts < newest)) || !(oldest && newest))  {
-      response.push(date)
+  if (dates) {
+    const keys = Object.keys(dates);
+    for(let i = 0;i<keys.length;i++) {
+      const date = dates[keys[i]];
+      const { starts } = date.window;
+      if ((oldest && newest && (starts >= oldest && starts < newest)) || !(oldest && newest))  {
+        response.push(date)
+      }
     }
   }
   return response

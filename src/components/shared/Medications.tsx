@@ -15,14 +15,22 @@ import DataTypes from './DataTypes';
 import Contacts from './Contacts';
 import Picker from '../shared/ChronoPicker';
 import SettingsItem from './SettingsItem';
+import { formatDateAndTime } from '../../middleware/CalendarMiddleware'
 
-export const NewMedication = (props: {
+type NewMedicationProps = {
   value?: Medication
   medications: MedicationsState['medications'],
   theme: ThemeState['theme'],
   saveNewMedication: (medication?: Medication) => void
-}) => {
-  const { value, medications, theme, saveNewMedication } = props;
+}
+
+export const NewMedication = ({
+  value,
+  medications,
+  theme,
+  saveNewMedication
+}: NewMedicationProps) => {
+  console.log({theme})
   const [name, setName] = React.useState(value?.name || '');
   const [active, setActive] = React.useState(value?.active || false);
   const [nameTouched, setNameTouched] = React.useState(false);
@@ -62,21 +70,22 @@ export const NewMedication = (props: {
         }}
         placeholder="Name" />
       <SettingsItem label="Active" value={active} onValueChange={(val) => setActive(val)} />
-      <Text>Type</Text>
       <DataTypes
         value={typeId}
         onValueChange={(dt) => dt.key && setTypeId(dt.key)}
         />
-      <Text>Prescribed</Text>
-      <Contacts
-        value={[prescribed]}
-        limit={1}
-        onValueChange={(cId) => setPrescribed(cId[0])}
-        />
+      <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
+        <Text style={{width:'20%',marginLeft:16}}>Prescriber</Text>
+        <Contacts
+          value={[prescribed]}
+          limit={1}
+          onValueChange={(cId) => setPrescribed(cId[0])}
+          />
+      </View>
       <TouchableOpacity onPress={() => setShowPicker(true)}>
         <View style={{...styles.buttonRow, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#AAA'}}>
           <Text style={{color: theme.paper.colors.text}}>Last Filled</Text>
-          <Text>{lastFilled ? lastFilled.toLocaleTimeString() : 'unknown'}</Text>
+          <Text>{lastFilled ? formatDateAndTime(lastFilled) : 'unknown'}</Text>
         </View>
       </TouchableOpacity>
       {showPicker && <Picker

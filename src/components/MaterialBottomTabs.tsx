@@ -2,17 +2,18 @@ import * as React from 'react';
 import { StyleSheet } from 'react-native';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import PainLogEntry from './shared/PainLogEntry';
-import ContactList from './Contacts/ContactList';
+import ContactsList from './Contacts/ContactsList';
 import Agenda from './shared/Agenda';
 import CalendarNavigator, { CalendarStackParamList } from './calendar/CalendarNavigator';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { MedicationsList } from './Medications/MedicationsList';
+import MedicationsList from './Medications/MedicationsList';
+import { contrast } from '../middleware/DataTypesMiddleware';
 
 export type MaterialBottomTabParams = {
   Agenda: undefined;
   Calendar: CalendarStackParamList;
   PainLogEntry: undefined;
-  ContactList: undefined;
+  ContactsList: undefined;
   MedicationsList: undefined;
 };
 
@@ -21,17 +22,27 @@ const MaterialBottomTabs = createMaterialBottomTabNavigator<
 >();
 
 export default function MaterialBottomTabsScreen() {
+  const colors = new Array<string>()
+  for(let i=0;i<5;i++) {
+    let color = Math.floor(Math.random()*16777215).toString(16)
+    if (color.length < 6) {
+      color = '0'.repeat(6 - color.length) + color
+    }
+    colors.push('#' + color)
+  }
   return (
-    <MaterialBottomTabs.Navigator barStyle={styles.tabBar}>
+    <MaterialBottomTabs.Navigator
+      labeled={false}
+      barStyle={styles.tabBar}
+    >
       <MaterialBottomTabs.Screen
         name="Agenda"
         component={Agenda}
         options={{
-          tabBarLabel: 'Agenda',
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="home" color={color} size={26} />
+            <MaterialCommunityIcons name="home" color={contrast(color)} size={26} />
           ),
-          tabBarColor: '#C9E7F8',
+          tabBarColor: colors[0],
         }}
       />
       <MaterialBottomTabs.Screen
@@ -39,42 +50,39 @@ export default function MaterialBottomTabsScreen() {
         component={CalendarNavigator}
         options={{
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="calendar" color={color} size={26} />
+            <MaterialCommunityIcons name="calendar" color={contrast(color)} size={26} />
           ),
-          tabBarColor: '#C9E7F8',
+          tabBarColor: colors[1],
         }}
       />
       <MaterialBottomTabs.Screen
-        name="ContactList"
-        component={ContactList}
+        name="ContactsList"
+        component={ContactsList}
         options={{
-          tabBarLabel: 'Contacts',
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="contacts" color={color} size={26} />
+            <MaterialCommunityIcons name="contacts" color={contrast(color)} size={26} />
           ),
-          tabBarColor: '#F7EAA2',
+          tabBarColor: colors[2],
         }}
       />
       <MaterialBottomTabs.Screen
         name="MedicationsList"
         component={MedicationsList}
         options={{
-          tabBarLabel: 'Medications',
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="pill" color={color} size={26} />
+            <MaterialCommunityIcons name="pill" color={contrast(color)} size={26} />
           ),
-          tabBarColor: '#F7EAA2',
+          tabBarColor: colors[3],
         }}
       />
       <MaterialBottomTabs.Screen
         name="PainLogEntry"
         component={PainLogEntry}
         options={{
-          tabBarLabel: 'PainLog',
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="human" color={color} size={26} />
+            <MaterialCommunityIcons name="human" color={contrast(color)} size={26} />
           ),
-          tabBarColor: '#FAD4D6',
+          tabBarColor: colors[4],
         }}
       />
     </MaterialBottomTabs.Navigator>
@@ -85,4 +93,12 @@ const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: 'white',
   },
+  tabBarLabel: {
+    paddingBottom: 6,
+    fontSize: 10,
+    textAlign: 'center'
+  },
+  tabBarLabelActive: {
+    color: 'red'
+  }
 });

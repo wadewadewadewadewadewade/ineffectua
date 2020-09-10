@@ -96,8 +96,8 @@ export const MedicationsList = ({
             theme={theme}
             saveNewMedication={(medication?: Medication)=> {
               if (medication) {
-                addNewMedication(medication, (c: Medication) => {
-                  if (c.key) {
+                addNewMedication(medication, (m: Medication) => {
+                  if (m.key) {
                     setAddOrEditMedicationId(undefined);
                     //setNewMedications([...newMedications, c.key]);
                     //onValueChange(newMedications);
