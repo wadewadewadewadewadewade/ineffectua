@@ -6,12 +6,14 @@ import ContactList from './Contacts/ContactList';
 import Agenda from './shared/Agenda';
 import CalendarNavigator, { CalendarStackParamList } from './calendar/CalendarNavigator';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MedicationsList } from './Medications/MedicationsList';
 
 export type MaterialBottomTabParams = {
   Agenda: undefined;
   Calendar: CalendarStackParamList;
   PainLogEntry: undefined;
   ContactList: undefined;
+  MedicationsList: undefined;
 };
 
 const MaterialBottomTabs = createMaterialBottomTabNavigator<
@@ -49,6 +51,17 @@ export default function MaterialBottomTabsScreen() {
           tabBarLabel: 'Contacts',
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="contacts" color={color} size={26} />
+          ),
+          tabBarColor: '#F7EAA2',
+        }}
+      />
+      <MaterialBottomTabs.Screen
+        name="MedicationsList"
+        component={MedicationsList}
+        options={{
+          tabBarLabel: 'Medications',
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="pill" color={color} size={26} />
           ),
           tabBarColor: '#F7EAA2',
         }}

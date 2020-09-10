@@ -6,7 +6,6 @@ import { connect } from 'react-redux';
 import { CalendarWindow, CalendarEntry, State } from '../../Types';
 import { RouteProp } from '@react-navigation/native';
 import { ScrollView, TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInput, Text, Button, FAB, Modal, Portal } from 'react-native-paper';
 import { CalendarStackParamList } from './CalendarNavigator';
 import { CalendarState } from '../../reducers/CalendarReducer';
@@ -19,28 +18,10 @@ import TypesSelector from '../shared/DataTypes';
 import { DataTypesState } from '../../reducers/DataTypesReducer';
 import { defaultColor, contrast } from '../../middleware/DataTypesMiddleware';
 import ContactsSelector from '../shared/Contacts';
+import Picker from '../shared/ChronoPicker';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 const screenHeightMultiplier = 1.2;
-
-const Picker = (props : { value: Date, onResult: (d?: Date) => void, minimum?: Date }) => {
-  const { value, minimum, onResult } = props;
-  const [phase, setPhase] = React.useState('date' as "time" | "date" | "datetime" | "countdown" | undefined);
-  const [datetime, setDateTime] = React.useState(value);
-  return (
-    <DateTimePicker mode={phase} value={datetime} minimumDate={minimum} onChange={(e: Event, d?: Date) => {
-      if (d) {
-        setDateTime(d);
-        if (phase === 'date') {
-          setPhase('time')
-        } else {
-          onResult(d)
-        }
-      } else {
-        onResult()
-      }
-    }}/>)
-}
 
 enum PickerPhases {
   Hidden,

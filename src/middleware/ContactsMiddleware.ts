@@ -43,6 +43,7 @@ const convertDocumentDataToContact = (data: firebase.firestore.DocumentData): Co
   const doc = data.data()
   const contactData: Contact = {
     key: data.id,
+    created: doc.created && doc.created.seconds && new Date(doc.created.seconds * 1000),
     typeId: doc.typeId,
     name: doc.name,
     number: doc.number,

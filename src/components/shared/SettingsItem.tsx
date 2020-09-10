@@ -5,7 +5,7 @@ import { Subheading, Switch } from 'react-native-paper';
 type Props = {
   label: string;
   value: boolean;
-  onValueChange: () => void;
+  onValueChange: (value: boolean) => void;
 };
 
 export default function SettingsItem({ label, value, onValueChange }: Props) {

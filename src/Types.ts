@@ -4,12 +4,19 @@ import { AuthState, initialState as authInitialState } from './reducers/AuthRedu
 import { CalendarState, initialState as calendarInitialState } from './reducers/CalendarReducer';
 import { DataTypesState, initialState as datatypesInitialState } from './reducers/DataTypesReducer';
 import { ContactsState, initialState as contactsInitialState } from './reducers/ContactsReducer';
+import { MedicationsState, initialState as medicationsInitialState } from './reducers/MedicationsReducer';
 
 export const NAVIGATION_PERSISTENCE_KEY = 'NAVIGATION_STATE';
 export const THEME_PERSISTENCE_KEY = 'THEME_TYPE';
 
 
-export type State = AuthState & ThemeState & CalendarState & DataTypesState & ContactsState;
+export type State =
+    AuthState
+  & ThemeState
+  & CalendarState
+  & DataTypesState
+  & ContactsState
+  & MedicationsState;
 
 // Initial State
 export const initialState: State = {
@@ -17,7 +24,8 @@ export const initialState: State = {
   theme: themeInitialState['theme'],
   dates: calendarInitialState,
   datatypes: datatypesInitialState,
-  contacts: contactsInitialState
+  contacts: contactsInitialState,
+  medications: medicationsInitialState
 }
 
 export type RootDrawerParamList = {
@@ -71,5 +79,19 @@ export type Contact = {
   number?: string,
   email?: string,
   location?: string,
+  description?: string
+}
+
+/*==== Medications ====*/
+
+export type Medication = {
+  created?: Date,
+  key?: string,
+  typeId?: string,
+  name: string,
+  active: boolean,
+  prescribed?: string,
+  lastFilled?: Date,
+  refills?: number,
   description?: string
 }

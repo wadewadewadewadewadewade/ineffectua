@@ -91,6 +91,7 @@ export const NewContact = (props: {
 
 type Props = {
   value?: Array<string>;
+  limit?: number;
   onValueChange: (contacts: Array<string>) => void;
   theme: ThemeState['theme'],
   contacts: ContactsState['contacts'],
@@ -99,6 +100,7 @@ type Props = {
 
 const Contacts = ({
   value,
+  limit,
   onValueChange,
   theme,
   contacts,
@@ -108,7 +110,30 @@ const Contacts = ({
   const [newContacts, setNewContacts] = React.useState(value || new Array<string>());
   const contactsArray = contactsToArray(contacts, true);
   let pickerRef: RNPickerSelect | null = null;
-  return (
+  return limit === 1 ? (
+    <View style={styles.pickerView}>
+      <RNPickerSelect
+        ref={(r) => pickerRef = r}
+        style={pickerStyles}
+        items={contactsArray.map(c => ({label:c.name,value:c.name}))}
+        onValueChange={(itemValue, itemIndex) => {
+          if (itemValue) {
+            const sel = contactsArray.filter(c => c.name === itemValue.toString())[0];
+            if (sel.name === newContactName) {
+              setVisible(true);
+            } else if (sel.key) {
+              setNewContacts([...newContacts, sel.key]);
+              if (pickerRef) {
+                pickerRef.setState({value:undefined})
+                pickerRef.forceUpdate()
+              }
+              onValueChange([...newContacts, sel.key]);
+            }
+          }
+        }}
+        />
+    </View>
+    ) : (
     <View
       style={{
         flexDirection: 'column',

@@ -13,14 +13,14 @@ import { ColorPicker, fromHsv } from 'react-native-color-picker';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const NewDataType = (props: {
-  value?: DataType
+  value?: DataType | string
   datatypes: DataTypesState['datatypes'],
   theme: ThemeState['theme'],
   saveNewDataType: (datatype?: DataType) => void
 }) => {
   const { value, datatypes, theme, saveNewDataType } = props;
-  const [newTitle, setNewTitle] = React.useState(value?.title ||'');
-  const [newColor, setNewColor] = React.useState(value?.color || '');
+  const [newTitle, setNewTitle] = React.useState(typeof value === 'string' ? datatypes[value]?.title : value?.title ||'');
+  const [newColor, setNewColor] = React.useState(typeof value === 'string' ? datatypes[value]?.color : value?.color || '');
   const newDataType = {title:newTitle,color:newColor};
   const datatypesArray = datatypesToArray(datatypes);
   const newTitleExists = datatypesArray.filter(dt => dt.title === newTitle);
@@ -53,7 +53,7 @@ const NewDataType = (props: {
 
 type Props = {
   dataTypeId?: string,
-  value?: DataType;
+  value?: DataType | string;
   onValueChange: (datatype: DataType) => void;
   theme: ThemeState['theme'],
   datatypes: DataTypesState['datatypes'],
@@ -69,7 +69,7 @@ const DataTypes = ({
   addDataTypes
 }: Props) => {
   const [visible, setVisible] = React.useState(false);
-  const [selected, setSelected] = React.useState(value?.title || datatypes && dataTypeId && datatypes[dataTypeId] && datatypes[dataTypeId].title || defaultTypeTitle);
+  const [selected, setSelected] = React.useState(typeof value === 'string' ? datatypes[value]?.title : value?.title || datatypes && dataTypeId && datatypes[dataTypeId] && datatypes[dataTypeId].title || defaultTypeTitle);
   const datatypesArray = datatypesToArray(datatypes);
   //<Button onPress={() => setVisible(true)}><Text>testing</Text></Button>
   return (
