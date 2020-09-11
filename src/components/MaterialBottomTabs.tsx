@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions, ScaledSize } from 'react-native';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import PainLog from './painlog/PainLog';
 import ContactsList from './Contacts/ContactsList';
@@ -39,10 +39,24 @@ export default function MaterialBottomTabsScreen() {
     }
     colors.push('#' + color)
   }
+  const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
+
+  React.useEffect(() => {
+    const onDimensionsChange = ({ window }: { window: ScaledSize }) => {
+      setDimensions(window);
+    };
+
+    Dimensions.addEventListener('change', onDimensionsChange);
+
+    return () => Dimensions.removeEventListener('change', onDimensionsChange);
+  }, []);
+
+  const isLandscapeOnPhone = dimensions.width > dimensions.height && dimensions.height <= 420;
+
   return (
     <MaterialBottomTabs.Navigator
       labeled={false}
-      barStyle={styles.tabBar}
+      barStyle={{...styles.tabBar, display: isLandscapeOnPhone ? 'none' : 'flex'}}
     >
       <MaterialBottomTabs.Screen
         name="Agenda"

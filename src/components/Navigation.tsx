@@ -179,7 +179,7 @@ const Navigation = (props: {
           onStateChange={(state) => {
             const currentRoute = navigationRef.current?.getCurrentRoute();
             const currentRouteName = currentRoute?.name;
-            
+            console.info({currentRouteName})
             if (currentRouteName && previousRouteName !== currentRouteName) {
               // The line below uses the expo-firebase-analytics tracker
               // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
@@ -213,8 +213,8 @@ const Navigation = (props: {
                   initialRouteName: 'Agenda',
                   screens: {
                     CalendarNavigator: 'calendar/',
-                    PainLogNavigator: 'pain-log/',
-                    ContactsNavigator: 'people',
+                    PainLog: 'pain-log/',
+                    ContactsList: 'people',
                     Dialog: 'dialog',
                     Agenda: '',
                     NotFound: '.+',
@@ -228,7 +228,7 @@ const Navigation = (props: {
             formatter: getHeaderTitle
           }}>
         {isUserAuthenticated(user) ? (
-          <Drawer.Navigator drawerType={isLargeScreen ? 'permanent' : undefined} drawerContent={() => <Profile />}>
+          <Drawer.Navigator drawerType={isLargeScreen ? 'permanent' : undefined} drawerContent={() => <Profile navigationRef={navigationRef.current} />}>
             <Drawer.Screen name="Root">
               {({ navigation }: DrawerScreenProps<RootDrawerParamList>) => (
                 <Stack.Navigator
@@ -245,7 +245,7 @@ const Navigation = (props: {
                         : () => (
                             <Appbar.Action
                               color={paperColors(theme).text}
-                              icon={() => <MaterialCommunityIcons name="account" color={paperColors(theme).text} size={26} />}
+                              icon={() => <MaterialCommunityIcons name="menu" color={paperColors(theme).text} size={26} />}
                               onPress={() => navigation.toggleDrawer()}
                             />
                           ),
