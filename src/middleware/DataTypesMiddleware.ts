@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { State } from './../Types';
-import { GetDataTypesAction, ReplaceDataTypesAction, DataTypesState } from '../reducers/DataTypesReducer';
+import { DataType, GetDataTypesAction, ReplaceDataTypesAction, DataTypesType } from '../reducers/DataTypesReducer';
 import { Action, isFetching } from './../reducers';
-import { DataType } from '../Types';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { DocumentData, DocumentReference } from '@firebase/firestore-types';
+import { firebaseDocumentToArray } from '.';
 
 export const newTypeTitle = '+ Add New Type';
 export const defaultTypeTitle = 'Default';
@@ -51,28 +51,11 @@ export function contrast(colorHex: string | undefined, threshold: number = 128):
 }
 // END contrasting text calculation
 
-export const datatypesToArray = (datatypes: DataTypesState['datatypes']) => {
-  const datatypesArray = React.useMemo(() => {
-    const arr = new Array<DataType>({title:defaultTypeTitle,color:'#600'});
-    if (datatypes) {
-      const keys = Object.keys(datatypes);
-      for(let i=0;i<keys.length;i++) {
-        const dt = datatypes[keys[i]];
-        dt.key = keys[i]
-        arr.push(dt);
-      }
-    }
-    arr.push({title:newTypeTitle,color:''})
-    return arr;
-  }, [datatypes])
-  return datatypesArray
-}
-
-export const dataTypeIsValid = (datatype: DataType, datatypes: DataTypesState['datatypes']): boolean => {
+export const dataTypeIsValid = (datatype: DataType, datatypes: DataTypesType): boolean => {
   const { title, color } = datatype;
   if (title && title.trim().length > 0 && color && color.trim().length > 0) { // no null or empty titles or colors
     if (title.trim() !== newTypeTitle && title.trim() !== defaultTypeTitle) { // no reserved titles
-      const preexistingDataTypesByTitle = datatypesToArray(datatypes).filter(dt => dt.title = title.trim())
+      const preexistingDataTypesByTitle = firebaseDocumentToArray(datatypes).filter((dt: DataType) => dt.title = title.trim())
       if (preexistingDataTypesByTitle.length === 0) { // no duplicate titles
         return true      
       }
@@ -101,7 +84,7 @@ export const getDataTypes = (): ThunkAction<Promise<void>, State, firebase.app.A
           .doc(user.uid).collection('datatypes')
           .get()
           .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-            const datatypes: DataTypesState['datatypes'] = {};
+            const datatypes: DataTypesType = {};
             const arr = querySnapshot.docs.map(d => {
               const val = convertDocumentDataToDataType(d);
               return val
@@ -131,7 +114,7 @@ export const watchDataTypes = (): ThunkAction<Promise<void>, State, firebase.app
           .collection('datatypes')
           .orderBy('window.starts')
           .onSnapshot((documentSnapshot: firebase.firestore.QuerySnapshot) => {
-            const datatypes: DataTypesState['datatypes'] = {};
+            const datatypes: DataTypesType = {};
             const arr = documentSnapshot.docs.map(d => {
               const val = convertDocumentDataToDataType(d);
               return val

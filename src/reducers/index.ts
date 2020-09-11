@@ -6,6 +6,7 @@ import CalendarReducer, { Action as CalendarAction }  from './CalendarReducer';
 import DataTypesReducer, { Action as DataTypesAction } from './DataTypesReducer';
 import ContactsReducer, { Action as ContactsAction } from './ContactsReducer';
 import MedicationsReducer, { Action as MedicationsAction } from './MedicationsReducer';
+import PainLogReducer, { Action as PainLogAction } from './PainLogReducer';
 
 const SET_FETCHING = 'SET_FETCHING';
 
@@ -25,7 +26,8 @@ export type Action =
   | CalendarAction
   | DataTypesAction
   | ContactsAction
-  | MedicationsAction;
+  | MedicationsAction
+  | PainLogAction
 
 // Redux: Root Reducer
 const rootReducer = combineReducers({
@@ -34,6 +36,7 @@ const rootReducer = combineReducers({
   dates: CalendarReducer,
   datatypes: DataTypesReducer,
   contacts: ContactsReducer,
-  medications: MedicationsReducer
+  medications: MedicationsReducer,
+  painlog: PainLogReducer,
 });// Exports
 export default rootReducer;

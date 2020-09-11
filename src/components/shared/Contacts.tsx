@@ -5,12 +5,13 @@ import RNPickerSelect, { PickerStyle } from 'react-native-picker-select';
 import { Text, Button, Modal, Portal, TextInput } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { addContact, emptyContact, contactsToArray, newContactName } from '../../middleware/ContactsMiddleware';
-import { Contact, State } from '../../Types';
+import { addContact, emptyContact, newContactName } from '../../middleware/ContactsMiddleware';
+import { State } from '../../Types';
 import { ThemeState, paperColors } from '../../reducers/ThemeReducer';
-import { ContactsState } from '../../reducers/ContactsReducer';
+import { Contact, ContactsState } from '../../reducers/ContactsReducer';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { firebaseDocumentToArray } from '../../middleware';
 
 export const NewContact = (props: {
   value?: Contact
@@ -33,7 +34,7 @@ export const NewContact = (props: {
     description
   };
   const buttonLabel = !value || value === emptyContact ? 'Add New' : 'Edit';
-  const contactsArray = contactsToArray(contacts);
+  const contactsArray = firebaseDocumentToArray<Contact>(contacts);
   const nameExists = contactsArray.filter(c => c.name === name);
   const [descriptionHeight, setDescriptionHeight] = React.useState(1);
   return (
@@ -108,7 +109,7 @@ const Contacts = ({
 }: Props) => {
   const [visible, setVisible] = React.useState(false);
   const [newContacts, setNewContacts] = React.useState(value || new Array<string>());
-  const contactsArray = contactsToArray(contacts, true);
+  const contactsArray = firebaseDocumentToArray<Contact>(contacts, {name:newContactName});
   let pickerRef: RNPickerSelect | null = null;
   return limit === 1 ? (
     <View style={styles.pickerView}>

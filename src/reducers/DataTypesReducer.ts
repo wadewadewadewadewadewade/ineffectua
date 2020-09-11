@@ -1,4 +1,18 @@
-import { DataType } from '../Types';
+export type DataType = {
+  key?: string,
+  title: string,
+  color: string
+}
+
+export type DataTypesType = {
+  [id: string]: DataType
+}
+
+export type DataTypesState = {
+  datatypes: DataTypesType
+}
+
+export const initialState: DataTypesType = {};
 
 export const GET_TYPES= 'GET_TYPES';
 export const SET_TYPES= 'SET_TYPES';
@@ -6,42 +20,34 @@ export const REPLACE_TYPES= 'REPLACE_TYPES';
 
 export type Action = {
     type: 'SET_TYPES';
-    datatypes: DataTypesState['datatypes']
+    datatypes: DataTypesType
   } | {
     type: 'GET_TYPES';
-    datatypes: DataTypesState['datatypes']
+    datatypes: DataTypesType
   } | {
     type: 'REPLACE_TYPES';
-    datatypes: DataTypesState['datatypes']
+    datatypes: DataTypesType
   };
 
-export const GetDataTypesAction = (datatypes: DataTypesState['datatypes']): Action => ({
+export const GetDataTypesAction = (datatypes: DataTypesType): Action => ({
   type: GET_TYPES,
   datatypes
 });
 
-export const SetDataTypesAction = (datatypes: DataTypesState['datatypes']): Action => ({
+export const SetDataTypesAction = (datatypes: DataTypesType): Action => ({
   type: SET_TYPES,
   datatypes
 });
 
-export const ReplaceDataTypesAction = (datatypes: DataTypesState['datatypes']): Action => ({
+export const ReplaceDataTypesAction = (datatypes: DataTypesType): Action => ({
   type: SET_TYPES,
   datatypes
 });
-
-export type DataTypesState = {
-  datatypes: {
-    [id: string]: DataType
-  }
-}
-
-export const initialState = {};
 
 export default function DataTypesReducer(
   prevState = initialState,
   action: Action
-): DataTypesState['datatypes'] {
+): DataTypesType {
   switch (action.type) {
     case GET_TYPES:
     case SET_TYPES:

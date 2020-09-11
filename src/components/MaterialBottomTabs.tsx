@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { StyleSheet } from 'react-native';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-import PainLogEntry from './shared/PainLogEntry';
+import PainLog from './painlog/PainLog';
 import ContactsList from './Contacts/ContactsList';
 import Agenda from './shared/Agenda';
 import CalendarNavigator, { CalendarStackParamList } from './calendar/CalendarNavigator';
@@ -12,7 +12,7 @@ import { contrast } from '../middleware/DataTypesMiddleware';
 export type MaterialBottomTabParams = {
   Agenda: undefined;
   Calendar: CalendarStackParamList;
-  PainLogEntry: undefined;
+  PainLog: undefined;
   ContactsList: undefined;
   MedicationsList: undefined;
 };
@@ -23,8 +23,17 @@ const MaterialBottomTabs = createMaterialBottomTabNavigator<
 
 export default function MaterialBottomTabsScreen() {
   const colors = new Array<string>()
+  const randomColor = () => { // pick a color that is neither too dark nor too light
+    const randomIndividualColor = () => {
+      const range = 128
+      const shift = Math.floor((256 - range) / 2)
+      const color = Math.floor(Math.random()*range+shift).toString(16)
+      return color.length < 2 ? '0' + color : color
+    }
+    return randomIndividualColor() + randomIndividualColor() + randomIndividualColor()
+  }
   for(let i=0;i<5;i++) {
-    let color = Math.floor(Math.random()*16777215).toString(16)
+    let color = randomColor()
     if (color.length < 6) {
       color = '0'.repeat(6 - color.length) + color
     }
@@ -76,8 +85,8 @@ export default function MaterialBottomTabsScreen() {
         }}
       />
       <MaterialBottomTabs.Screen
-        name="PainLogEntry"
-        component={PainLogEntry}
+        name="PainLog"
+        component={PainLog}
         options={{
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="human" color={contrast(color)} size={26} />

@@ -5,12 +5,13 @@ import RNPickerSelect, { PickerStyle } from 'react-native-picker-select';
 import { Text, Button, Modal, Portal, TextInput } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { addDataType, newTypeTitle, defaultTypeTitle, emptyDataType, datatypesToArray } from '../../middleware/DataTypesMiddleware';
-import { DataType, State } from '../../Types';
+import { addDataType, newTypeTitle, defaultTypeTitle, emptyDataType } from '../../middleware/DataTypesMiddleware';
+import { State } from '../../Types';
 import { ThemeState } from '../../reducers/ThemeReducer';
-import { DataTypesState } from '../../reducers/DataTypesReducer';
+import { DataType, DataTypesState } from '../../reducers/DataTypesReducer';
 import { ColorPicker, fromHsv } from 'react-native-color-picker';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { firebaseDocumentToArray } from '../../middleware';
 
 const NewDataType = (props: {
   value?: DataType | string
@@ -22,7 +23,7 @@ const NewDataType = (props: {
   const [newTitle, setNewTitle] = React.useState(typeof value === 'string' ? datatypes[value]?.title : value?.title ||'');
   const [newColor, setNewColor] = React.useState(typeof value === 'string' ? datatypes[value]?.color : value?.color || '');
   const newDataType = {title:newTitle,color:newColor};
-  const datatypesArray = datatypesToArray(datatypes);
+  const datatypesArray = firebaseDocumentToArray<DataType>(datatypes);
   const newTitleExists = datatypesArray.filter(dt => dt.title === newTitle);
   return (
     <SafeAreaView style={{backgroundColor: theme.paper.colors.surface, height:'90%'}}>
@@ -70,7 +71,7 @@ const DataTypes = ({
 }: Props) => {
   const [visible, setVisible] = React.useState(false);
   const [selected, setSelected] = React.useState(typeof value === 'string' ? datatypes[value]?.title : value?.title || datatypes && dataTypeId && datatypes[dataTypeId] && datatypes[dataTypeId].title || defaultTypeTitle);
-  const datatypesArray = datatypesToArray(datatypes);
+  const datatypesArray = firebaseDocumentToArray<DataType>(datatypes);
   //<Button onPress={() => setVisible(true)}><Text>testing</Text></Button>
   return (
     <View

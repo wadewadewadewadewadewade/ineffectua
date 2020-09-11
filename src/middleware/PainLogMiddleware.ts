@@ -1,46 +1,35 @@
 import * as React from 'react';
 import { State } from './../Types';
-import { Contact, GetContactsAction, ReplaceContactsAction, ContactsState } from '../reducers/ContactsReducer';
+import { GetPainLogAction, ReplacePainLogAction, PainLogState } from '../reducers/PainLogReducer';
 import { Action, isFetching } from './../reducers';
+import { PainLogLocation } from './../reducers/PainLogReducer';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { DocumentData, DocumentReference } from '@firebase/firestore-types';
-import { firebaseDocumentToArray } from '.';
 
-export const newContactName = '+ Add New Contact';
-export const emptyContact: Contact = {name:'',};
+export const newPainLogLocationName = '+ Add New PainLogLocation';
+export const emptyPainLogLocation: PainLogLocation = {created:new Date(),x:-1,y:-1,title:'',active:true,severity:-1};
 
-export const contactIsValid = (contact: Contact, Contacts: ContactsState['contacts']): boolean => {
-  const { name } = contact;
-  if (name && name.trim().length > 0) { // no null or empty names or colors
-    if (name.trim() !== newContactName) { // no reserved names
-      const preexistingContactsByname = firebaseDocumentToArray(Contacts).filter((c: Contact) => c.name = name.trim())
-      if (preexistingContactsByname.length === 0) { // no duplicate names
-        return true      
-      }
-    }
-  }
-  return false
-}
-
-const convertDocumentDataToContact = (data: firebase.firestore.DocumentData): Contact => {
+const convertDocumentDataToPainLogLocation = (data: firebase.firestore.DocumentData): PainLogLocation => {
   const doc = data.data()
-  const contactData: Contact = {
+  const painLogLocationData: PainLogLocation = {
     key: data.id,
     created: doc.created && doc.created.seconds && new Date(doc.created.seconds * 1000),
     typeId: doc.typeId,
-    name: doc.name,
-    number: doc.number,
-    email: doc.email,
-    location: doc.location,
-    description: doc.description
+    x: doc.x,
+    y: doc.y,
+    title: doc.title,
+    active: doc.active,
+    description: doc.description,
+    severity: doc.severity,
+    medications: doc.medications
   }
   if (doc.created && doc.created.seconds) {
-    contactData.created = new Date(doc.created.seconds * 1000)
+    painLogLocationData.created = new Date(doc.created.seconds * 1000)
   }
-  return contactData
+  return painLogLocationData
 }
 
-export const getContacts = (): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
+export const getPainLog = (): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
   return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
     return new Promise<void>((resolve) => {
       const { user } = getState();
@@ -48,20 +37,20 @@ export const getContacts = (): ThunkAction<Promise<void>, State, firebase.app.Ap
         //firebase.firestore.setLogLevel('debug');
         dispatch(isFetching(true))
         firebase.firestore().collection('users')
-          .doc(user.uid).collection('contacts')
+          .doc(user.uid).collection('painLogLocations')
           .get()
           .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-            const contacts: ContactsState['contacts'] = {};
+            const painLogLocations: PainLogState['painlog'] = {};
             const arr = querySnapshot.docs.map(d => {
-              const val = convertDocumentDataToContact(d);
+              const val = convertDocumentDataToPainLogLocation(d);
               return val
             })
-            arr.forEach(d => { if (d.key) contacts[d.key] = d })
-            dispatch(GetContactsAction(contacts))
+            arr.forEach(d => { if (d.key) painLogLocations[d.key] = d })
+            dispatch(GetPainLogAction(painLogLocations))
             dispatch(isFetching(false))
           })
           .finally(() => {
-            //console.log('resolving getContacts')
+            //console.log('resolving getPainLog')
             resolve()
           })
       }
@@ -69,7 +58,7 @@ export const getContacts = (): ThunkAction<Promise<void>, State, firebase.app.Ap
   }
 }
 
-export const watchContacts = (): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
+export const watchPainLog = (): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
   return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
     return new Promise<void>((resolve) => {
       const { user } = getState();
@@ -78,47 +67,47 @@ export const watchContacts = (): ThunkAction<Promise<void>, State, firebase.app.
         firebase.firestore()
           .collection('users')
           .doc(user.uid)
-          .collection('contacts')
+          .collection('painLogLocations')
           .orderBy('name')
           .onSnapshot((documentSnapshot: firebase.firestore.QuerySnapshot) => {
-            const contacts: ContactsState['contacts'] = {};
+            const painLogLocations: PainLogState['painlog'] = {};
             const arr = documentSnapshot.docs.map(d => {
-              const val = convertDocumentDataToContact(d);
+              const val = convertDocumentDataToPainLogLocation(d);
               return val
             })
-            arr.forEach(d => { if (d.key) contacts[d.key] = d })
-            dispatch(ReplaceContactsAction(contacts));
+            arr.forEach(d => { if (d.key) painLogLocations[d.key] = d })
+            dispatch(ReplacePainLogAction(painLogLocations));
           });
       }
     })
   }
 }
 
-export const addContact = (contact: Contact, onComplete?: (Contact: Contact) => void): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
+export const addPainLogLocation = (painLogLocation: PainLogLocation, onComplete?: (PainLogLocation: PainLogLocation) => void): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
   return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {
         dispatch(isFetching(true))
-        if (contact.key) {
+        if (painLogLocation.key) {
           // its an update
-          const { key, ...data } = contact;
+          const { key, ...data } = painLogLocation;
           firebase.firestore().collection('users')
-            .doc(user.uid).collection('contacts')
+            .doc(user.uid).collection('painLogLocations')
             .doc(key).update(data)
             .then(() => {
               dispatch(isFetching(true))
-              onComplete && onComplete(contact)
+              onComplete && onComplete(painLogLocation)
           })
         } else {
           // it's a new record
-          contact.created = new Date(Date.now())
+          painLogLocation.created = new Date(Date.now())
           firebase.firestore().collection('users')
-            .doc(user.uid).collection('contacts')
-            .add(contact)
+            .doc(user.uid).collection('painLogLocations')
+            .add(painLogLocation)
             .then((value: DocumentReference<DocumentData>) => {
               dispatch(isFetching(true))
-              const data = {...contact, key: value.id}
+              const data = {...painLogLocation, key: value.id}
               onComplete && onComplete(data)
             })
         }

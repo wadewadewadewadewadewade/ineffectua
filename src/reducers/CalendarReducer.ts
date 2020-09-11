@@ -1,4 +1,31 @@
-import { CalendarEntry } from '../Types';
+export type CalendarWindow = {
+  starts: Date,
+  ends: Date
+}
+
+export type CalendarEntry = {
+  key?: string,
+  typeId?: string,
+  window: CalendarWindow,
+  title: string,
+  description?: string,
+  contacts?: Array<string>
+}
+
+export type CalendarRecord = {
+  window: CalendarWindow
+  items: Array<CalendarEntry>
+}
+
+export type CalendarType = {
+  [id: string]: CalendarEntry
+}
+
+export type CalendarState = {
+  dates: CalendarType
+}
+
+export const initialState: CalendarType = {};
 
 export const GET_DATES= 'GET_DATES';
 export const SET_DATES= 'SET_DATES';
@@ -29,14 +56,6 @@ export const ReplaceDatesAction = (dates: CalendarState['dates']): Action => ({
   type: SET_DATES,
   dates
 });
-
-export type CalendarState = {
-  dates: {
-    [id: string]: CalendarEntry
-  }
-}
-
-export const initialState = {};
 
 export default function CalendarReducer(
   prevState = initialState,

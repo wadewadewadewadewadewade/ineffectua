@@ -203,8 +203,10 @@ I'd like to add a social feature to this app; the intent of which is twofold:
       * description
       * location
   * painlog
-    * {ISO DateTime} <-- for versioning - [see description below](#description-of-painlog-versioning)
+    * version (number) <-- for versioning - [see description below](#description-of-painlog-versioning)
+    * locations
       * {LocationID}
+        * created (DateTime)
         * typeId
         * x (percentage)
         * y (percentage)

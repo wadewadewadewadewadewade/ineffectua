@@ -1,4 +1,24 @@
-import { Medication } from '../Types';
+export type Medication = {
+  key?: string,
+  created?: Date,
+  typeId?: string,
+  name: string,
+  active: boolean,
+  prescribed?: string,
+  lastFilled?: Date,
+  refills?: number,
+  description?: string
+}
+
+export type MedicationsType = {
+  [id: string]: Medication
+}
+
+export type MedicationsState = {
+  medications: MedicationsType
+}
+
+export const initialState: MedicationsType = {};
 
 export const GET_MEDICATIONS= 'GET_MEDICATIONS';
 export const SET_MEDICATIONS= 'SET_MEDICATIONS';
@@ -6,42 +26,34 @@ export const REPLACE_MEDICATIONS= 'REPLACE_MEDICATIONS';
 
 export type Action = {
     type: 'SET_MEDICATIONS';
-    medications: MedicationsState['medications']
+    medications: MedicationsType
   } | {
     type: 'GET_MEDICATIONS';
-    medications: MedicationsState['medications']
+    medications: MedicationsType
   } | {
     type: 'REPLACE_MEDICATIONS';
-    medications: MedicationsState['medications']
+    medications: MedicationsType
   };
 
-export const GetMedicationsAction = (medications: MedicationsState['medications']): Action => ({
+export const GetMedicationsAction = (medications: MedicationsType): Action => ({
   type: GET_MEDICATIONS,
   medications
 });
 
-export const SetMedicationsAction = (medications: MedicationsState['medications']): Action => ({
+export const SetMedicationsAction = (medications: MedicationsType): Action => ({
   type: SET_MEDICATIONS,
   medications
 });
 
-export const ReplaceMedicationsAction = (medications: MedicationsState['medications']): Action => ({
+export const ReplaceMedicationsAction = (medications: MedicationsType): Action => ({
   type: SET_MEDICATIONS,
   medications
 });
-
-export type MedicationsState = {
-  medications: {
-    [id: string]: Medication
-  }
-}
-
-export const initialState = {};
 
 export default function MedicationsReducer(
   prevState = initialState,
   action: Action
-): MedicationsState['medications'] {
+): MedicationsType {
   switch (action.type) {
     case GET_MEDICATIONS:
     case SET_MEDICATIONS:

@@ -4,10 +4,10 @@ import { Text, Modal, Portal, FAB } from 'react-native-paper';
 import { useScrollToTop } from '@react-navigation/native';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { State, Medication } from '../../Types';
+import { State } from '../../Types';
 import { addMedication, medicationsToArray, emptyMedication } from '../../middleware/MedicationsMiddleware';
 import { ThemeState } from '../../reducers/ThemeReducer';
-import { MedicationsState } from '../../reducers/MedicationsReducer';
+import { MedicationsState, Medication } from '../../reducers/MedicationsReducer';
 import { NewMedication } from '../shared/Medications'
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';

@@ -4,13 +4,14 @@ import { Text, Modal, Portal, FAB } from 'react-native-paper';
 import { useScrollToTop } from '@react-navigation/native';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { State, Contact } from '../../Types';
-import { addContact, contactsToArray, emptyContact } from '../../middleware/ContactsMiddleware';
+import { State } from '../../Types';
+import { addContact, emptyContact } from '../../middleware/ContactsMiddleware';
 import { ThemeState } from '../../reducers/ThemeReducer';
-import { ContactsState } from '../../reducers/ContactsReducer';
+import { ContactsState, Contact } from '../../reducers/ContactsReducer';
 import { NewContact } from '../shared/Contacts'
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { firebaseDocumentToArray } from '../../middleware';
 
 const ContactItem = React.memo((
   { item, theme, onPress }:
@@ -77,7 +78,7 @@ export const ContactsList = ({
     >
       <FlatList
         ref={ref}
-        data={contactsToArray(contacts)}
+        data={firebaseDocumentToArray<Contact>(contacts)}
         keyExtractor={(_, i) => String(i)}
         renderItem={renderItem}
         ItemSeparatorComponent={() => ItemSeparator(theme)}
