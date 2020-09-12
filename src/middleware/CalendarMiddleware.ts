@@ -1,7 +1,7 @@
 import { State } from './../Types';
 import { GetDatesAction, ReplaceDatesAction, CalendarState } from './../reducers/CalendarReducer';
 import { Action, isFetching } from './../reducers';
-import { CalendarEntry } from '../Types';
+import { CalendarEntry } from '../reducers/CalendarReducer';
 import { CalendarDot, MultiDotMarking } from 'react-native-calendars';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { DataTypesState } from '../reducers/DataTypesReducer';

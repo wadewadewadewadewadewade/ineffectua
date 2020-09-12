@@ -3,12 +3,12 @@ import { DateObject } from 'react-native-calendars';
 import { StyleSheet, ScaledSize, Dimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { connect } from 'react-redux';
-import { CalendarWindow, CalendarEntry, State } from '../../Types';
+import { State } from '../../Types';
 import { RouteProp } from '@react-navigation/native';
 import { ScrollView, TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { TextInput, Text, Button, FAB, Modal, Portal } from 'react-native-paper';
 import { CalendarStackParamList } from './CalendarNavigator';
-import { CalendarState } from '../../reducers/CalendarReducer';
+import { CalendarWindow, CalendarEntry, CalendarState } from '../../reducers/CalendarReducer';
 import { addDates, datesToArray, formatTime, formatDateAndTime } from '../../middleware/CalendarMiddleware';
 import { ThemeState } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
@@ -19,6 +19,7 @@ import { DataTypesState } from '../../reducers/DataTypesReducer';
 import { defaultColor, contrast } from '../../middleware/DataTypesMiddleware';
 import ContactsSelector from '../shared/Contacts';
 import Picker from '../shared/ChronoPicker';
+import { Contact } from '../../reducers/ContactsReducer';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 const screenHeightMultiplier = 1.2;
@@ -56,7 +57,7 @@ const NewSlot = (props : {
           <View style={{height:StyleSheet.hairlineWidth,backgroundColor:'#AAA'}}></View>
           <ContactsSelector
             value={newCalendarEntry.contacts}
-            onValueChange={(contacts) => setNewCalendarEntry({...newCalendarEntry, contacts})} />
+            onValueChange={(contacts: Array<string>) => setNewCalendarEntry({...newCalendarEntry, contacts})} />
           <TouchableOpacity onPress={() => setPickerPhase(PickerPhases.Starts)}>
             <View style={{...styles.buttonRow, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#AAA'}}>
               <Text style={{color: theme.paper.colors.text}}>From</Text>
