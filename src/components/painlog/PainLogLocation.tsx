@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Slider} from '@react-native-community/slider';
+import Slider from '@react-native-community/slider';
 import { Text, Button, TextInput } from 'react-native-paper';
 import { PainLogLocation, PainLogState } from '../../reducers/PainLogReducer';
 import { ThemeState, paperColors } from '../../reducers/ThemeReducer';
@@ -72,8 +72,6 @@ export const NewPainLogLocation = ({
         minimumValue={1}
         maximumValue={10}
         onValueChange={(s: number) => setSeverity(s)}
-        minimumTrackImage={() => <MaterialCommunityIcons name="emoticon-happy-outline" color={paperColors(theme).text} size={26}/>}
-        maximumTrackImage={() => <MaterialCommunityIcons name="emoticon-dead-outline" color={paperColors(theme).text} size={26}/>}
         />
       <Medications
         value={medications}
