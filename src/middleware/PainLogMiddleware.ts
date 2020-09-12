@@ -7,7 +7,7 @@ import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { DocumentData, DocumentReference } from '@firebase/firestore-types';
 
 export const newPainLogLocationName = '+ Add New PainLogLocation';
-export const emptyPainLogLocation: PainLogLocation = {created:new Date(),x:-1,y:-1,title:'',active:true,severity:-1};
+export const emptyPainLogLocation: PainLogLocation = {created:new Date()};
 
 const convertDocumentDataToPainLogLocation = (data: firebase.firestore.DocumentData): PainLogLocation => {
   const doc = data.data()
@@ -15,16 +15,15 @@ const convertDocumentDataToPainLogLocation = (data: firebase.firestore.DocumentD
     key: data.id,
     created: doc.created && doc.created.seconds && new Date(doc.created.seconds * 1000),
     typeId: doc.typeId,
-    x: doc.x,
-    y: doc.y,
     title: doc.title,
     active: doc.active,
     description: doc.description,
     severity: doc.severity,
-    medications: doc.medications
+    medications: doc.medications,
+    updatePainLogId: doc.updatePainLogId
   }
-  if (doc.created && doc.created.seconds) {
-    painLogLocationData.created = new Date(doc.created.seconds * 1000)
+  if (doc.position) {
+    painLogLocationData.position = doc.position
   }
   return painLogLocationData
 }
@@ -83,7 +82,7 @@ export const watchPainLog = (): ThunkAction<Promise<void>, State, firebase.app.A
   }
 }
 
-export const addPainLogLocation = (painLogLocation: PainLogLocation, onComplete?: (PainLogLocation: PainLogLocation) => void): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
+export const addPainLogLocation = (painLogLocation: PainLogLocation, previousPainLogId?: string, onComplete?: (PainLogLocation: PainLogLocation) => void): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
   return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
     return new Promise<void>((resolve) => {
       const { user } = getState();
@@ -99,6 +98,21 @@ export const addPainLogLocation = (painLogLocation: PainLogLocation, onComplete?
               dispatch(isFetching(true))
               onComplete && onComplete(painLogLocation)
           })
+        } else if (previousPainLogId) {
+          // it's a change to a previous location = new record in linked-list
+          painLogLocation.created = new Date(Date.now())
+          firebase.firestore().collection('users')
+            .doc(user.uid).collection('painLogLocations')
+            .add(painLogLocation)
+            .then((value: DocumentReference<DocumentData>) => {
+              dispatch(isFetching(true))
+              const data = {...painLogLocation, key: value.id}
+              // then update the "parent" record witht eh "child" id
+              firebase.firestore().collection('users')
+                .doc(user.uid).collection('painLogLocations')
+                .doc(previousPainLogId).update({updatePainLogId: data.key})
+              onComplete && onComplete(data)
+            })
         } else {
           // it's a new record
           painLogLocation.created = new Date(Date.now())

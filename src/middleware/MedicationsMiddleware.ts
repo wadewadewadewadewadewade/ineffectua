@@ -1,38 +1,19 @@
 import * as React from 'react';
 import { State } from './../Types';
-import { GetMedicationsAction, ReplaceMedicationsAction, MedicationsState } from '../reducers/MedicationsReducer';
+import { Medication, GetMedicationsAction, ReplaceMedicationsAction, MedicationsState } from '../reducers/MedicationsReducer';
 import { Action, isFetching } from './../reducers';
-import { Medication } from '../Types';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { DocumentData, DocumentReference } from '@firebase/firestore-types';
+import { firebaseDocumentToArray } from '.';
 
 export const newMedicationName = '+ Add New Medication';
 export const emptyMedication: Medication = {name:'',active:true};
-
-export const medicationsToArray = (medication: MedicationsState['medications'], includeNewMedicationitem?: boolean) => {
-  const medicationsArray = React.useMemo(() => {
-    const arr = new Array<Medication>();
-    if (medication) {
-      const keys = Object.keys(medication);
-      for(let i=0;i<keys.length;i++) {
-        const dt = medication[keys[i]];
-        dt.key = keys[i]
-        arr.push(dt);
-      }
-    }
-    if (includeNewMedicationitem) {
-      arr.push({name:newMedicationName,active:true})
-    }
-    return arr;
-  }, [medication])
-  return medicationsArray
-}
 
 export const medicaitonIsValid = (medicaiton: Medication, Medications: MedicationsState['medications']): boolean => {
   const { name } = medicaiton;
   if (name && name.trim().length > 0) { // no null or empty names or colors
     if (name.trim() !== newMedicationName) { // no reserved names
-      const preexistingMedicationsByname = medicationsToArray(Medications).filter(dt => dt.name = name.trim())
+      const preexistingMedicationsByname = firebaseDocumentToArray(Medications).filter(m => m.name = name.trim())
       if (preexistingMedicationsByname.length === 0) { // no duplicate names
         return true      
       }

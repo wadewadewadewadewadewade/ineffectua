@@ -66,7 +66,7 @@ const mapStateToProps = (state: State) => {
 const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
   return {
     addNewPainLocation: (painlogLocation: PainLogLocation, onComplete: () => void) => {
-      dispatch(addPainLogLocation(painlogLocation, onComplete))
+      dispatch(addPainLogLocation(painlogLocation, undefined, onComplete))
     }
   };
 };

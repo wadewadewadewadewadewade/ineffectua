@@ -2,13 +2,16 @@ export type PainLogLocation = {
   key?: string,
   created: Date,
   typeId?: string,
-  x: number,
-  y: number,
-  title: string,
-  active: boolean,
+  position?: {
+    x?: number,
+    y?: number,
+  },
+  title?: string,
+  active?: boolean,
   description?: string,
-  severity: number,
+  severity?: number,
   medications?: Array<string>
+  updatePainLogId?: string
 }
 
 export type PainLogType = {

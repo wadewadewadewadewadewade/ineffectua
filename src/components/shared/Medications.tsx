@@ -6,9 +6,9 @@ import { Text, Button, Modal, Portal, TextInput } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { addMedication, emptyMedication, medicationsToArray, newMedicationName } from '../../middleware/MedicationsMiddleware';
-import { Medication, State } from '../../Types';
+import { State } from '../../Types';
 import { ThemeState, paperColors } from '../../reducers/ThemeReducer';
-import { MedicationsState } from '../../reducers/MedicationsReducer';
+import { Medication, MedicationsState } from '../../reducers/MedicationsReducer';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DataTypes from './DataTypes';
@@ -30,7 +30,6 @@ export const NewMedication = ({
   theme,
   saveNewMedication
 }: NewMedicationProps) => {
-  console.log({theme})
   const [name, setName] = React.useState(value?.name || '');
   const [active, setActive] = React.useState(value?.active || false);
   const [nameTouched, setNameTouched] = React.useState(false);

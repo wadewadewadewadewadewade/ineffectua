@@ -179,7 +179,7 @@ const Navigation = (props: {
           onStateChange={(state) => {
             const currentRoute = navigationRef.current?.getCurrentRoute();
             const currentRouteName = currentRoute?.name;
-            console.info({currentRouteName})
+
             if (currentRouteName && previousRouteName !== currentRouteName) {
               // The line below uses the expo-firebase-analytics tracker
               // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
