@@ -36,7 +36,7 @@ export const getPainLog = (): ThunkAction<Promise<void>, State, firebase.app.App
         //firebase.firestore.setLogLevel('debug');
         dispatch(isFetching(true))
         firebase.firestore().collection('users')
-          .doc(user.uid).collection('painLogLocations')
+          .doc(user.uid).collection('painlog')
           .get()
           .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
             const painLogLocations: PainLogState['painlog'] = {};
@@ -66,7 +66,7 @@ export const watchPainLog = (): ThunkAction<Promise<void>, State, firebase.app.A
         firebase.firestore()
           .collection('users')
           .doc(user.uid)
-          .collection('painLogLocations')
+          .collection('painlog')
           .orderBy('name')
           .onSnapshot((documentSnapshot: firebase.firestore.QuerySnapshot) => {
             const painLogLocations: PainLogState['painlog'] = {};
@@ -92,7 +92,7 @@ export const addPainLogLocation = (painLogLocation: PainLogLocation, previousPai
           // its an update
           const { key, ...data } = painLogLocation;
           firebase.firestore().collection('users')
-            .doc(user.uid).collection('painLogLocations')
+            .doc(user.uid).collection('painlog')
             .doc(key).update(data)
             .then(() => {
               dispatch(isFetching(true))
@@ -102,14 +102,14 @@ export const addPainLogLocation = (painLogLocation: PainLogLocation, previousPai
           // it's a change to a previous location = new record in linked-list
           painLogLocation.created = new Date(Date.now())
           firebase.firestore().collection('users')
-            .doc(user.uid).collection('painLogLocations')
+            .doc(user.uid).collection('painlog')
             .add(painLogLocation)
             .then((value: DocumentReference<DocumentData>) => {
               dispatch(isFetching(true))
               const data = {...painLogLocation, key: value.id}
               // then update the "parent" record witht eh "child" id
               firebase.firestore().collection('users')
-                .doc(user.uid).collection('painLogLocations')
+                .doc(user.uid).collection('painlog')
                 .doc(previousPainLogId).update({updatePainLogId: data.key})
               onComplete && onComplete(data)
             })
@@ -117,7 +117,7 @@ export const addPainLogLocation = (painLogLocation: PainLogLocation, previousPai
           // it's a new record
           painLogLocation.created = new Date(Date.now())
           firebase.firestore().collection('users')
-            .doc(user.uid).collection('painLogLocations')
+            .doc(user.uid).collection('painlog')
             .add(painLogLocation)
             .then((value: DocumentReference<DocumentData>) => {
               dispatch(isFetching(true))

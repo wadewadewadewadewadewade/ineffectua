@@ -5,12 +5,13 @@ import { useScrollToTop } from '@react-navigation/native';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { State } from '../../Types';
-import { addMedication, medicationsToArray, emptyMedication } from '../../middleware/MedicationsMiddleware';
+import { addMedication, emptyMedication } from '../../middleware/MedicationsMiddleware';
 import { ThemeState } from '../../reducers/ThemeReducer';
 import { MedicationsState, Medication } from '../../reducers/MedicationsReducer';
 import { NewMedication } from '../shared/Medications'
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { firebaseDocumentToArray } from '../../middleware';
 
 const MedicationItem = React.memo((
   { item, theme, onPress }:
@@ -77,7 +78,7 @@ export const MedicationsList = ({
     >
       <FlatList
         ref={ref}
-        data={medicationsToArray(medications)}
+        data={firebaseDocumentToArray(medications)}
         keyExtractor={(_, i) => String(i)}
         renderItem={renderItem}
         ItemSeparatorComponent={() => ItemSeparator(theme)}

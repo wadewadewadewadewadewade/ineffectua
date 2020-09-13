@@ -5,7 +5,7 @@ import RNPickerSelect, { PickerStyle } from 'react-native-picker-select';
 import { Text, Button, Modal, Portal, TextInput } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { addMedication, emptyMedication, medicationsToArray, newMedicationName } from '../../middleware/MedicationsMiddleware';
+import { addMedication, emptyMedication, newMedicationName } from '../../middleware/MedicationsMiddleware';
 import { State } from '../../Types';
 import { ThemeState, paperColors } from '../../reducers/ThemeReducer';
 import { Medication, MedicationsState } from '../../reducers/MedicationsReducer';
@@ -16,6 +16,7 @@ import Contacts from './Contacts';
 import Picker from '../shared/ChronoPicker';
 import SettingsItem from './SettingsItem';
 import { formatDateAndTime } from '../../middleware/CalendarMiddleware'
+import { firebaseDocumentToArray } from '../../middleware';
 
 type NewMedicationProps = {
   value?: Medication
@@ -49,7 +50,7 @@ export const NewMedication = ({
     description
   };
   const buttonLabel = !value || value === emptyMedication ? 'Add New' : 'Edit';
-  const medicationsArray = medicationsToArray(medications);
+  const medicationsArray = firebaseDocumentToArray(medications);
   const nameExists = medicationsArray.filter(c => c.name === name);
   const [descriptionHeight, setDescriptionHeight] = React.useState(1);
   return (
@@ -139,7 +140,7 @@ const Medications = ({
 }: Props) => {
   const [visible, setVisible] = React.useState(false);
   const [newMedications, setNewMedications] = React.useState(value || new Array<string>());
-  const medicationsArray = medicationsToArray(medications, true);
+  const medicationsArray = firebaseDocumentToArray(medications, {name:newMedicationName,active:true});
   let pickerRef: RNPickerSelect | null = null;
   return (
     <View

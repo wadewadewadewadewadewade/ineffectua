@@ -75,7 +75,20 @@ export const barClassName = (
 
 export const paperColors = (
   theme: Theme | undefined
-): any => {
+): {
+  primary: string;
+  background: string;
+  surface: string;
+  accent: string;
+  error: string;
+  text: string;
+  onSurface: string;
+  onBackground: string;
+  disabled: string;
+  placeholder: string;
+  backdrop: string;
+  notification: string;
+} => {
   if (themeIsDark(theme)) {
     return CombinedDarkTheme.paper.colors;
   }
