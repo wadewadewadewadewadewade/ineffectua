@@ -158,15 +158,18 @@ export const PainLog = ({
   const painLogArray = firebaseDocumentToArray(painlog);
   const addLocation = (e: GestureResponderEvent, ref: React.Component<SvgProps, any, any> | null, isBack: boolean = false) => {
     if (ref) {
-      const { width, height } = ReactDOM.findDOMNode(ref).getBoundingClientRect();
-      const newLocation: PainLogLocation = {
-        created: new Date(),
-        position: {
-          x: Math.round(e.nativeEvent.locationX / width * 10000) / 100,
-          y: Math.round(e.nativeEvent.locationY / height * 10000) / 100,
+      const element = ReactDOM.findDOMNode(ref);
+      if (element && 'getBoundingClientRect' in element) {
+        const { width, height } = element.getBoundingClientRect();
+        const newLocation: PainLogLocation = {
+          created: new Date(),
+          position: {
+            x: Math.round(e.nativeEvent.locationX / width * 10000) / 100,
+            y: Math.round(e.nativeEvent.locationY / height * 10000) / 100,
+          }
         }
+        addNewPainLocation(newLocation)
       }
-      addNewPainLocation(newLocation)
     }
   }
   return (
