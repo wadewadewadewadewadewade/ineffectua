@@ -3,8 +3,8 @@ export type PainLogLocation = {
   created: Date,
   typeId?: string,
   position?: {
-    x?: number,
-    y?: number,
+    x: number,
+    y: number,
   },
   title?: string,
   active?: boolean,
