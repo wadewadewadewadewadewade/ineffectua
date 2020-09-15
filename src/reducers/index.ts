@@ -29,6 +29,16 @@ export type Action =
   | MedicationsAction
   | PainLogAction
 
+export const reducerNames = [
+  'AuthReducer',
+  'ThemeReducer',
+  'CalendarReducer',
+  'DataTypesReducer',
+  'ContactsReducer',
+  'MedicationsReducer',
+  'PainLogReducer',
+]
+
 // Redux: Root Reducer
 const rootReducer = combineReducers({
   user: AuthReducer,

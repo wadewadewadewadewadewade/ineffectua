@@ -49,7 +49,7 @@ import { paperTheme, CombinedLightTheme, barClassName, paperColors, ThemeState }
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CalendarDayProps } from './calendar/CalendarDay';
 import { ThunkDispatch } from 'redux-thunk';
-import { getAndWatchData } from '../middleware';
+import { watchFirebaseData } from '../middleware';
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -289,7 +289,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, Act
       dispatch(SignOutAction())
     } else {
       dispatch(SignInAction(userState));
-      getAndWatchData(dispatch);
+      watchFirebaseData(dispatch);
     }
   });
   return {

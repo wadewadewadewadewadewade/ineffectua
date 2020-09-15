@@ -1,7 +1,7 @@
 import React from 'react';
 import { firebase } from '../../firebase/config';
 import { ScrollView, StyleSheet, Dimensions, ScaledSize, View } from 'react-native';
-import { Subheading, Avatar, Button, Divider, Text } from 'react-native-paper';
+import { Subheading, Avatar, Button, Divider, Text, ActivityIndicator } from 'react-native-paper';
 import SettingsItem from '../shared/SettingsItem';
 import { NavigationContainerRef } from '@react-navigation/native';
 import { connect } from 'react-redux';
@@ -13,6 +13,7 @@ import { signOut } from '../../middleware/AuthMiddleware';
 import { ThunkDispatch } from 'redux-thunk';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { TouchableHighlight } from 'react-native-gesture-handler';
+import { getFirebaseData } from '../../middleware';
 
 const TabsLinks = ({
   color,
@@ -52,18 +53,21 @@ const Profile =
   theme,
   toggleTheme,
   logout,
-  navigationRef
+  refreshDataFromFirebase,
+  navigationRef,
 }: {
   authenticated: boolean,
   user: AuthState['user'],
   theme: ThemeState['theme'],
   toggleTheme: () => void,
   logout: () => void,
+  refreshDataFromFirebase: () => Promise<void>,
   navigationRef: NavigationContainerRef | null
 }) => {
   const thumbnail = null //user !== null && user.photoURL !== null ? require(user.photoURL) : null;
   const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
   const isLandscapeOnPhone = dimensions.width > dimensions.height && dimensions.height <= 420;
+  const [fetching, setFetching] = React.useState(false);
 
   React.useEffect(() => {
     const onDimensionsChange = ({ window }: { window: ScaledSize }) => {
@@ -87,6 +91,14 @@ const Profile =
         />
         <Divider />
         {isLandscapeOnPhone && <TabsLinks navigationRef={navigationRef} color={theme.paper.colors.text} />}
+        <Button onPress={() => {
+          setFetching(true)
+          refreshDataFromFirebase().finally(() => setFetching(false))
+        }} style={styles.button}>
+          <Text>Refresh Data</Text>
+        </Button>
+        {fetching && <ActivityIndicator />}
+        <Divider />
         <Button onPress={() => logout()} style={styles.button}>
           Sign Out
         </Button>
@@ -125,6 +137,7 @@ interface OwnProps {
 interface DispatchProps {
   toggleTheme: () => void,
   logout: () => void,
+  refreshDataFromFirebase: () => Promise<void>,
 }
 
 const mapStateToProps = (state: State) => {
@@ -141,6 +154,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any
     logout: () => {
       dispatch(signOut())
     },
+    refreshDataFromFirebase: () => getFirebaseData(dispatch)
   };
 };// Exports
 export default connect(mapStateToProps, mapDispatchToProps)(Profile)

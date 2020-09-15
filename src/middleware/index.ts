@@ -30,19 +30,28 @@ export function firebaseDocumentToArray<T>(items: {[index: string]: T}, optional
   return itemsAsArray
 }
 
-export const getAndWatchData = (dispatch: ThunkDispatch<State, firebase.app.App, Action>) => {
-  dispatch(watchDates());
-  dispatch(watchDataTypes());
-  dispatch(watchContacts());
-  dispatch(watchMedications());
-  dispatch(watchPainLog());
-  return Promise.all([
-    dispatch(getDates()),
-    dispatch(getDataTypes()),
-    dispatch(getContacts()),
-    dispatch(getMedications()),
-    dispatch(getPainLog()),
-  ])
+export const watchFirebaseData = (dispatch: ThunkDispatch<State, firebase.app.App, Action>) => {
+  return new Promise<void>((s,f) => {
+    Promise.all([
+      dispatch(watchDates()),
+      dispatch(watchDataTypes()),
+      dispatch(watchContacts()),
+      dispatch(watchMedications()),
+      dispatch(watchPainLog()),
+    ]).then(() => s()).catch((e) => f(e))
+  })
+}
+
+export const getFirebaseData = (dispatch: ThunkDispatch<State, firebase.app.App, Action>) => {
+  return new Promise<void>((s,f) => {
+    Promise.all([
+      dispatch(getDates()),
+      dispatch(getDataTypes()),
+      dispatch(getContacts()),
+      dispatch(getMedications()),
+      dispatch(getPainLog()),
+    ]).then(() => s()).catch((e) => f(e))
+  })
 }
 
 export default applyMiddleware(

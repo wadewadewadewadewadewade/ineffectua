@@ -1,5 +1,5 @@
 import React from 'react';
-import { PanResponder, Animated, StyleSheet, View, GestureResponderEvent, Alert, Platform, LayoutChangeEvent, PanResponderGestureState } from 'react-native'
+import { Animated, StyleSheet, View, GestureResponderEvent, Alert, Platform, LayoutChangeEvent, ViewStyle } from 'react-native'
 import { Svg, Path } from 'react-native-svg'
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
@@ -18,7 +18,6 @@ import Slider from '@react-native-community/slider';
 import Medications from '../shared/Medications';
 
 type ScreenPosition = { x: number, y: number}
-type ScreenPercentage = { left: string, top: string}
 
 type NewPainLogLocationProps = {
   value?: PainLogLocation
@@ -127,23 +126,17 @@ const Location = ({
       y: loc.y / 100 * figureDimensions.height
     }
   }
-  const pixelsToPercent = (loc: ScreenPosition, supplyPercentSymbol = false): ScreenPosition | ScreenPercentage => {
+  const pixelsToPercent = (loc: ScreenPosition, supplyPercentSymbol = false): ScreenPosition | ViewStyle => {
     if (supplyPercentSymbol) {
       return {
-        left: (loc.x / figureDimensions.width * 100).toFixed(2).toString() + '%',
-        top: (loc.y / figureDimensions.height * 100).toFixed(2).toString() + '%',
-      }  
+        left: (loc.x / figureDimensions.width * 100).toFixed(2) + '%',
+        top: (loc.y / figureDimensions.height * 100).toFixed(2) + '%',
+      } as ViewStyle
     } else {
       return {
         x: loc.x / 100 * figureDimensions.width,
         y: loc.y / 100 * figureDimensions.height
       }
-    }
-  }
-  const panToPixels = (p: Animated.ValueXY): ScreenPosition => {
-    return {
-      x: (pan.x as any)._value,
-      y: (pan.y as any)._value,
     }
   }
   const addLocations = (loc1: ScreenPosition, loc2: ScreenPosition): ScreenPosition => {
@@ -152,8 +145,20 @@ const Location = ({
       y: loc1.y + loc2.y
     }
   }
+  const multiplyLocations = (loc1: ScreenPosition, loc2: ScreenPosition): ScreenPosition => {
+    return {
+      x: loc1.x * loc2.x,
+      y: loc1.y * loc2.y
+    }
+  }
+  const panToPixels = (p: Animated.ValueXY) => ({
+    x: (p.x as any)._value, // typings isn't right, so force 
+    y: (p.y as any)._value  // typescript to believe me using 'any'
+  })
+  const scaleShift = {x: 18,y: 2}
+  const negativeOne = {x: -1,y: -1}
   const [location, setLocation] = React.useState(percentToPixels(value.position));
-  const adjustForDesktop = Platform.OS === 'web' ? { position: 'absolute', zIndex: 2, padding: 0 } : {};
+  const adjustForDesktop: ViewStyle = Platform.OS === 'web' ? { position: 'absolute', zIndex: 2, padding: 0 } : {};
   const adjustForDesktopIcon = Platform.OS === 'web' ? { padding: 0, width: '50px' } : {};
   const createTwoButtonAlert = (loc: PainLogLocation) =>
     Alert.alert(
@@ -171,7 +176,7 @@ const Location = ({
     );
     const pan = React.useRef(new Animated.ValueXY({x:0,y:0})).current;
     const scale = new Animated.Value(1)
-    const panResponder = React.useRef(
+    /*const panResponder = React.useRef(
       PanResponder.create({
         onMoveShouldSetPanResponder: () => true,
         onPanResponderGrant: () => {
@@ -184,12 +189,6 @@ const Location = ({
             { toValue: 1.2, duration: 0, useNativeDriver: true }
           ).start();
         },
-        onPanResponderMove: Animated.event(
-          [
-            null,
-            { dx: pan.x, dy: pan.y }
-          ], {useNativeDriver: true}
-        ),
         onPanResponderTerminationRequest: () => true,
         onPanResponderRelease: () => {
           pan.flattenOffset();
@@ -201,10 +200,36 @@ const Location = ({
           updateLocation({...value, position: (pixelsToPercent(location, true) as {x:number,y:number})})
         }
       })
-    ).current;
+    ).current;*/
   return (
-    <Animated.View style={{...styles.location, ...pixelsToPercent(location, true), ...adjustForDesktop, transform: [{ translateX: pan.x }, { translateY: pan.y }, { scale }]}}>
-      <View { ...panResponder.panHandlers}>
+    <Animated.View
+      style={{...styles.location, ...pixelsToPercent(location, true), ...adjustForDesktop, transform: [{ translateX: pan.x }, { translateY: pan.y }, { scale }]}}
+    >
+      <View
+        onTouchStart={(e: GestureResponderEvent) => {
+          pan.setOffset(addLocations(scaleShift,panToPixels(pan)));
+          Animated.timing(
+            scale,
+            { toValue: 1.2, duration: 0, useNativeDriver: true }
+          ).start();
+        }}
+        onTouchMove={(e: GestureResponderEvent) => {
+          pan.setValue({
+            x: e.nativeEvent.locationX,
+            y: e.nativeEvent.locationY,
+          })
+        }}
+        onTouchEnd={(e: GestureResponderEvent) => {
+          pan.setOffset(addLocations(multiplyLocations(scaleShift, negativeOne),panToPixels(pan)));
+          pan.flattenOffset();
+          Animated.timing(
+            scale,
+            { toValue: 1, duration: 0, useNativeDriver: true }
+          ).start();
+          /*setLocation(addLocations(panToPixels(pan), location))
+          updateLocation({...value, position: (pixelsToPercent(location, true) as {x:number,y:number})})*/
+        }}
+      >
         <Svg
             fill={paperColors(theme).accent} style={{...styles.locationIcon, ...adjustForDesktopIcon}}
             x="0px" y="0px" viewBox="170 0 650 1000"
@@ -243,10 +268,11 @@ export const PainLog = ({
     }
     addNewPainLocation(newLocation)
   }
+  let alternatekey = 1
   return (
     <View>
       <ScrollView centerContent={true}>
-        {painLogArray.filter(p => p.active).map(p => <Location value={p} figureDimensions={figureDimensions} theme={theme} updateLocation={(p2) => setLocation(p2)}/>)}
+        {painLogArray.filter(p => p.active).map(p => <Location key={p.key || alternatekey++} value={p} figureDimensions={figureDimensions} theme={theme} updateLocation={(p2) => setLocation(p2)}/>)}
         <View
             style={styles.container}
             onLayout={(e: LayoutChangeEvent) => setFigureDimensions({
