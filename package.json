@@ -15,7 +15,7 @@
     "test": "jest",
     "lint": "eslint .",
     "web": "expo start --web",
-    "expo": "expo start"
+    "expo": "expo start -c"
   },
   "dependencies": {
     "@react-native-community/async-storage": "~1.11.0",

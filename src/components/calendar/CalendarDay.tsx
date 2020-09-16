@@ -19,7 +19,6 @@ import { DataTypesState } from '../../reducers/DataTypesReducer';
 import { defaultColor, contrast } from '../../middleware/DataTypesMiddleware';
 import ContactsSelector from '../shared/Contacts';
 import Picker from '../shared/ChronoPicker';
-import { Contact } from '../../reducers/ContactsReducer';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 const screenHeightMultiplier = 1.2;

@@ -4,7 +4,7 @@ import { Contact, GetContactsAction, ReplaceContactsAction, ContactsState } from
 import { Action, isFetching } from './../reducers';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { DocumentData, DocumentReference } from '@firebase/firestore-types';
-import { firebaseDocumentToArray } from '.';
+import { firebaseDocumentToArray } from '../firebase/utilities';
 
 export const newContactName = '+ Add New Contact';
 export const emptyContact: Contact = {name:'',};
@@ -45,8 +45,6 @@ export const getContacts = (): ThunkAction<Promise<void>, State, firebase.app.Ap
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {
-        //firebase.firestore.setLogLevel('debug');
-        dispatch(isFetching(true))
         firebase.firestore().collection('users')
           .doc(user.uid).collection('contacts')
           .get()
@@ -58,7 +56,6 @@ export const getContacts = (): ThunkAction<Promise<void>, State, firebase.app.Ap
             })
             arr.forEach(d => { if (d.key) contacts[d.key] = d })
             dispatch(GetContactsAction(contacts))
-            dispatch(isFetching(false))
           })
           .finally(() => {
             //console.log('resolving getContacts')

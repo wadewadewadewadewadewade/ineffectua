@@ -11,7 +11,7 @@ import { MedicationsState, Medication } from '../../reducers/MedicationsReducer'
 import { NewMedication } from '../shared/Medications'
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { firebaseDocumentToArray } from '../../middleware';
+import { firebaseDocumentToArray } from '../../firebase/utilities';
 
 const MedicationItem = React.memo((
   { item, theme, onPress }:

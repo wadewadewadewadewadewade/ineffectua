@@ -31,7 +31,7 @@ import {
   HeaderStyleInterpolators,
 } from '@react-navigation/stack';
 import { useReduxDevToolsExtension } from '@react-navigation/devtools';
-import { Action } from '../reducers';
+import { Action, isFetching } from '../reducers';
 
 // use this to restart the app for things like changing RTL to LTR
 //import { restartApp } from './Restart';
@@ -57,8 +57,9 @@ const Stack = createStackNavigator<RootStackParamList>();
 const Navigation = (props: {
     theme: ThemeState['theme'],
     user: AuthState['user'],
+    fetching: boolean
   }) => {
-  const { theme, user } = props;
+  const { theme, user, fetching } = props;
   const [isReady, setIsReady] = React.useState(Platform.OS === 'web');
   const [initialState, setInitialState] = React.useState<
     InitialState | undefined
@@ -157,7 +158,7 @@ const Navigation = (props: {
 
   useReduxDevToolsExtension(navigationRef);
 
-  if (!isReady) {
+  if (!isReady || fetching) {
     return (
       <View style={{height: '100%', justifyContent:'center'}}>
         <ActivityIndicator />
@@ -212,10 +213,10 @@ const Navigation = (props: {
                   path: '',
                   initialRouteName: 'Agenda',
                   screens: {
-                    CalendarNavigator: 'calendar/',
+                    Calendar: 'calendar/',
                     PainLog: 'pain-log/',
-                    ContactsList: 'people',
-                    Dialog: 'dialog',
+                    ContactsList: 'contacts/',
+                    MedicationsList: 'medications/',
                     Agenda: '',
                     NotFound: '.+',
                   },
@@ -274,6 +275,7 @@ interface OwnProps {
 }
 
 interface DispatchProps {
+  fetching: boolean
 }
 
 const mapStateToProps = (state: State): State => {
@@ -283,16 +285,19 @@ const mapStateToProps = (state: State): State => {
   };
 };
 const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, Action>, ownProps: OwnProps): DispatchProps => {
+  let fetching = false
   firebase.auth().onAuthStateChanged(userState => {
     if (userState === null) {
       // user is not authenticated, so navigate
       dispatch(SignOutAction())
     } else {
+      dispatch(isFetching(true))
       dispatch(SignInAction(userState));
-      watchFirebaseData(dispatch).then(() => getFirebaseData(dispatch))
+      getFirebaseData(dispatch).then(() => watchFirebaseData(dispatch).then(() => dispatch(isFetching(false))))
     }
   });
   return {
+    fetching
   };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Navigation)

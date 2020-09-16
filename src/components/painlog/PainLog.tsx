@@ -9,7 +9,7 @@ import { State } from '../../Types';
 import { PainLogLocation, PainLogType } from '../../reducers/PainLogReducer';
 import { addPainLogLocation, emptyPainLogLocation } from '../../middleware/PainLogMiddleware';
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
-import { firebaseDocumentToArray } from '../../middleware';
+import { firebaseDocumentToArray } from '../../firebase/utilities'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { paperColors, ThemeState } from '../../reducers/ThemeReducer';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -183,10 +183,12 @@ const Location = ({
   const offsetX = new Value(0);
   const offsetY = new Value(0);
   const gestureState = new Value(-1);
+  const scaleMax = new Value(1.2);
+  const scaleMin = new Value(1);
   const scale = cond(
     eq(gestureState, PanGestureState.ACTIVE),
-    new Value(1.2),
-    new Value(1),
+    scaleMax,
+    scaleMin,
   );
   const onGestureEvent = event([
     {
@@ -207,8 +209,17 @@ const Location = ({
       add(offsetX, scaleShift.x * -1)
       add(offsetY, scaleShift.y * -1)
       const translate = {x: e.nativeEvent.translationX, y: e.nativeEvent.translationY}
-      setPosition(addLocations(position,translate))
-      //updateLocation({...value, position})
+      const positionPercentage = pixelsToPercent(position, figureDimensions)
+      if (value.position && positionPercentage && positionPercentage.left && positionPercentage.top) { // this should always be true, but TypeScript like being explicit...
+        console.log('updating', percentToPixels(value.position, figureDimensions), position)
+        console.log('updating', value.position, {
+          // also, left and top should always be strings in this case, but I chose to use ViewStyle as the return type to be compatable elsewhere
+          x: typeof positionPercentage.left === 'string' ? parseFloat(positionPercentage.left) : positionPercentage.left,
+          y: typeof positionPercentage.top === 'string' ? parseFloat(positionPercentage.top) : positionPercentage.top
+        })
+        setPosition(addLocations(position,translate))
+        //updateLocation({...value, position})
+      }
     }
   }
   const transX = cond(
@@ -254,11 +265,12 @@ export const PainLog = ({
   theme,
   addNewPainLocation
 }: Props) => {
+  const undefinedFigureDimensions = {width:-1,height:-1}
   const [location, setLocation] = React.useState(emptyPainLogLocation);
-  const [figureDimensions, setFigureDimensions] = React.useState({width:-1,height:-1});
+  const [figureDimensions, setFigureDimensions] = React.useState(undefinedFigureDimensions);
   const painLogArray = firebaseDocumentToArray(painlog);
   const adjustForDesktop = Platform.OS === 'web' ? { paddingVertical: 0 } : {};
-  const addLocation = (e: GestureResponderEvent, isBack: boolean = false) => {
+  const addLocation = (e: GestureResponderEvent) => {
     const newLocation: PainLogLocation = {
       created: new Date(),
       position: {
@@ -272,7 +284,7 @@ export const PainLog = ({
   return (
     <View>
       <ScrollView centerContent={true}>
-        {painLogArray.filter(p => p.active).map(p => <Location key={p.key || alternatekey++} value={p} figureDimensions={figureDimensions} theme={theme} updateLocation={(p2) => setLocation(p2)}/>)}
+        {figureDimensions !== undefinedFigureDimensions && painLogArray.filter(p => p.active).map(p => <Location key={p.key || alternatekey++} value={p} figureDimensions={figureDimensions} theme={theme} updateLocation={(p2) => setLocation(p2)}/>)}
         <View
             style={styles.container}
             onLayout={(e: LayoutChangeEvent) => setFigureDimensions({

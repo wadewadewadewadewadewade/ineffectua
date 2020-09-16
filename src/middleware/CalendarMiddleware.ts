@@ -168,8 +168,6 @@ export const getDates = (): ThunkAction<Promise<void>, State, firebase.app.App, 
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {
-        //firebase.firestore.setLogLevel('debug');
-        dispatch(isFetching(true))
         firebase.firestore().collection('users')
           .doc(user.uid).collection('calendar')
           .orderBy('window.starts')
@@ -182,7 +180,6 @@ export const getDates = (): ThunkAction<Promise<void>, State, firebase.app.App, 
             })
             arr.forEach(d => { if (d.key) dates[d.key] = d })
             dispatch(GetDatesAction(dates))
-            dispatch(isFetching(false))
           })
           .finally(() => {
             //console.log('resolving getDates')

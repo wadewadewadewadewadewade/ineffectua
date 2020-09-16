@@ -266,17 +266,17 @@ const SignInScreen = (props: {
         ]}
         onChangeText={onChangePasswordConfirm}
       />)}
-      {error !== undefined ? <Text style={{color: 'red'}}>{error.message}</Text> : null}
+      {error !== undefined ? <Text style={{color: 'red'}}>{error}</Text> : null}
       <Button mode="contained" onPress={() => {
         Keyboard.dismiss();
         if (register) {
           if (password === passwordConfirm) {
-            auth(email, password, (e) => onChangeError(e), true)
+            auth(email, password, (e) => onChangeError('message' in e ? e.message : typeof e === 'string' ? e : 'Authentication error - please try again'), true)
           } else {
             onChangeError('"Password" and "Confirm Password" values must match, so you know you\'re entering the password your\'e intending to enter')
           }
         } else {
-          auth(email, password, (e) => onChangeError(e))
+          auth(email, password, (e) => onChangeError('message' in e ? e.message : typeof e === 'string' ? e : 'Authentication error - please try again'))
         }
       }} style={styles.button}>
         <Text>Sign {register ? 'Up' : 'In'}</Text>

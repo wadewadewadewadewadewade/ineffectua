@@ -4,7 +4,7 @@ import { Medication, GetMedicationsAction, ReplaceMedicationsAction, Medications
 import { Action, isFetching } from './../reducers';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { DocumentData, DocumentReference } from '@firebase/firestore-types';
-import { firebaseDocumentToArray } from '.';
+import { firebaseDocumentToArray } from '../firebase/utilities';
 
 export const newMedicationName = '+ Add New Medication';
 export const emptyMedication: Medication = {name:'',active:true};
@@ -47,7 +47,6 @@ export const getMedications = (): ThunkAction<Promise<void>, State, firebase.app
       const { user } = getState();
       if (user) {
         //firebase.firestore.setLogLevel('debug');
-        dispatch(isFetching(true))
         firebase.firestore().collection('users')
           .doc(user.uid).collection('medications')
           .get()
@@ -59,7 +58,6 @@ export const getMedications = (): ThunkAction<Promise<void>, State, firebase.app
             })
             arr.forEach(d => { if (d.key) medication[d.key] = d })
             dispatch(GetMedicationsAction(medication))
-            dispatch(isFetching(false))
           })
           .finally(() => {
             //console.log('resolving getMedications')

@@ -33,8 +33,6 @@ export const getPainLog = (): ThunkAction<Promise<void>, State, firebase.app.App
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {
-        //firebase.firestore.setLogLevel('debug');
-        dispatch(isFetching(true))
         firebase.firestore().collection('users')
           .doc(user.uid).collection('painlog')
           .get()
@@ -46,7 +44,6 @@ export const getPainLog = (): ThunkAction<Promise<void>, State, firebase.app.App
             })
             arr.forEach(d => { if (d.key) painLogLocations[d.key] = d })
             dispatch(GetPainLogAction(painLogLocations))
-            dispatch(isFetching(false))
           })
           .finally(() => {
             //console.log('resolving getPainLog')

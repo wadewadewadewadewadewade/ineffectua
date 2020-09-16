@@ -1,10 +1,9 @@
-import * as React from 'react';
 import { State } from './../Types';
 import { DataType, GetDataTypesAction, ReplaceDataTypesAction, DataTypesType } from '../reducers/DataTypesReducer';
 import { Action, isFetching } from './../reducers';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { DocumentData, DocumentReference } from '@firebase/firestore-types';
-import { firebaseDocumentToArray } from '.';
+import { firebaseDocumentToArray } from '../firebase/utilities';
 
 export const newTypeTitle = '+ Add New Type';
 export const defaultTypeTitle = 'Default';
@@ -78,8 +77,6 @@ export const getDataTypes = (): ThunkAction<Promise<void>, State, firebase.app.A
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {
-        //firebase.firestore.setLogLevel('debug');
-        dispatch(isFetching(true))
         firebase.firestore().collection('users')
           .doc(user.uid).collection('datatypes')
           .get()
@@ -91,7 +88,6 @@ export const getDataTypes = (): ThunkAction<Promise<void>, State, firebase.app.A
             })
             arr.forEach(d => { if (d.key) datatypes[d.key] = d })
             dispatch(GetDataTypesAction(datatypes))
-            dispatch(isFetching(false))
           })
           .finally(() => {
             //console.log('resolving getDataTypes')

@@ -10,17 +10,17 @@ import PainLogReducer, { Action as PainLogAction } from './PainLogReducer';
 
 const SET_FETCHING = 'SET_FETCHING';
 
-export type FetcingAction = {
+export type FetchingAction = {
   type: 'SET_FETCHING'
   isFetching: boolean
 }
 
-export const isFetching = (is: boolean): FetcingAction => {
+export const isFetching = (is: boolean): FetchingAction => {
   return { type: 'SET_FETCHING', isFetching: is }
 }
 
 export type Action =
-    FetcingAction
+    FetchingAction
   | AuthAction
   | ThemeAction
   | CalendarAction

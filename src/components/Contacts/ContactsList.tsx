@@ -11,7 +11,7 @@ import { ContactsState, Contact } from '../../reducers/ContactsReducer';
 import { NewContact } from '../shared/Contacts'
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { firebaseDocumentToArray } from '../../middleware';
+import { firebaseDocumentToArray } from '../../firebase/utilities';
 
 const ContactItem = React.memo((
   { item, theme, onPress }:

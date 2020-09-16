@@ -6,7 +6,6 @@ import { State } from './../Types';
 export const authenticate = (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
   return async (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
-      dispatch(isFetching(true))
       if (isCreation) {
         firebase.auth()
           .createUserWithEmailAndPassword(email, password)
@@ -48,7 +47,6 @@ export const authenticate = (email: string, password: string, errorCallback?: (e
             if (user) {
               dispatch(SignInAction(user))
             }
-            dispatch(isFetching(false))
             resolve();
           })
           .catch(errorCallback)

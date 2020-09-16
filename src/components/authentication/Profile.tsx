@@ -14,6 +14,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { getFirebaseData } from '../../middleware';
+import { isFetching, FetchingAction } from '../../reducers';
 
 const TabsLinks = ({
   color,
@@ -55,6 +56,7 @@ const Profile =
   logout,
   refreshDataFromFirebase,
   navigationRef,
+  fetching
 }: {
   authenticated: boolean,
   user: AuthState['user'],
@@ -62,12 +64,12 @@ const Profile =
   toggleTheme: () => void,
   logout: () => void,
   refreshDataFromFirebase: () => Promise<void>,
-  navigationRef: NavigationContainerRef | null
+  navigationRef: NavigationContainerRef | null,
+  fetching: (is: boolean) => FetchingAction,
 }) => {
   const thumbnail = null //user !== null && user.photoURL !== null ? require(user.photoURL) : null;
   const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
   const isLandscapeOnPhone = dimensions.width > dimensions.height && dimensions.height <= 420;
-  const [fetching, setFetching] = React.useState(false);
 
   React.useEffect(() => {
     const onDimensionsChange = ({ window }: { window: ScaledSize }) => {
@@ -92,12 +94,11 @@ const Profile =
         <Divider />
         {isLandscapeOnPhone && <TabsLinks navigationRef={navigationRef} color={theme.paper.colors.text} />}
         <Button onPress={() => {
-          setFetching(true)
-          refreshDataFromFirebase().finally(() => setFetching(false))
+          fetching(true)
+          refreshDataFromFirebase().finally(() => fetching(false))
         }} style={styles.button}>
           <Text>Refresh Data</Text>
         </Button>
-        {fetching && <ActivityIndicator />}
         <Divider />
         <Button onPress={() => logout()} style={styles.button}>
           Sign Out
@@ -138,6 +139,7 @@ interface DispatchProps {
   toggleTheme: () => void,
   logout: () => void,
   refreshDataFromFirebase: () => Promise<void>,
+  fetching: (is: boolean) => FetchingAction
 }
 
 const mapStateToProps = (state: State) => {
@@ -154,7 +156,8 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any
     logout: () => {
       dispatch(signOut())
     },
-    refreshDataFromFirebase: () => getFirebaseData(dispatch)
+    refreshDataFromFirebase: () => getFirebaseData(dispatch),
+    fetching: (is:boolean) => dispatch(isFetching(is))
   };
 };// Exports
 export default connect(mapStateToProps, mapDispatchToProps)(Profile)
