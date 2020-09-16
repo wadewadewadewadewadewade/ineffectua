@@ -19,7 +19,44 @@ import DataTypes from '../shared/DataTypes';
 import Slider from '@react-native-community/slider';
 import Medications from '../shared/Medications';
 
-type ScreenPosition = { x: number, y: number}
+type ScreenPosition = {
+  x: number,
+  y: number,
+}
+
+type ObjectDimensions = {
+  width: number,
+  height: number,
+}
+
+const percentToPixels = (loc: ScreenPosition, obj: ObjectDimensions): ScreenPosition => {
+  return {
+    x: loc.x / 100 * obj.width,
+    y: loc.y / 100 * obj.height
+  }
+}
+const pixelsToPercent = (loc: ScreenPosition, obj: ObjectDimensions): ViewStyle => {
+  return {
+      left: (loc.x / obj.width * 100).toFixed(2) + '%',
+      top: (loc.y / obj.height * 100).toFixed(2) + '%',
+  }
+}
+const addLocations = (loc1: ScreenPosition, loc2: ScreenPosition): ScreenPosition => {
+  return {
+    x: loc1.x + loc2.x,
+    y: loc1.y + loc2.y
+  }
+}
+/*const multiplyLocations = (loc1: ScreenPosition, loc2: ScreenPosition): ScreenPosition => {
+  return {
+    x: loc1.x * loc2.x,
+    y: loc1.y * loc2.y
+  }
+}
+const panToPixels = (p: Animated.ValueXY) => ({
+  x: (p.x as any)._value, // typings isn't right, so force 
+  y: (p.y as any)._value  // typescript to believe me using 'any'
+})*/
 
 type NewPainLogLocationProps = {
   value?: PainLogLocation
@@ -122,45 +159,9 @@ const Location = ({
     console.error('position or figure dimensions missing', {value, figureDimensions})
     return <View></View>
   }
-  const percentToPixels = (loc: ScreenPosition) => {
-    return {
-      x: loc.x / 100 * figureDimensions.width,
-      y: loc.y / 100 * figureDimensions.height
-    }
-  }
-  const pixelsToPercent = (loc: ScreenPosition, supplyPercentSymbol = false): ScreenPosition | ViewStyle => {
-    if (supplyPercentSymbol) {
-      return {
-        left: (loc.x / figureDimensions.width * 100).toFixed(2) + '%',
-        top: (loc.y / figureDimensions.height * 100).toFixed(2) + '%',
-      } as ViewStyle
-    } else {
-      return {
-        x: loc.x / 100 * figureDimensions.width,
-        y: loc.y / 100 * figureDimensions.height
-      }
-    }
-  }
-  const addLocations = (loc1: ScreenPosition, loc2: ScreenPosition): ScreenPosition => {
-    return {
-      x: loc1.x + loc2.x,
-      y: loc1.y + loc2.y
-    }
-  }
-  const multiplyLocations = (loc1: ScreenPosition, loc2: ScreenPosition): ScreenPosition => {
-    return {
-      x: loc1.x * loc2.x,
-      y: loc1.y * loc2.y
-    }
-  }
-  /*const panToPixels = (p: Animated.ValueXY) => ({
-    x: (p.x as any)._value, // typings isn't right, so force 
-    y: (p.y as any)._value  // typescript to believe me using 'any'
-  })*/
   const scaleShift = {x: 18,y: 2}
-  const negativeOne = {x: -1,y: -1}
-  const [position, setPosition] = React.useState(percentToPixels(value.position));
-  const adjustForDesktop: ViewStyle = Platform.OS === 'web' ? { position: 'absolute', zIndex: 2, padding: 0 } : {};
+  const [position, setPosition] = React.useState(percentToPixels(value.position, figureDimensions));
+  const adjustForDesktop: ViewStyle = Platform.OS === 'web' ? { flexDirection: 'row', position: 'absolute', zIndex: 2, padding: 0 } : {};
   const adjustForDesktopIcon = Platform.OS === 'web' ? { padding: 0, width: '50px' } : {};
   const createTwoButtonAlert = (loc: PainLogLocation) =>
     Alert.alert(
@@ -176,12 +177,17 @@ const Location = ({
       ],
       { cancelable: false }
     );
-  const { cond, eq, add, set, Value, event, interpolate, Extrapolate } = Animated;
+  const { cond, eq, add, set, Value, event } = Animated;
   const dragX = new Value(0);
   const dragY = new Value(0);
-  const offsetX = new Value(percentToPixels(position).x);
-  const offsetY = new Value(percentToPixels(position).y);
+  const offsetX = new Value(0);
+  const offsetY = new Value(0);
   const gestureState = new Value(-1);
+  const scale = cond(
+    eq(gestureState, PanGestureState.ACTIVE),
+    new Value(1.2),
+    new Value(1),
+  );
   const onGestureEvent = event([
     {
       nativeEvent: {
@@ -193,13 +199,16 @@ const Location = ({
   ]);
   const onHandlerStateChange = (e: PanGestureHandlerStateChangeEvent) => {
     const { state } = e.nativeEvent
-    /*if (state === State.ACTIVE) {
-      this.onDragStart(event)
-    }*/
+    if (state === PanGestureState.ACTIVE) {
+      add(offsetX, scaleShift.x)
+      add(offsetY, scaleShift.y)
+    }
     if (state === PanGestureState.END || state === PanGestureState.CANCELLED) {
+      add(offsetX, scaleShift.x * -1)
+      add(offsetY, scaleShift.y * -1)
       const translate = {x: e.nativeEvent.translationX, y: e.nativeEvent.translationY}
       setPosition(addLocations(position,translate))
-      updateLocation({...value, position})
+      //updateLocation({...value, position})
     }
   }
   const transX = cond(
@@ -212,30 +221,25 @@ const Location = ({
     add(offsetY, dragY),
     set(offsetY, add(offsetY, dragY)),
   );
-  const scale = interpolate(transY, {
-    inputRange: [0, 1], // adjust this for scale
-    outputRange: [1, 1.2],
-    extrapolate: Extrapolate.CLAMP
-  });
   return (
-    <Animated.View
-      style={{...styles.location, ...pixelsToPercent(position, true), ...adjustForDesktop, transform: [{ translateX: transX }, { translateY: transY }, { scale }]}}
+    <PanGestureHandler
+      maxPointers={1}
+      onGestureEvent={onGestureEvent}
+      onHandlerStateChange={onHandlerStateChange}
     >
-      <PanGestureHandler
-        maxPointers={1}
-        onGestureEvent={onGestureEvent}
-        onHandlerStateChange={onHandlerStateChange}
+      <Animated.View
+        style={[styles.location, pixelsToPercent(position, figureDimensions), adjustForDesktop, {transform: [{ translateX: transX }, { translateY: transY }, { scale }]}]}
       >
-        <Svg
-            fill={paperColors(theme).accent} style={{...styles.locationIcon, ...adjustForDesktopIcon}}
-            x="0px" y="0px" viewBox="170 0 650 1000"
-        >
-          <Path d="M 614.77414,560.12174 C 587.68041,570.68533 516.07017,565.13404 470.71715,548.95468 C 418.22568,530.22820 414.64302,532.12672 417.35792,577.22605 C 418.19747,591.17179 416.29918,597.61098 411.33095,597.66740 C 405.80535,597.73092 405.65871,598.75516 410.71387,601.96694 C 419.30663,607.42599 402.62734,646.44468 391.70092,646.44468 C 385.84628,646.44468 386.03425,648.17791 392.60170,654.74536 C 397.16677,659.31019 399.61761,666.39242 398.04814,670.48229 C 396.47814,674.57293 397.80373,679.53260 400.99335,681.50396 C 411.70410,688.12355 407.10525,696.13577 394.83083,692.23940 C 383.41004,688.61488 383.30143,688.87593 392.42857,698.00308 C 398.18293,703.75743 400.50530,711.06490 398.26281,716.36322 C 396.21433,721.20343 393.34624,730.65990 391.88890,737.37855 C 390.43228,744.09667 386.03473,749.59350 382.11695,749.59350 C 371.70527,749.59350 356.87064,733.04575 359.99174,724.91287 C 361.46772,721.06636 358.82891,716.44258 354.12753,714.63875 C 347.25140,711.99969 346.17350,705.60209 348.61705,681.92677 C 350.66553,662.08232 349.61280,651.81476 345.38586,650.40552 C 341.11809,648.98344 338.85695,625.05844 338.30087,575.44771 C 337.85188,535.37028 337.19931,499.47270 336.85033,495.67633 C 336.50160,491.88025 329.49825,485.86536 321.28725,482.31088 C 313.07601,478.75668 281.92791,459.93270 252.06918,440.48105 C 222.21013,421.02891 191.52114,401.39208 183.87127,396.84290 C 133.49682,366.88888 124.46817,360.26925 119.69471,349.79286 C 116.76210,343.35668 115.73006,332.86188 117.40135,326.47157 C 120.67613,313.94842 150.02036,298.99561 171.31939,298.99561 C 193.98911,298.99561 283.70453,345.54047 306.67461,369.21854 C 337.21744,400.70298 341.56028,398.58394 342.10451,351.92750 C 342.83096,289.58376 347.00900,244.11452 353.04962,232.82805 C 361.75423,216.56377 388.39869,202.84682 406.20899,205.46070 C 414.94310,206.74247 428.34657,214.32303 435.99472,222.30576 C 449.71591,236.62817 449.79227,237.17845 441.75712,263.83627 C 436.47140,281.37248 433.19462,318.47343 432.41831,369.57128 L 431.22198,448.29020 L 480.86221,472.72014 C 542.53674,503.07276 567.98968,513.96288 587.95883,518.54208 C 607.02397,522.91393 620.57660,535.57411 615.31209,544.09302 C 612.97535,547.87326 613.77435,548.94232 617.30486,546.76033 C 620.54614,544.75720 624.73530,545.60583 626.61370,548.64625 C 628.49281,551.68647 623.16479,556.85048 614.77414,560.12174 z " />
-        </Svg>
-      </PanGestureHandler>
+      <Svg
+        fill={paperColors(theme).accent} style={[styles.locationIcon, adjustForDesktopIcon]}
+        x="0px" y="0px" viewBox="170 0 650 1000"
+      >
+        <Path d="M 614.77414,560.12174 C 587.68041,570.68533 516.07017,565.13404 470.71715,548.95468 C 418.22568,530.22820 414.64302,532.12672 417.35792,577.22605 C 418.19747,591.17179 416.29918,597.61098 411.33095,597.66740 C 405.80535,597.73092 405.65871,598.75516 410.71387,601.96694 C 419.30663,607.42599 402.62734,646.44468 391.70092,646.44468 C 385.84628,646.44468 386.03425,648.17791 392.60170,654.74536 C 397.16677,659.31019 399.61761,666.39242 398.04814,670.48229 C 396.47814,674.57293 397.80373,679.53260 400.99335,681.50396 C 411.70410,688.12355 407.10525,696.13577 394.83083,692.23940 C 383.41004,688.61488 383.30143,688.87593 392.42857,698.00308 C 398.18293,703.75743 400.50530,711.06490 398.26281,716.36322 C 396.21433,721.20343 393.34624,730.65990 391.88890,737.37855 C 390.43228,744.09667 386.03473,749.59350 382.11695,749.59350 C 371.70527,749.59350 356.87064,733.04575 359.99174,724.91287 C 361.46772,721.06636 358.82891,716.44258 354.12753,714.63875 C 347.25140,711.99969 346.17350,705.60209 348.61705,681.92677 C 350.66553,662.08232 349.61280,651.81476 345.38586,650.40552 C 341.11809,648.98344 338.85695,625.05844 338.30087,575.44771 C 337.85188,535.37028 337.19931,499.47270 336.85033,495.67633 C 336.50160,491.88025 329.49825,485.86536 321.28725,482.31088 C 313.07601,478.75668 281.92791,459.93270 252.06918,440.48105 C 222.21013,421.02891 191.52114,401.39208 183.87127,396.84290 C 133.49682,366.88888 124.46817,360.26925 119.69471,349.79286 C 116.76210,343.35668 115.73006,332.86188 117.40135,326.47157 C 120.67613,313.94842 150.02036,298.99561 171.31939,298.99561 C 193.98911,298.99561 283.70453,345.54047 306.67461,369.21854 C 337.21744,400.70298 341.56028,398.58394 342.10451,351.92750 C 342.83096,289.58376 347.00900,244.11452 353.04962,232.82805 C 361.75423,216.56377 388.39869,202.84682 406.20899,205.46070 C 414.94310,206.74247 428.34657,214.32303 435.99472,222.30576 C 449.71591,236.62817 449.79227,237.17845 441.75712,263.83627 C 436.47140,281.37248 433.19462,318.47343 432.41831,369.57128 L 431.22198,448.29020 L 480.86221,472.72014 C 542.53674,503.07276 567.98968,513.96288 587.95883,518.54208 C 607.02397,522.91393 620.57660,535.57411 615.31209,544.09302 C 612.97535,547.87326 613.77435,548.94232 617.30486,546.76033 C 620.54614,544.75720 624.73530,545.60583 626.61370,548.64625 C 628.49281,551.68647 623.16479,556.85048 614.77414,560.12174 z " />
+      </Svg>
       <Text numberOfLines={1} ellipsizeMode="tail" style={{...styles.locationText, color: paperColors(theme).accent}}>{value.title || 'Untitled'}</Text>
       <MaterialCommunityIcons onPress={() => createTwoButtonAlert(value)} style={styles.locationDeleteIcon} name="delete" color={paperColors(theme).accent} size={26} />
-    </Animated.View>
+      </Animated.View>
+    </PanGestureHandler>
   )
 }
 
@@ -253,7 +257,7 @@ export const PainLog = ({
   const [location, setLocation] = React.useState(emptyPainLogLocation);
   const [figureDimensions, setFigureDimensions] = React.useState({width:-1,height:-1});
   const painLogArray = firebaseDocumentToArray(painlog);
-  const adjustForDesktop = Platform.OS === 'web' ? { paddingVertical: 0} : {};
+  const adjustForDesktop = Platform.OS === 'web' ? { paddingVertical: 0 } : {};
   const addLocation = (e: GestureResponderEvent, isBack: boolean = false) => {
     const newLocation: PainLogLocation = {
       created: new Date(),
@@ -272,7 +276,7 @@ export const PainLog = ({
         <View
             style={styles.container}
             onLayout={(e: LayoutChangeEvent) => setFigureDimensions({
-              width: e.nativeEvent.layout.width * 2,
+              width: e.nativeEvent.layout.width,
               height: e.nativeEvent.layout.height
             })}
             onTouchStart={(e) => addLocation(e)}
