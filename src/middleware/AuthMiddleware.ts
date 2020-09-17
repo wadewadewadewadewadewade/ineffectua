@@ -1,5 +1,5 @@
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
-import { isFetching, Action } from '../reducers';
+import { Action } from '../reducers';
 import { SignInAction, SignOutAction } from './../reducers/AuthReducer';
 import { State } from './../Types';
 
@@ -31,7 +31,6 @@ export const authenticate = (email: string, password: string, errorCallback?: (e
                   .catch(errorCallback)
                 .then(() => {
                   dispatch(SignInAction(user))
-                  dispatch(isFetching(false))
                   resolve();
                 })
               }

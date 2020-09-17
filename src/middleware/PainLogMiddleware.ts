@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { State } from './../Types';
 import { GetPainLogAction, ReplacePainLogAction, PainLogState } from '../reducers/PainLogReducer';
-import { Action, isFetching } from './../reducers';
+import { Action } from './../reducers';
 import { PainLogLocation } from './../reducers/PainLogReducer';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { DocumentData, DocumentReference } from '@firebase/firestore-types';
@@ -84,7 +84,6 @@ export const addPainLogLocation = (painLogLocation: PainLogLocation, previousPai
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {
-        dispatch(isFetching(true))
         if (painLogLocation.key) {
           // its an update
           const { key, ...data } = painLogLocation;
@@ -92,7 +91,6 @@ export const addPainLogLocation = (painLogLocation: PainLogLocation, previousPai
             .doc(user.uid).collection('painlog')
             .doc(key).update(data)
             .then(() => {
-              dispatch(isFetching(true))
               onComplete && onComplete(painLogLocation)
           })
         } else if (previousPainLogId) {
@@ -102,7 +100,6 @@ export const addPainLogLocation = (painLogLocation: PainLogLocation, previousPai
             .doc(user.uid).collection('painlog')
             .add(painLogLocation)
             .then((value: DocumentReference<DocumentData>) => {
-              dispatch(isFetching(true))
               const data = {...painLogLocation, key: value.id}
               // then update the "parent" record witht eh "child" id
               firebase.firestore().collection('users')
@@ -117,7 +114,6 @@ export const addPainLogLocation = (painLogLocation: PainLogLocation, previousPai
             .doc(user.uid).collection('painlog')
             .add(painLogLocation)
             .then((value: DocumentReference<DocumentData>) => {
-              dispatch(isFetching(true))
               const data = {...painLogLocation, key: value.id}
               onComplete && onComplete(data)
             })

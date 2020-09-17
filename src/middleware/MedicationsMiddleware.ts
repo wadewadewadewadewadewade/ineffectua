@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { State } from './../Types';
 import { Medication, GetMedicationsAction, ReplaceMedicationsAction, MedicationsState } from '../reducers/MedicationsReducer';
-import { Action, isFetching } from './../reducers';
+import { Action } from './../reducers';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { DocumentData, DocumentReference } from '@firebase/firestore-types';
 import { firebaseDocumentToArray } from '../firebase/utilities';
@@ -98,7 +98,6 @@ export const addMedication = (medicaiton: Medication, onComplete?: (Medication: 
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {
-        dispatch(isFetching(true))
         if (medicaiton.key) {
           // its an update
           const { key, ...data } = medicaiton;
@@ -106,7 +105,6 @@ export const addMedication = (medicaiton: Medication, onComplete?: (Medication: 
             .doc(user.uid).collection('medications')
             .doc(key).update(data)
             .then(() => {
-              dispatch(isFetching(true))
               onComplete && onComplete(medicaiton)
           })
         } else {
@@ -116,7 +114,6 @@ export const addMedication = (medicaiton: Medication, onComplete?: (Medication: 
             .doc(user.uid).collection('medications')
             .add(medicaiton)
             .then((value: DocumentReference<DocumentData>) => {
-              dispatch(isFetching(true))
               const data = {...medicaiton, key: value.id}
               onComplete && onComplete(data)
             })

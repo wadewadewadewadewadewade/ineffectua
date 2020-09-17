@@ -16,6 +16,6 @@ export function firebaseDocumentToArray<T>(items: {[index: string]: T}, optional
       arr.push(optionalItem)
     }
     return arr;
-  }, [items])
+  }, [items, optionalItem])
   return itemsAsArray
 }

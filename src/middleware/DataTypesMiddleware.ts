@@ -1,6 +1,6 @@
 import { State } from './../Types';
 import { DataType, GetDataTypesAction, ReplaceDataTypesAction, DataTypesType } from '../reducers/DataTypesReducer';
-import { Action, isFetching } from './../reducers';
+import { Action } from './../reducers';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { DocumentData, DocumentReference } from '@firebase/firestore-types';
 import { firebaseDocumentToArray } from '../firebase/utilities';
@@ -128,7 +128,6 @@ export const addDataType = (dataType: DataType, onComplete?: (datatype: DataType
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {
-        dispatch(isFetching(true))
         if (dataType.key) {
           // its an update
           const { key, ...data } = dataType;
@@ -136,7 +135,6 @@ export const addDataType = (dataType: DataType, onComplete?: (datatype: DataType
             .doc(user.uid).collection('datatypes')
             .doc(key).update(data)
             .then(() => {
-              dispatch(isFetching(false))
               onComplete && onComplete(dataType)
           })
         } else {
@@ -145,7 +143,6 @@ export const addDataType = (dataType: DataType, onComplete?: (datatype: DataType
             .doc(user.uid).collection('datatypes')
             .add(dataType)
             .then((value: DocumentReference<DocumentData>) => {
-              dispatch(isFetching(false))
               const data = {...dataType, key: value.id}
               onComplete && onComplete(data)
             })

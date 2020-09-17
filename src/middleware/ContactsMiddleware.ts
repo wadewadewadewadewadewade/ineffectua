@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { State } from './../Types';
 import { Contact, GetContactsAction, ReplaceContactsAction, ContactsState } from '../reducers/ContactsReducer';
-import { Action, isFetching } from './../reducers';
+import { Action } from './../reducers';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { DocumentData, DocumentReference } from '@firebase/firestore-types';
 import { firebaseDocumentToArray } from '../firebase/utilities';
@@ -96,7 +96,6 @@ export const addContact = (contact: Contact, onComplete?: (Contact: Contact) => 
     return new Promise<void>((resolve) => {
       const { user } = getState();
       if (user) {
-        dispatch(isFetching(true))
         if (contact.key) {
           // its an update
           const { key, ...data } = contact;
@@ -104,7 +103,6 @@ export const addContact = (contact: Contact, onComplete?: (Contact: Contact) => 
             .doc(user.uid).collection('contacts')
             .doc(key).update(data)
             .then(() => {
-              dispatch(isFetching(true))
               onComplete && onComplete(contact)
           })
         } else {
@@ -114,7 +112,6 @@ export const addContact = (contact: Contact, onComplete?: (Contact: Contact) => 
             .doc(user.uid).collection('contacts')
             .add(contact)
             .then((value: DocumentReference<DocumentData>) => {
-              dispatch(isFetching(true))
               const data = {...contact, key: value.id}
               onComplete && onComplete(data)
             })

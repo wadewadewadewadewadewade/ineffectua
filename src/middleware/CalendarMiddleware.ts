@@ -1,6 +1,6 @@
 import { State } from './../Types';
 import { GetDatesAction, ReplaceDatesAction, CalendarState } from './../reducers/CalendarReducer';
-import { Action, isFetching } from './../reducers';
+import { Action } from './../reducers';
 import { CalendarEntry } from '../reducers/CalendarReducer';
 import { CalendarDot, MultiDotMarking } from 'react-native-calendars';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
@@ -221,7 +221,6 @@ export const addDates = (date: CalendarEntry, onComplete?: () => void): ThunkAct
       const { user } = getState();
       if (user) {
         //firebase.firestore.setLogLevel('debug');
-        dispatch(isFetching(true))
         if (date.key) {
           // its an update
           const { key, ...data } = date;
@@ -232,7 +231,6 @@ export const addDates = (date: CalendarEntry, onComplete?: () => void): ThunkAct
               /* rely on watchDates to pull new data
               const dates: CalendarState['dates'] = {date};
               dispatch(GetDatesAction(dates))*/
-              dispatch(isFetching(false))
               onComplete && onComplete()
           })
         } else {
@@ -245,7 +243,6 @@ export const addDates = (date: CalendarEntry, onComplete?: () => void): ThunkAct
               const dates: CalendarState['dates'] = {date}
               dates.key = value.id;
               dispatch(GetDatesAction(dates))*/
-              dispatch(isFetching(false))
               onComplete && onComplete()
             })
         }
