@@ -11,7 +11,7 @@ import { ThemeState, paperColors } from '../../reducers/ThemeReducer';
 import { Contact, ContactsState } from '../../reducers/ContactsReducer';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { firebaseDocumentToArray } from '../../middleware';
+import { firebaseDocumentToArray } from '../../firebase/utilities';
 
 export const NewContact = (props: {
   value?: Contact

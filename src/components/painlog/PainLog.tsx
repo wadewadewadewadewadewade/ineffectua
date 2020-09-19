@@ -7,12 +7,10 @@ import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { State } from '../../Types';
 import { PainLogLocation, PainLogType } from '../../reducers/PainLogReducer';
-import { addPainLogLocation, emptyPainLogLocation } from '../../middleware/PainLogMiddleware';
-import { firebaseDocumentToArray } from '../../firebase/utilities'
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { addPainLogLocation, emptyPainLogLocation, getPainLogArrayByRange } from '../../middleware/PainLogMiddleware';
 import { paperColors, ThemeState } from '../../reducers/ThemeReducer';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Modal, Portal, TextInput, Button, Text } from 'react-native-paper';
+import { Modal, Portal, TextInput, Button, Text, Divider } from 'react-native-paper';
 import SettingsItem from '../shared/SettingsItem';
 import DataTypes from '../shared/DataTypes';
 import Slider from '@react-native-community/slider';
@@ -56,14 +54,12 @@ const addLocations = (loc1: ScreenPosition, loc2: ScreenPosition): ScreenPositio
 
 type NewPainLogLocationProps = {
   value?: PainLogLocation
-  painlog: PainLogType,
   theme: ThemeState['theme'],
-  saveNewPainLogLocation: (painLogLocation?: PainLogLocation, previousPainLogId?: string) => void
+  saveNewPainLogLocation: (painLogLocation?: PainLogLocation) => void
 }
 
 export const NewPainLogLocation = ({
   value,
-  painlog,
   theme,
   saveNewPainLogLocation
 }: NewPainLogLocationProps) => {
@@ -74,8 +70,9 @@ export const NewPainLogLocation = ({
   const [medications, setMedications] = React.useState(value?.medications || new Array<string>());
   const [severity, setSeverity] = React.useState(value?.severity || 1);
   const [description, setDescription] = React.useState(value?.description || '');
+  const isNewLocation = !value || value === emptyPainLogLocation;
   const newPainLogLocation: PainLogLocation = {
-    created: new Date(Date.now()),
+    previous: value?.key,
     title,
     active,
     typeId,
@@ -83,11 +80,24 @@ export const NewPainLogLocation = ({
     medications,
     description
   };
-  const buttonLabel = !value || value === emptyPainLogLocation ? 'Add New' : 'Edit';
+  const buttonLabel = isNewLocation ? 'Add New' : 'Update';
   const [descriptionHeight, setDescriptionHeight] = React.useState(1);
-  const position = value && value.position ? {left: value?.position.x + '%', top: value?.position.y + '%'} : {};
+  const createTwoButtonAlert = (val: boolean) =>
+    Alert.alert(
+      "Deactivate Pain Log Location",
+      "Are you sure?",
+      [
+        {
+          text: "Cancel",
+          //onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        { text: "OK", onPress: () => setActive(val) }
+      ],
+      { cancelable: false }
+    );
   return (
-    <SafeAreaView style={{backgroundColor: theme.paper.colors.surface, ...position}}>
+    <SafeAreaView style={{backgroundColor: theme.paper.colors.surface, }}>
       <TextInput
         ref={(input) => {
           if (!titleTouched) {
@@ -102,23 +112,40 @@ export const NewPainLogLocation = ({
           }
         }}
         placeholder="Title" />
-      <SettingsItem label="Active" value={active} onValueChange={(val) => setActive(val)} />
+      <Divider/>
+      <SettingsItem label="Active" value={active} onValueChange={(val) => createTwoButtonAlert(val)} />
+      <Divider/>
       <DataTypes
         value={typeId}
         onValueChange={(dt) => dt.key && setTypeId(dt.key)}
         />
-      <Slider
-        value={severity}
-        minimumValue={1}
-        maximumValue={10}
-        onValueChange={(s: number) => setSeverity(s)}
-        />
+      <Divider/>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 16,
+          paddingVertical: 16,
+        }}
+      >
+        <Text style={{color: theme.paper.colors.text}}>Severity</Text>
+        <Slider
+          style={{flex:1,maxWidth:'80%'}}
+          value={severity}
+          minimumValue={1}
+          maximumValue={10}
+          onValueChange={(s: number) => setSeverity(s)}
+          />
+      </View>
+      <Divider/>
       <Medications
         value={medications}
         onValueChange={(m) => setMedications(m)}
         />
+      <Divider/>
       <TextInput
-        style={styles.description}
+        style={[styles.description, {backgroundColor: theme.paper.colors.surface}]}
         multiline={true}
         value={description}
         onContentSizeChange={(event) => {
@@ -130,9 +157,9 @@ export const NewPainLogLocation = ({
       <TouchableOpacity
         style={{backgroundColor: theme.paper.colors.accent, ...styles.button}}
         onPress={() => {
-          addPainLogLocation(newPainLogLocation, value?.key)
+          saveNewPainLogLocation(newPainLogLocation)
         }}>
-        <Text style={styles.buttonContents}>{buttonLabel} Medication</Text>
+        <Text style={styles.buttonContents}>{buttonLabel} Location</Text>
       </TouchableOpacity>
       <Button onPress={() => saveNewPainLogLocation()} style={{paddingVertical:8}}><Text>Cancel</Text></Button>
     </SafeAreaView>
@@ -156,22 +183,8 @@ const Location = ({
     return <View></View>
   }
   const scaleShift = {x: 18,y: 2}
-  const [position, setPosition] = React.useState(percentToPixels(value.position, figureDimensions));
+  const position = percentToPixels(value.position, figureDimensions);
   const adjustForDesktop: ViewStyle = Platform.OS === 'web' ? { flexDirection: 'row', position: 'absolute', zIndex: 2, padding: 0 } : {};
-  const createTwoButtonAlert = (loc: PainLogLocation) =>
-    Alert.alert(
-      "Deactivate Pain Log Location",
-      "Are you sure?",
-      [
-        {
-          text: "Cancel",
-          //onPress: () => console.log("Cancel Pressed"),
-          style: "cancel"
-        },
-        { text: "OK", onPress: () => addPainLogLocation({created: new Date(), active: false}, value.key) }
-      ],
-      { cancelable: false }
-    );
   const { cond, eq, add, set, Value, event } = Animated;
   const dragX = new Value(0);
   const dragY = new Value(0);
@@ -210,8 +223,8 @@ const Location = ({
       if (value.position && positionPercentage) { // this should always be true, but TypeScript like being explicit...
         console.log('updating', percentToPixels(value.position, figureDimensions), newPosition)
         console.log('updating', value.position, newPositionPercentage)
-        setPosition(newPosition)
-        //updateLocation({...value, position: newPositionPercentage})
+        //setPosition(newPosition)
+        updateLocation({...value, position: newPositionPercentage})
       }
     }
   }
@@ -225,6 +238,19 @@ const Location = ({
     add(offsetY, dragY),
     set(offsetY, add(offsetY, dragY)),
   );
+  let lastPress = 0;
+  const onDoublePress = () => {
+    const time = new Date().getTime();
+    const delta = time - lastPress;
+
+    const DOUBLE_PRESS_DELAY = 400;
+    if (delta < DOUBLE_PRESS_DELAY) {
+      updateLocation(value)
+      return false
+    }
+    lastPress = time;
+    return true
+};
   return (
     <PanGestureHandler
       maxPointers={1}
@@ -232,6 +258,7 @@ const Location = ({
       onHandlerStateChange={onHandlerStateChange}
     >
       <Animated.View
+        onStartShouldSetResponder={() => onDoublePress()}
         style={[styles.location, pixelsToPercentViewStyle(position, figureDimensions) ,adjustForDesktop, {transform: [{ translateX: transX }, { translateY: transY }, { scale }]}]}
       >
         <Svg
@@ -240,8 +267,6 @@ const Location = ({
         >
           <Path d="m 668.17324,354.98227 c -27.09373,10.56359 -98.70397,5.0123 -144.05699,-11.16706 -52.49147,-18.72648 -56.07413,-16.82796 -53.35923,28.27137 0.83955,13.94574 -1.05874,20.38493 -6.02697,20.44135 -5.5256,0.0635 -5.67224,1.08776 -0.61708,4.29954 8.59276,5.45905 -8.08653,44.47774 -19.01295,44.47774 -5.85464,0 -5.66667,1.73323 0.90078,8.30068 4.56507,4.56483 7.01591,11.64706 5.44644,15.73693 -1.57,4.09064 -0.24441,9.05031 2.94521,11.02167 10.71075,6.61959 6.1119,14.63181 -6.16252,10.73544 -11.42079,-3.62452 -11.5294,-3.36347 -2.40226,5.76368 5.75436,5.75435 8.07673,13.06182 5.83424,18.36014 -2.04848,4.84021 -4.91657,14.29668 -6.37391,21.01533 -1.45662,6.71812 -5.85417,12.21495 -9.77195,12.21495 -10.41168,0 -25.24631,-16.54775 -22.12521,-24.68063 1.47598,-3.84651 -1.16283,-8.47029 -5.86421,-10.27412 -6.87613,-2.63906 -7.95403,-9.03666 -5.51048,-32.71198 2.04848,-19.84445 0.99575,-30.11201 -3.23119,-31.52125 -4.26777,-1.42208 -6.52891,-25.34708 -7.08499,-74.95781 -0.44899,-40.07743 -1.10156,-75.97501 -1.45054,-79.77138 -0.34873,-3.79608 -7.35208,-9.81097 -15.56308,-13.36545 -8.21124,-3.5542 -39.35934,-22.37818 -69.21807,-41.82983 -29.85905,-19.45214 -60.54804,-39.08897 -68.19791,-43.63815 -50.37445,-29.95402 -59.4031,-36.57365 -64.17656,-47.05004 -2.93261,-6.43618 -3.96465,-16.93098 -2.29336,-23.32129 3.27478,-12.52315 32.61901,-27.475962 53.91804,-27.475962 22.66972,0 112.38514,46.544862 135.35522,70.222932 30.54283,31.48444 34.88567,29.3654 35.4299,-17.29104 0.72645,-62.343742 4.90449,-107.812982 10.94511,-119.099452 8.70461,-16.26428 35.34907,-29.9812297 53.15937,-27.3673497 8.73411,1.28177 22.13758,8.86233 29.78573,16.8450597 13.72119,14.32241 13.79755,14.87269 5.7624,41.53051 -5.28572,17.53621 -8.5625,54.637162 -9.33881,105.735012 l -1.19633,78.71892 49.64023,24.42994 c 61.67453,30.35262 87.12747,41.24274 107.09662,45.82194 19.06514,4.37185 32.61777,17.03203 27.35326,25.55094 -2.33674,3.78024 -1.53774,4.8493 1.99277,2.66731 3.24128,-2.00313 7.43044,-1.1545 9.30884,1.88592 1.87911,3.04022 -3.44891,8.20423 -11.83956,11.47549 z" />
         </Svg>
-        <Text numberOfLines={1} ellipsizeMode="tail" style={{...styles.locationText, color: paperColors(theme).accent}}>{value.title || 'Untitled'}</Text>
-        <MaterialCommunityIcons onPress={() => createTwoButtonAlert(value)} style={styles.locationDeleteIcon} name="delete" color={paperColors(theme).accent} size={26} />
       </Animated.View>
     </PanGestureHandler>
   )
@@ -261,11 +286,10 @@ export const PainLog = ({
   const undefinedFigureDimensions = {width:-1,height:-1}
   const [location, setLocation] = React.useState(emptyPainLogLocation);
   const [figureDimensions, setFigureDimensions] = React.useState(undefinedFigureDimensions);
-  const painLogArray = firebaseDocumentToArray(painlog);
+  const painLogArray = getPainLogArrayByRange(painlog, new Date(-1), new Date());
   const adjustForDesktop = Platform.OS === 'web' ? { paddingVertical: 0 } : {};
   const addLocation = (e: GestureResponderEvent) => {
     const newLocation: PainLogLocation = {
-      created: new Date(),
       position: {
         x: Math.round(e.nativeEvent.locationX / figureDimensions.width * 10000) / 100,
         y: Math.round(e.nativeEvent.locationY / figureDimensions.height * 10000) / 100,
@@ -274,8 +298,24 @@ export const PainLog = ({
     //addNewPainLocation(newLocation)
   }
   let alternatekey = 1
+  const visibleMostRecentLocationsWithinDateRange = figureDimensions !== undefinedFigureDimensions
+    ? painLogArray.filter(p => p.active && p.next === undefined)
+    : []
   return (
     <View>
+      <Portal>
+        <Modal visible={location !== emptyPainLogLocation}>
+          <NewPainLogLocation
+            value={location}
+            theme={theme}
+            saveNewPainLogLocation={(painLogLocation?: PainLogLocation)=> {
+              if (painLogLocation) {
+                addNewPainLocation(painLogLocation)
+              }
+              setLocation(emptyPainLogLocation);
+            }} />
+        </Modal>
+      </Portal>
       <ScrollView centerContent={true}>
         <View
             style={styles.container}
@@ -285,7 +325,7 @@ export const PainLog = ({
             })}
             onTouchStart={(e) => addLocation(e)}
         >
-          {figureDimensions !== undefinedFigureDimensions && painLogArray.filter(p => p.active).map(p => <Location key={p.key || alternatekey++} value={p} figureDimensions={figureDimensions} theme={theme} updateLocation={(p2) => setLocation(p2)}/>)}
+          {visibleMostRecentLocationsWithinDateRange.map(p => <Location key={p.key || alternatekey++} value={p} figureDimensions={figureDimensions} theme={theme} updateLocation={(p2) => setLocation(p2)}/>)}
           <View style={styles.touchablefigure}>
             <Svg
                 style={{...styles.figure, ...adjustForDesktop}}
@@ -306,20 +346,6 @@ export const PainLog = ({
           </View>
         </View>
       </ScrollView>
-      <Portal>
-        <Modal visible={location !== emptyPainLogLocation}>
-          <NewPainLogLocation
-            value={location}
-            painlog={painlog}
-            theme={theme}
-            saveNewPainLogLocation={(loc?: PainLogLocation)=> {
-              if (loc) {
-                addPainLogLocation(loc)
-              }
-              setLocation(emptyPainLogLocation);
-            }} />
-        </Modal>
-      </Portal>
     </View>
   )
 }
@@ -372,7 +398,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: -10, //for the center of the X
-    width:170,
   },
   locationIcon: {
     width:40,

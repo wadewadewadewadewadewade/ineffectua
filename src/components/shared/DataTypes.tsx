@@ -11,7 +11,7 @@ import { ThemeState } from '../../reducers/ThemeReducer';
 import { DataType, DataTypesState } from '../../reducers/DataTypesReducer';
 import { ColorPicker, fromHsv } from 'react-native-color-picker';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { firebaseDocumentToArray } from '../../middleware';
+import { firebaseDocumentToArray } from '../../firebase/utilities';
 
 const NewDataType = (props: {
   value?: DataType | string

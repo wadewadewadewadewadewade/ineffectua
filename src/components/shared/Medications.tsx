@@ -16,7 +16,7 @@ import Contacts from './Contacts';
 import Picker from '../shared/ChronoPicker';
 import SettingsItem from './SettingsItem';
 import { formatDateAndTime } from '../../middleware/CalendarMiddleware'
-import { firebaseDocumentToArray } from '../../middleware';
+import { firebaseDocumentToArray } from '../../firebase/utilities';
 
 type NewMedicationProps = {
   value?: Medication
@@ -152,36 +152,44 @@ const Medications = ({
         paddingVertical: 12,
       }}
     >
-      <Text style={{color: theme.paper.colors.text}}>Medication</Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Text style={{color: theme.paper.colors.text}}>Medication</Text>
+        <View style={styles.pickerView}>
+          <RNPickerSelect
+            ref={(r) => pickerRef = r}
+            style={pickerStyles}
+            items={medicationsArray.map(c => ({label:c.name,value:c.name}))}
+            onValueChange={(itemValue, itemIndex) => {
+              if (itemValue) {
+                const sel = medicationsArray.filter(c => c.name === itemValue.toString())[0];
+                if (sel.name === newMedicationName) {
+                  setVisible(true);
+                } else if (sel.key) {
+                  setNewMedications([...newMedications, sel.key]);
+                  if (pickerRef) {
+                    pickerRef.setState({value:undefined})
+                    pickerRef.forceUpdate()
+                  }
+                  onValueChange([...newMedications, sel.key]);
+                }
+              }
+            }}
+            />
+        </View>
+      </View>
       {newMedications && newMedications.map((cId: string) => medications[cId] && 
-        <View style={styles.existingMedications}>
+        <View key={cId} style={styles.existingMedications}>
           <Text style={styles.existingMedicationsText}>{medications[cId].name}</Text>
           <MaterialCommunityIcons onPress={() => {
             setNewMedications(newMedications.filter(c => c !== cId))
           }} style={styles.existingMedicationsIcon} name="delete" color={paperColors(theme).text} size={26} />
         </View>)}
-      <View style={styles.pickerView}>
-        <RNPickerSelect
-          ref={(r) => pickerRef = r}
-          style={pickerStyles}
-          items={medicationsArray.map(c => ({label:c.name,value:c.name}))}
-          onValueChange={(itemValue, itemIndex) => {
-            if (itemValue) {
-              const sel = medicationsArray.filter(c => c.name === itemValue.toString())[0];
-              if (sel.name === newMedicationName) {
-                setVisible(true);
-              } else if (sel.key) {
-                setNewMedications([...newMedications, sel.key]);
-                if (pickerRef) {
-                  pickerRef.setState({value:undefined})
-                  pickerRef.forceUpdate()
-                }
-                onValueChange([...newMedications, sel.key]);
-              }
-            }
-          }}
-          />
-      </View>
       <Portal>
         <Modal visible={visible}>
           <NewMedication
@@ -258,9 +266,8 @@ const styles = StyleSheet.create({
     paddingHorizontal:4,
   },
   pickerView: {
-    flex:1,
+    alignSelf:'flex-end',
     width:'80%',
-    alignSelf:'flex-end'
   },
   buttonContents : {
     fontSize: 16,

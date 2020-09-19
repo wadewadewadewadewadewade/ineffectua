@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { StyleSheet, Dimensions, ScaledSize } from 'react-native';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import PainLog from './painlog/PainLog';
 import ContactsList from './Contacts/ContactsList';
 import Agenda from './shared/Agenda';
@@ -54,61 +55,63 @@ export default function MaterialBottomTabsScreen() {
   const isLandscapeOnPhone = dimensions.width > dimensions.height && dimensions.height <= 420;
 
   return (
-    <MaterialBottomTabs.Navigator
-      labeled={false}
-      barStyle={{...styles.tabBar, display: isLandscapeOnPhone ? 'none' : 'flex'}}
-    >
-      <MaterialBottomTabs.Screen
-        name="Agenda"
-        component={Agenda}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="home" color={contrast(color)} size={26} />
-          ),
-          tabBarColor: colors[0],
-        }}
-      />
-      <MaterialBottomTabs.Screen
-        name="Calendar"
-        component={CalendarNavigator}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="calendar" color={contrast(color)} size={26} />
-          ),
-          tabBarColor: colors[1],
-        }}
-      />
-      <MaterialBottomTabs.Screen
-        name="ContactsList"
-        component={ContactsList}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="contacts" color={contrast(color)} size={26} />
-          ),
-          tabBarColor: colors[2],
-        }}
-      />
-      <MaterialBottomTabs.Screen
-        name="MedicationsList"
-        component={MedicationsList}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="pill" color={contrast(color)} size={26} />
-          ),
-          tabBarColor: colors[3],
-        }}
-      />
-      <MaterialBottomTabs.Screen
-        name="PainLog"
-        component={PainLog}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="human" color={contrast(color)} size={26} />
-          ),
-          tabBarColor: colors[4],
-        }}
-      />
-    </MaterialBottomTabs.Navigator>
+    <SafeAreaProvider>
+      <MaterialBottomTabs.Navigator
+        labeled={false}
+        barStyle={{...styles.tabBar, display: isLandscapeOnPhone ? 'none' : 'flex'}}
+      >
+        <MaterialBottomTabs.Screen
+          name="Agenda"
+          component={Agenda}
+          options={{
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons name="home" color={contrast(color)} size={26} />
+            ),
+            tabBarColor: colors[0],
+          }}
+        />
+        <MaterialBottomTabs.Screen
+          name="Calendar"
+          component={CalendarNavigator}
+          options={{
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons name="calendar" color={contrast(color)} size={26} />
+            ),
+            tabBarColor: colors[1],
+          }}
+        />
+        <MaterialBottomTabs.Screen
+          name="ContactsList"
+          component={ContactsList}
+          options={{
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons name="contacts" color={contrast(color)} size={26} />
+            ),
+            tabBarColor: colors[2],
+          }}
+        />
+        <MaterialBottomTabs.Screen
+          name="MedicationsList"
+          component={MedicationsList}
+          options={{
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons name="pill" color={contrast(color)} size={26} />
+            ),
+            tabBarColor: colors[3],
+          }}
+        />
+        <MaterialBottomTabs.Screen
+          name="PainLog"
+          component={PainLog}
+          options={{
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons name="human" color={contrast(color)} size={26} />
+            ),
+            tabBarColor: colors[4],
+          }}
+        />
+      </MaterialBottomTabs.Navigator>
+    </SafeAreaProvider>
   );
 }
 

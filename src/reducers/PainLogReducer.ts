@@ -1,6 +1,6 @@
 export type PainLogLocation = {
   key?: string,
-  created: Date,
+  created?: Date,
   typeId?: string,
   position?: {
     x: number,
@@ -11,7 +11,8 @@ export type PainLogLocation = {
   description?: string,
   severity?: number,
   medications?: Array<string>
-  updatePainLogId?: string
+  previous?: string
+  next?: string
 }
 
 export type PainLogType = {

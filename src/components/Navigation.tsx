@@ -8,7 +8,6 @@ import {
   Linking,
   View
 } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { firebase } from '../firebase/config';
 import {
   Provider as PaperProvider,
@@ -173,7 +172,6 @@ const Navigation = (props: {
       {Platform.OS === 'ios' && (
         <StatusBar barStyle={barClassName(theme)} />
       )}
-      <SafeAreaProvider>
         <NavigationContainer
           ref={navigationRef}
           initialState={initialState}
@@ -266,7 +264,6 @@ const Navigation = (props: {
           <AuthFlow />
         )}
         </NavigationContainer>
-      </SafeAreaProvider>
     </PaperProvider>
   )
 }
