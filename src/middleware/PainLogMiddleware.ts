@@ -10,14 +10,43 @@ import { firebaseDocumentToArray } from '../firebase/utilities';
 export const newPainLogLocationName = '+ Add New PainLogLocation';
 export const emptyPainLogLocation: PainLogLocation = {created:new Date()};
 
+type PainLogThread = {
+  [isodate: string]: PainLogLocation
+}
+
+type PainLogKey = {
+  thread: number,
+  isodate: string,
+  date: Date,
+}
+
+const unknownPainLogKey: PainLogKey = {
+  thread: -1,
+  isodate: new Date().toISOString(),
+  date: new Date(),
+
+}
+
 type PainLogThreads = {
   beginnings: Array<string>,
   endings: Array<string>,
-  hash: { [key: string]: PainLogLocation }
+  oldest: PainLogKey,
+  newest: PainLogKey,
+  hash: {
+    [thread: number]: PainLogThread
+  }
 }
 
-const buildPainLogHistory = (painlog: PainLogType) => React.useMemo(() => {
-  const painlogThreads: PainLogThreads = {beginnings:[],endings:[],hash:{}}
+const initialPainLogThreads: PainLogThreads = {
+  beginnings:[],
+  endings:[],
+  oldest: unknownPainLogKey,
+  newest: unknownPainLogKey,
+  hash:{}
+}
+
+const PainLogHistory = (painlog: PainLogType) => React.useMemo(() => {
+  const painlogThreads: PainLogThreads = initialPainLogThreads
   const painlogArray = firebaseDocumentToArray(painlog)
       
   const copyPortionOfLocation = (loc:PainLogLocation): PainLogLocation => {
@@ -25,38 +54,63 @@ const buildPainLogHistory = (painlog: PainLogType) => React.useMemo(() => {
     return rest
   }
 
-  const generateKey = (loc: PainLogLocation, index: number) => loc.created?.toISOString() + '_' + index
-
   const crawlThread = (
     pl: PainLogType,
     threads: PainLogThreads,
     current: PainLogLocation,
-    index: number,
-    previousKey?: string
+    thread: number,
+    previousKey?: PainLogKey
   ) => {
     if (current.created) {
-      const newKey = generateKey(current, index)
+      const isodate = current.created.toISOString()
       if (previousKey) {
-        Object.assign<PainLogLocation, PainLogLocation[]>(threads.hash[newKey], [
-          threads.hash[previousKey],
+        Object.assign<PainLogLocation, PainLogLocation[]>(threads.hash[thread][isodate], [
+          threads.hash[previousKey.thread][previousKey.isodate],
           copyPortionOfLocation(current)
         ])
       } else {
-        threads.hash[newKey] = copyPortionOfLocation(current)
+        threads.hash[thread][isodate] = copyPortionOfLocation(current)
       }
+      const newKey: PainLogKey = {thread, isodate, date: current.created}
       if (current.next) {
-        crawlThread(pl, threads, pl[current.next], index, newKey)
+        crawlThread(pl, threads, pl[current.next], thread, newKey)
       } else {
-        threads.endings[index] = newKey
+        threads.endings[thread] = isodate
+        if (threads.newest.date < current.created) {
+          threads.newest = newKey
+        }
       }
     }
   }
   
-  const arr = painlogArray.filter(p => p.previous === undefined)
+  // filter the list of locations so it's just the thread begninnings,
+  // and sort so the oldes location is first to se the 'oldest' property
+  const arr = painlogArray.filter(p => p.previous === undefined).sort((a,b) => {
+    if (!a.created || !b.created) {
+      return -1
+    } else if (a.created < b.created) {
+      return -1
+    } else {
+      return 1
+    }
+  })
   for(let i=0;i<arr.length;i++) {
-    painlogThreads.beginnings[i] = generateKey(arr[i], i)
-    crawlThread(painlog, painlogThreads, arr[i], i)
+    const current = arr[i]
+    if (current.created) {
+      const isodate = current.created.toISOString()
+      if (painlogThreads.oldest === unknownPainLogKey) {
+        painlogThreads.oldest = {
+          thread: i,
+          isodate,
+          date: current.created
+        }
+      }
+      painlogThreads.beginnings[i] = isodate
+      crawlThread(painlog, painlogThreads, current, i)
+    }
   }
+
+
   return painlogThreads
 
 }, [painlog])
@@ -64,30 +118,44 @@ const buildPainLogHistory = (painlog: PainLogType) => React.useMemo(() => {
 export const getPainLogArrayByRange = (painlog: PainLogType, start: Date, end: Date): Array<PainLogLocation> => {
   const result = new Array<PainLogLocation>()
   const threadsToDiscard = new Array<number>()
-  const history = buildPainLogHistory(painlog)
+  const history = PainLogHistory(painlog)
   
-  // if thread ends before window, or thread is inactive within window, remove it
-  for(let i=0;i<history.endings.length;i++) {
-    const ended = history.endings[i]
-    const [ dateString, indexString ] = ended.split('_')
-    if (new Date(dateString) < start || !history.hash[ended].active) {
-      threadsToDiscard.push(parseInt(indexString, 10))
+  // if thread ends before window, or thread ending is inactive within window, remove it
+  for(let thread=0;thread<history.endings.length;thread++) {
+    const isodate = history.endings[thread]
+    const current = history.hash[thread][isodate]
+    if (!current.created || current.created < start || !history.hash[thread][isodate].active) {
+      threadsToDiscard.push(thread)
     }
   }
 
   // if thread starts after the window, remove it also
-  for(let i=0;i<history.beginnings.length;i++) {
-    const started = history.beginnings[i]
-    const [ dateString, indexString ] = started.split('_')
-    if (new Date(dateString) > end) {
-      threadsToDiscard.push(parseInt(indexString, 10))
+  for(let thread=0;thread<history.beginnings.length;thread++) {
+    const isodate = history.beginnings[thread]
+    const current = history.hash[thread][isodate]
+    if (!current.created || current.created > end) {
+      threadsToDiscard.push(thread)
     }
   }
 
-  // new that we know which thrads to ignore, find newest keys that are still active within window
-  for(let i=0;i<history.endings.length;i++) {
-    if (threadsToDiscard.indexOf(i) < 0) {
-      result.push(history.hash[history.endings[i]])
+  // now that we know which thrads to ignore, find newest keys that are still active within window
+  const getNewestPainLogLocationWithinRangeByThread = (thread: PainLogThread) => {
+    const isodates = Object.keys(thread).sort()
+    const startString = start.toISOString()
+    let threadNumber = 0
+    let isodate = isodates[threadNumber]
+    let nextIsodate = isodates[threadNumber + 1]
+    while (nextIsodate && nextIsodate < startString) {
+      threadNumber++
+      isodate = nextIsodate
+      nextIsodate = isodates[threadNumber + 1]
+    }
+    return isodate
+  }
+  for(let thread=0;thread<history.beginnings.length;thread++) {
+    if (threadsToDiscard.indexOf(thread) < 0) {
+      const isodate = getNewestPainLogLocationWithinRangeByThread(history.hash[thread])
+      result.push(history.hash[thread][isodate])
     }
   }
 
