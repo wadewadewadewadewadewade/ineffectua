@@ -45,7 +45,7 @@ const initialPainLogThreads: PainLogThreads = {
   hash:{}
 }
 
-const PainLogHistory = (painlog: PainLogType) => React.useMemo(() => {
+const PainLogHistory = (painlog: PainLogType) => {
   const painlogThreads: PainLogThreads = initialPainLogThreads
   const painlogArray = firebaseDocumentToArray(painlog)
       
@@ -59,11 +59,14 @@ const PainLogHistory = (painlog: PainLogType) => React.useMemo(() => {
     threads: PainLogThreads,
     current: PainLogLocation,
     thread: number,
-    previousKey?: PainLogKey
+    previousKey: PainLogKey = unknownPainLogKey
   ) => {
-    if (current.created) {
+    if (current && current.created) {
+      if (!threads.hash[thread]) {
+        threads.hash[thread] = {} as PainLogThread
+      }
       const isodate = current.created.toISOString()
-      if (previousKey) {
+      if (previousKey !== unknownPainLogKey) {
         Object.assign<PainLogLocation, PainLogLocation[]>(threads.hash[thread][isodate], [
           threads.hash[previousKey.thread][previousKey.isodate],
           copyPortionOfLocation(current)
@@ -72,11 +75,11 @@ const PainLogHistory = (painlog: PainLogType) => React.useMemo(() => {
         threads.hash[thread][isodate] = copyPortionOfLocation(current)
       }
       const newKey: PainLogKey = {thread, isodate, date: current.created}
-      if (current.next) {
+      if (typeof current.next === 'string' && pl[current.next]) {
         crawlThread(pl, threads, pl[current.next], thread, newKey)
       } else {
         threads.endings[thread] = isodate
-        if (threads.newest.date < current.created) {
+        if (!threads.newest || threads.newest.date < current.created) {
           threads.newest = newKey
         }
       }
@@ -84,7 +87,7 @@ const PainLogHistory = (painlog: PainLogType) => React.useMemo(() => {
   }
   
   // filter the list of locations so it's just the thread begninnings,
-  // and sort so the oldes location is first to se the 'oldest' property
+  // and sort so the oldest location is first to se the 'oldest' property
   const arr = painlogArray.filter(p => p.previous === undefined).sort((a,b) => {
     if (!a.created || !b.created) {
       return -1
@@ -110,10 +113,9 @@ const PainLogHistory = (painlog: PainLogType) => React.useMemo(() => {
     }
   }
 
-
   return painlogThreads
 
-}, [painlog])
+}
 
 export const getPainLogArrayByRange = (painlog: PainLogType, start: Date, end: Date): Array<PainLogLocation> => {
   const result = new Array<PainLogLocation>()

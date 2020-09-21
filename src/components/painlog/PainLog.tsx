@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, GestureResponderEvent, Alert, Platform, LayoutChangeEvent, ViewStyle } from 'react-native'
 import { ScrollView, TouchableOpacity, PanGestureHandler, State as PanGestureState, PanGestureHandlerStateChangeEvent } from "react-native-gesture-handler";
-import Animated from "react-native-reanimated";
+import Animated, { useCode, debug, call } from 'react-native-reanimated';
 import { Svg, Path } from 'react-native-svg'
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
@@ -207,27 +207,6 @@ const Location = ({
       },
     },
   ]);
-  const onHandlerStateChange = (e: PanGestureHandlerStateChangeEvent) => {
-    const { state } = e.nativeEvent
-    if (state === PanGestureState.ACTIVE) {
-      add(offsetX, scaleShift.x)
-      add(offsetY, scaleShift.y)
-    }
-    if (state === PanGestureState.END || state === PanGestureState.CANCELLED) {
-      add(offsetX, scaleShift.x * -1)
-      add(offsetY, scaleShift.y * -1)
-      const translate = {x: e.nativeEvent.translationX, y: e.nativeEvent.translationY}
-      const newPosition = addLocations(position,translate)
-      const positionPercentage = pixelsToPercent(position, figureDimensions)
-      const newPositionPercentage = pixelsToPercent(newPosition, figureDimensions)
-      if (value.position && positionPercentage) { // this should always be true, but TypeScript like being explicit...
-        console.log('updating', percentToPixels(value.position, figureDimensions), newPosition)
-        console.log('updating', value.position, newPositionPercentage)
-        //setPosition(newPosition)
-        updateLocation({...value, position: newPositionPercentage})
-      }
-    }
-  }
   const transX = cond(
     eq(gestureState, PanGestureState.ACTIVE),
     add(offsetX, dragX),
@@ -238,6 +217,29 @@ const Location = ({
     add(offsetY, dragY),
     set(offsetY, add(offsetY, dragY)),
   );
+  useCode(() => cond(eq(gestureState, PanGestureState.END), call([transX, transY], ([x, y]) => {
+    const translate = { x,y };
+    const newPosition = addLocations(position,translate)
+    const positionPercentage = pixelsToPercent(position, figureDimensions)
+    const newPositionPercentage = pixelsToPercent(newPosition, figureDimensions)
+    if (value.position && positionPercentage) { // this should always be true, but TypeScript like being explicit...
+      console.log('updating', percentToPixels(value.position, figureDimensions), newPosition)
+      console.log('updating', value.position, newPositionPercentage)
+      //setPosition(newPosition)
+      updateLocation({...value, position: newPositionPercentage})
+    }
+  })), [gestureState, transX, transY]);
+  const onHandlerStateChange = (e: PanGestureHandlerStateChangeEvent) => {
+    const { state } = e.nativeEvent
+    if (state === PanGestureState.ACTIVE) {
+      add(offsetX, scaleShift.x)
+      add(offsetY, scaleShift.y)
+    }
+    if (state === PanGestureState.END || state === PanGestureState.CANCELLED) {
+      add(offsetX, scaleShift.x * -1)
+      add(offsetY, scaleShift.y * -1)
+    }
+  }
   let lastPress = 0;
   const onDoublePress = () => {
     const time = new Date().getTime();
@@ -287,6 +289,7 @@ export const PainLog = ({
   const [location, setLocation] = React.useState(emptyPainLogLocation);
   const [figureDimensions, setFigureDimensions] = React.useState(undefinedFigureDimensions);
   const painLogArray = getPainLogArrayByRange(painlog, new Date(-1), new Date());
+  console.log({painLogArray})
   const adjustForDesktop = Platform.OS === 'web' ? { paddingVertical: 0 } : {};
   const addLocation = (e: GestureResponderEvent) => {
     const newLocation: PainLogLocation = {
