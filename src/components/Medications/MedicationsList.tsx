@@ -180,7 +180,7 @@ const mapStateToProps = (state: State) => {
     medications: state.medications
   };
 };
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
+const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
   return {
     addNewMedication: (medication: Medication, onComplete: (medication: Medication) => void) => {
       dispatch(addMedication(medication, onComplete))

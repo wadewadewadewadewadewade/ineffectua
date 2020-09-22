@@ -112,9 +112,4 @@ const mapStateToProps = (state: State) => {
     dates: state.dates
   };
 };
-const mapDispatchToProps = (dispatch: (value: Action) => void) => {
-  // Action
-  return {
-  };
-};// Exports
-export default connect(mapStateToProps, mapDispatchToProps)(Agenda);
+export default connect(mapStateToProps)(Agenda);

@@ -160,7 +160,7 @@ const mapStateToProps = (state: State) => {
     datatypes: state.datatypes
   };
 };
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
+const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
   return {
     addDataTypes: (datatype: DataType, onComplete: (datatype: DataType) => void) => {
       dispatch(addDataType(datatype, onComplete))

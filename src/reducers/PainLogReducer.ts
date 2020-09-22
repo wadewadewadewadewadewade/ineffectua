@@ -1,3 +1,7 @@
+export type PainLogType = {
+  [id: string]: PainLogLocation
+}
+
 export type PainLogLocation = {
   key?: string,
   created?: Date,
@@ -15,15 +19,11 @@ export type PainLogLocation = {
   next?: string
 }
 
-export type PainLogType = {
-  [id: string]: PainLogLocation
-}
-
 export type PainLogState = {
   painlog: PainLogType
 }
 
-export const initialState: PainLogType = {};
+export const initialState = {}
 
 export const GET_PAINLOGLOCATIONS= 'GET_PAINLOGLOCATIONS';
 export const SET_PAINLOGLOCATIONS= 'SET_PAINLOGLOCATIONS';
@@ -31,28 +31,28 @@ export const REPLACE_PAINLOGLOCATIONS= 'REPLACE_PAINLOGLOCATIONS';
 
 export type Action = {
     type: 'SET_PAINLOGLOCATIONS';
-    contacts: PainLogType
+    painlog: PainLogType
   } | {
     type: 'GET_PAINLOGLOCATIONS';
-    contacts: PainLogType
+    painlog: PainLogType
   } | {
     type: 'REPLACE_PAINLOGLOCATIONS';
-    contacts: PainLogType
+    painlog: PainLogType
   };
 
-export const GetPainLogAction = (contacts: PainLogType): Action => ({
+export const GetPainLogAction = (painlog: PainLogType): Action => ({
   type: GET_PAINLOGLOCATIONS,
-  contacts
+  painlog
 });
 
-export const SetPainLogAction = (contacts: PainLogType): Action => ({
+export const SetPainLogAction = (painlog: PainLogType): Action => ({
   type: SET_PAINLOGLOCATIONS,
-  contacts
+  painlog
 });
 
-export const ReplacePainLogAction = (contacts: PainLogType): Action => ({
+export const ReplacePainLogAction = (painlog: PainLogType): Action => ({
   type: SET_PAINLOGLOCATIONS,
-  contacts
+  painlog
 });
 
 export default function PainLogReducer(
@@ -64,10 +64,10 @@ export default function PainLogReducer(
     case SET_PAINLOGLOCATIONS:
       return {
         ...prevState,
-        ...action.contacts
+        ...action.painlog
       };
     case REPLACE_PAINLOGLOCATIONS:
-      return action.contacts
+      return action.painlog
     default:
       return prevState
   }

@@ -342,7 +342,7 @@ const mapStateToProps = (state: State) => {
     datatypes: state.datatypes,
   };
 };
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
+const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
   return {
     saveDates: (entry: CalendarEntry, onComplete: () => void) => {
       dispatch(addDates(entry, onComplete))

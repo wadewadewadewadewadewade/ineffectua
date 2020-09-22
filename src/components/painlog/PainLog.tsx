@@ -1,13 +1,13 @@
 import React from 'react';
 import { StyleSheet, View, GestureResponderEvent, Alert, Platform, LayoutChangeEvent, ViewStyle } from 'react-native'
 import { ScrollView, TouchableOpacity, PanGestureHandler, State as PanGestureState, PanGestureHandlerStateChangeEvent } from "react-native-gesture-handler";
-import Animated, { useCode, debug, call } from 'react-native-reanimated';
+import Animated, { useCode, call } from 'react-native-reanimated';
 import { Svg, Path } from 'react-native-svg'
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { State } from '../../Types';
 import { PainLogLocation, PainLogType } from '../../reducers/PainLogReducer';
-import { addPainLogLocation, emptyPainLogLocation, getPainLogArrayByRange } from '../../middleware/PainLogMiddleware';
+import { addPainLogLocation, emptyPainLogLocation, PainLogThreads } from '../../middleware/PainLogMiddleware';
 import { paperColors, ThemeState } from '../../reducers/ThemeReducer';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Modal, Portal, TextInput, Button, Text, Divider } from 'react-native-paper';
@@ -288,8 +288,9 @@ export const PainLog = ({
   const undefinedFigureDimensions = {width:-1,height:-1}
   const [location, setLocation] = React.useState(emptyPainLogLocation);
   const [figureDimensions, setFigureDimensions] = React.useState(undefinedFigureDimensions);
-  const painLogArray = getPainLogArrayByRange(painlog, new Date(-1), new Date());
-  console.log({painLogArray})
+  const threads = new PainLogThreads(painlog)
+  const painLogArray: Array<PainLogLocation> = threads.getArray(new Date(-1), new Date());
+  console.log(painLogArray)
   const adjustForDesktop = Platform.OS === 'web' ? { paddingVertical: 0 } : {};
   const addLocation = (e: GestureResponderEvent) => {
     const newLocation: PainLogLocation = {
@@ -430,7 +431,7 @@ const mapStateToProps = (state: State) => {
     painlog: state.painlog
   };
 };
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
+const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
   return {
     addNewPainLocation: (painlogLocation: PainLogLocation) => {
       dispatch(addPainLogLocation(painlogLocation))

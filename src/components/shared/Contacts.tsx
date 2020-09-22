@@ -266,7 +266,7 @@ const mapStateToProps = (state: State) => {
     contacts: state.contacts
   };
 };
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, {}, any>, ownProps: OwnProps): DispatchProps => {
+const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
   return {
     addNewContact: (contact: Contact, onComplete: (contact: Contact) => void) => {
       dispatch(addContact(contact, onComplete))
