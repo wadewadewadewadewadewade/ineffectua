@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, GestureResponderEvent, Alert, Platform, LayoutChangeEvent, ViewStyle } from 'react-native'
 import { ScrollView, TouchableOpacity, PanGestureHandler, State as PanGestureState, PanGestureHandlerStateChangeEvent } from "react-native-gesture-handler";
-import Animated, { useCode, call } from 'react-native-reanimated';
+import Animated, { useCode, call, debug } from 'react-native-reanimated';
 import { Svg, Path } from 'react-native-svg'
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
@@ -184,7 +184,12 @@ const Location = ({
   }
   const scaleShift = {x: 18,y: 2}
   const position = percentToPixels(value.position, figureDimensions);
-  const adjustForDesktop: ViewStyle = Platform.OS === 'web' ? { flexDirection: 'row', position: 'absolute', zIndex: 2, padding: 0 } : {};
+  const adjustForDesktop: ViewStyle = Platform.OS === 'web' ? {
+    flexDirection: 'row',
+    position: 'absolute',
+    zIndex: 2,
+    padding: 0
+  } : {};
   const { cond, eq, add, set, Value, event } = Animated;
   const dragX = new Value(0);
   const dragY = new Value(0);
@@ -193,11 +198,6 @@ const Location = ({
   const gestureState = new Value(-1);
   const scaleMax = new Value(1.2);
   const scaleMin = new Value(1);
-  const scale = cond(
-    eq(gestureState, PanGestureState.ACTIVE),
-    scaleMax,
-    scaleMin,
-  );
   const onGestureEvent = event([
     {
       nativeEvent: {
@@ -217,29 +217,41 @@ const Location = ({
     add(offsetY, dragY),
     set(offsetY, add(offsetY, dragY)),
   );
-  useCode(() => cond(eq(gestureState, PanGestureState.END), call([transX, transY], ([x, y]) => {
-    const translate = { x,y };
-    const newPosition = addLocations(position,translate)
-    const positionPercentage = pixelsToPercent(position, figureDimensions)
-    const newPositionPercentage = pixelsToPercent(newPosition, figureDimensions)
-    if (value.position && positionPercentage) { // this should always be true, but TypeScript like being explicit...
-      console.log('updating', percentToPixels(value.position, figureDimensions), newPosition)
-      console.log('updating', value.position, newPositionPercentage)
-      //setPosition(newPosition)
-      updateLocation({...value, position: newPositionPercentage})
-    }
-  })), [gestureState, transX, transY]);
+  const scale = cond(
+    eq(gestureState, PanGestureState.ACTIVE),
+    scaleMax,
+    scaleMin,
+  );
   const onHandlerStateChange = (e: PanGestureHandlerStateChangeEvent) => {
     const { state } = e.nativeEvent
-    if (state === PanGestureState.ACTIVE) {
-      add(offsetX, scaleShift.x)
-      add(offsetY, scaleShift.y)
+    if (state === PanGestureState.BEGAN) {
+      //add(offsetX, scaleShift.x)
+      //add(offsetY, scaleShift.y)
     }
     if (state === PanGestureState.END || state === PanGestureState.CANCELLED) {
-      add(offsetX, scaleShift.x * -1)
-      add(offsetY, scaleShift.y * -1)
+      //add(offsetX, scaleShift.x * -1)
+      //add(offsetY, scaleShift.y * -1)
+      const translate = {x: e.nativeEvent.translationX, y: e.nativeEvent.translationY}
+      const newPosition = addLocations(position,translate)
+      const newPositionPercentage = pixelsToPercent(newPosition, figureDimensions)
+      if (value.position) { // this should always be true, but TypeScript likes being explicit...
+        const pixels = { start: percentToPixels(value.position, figureDimensions), end: newPosition }
+        const percent = { start: value.position, end: newPositionPercentage }
+        console.log('updating', { pixels, percent })
+        //setPosition(newPosition)
+        updateLocation({...value, position: newPositionPercentage})
+      }
     }
   }
+  /*useCode(() => cond(
+    eq(gestureState, PanGestureState.END),
+    call([transX, transY], ([x, y]) => {
+      debug('transX', transX)
+    }),
+    call([transX, transY], ([x, y]) => {
+      console.log('gestureState', (gestureState as any)._value)
+    })
+  ), [transX, transX, gestureState])*/
   let lastPress = 0;
   const onDoublePress = () => {
     const time = new Date().getTime();
@@ -252,7 +264,7 @@ const Location = ({
     }
     lastPress = time;
     return true
-};
+  };
   return (
     <PanGestureHandler
       maxPointers={1}
@@ -261,7 +273,16 @@ const Location = ({
     >
       <Animated.View
         onStartShouldSetResponder={() => onDoublePress()}
-        style={[styles.location, pixelsToPercentViewStyle(position, figureDimensions) ,adjustForDesktop, {transform: [{ translateX: transX }, { translateY: transY }, { scale }]}]}
+        style={[
+          styles.location,
+          pixelsToPercentViewStyle(position, figureDimensions),
+          adjustForDesktop,
+          {transform: [
+            { translateX: transX },
+            { translateY: transY },
+            { scale }
+          ]}
+        ]}
       >
         <Svg
           fill={paperColors(theme).accent} style={styles.locationIcon}
@@ -290,7 +311,6 @@ export const PainLog = ({
   const [figureDimensions, setFigureDimensions] = React.useState(undefinedFigureDimensions);
   const threads = new PainLogThreads(painlog)
   const painLogArray: Array<PainLogLocation> = threads.getArray(new Date(-1), new Date());
-  console.log(painLogArray)
   const adjustForDesktop = Platform.OS === 'web' ? { paddingVertical: 0 } : {};
   const addLocation = (e: GestureResponderEvent) => {
     const newLocation: PainLogLocation = {
@@ -301,9 +321,14 @@ export const PainLog = ({
     }
     //addNewPainLocation(newLocation)
   }
+  const updateLocation = (loc: PainLogLocation) => {
+    const { key, ...rest} = loc
+    const newLocation: PainLogLocation = {...rest, previous: key}
+    //addNewPainLocation(newLocation)
+  }
   let alternatekey = 1
   const visibleMostRecentLocationsWithinDateRange = figureDimensions !== undefinedFigureDimensions
-    ? painLogArray.filter(p => p.active && p.next === undefined)
+    ? painLogArray
     : []
   return (
     <View>
@@ -329,7 +354,7 @@ export const PainLog = ({
             })}
             onTouchStart={(e) => addLocation(e)}
         >
-          {visibleMostRecentLocationsWithinDateRange.map(p => <Location key={p.key || alternatekey++} value={p} figureDimensions={figureDimensions} theme={theme} updateLocation={(p2) => setLocation(p2)}/>)}
+          {visibleMostRecentLocationsWithinDateRange.map(p => <Location key={p.key || alternatekey++} value={p} figureDimensions={figureDimensions} theme={theme} updateLocation={(p2) => updateLocation(p2)}/>)}
           <View style={styles.touchablefigure}>
             <Svg
                 style={{...styles.figure, ...adjustForDesktop}}

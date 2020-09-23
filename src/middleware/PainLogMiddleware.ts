@@ -42,8 +42,8 @@ export class PainLogThreads {
     // if thread ends before window, or thread ending is inactive within window, remove it
     for(let thread=0;thread<history.endings.length;thread++) {
       const isodate = history.endings[thread]
-      const current = new Date(Date.parse(history.endings[thread]))
-      if (current < start || !history.hash[thread][isodate].active) {
+      const ending = new Date(Date.parse(history.endings[thread]))
+      if (ending < start && !history.hash[thread][isodate].active) {
         threadsToDiscard.push(thread)
       }
     }
@@ -51,8 +51,8 @@ export class PainLogThreads {
     // if thread starts after the window, remove it also
     for(let thread=0;thread<history.beginnings.length;thread++) {
       const isodate = history.beginnings[thread]
-      const current = new Date(Date.parse(history.endings[thread]))
-      if (current > end) {
+      const beginning = new Date(Date.parse(isodate))
+      if (beginning > end) {
         threadsToDiscard.push(thread)
       }
     }

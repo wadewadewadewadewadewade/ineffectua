@@ -29,7 +29,6 @@ import {
   createStackNavigator,
   HeaderStyleInterpolators,
 } from '@react-navigation/stack';
-import { useReduxDevToolsExtension } from '@react-navigation/devtools';
 import { Action, isFetching } from '../reducers';
 
 // use this to restart the app for things like changing RTL to LTR
@@ -154,8 +153,6 @@ const Navigation = (props: {
   }, []);
 
   const navigationRef = React.useRef<NavigationContainerRef>(null);
-
-  useReduxDevToolsExtension(navigationRef);
 
   if (!isReady || fetching) {
     return (
