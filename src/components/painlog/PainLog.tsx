@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, GestureResponderEvent, Alert, Platform, LayoutChangeEvent, ViewStyle } from 'react-native'
 import { ScrollView, TouchableOpacity, PanGestureHandler, State as PanGestureState, PanGestureHandlerStateChangeEvent } from "react-native-gesture-handler";
-import Animated, { useCode, call, debug } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { Svg, Path } from 'react-native-svg'
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
@@ -224,34 +224,28 @@ const Location = ({
   );
   const onHandlerStateChange = (e: PanGestureHandlerStateChangeEvent) => {
     const { state } = e.nativeEvent
-    if (state === PanGestureState.BEGAN) {
-      //add(offsetX, scaleShift.x)
-      //add(offsetY, scaleShift.y)
-    }
-    if (state === PanGestureState.END || state === PanGestureState.CANCELLED) {
-      //add(offsetX, scaleShift.x * -1)
-      //add(offsetY, scaleShift.y * -1)
-      const translate = {x: e.nativeEvent.translationX, y: e.nativeEvent.translationY}
-      const newPosition = addLocations(position,translate)
-      const newPositionPercentage = pixelsToPercent(newPosition, figureDimensions)
-      if (value.position) { // this should always be true, but TypeScript likes being explicit...
-        const pixels = { start: percentToPixels(value.position, figureDimensions), end: newPosition }
-        const percent = { start: value.position, end: newPositionPercentage }
-        console.log('updating', { pixels, percent })
-        //setPosition(newPosition)
-        updateLocation({...value, position: newPositionPercentage})
-      }
+    switch (state) {
+      case PanGestureState.BEGAN:
+        add(offsetX, scaleShift.x)
+        add(offsetY, scaleShift.y)
+        break
+      case PanGestureState.END:
+      case PanGestureState.CANCELLED:
+        add(offsetX, scaleShift.x * -1)
+        add(offsetY, scaleShift.y * -1)
+        const translate = {x: e.nativeEvent.translationX, y: e.nativeEvent.translationY}
+        const newPosition = addLocations(position,translate)
+        const newPositionPercentage = pixelsToPercent(newPosition, figureDimensions)
+        if (value.position) { // this should always be true, but TypeScript likes being explicit...
+          const pixels = { start: percentToPixels(value.position, figureDimensions), end: newPosition }
+          const percent = { start: value.position, end: newPositionPercentage }
+          console.log('updating', { pixels, percent })
+          //setPosition(newPosition)
+          updateLocation({key: value.key, position: newPositionPercentage}) // only update the changed information
+        }
+        break
     }
   }
-  /*useCode(() => cond(
-    eq(gestureState, PanGestureState.END),
-    call([transX, transY], ([x, y]) => {
-      debug('transX', transX)
-    }),
-    call([transX, transY], ([x, y]) => {
-      console.log('gestureState', (gestureState as any)._value)
-    })
-  ), [transX, transX, gestureState])*/
   let lastPress = 0;
   const onDoublePress = () => {
     const time = new Date().getTime();
@@ -322,9 +316,9 @@ export const PainLog = ({
     //addNewPainLocation(newLocation)
   }
   const updateLocation = (loc: PainLogLocation) => {
-    const { key, ...rest} = loc
+    const { key, next, ...rest } = loc
     const newLocation: PainLogLocation = {...rest, previous: key}
-    //addNewPainLocation(newLocation)
+    addNewPainLocation(newLocation)
   }
   let alternatekey = 1
   const visibleMostRecentLocationsWithinDateRange = figureDimensions !== undefinedFigureDimensions

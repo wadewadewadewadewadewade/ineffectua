@@ -100,10 +100,10 @@ export class PainLogThreads {
     }
     const painlogArray = firebaseDocumentToArray(painlog)
       
-    const copyPortionOfLocation = (loc:PainLogLocation): PainLogLocation => {
+    /*const copyPortionOfLocation = (loc:PainLogLocation): PainLogLocation => {
       const { key, created, previous, next, ...rest } = loc
       return rest
-    }
+    }*/
 
     const crawlThread = (
       current: PainLogLocation,
@@ -119,10 +119,10 @@ export class PainLogThreads {
         if (previousKey !== unknownPainLogKey) {
           threads.hash[thread][isodate] = {
             ...threads.hash[previousKey.thread][previousKey.isodate],
-            ...copyPortionOfLocation(current)
+            ...current//...copyPortionOfLocation(current)
           }
         } else {
-          threads.hash[thread][isodate] = copyPortionOfLocation(current)
+          threads.hash[thread][isodate] = current//copyPortionOfLocation(current)
         }
         const newKey: PainLogKey = {thread, isodate, date}
         if (threads.oldest === unknownPainLogKey || threads.oldest.date > date) {
