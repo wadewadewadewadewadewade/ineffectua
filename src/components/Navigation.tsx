@@ -55,13 +55,33 @@ const Stack = createStackNavigator<RootStackParamList>();
 const Navigation = (props: {
     theme: ThemeState['theme'],
     user: AuthState['user'],
-    fetching: boolean
+    fetchData: () => void,
+    signIn: (userState: firebase.User) => void,
+    signOut: () => void,
   }) => {
-  const { theme, user, fetching } = props;
+  const { theme, user, fetchData, signIn, signOut } = props;
+  const [dataRetrivedAndWatched, setDataRetrivedAndWatched] = React.useState(false);
   const [isReady, setIsReady] = React.useState(Platform.OS === 'web');
   const [initialState, setInitialState] = React.useState<
     InitialState | undefined
   >();
+
+  firebase.auth().onAuthStateChanged(userState => {
+    if (userState === null) {
+      if (user) {
+        signOut()
+      }
+    } else {
+      if (!user) {
+        signIn(userState)
+      }
+    }
+  });
+  if (user && !dataRetrivedAndWatched) { // only fetch and watch data once per app-use
+    console.log('fetching')
+    fetchData()
+    setDataRetrivedAndWatched(true)
+  }
 
   function getHeaderTitle(
     options: Record<string, any> | undefined,
@@ -154,7 +174,7 @@ const Navigation = (props: {
 
   const navigationRef = React.useRef<NavigationContainerRef>(null);
 
-  if (!isReady || fetching) {
+  if (!isReady) {
     return (
       <View style={{height: '100%', justifyContent:'center'}}>
         <ActivityIndicator />
@@ -266,10 +286,12 @@ const Navigation = (props: {
 }
 
 interface OwnProps {
+  fetchData: () => void,
+  signIn: (userState: firebase.User) => void,
+  signOut: () => void,
 }
 
 interface DispatchProps {
-  fetching: boolean
 }
 
 const mapStateToProps = (state: State): State => {
@@ -279,19 +301,17 @@ const mapStateToProps = (state: State): State => {
   };
 };
 const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, Action>, ownProps: OwnProps): DispatchProps => {
-  let fetching = false
-  firebase.auth().onAuthStateChanged(userState => {
-    if (userState === null) {
-      // user is not authenticated, so navigate
-      dispatch(SignOutAction())
-    } else {
-      dispatch(isFetching(true))
-      dispatch(SignInAction(userState));
-      getFirebaseData(dispatch).then(() => watchFirebaseData(dispatch).then(() => dispatch(isFetching(false))))
-    }
-  });
   return {
-    fetching
+    fetchData: () => {
+      dispatch(isFetching(true))
+      getFirebaseData(dispatch).then(() => watchFirebaseData(dispatch).then(() => dispatch(isFetching(false))))
+    },
+    signIn: (userState: firebase.User) => {
+      dispatch(SignInAction(userState))
+    },
+    signOut: () => {
+      dispatch(SignOutAction())
+    }
   };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Navigation)

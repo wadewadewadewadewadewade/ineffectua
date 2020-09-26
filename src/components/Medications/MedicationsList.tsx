@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
+import { View, FlatList, StyleSheet, Linking } from 'react-native';
 import { Text, Modal, Portal, FAB } from 'react-native-paper';
 import { useScrollToTop } from '@react-navigation/native';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { State } from '../../Types';
 import { addMedication, emptyMedication } from '../../middleware/MedicationsMiddleware';
-import { ThemeState } from '../../reducers/ThemeReducer';
+import { ThemeState, paperColors } from '../../reducers/ThemeReducer';
 import { MedicationsState, Medication } from '../../reducers/MedicationsReducer';
 import { NewMedication } from '../shared/Medications'
 import { TouchableHighlight } from 'react-native-gesture-handler';
@@ -30,8 +30,13 @@ const MedicationItem = React.memo((
           <View style={styles.details}>
             <Text style={[styles.name, { color: colors.text }]}>{item.name}</Text>
             <Text style={[styles.number, { color: colors.text, opacity: 0.5 }]}>
-              {item.refills}
+              {item.refills + ' refill'}{item.refills !== 1 && 's'}
             </Text>
+          </View>
+          <View style={styles.links}>
+            <MaterialCommunityIcons onPress={() => {
+              Linking.openURL('https://en.wikipedia.org/wiki/' + encodeURIComponent(item.name));
+            }} name="information" color={paperColors(theme).text} size={26} />
           </View>
         </View>
       </TouchableHighlight>
@@ -82,6 +87,7 @@ export const MedicationsList = ({
         keyExtractor={(_, i) => String(i)}
         renderItem={renderItem}
         ItemSeparatorComponent={() => ItemSeparator(theme)}
+        style={{width:'100%'}}
       />
       {addOrEditMedicationId === undefined && <FAB
         style={styles.fab}
@@ -146,7 +152,10 @@ const styles = StyleSheet.create({
   },
   details: {
     margin: 8,
-    width:'100%',
+    flexGrow:1,
+  },
+  links: {
+    flexDirection: 'column',
   },
   name: {
     fontWeight: 'bold',

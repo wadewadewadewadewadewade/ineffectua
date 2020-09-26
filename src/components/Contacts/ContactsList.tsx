@@ -82,6 +82,7 @@ export const ContactsList = ({
         keyExtractor={(_, i) => String(i)}
         renderItem={renderItem}
         ItemSeparatorComponent={() => ItemSeparator(theme)}
+        style={{width:'100%'}}
       />
       {addOrEditContactId === undefined && <FAB
         style={styles.fab}
