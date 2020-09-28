@@ -4,23 +4,25 @@ import { StyleSheet, View, Text } from 'react-native';
 import { connect } from 'react-redux';
 import { State } from '../../Types';
 import { NavigationContainerRef } from '@react-navigation/native';
-import { CalendarState } from '../../reducers/CalendarReducer';
-import { formatDates } from '../../middleware/CalendarMiddleware';
+import { CalendarType } from '../../reducers/CalendarReducer';
+import { formatDates, formatDatesForMarking } from '../../middleware/CalendarMiddleware';
 import { Theme, themeIsDark } from '../../reducers/ThemeReducer';
-import { AuthState } from '../../reducers/AuthReducer';
+import ComposePost from '../shared/ComposePost'
+import { DataTypesType } from '../../reducers/DataTypesReducer';
 
-const Agenda = (props: any) => {
-  const {
-    dates,
-    navigation,
-    theme
-  } : {
-    dates: CalendarState['dates'],
-    navigation: NavigationContainerRef,
-    authenticated: boolean,
-    user:  AuthState['user'],
-    theme: Theme
-  } = props;
+type AgendaProps = {
+  theme: Theme,
+  dates: CalendarType,
+  datatypes: DataTypesType,
+  navigation: NavigationContainerRef,
+}
+
+const Agenda = ({
+  dates,
+  navigation,
+  theme,
+  datatypes
+}: AgendaProps) => {
   const calendarTheme = {
     ...theme.paper,
     agendaDayTextColor: themeIsDark(theme) ? '#666' : '#ccc',
@@ -31,6 +33,7 @@ const Agenda = (props: any) => {
 
   return (
     <View>
+      <ComposePost />
       <AgendaList
         // The list of items that have to be displayed in agenda. If you want to render item as empty date
         // the value of date key has to be an empty array []. If there exists no value for date key it is
@@ -45,7 +48,7 @@ const Agenda = (props: any) => {
         // Callback that gets called when day changes while scrolling agenda list
         //onDayChange={(day)=>{console.log('day changed')}}
         // Initially selected day
-        //selected={'2012-05-16'}
+        selected={new Date()}
         // Minimum date that can be selected, dates before minDate will be grayed out. Default = undefined
         //minDate={'2012-05-10'}
         // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
@@ -57,27 +60,23 @@ const Agenda = (props: any) => {
         // Specify how each item should be rendered in agenda
         renderItem={(item, firstItemInDay: boolean) => {return (<View><Text>{item.name}</Text></View>);}}
         // Specify how each date should be rendered. day can be undefined if the item is not first in that day.
-        //renderDay={(day, item) => {return (<View />);}}
+        renderDay={(day, item) => {return (<View />);}}
         // Specify how empty date content with no items should be rendered
         renderEmptyDate={() => {return (<View />);}}
         // Specify how agenda knob should look like
-        //renderKnob={() => {return (<View />);}}
+        renderKnob={() => {return (<View />);}}
         // Specify what should be rendered instead of ActivityIndicator
-        //renderEmptyData = {() => {return (<View />);}}
+        renderEmptyData = {() => {return (<View />);}}
         // Specify your item comparison function for increased performance
         rowHasChanged={(r1, r2) => {return r1.name !== r2.name}}
         // Hide knob button. Default = false
         hideKnob={true}
         // By default, agenda dates are marked if they have at least one item, but you can override this if needed
-        /*markedDates={{
-          '2012-05-16': {selected: true, marked: true},
-          '2012-05-17': {marked: true},
-          '2012-05-18': {disabled: true}
-        }}*/
+        markedDates={formatDatesForMarking(dates, datatypes)}
         // If disabledByDefault={true} dates flagged as not disabled will be enabled. Default = false
         //disabledByDefault={true}
         // If provided, a standard RefreshControl will be added for "Pull to Refresh" functionality. Make sure to also set the refreshing prop correctly.
-        //onRefresh={() => console.log('refreshing...')}
+        onRefresh={() => console.log('refreshing...')}
         // Set this true while waiting for new data from a refresh
         refreshing={false}
         // Add a custom RefreshControl component, used to provide pull-to-refresh functionality for the ScrollView.
@@ -102,12 +101,11 @@ const styles = StyleSheet.create({
   },
 });
 
-// Map State To Props (Redux Store Passes State To Component)
 const mapStateToProps = (state: State) => {
-  // Redux Store --> Component
   return {
     theme: state.theme,
-    dates: state.dates
+    dates: state.dates,
+    datatypes: state.datatypes
   };
 };
 export default connect(mapStateToProps)(Agenda);

@@ -1,7 +1,7 @@
 import React from 'react';
 import { firebase } from '../../firebase/config';
 import { ScrollView, StyleSheet, Dimensions, ScaledSize, View } from 'react-native';
-import { Subheading, Avatar, Button, Divider, Text, ActivityIndicator } from 'react-native-paper';
+import { Subheading, Avatar, Button, Divider, Text } from 'react-native-paper';
 import SettingsItem from '../shared/SettingsItem';
 import { NavigationContainerRef } from '@react-navigation/native';
 import { connect } from 'react-redux';

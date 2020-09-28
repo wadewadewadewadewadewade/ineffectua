@@ -17,6 +17,7 @@ import Picker from '../shared/ChronoPicker';
 import SettingsItem from './SettingsItem';
 import { formatDateAndTime } from '../../middleware/CalendarMiddleware'
 import { firebaseDocumentToArray } from '../../firebase/utilities';
+import FlexableTextArea from './FlexableTextArea';
 
 type NewMedicationProps = {
   value?: Medication
@@ -52,7 +53,6 @@ export const NewMedication = ({
   const buttonLabel = !value || value === emptyMedication ? 'Add New' : 'Edit';
   const medicationsArray = firebaseDocumentToArray(medications);
   const nameExists = medicationsArray.filter(c => c.name === name);
-  const [descriptionHeight, setDescriptionHeight] = React.useState(1);
   return (
     <SafeAreaView style={{backgroundColor: theme.paper.colors.surface}}>
       <TextInput
@@ -101,16 +101,9 @@ export const NewMedication = ({
         keyboardType="number-pad"
         onChangeText={(text) => setRefills(parseInt(text, 10))}
         placeholder="Optional Refills" />
-      <TextInput
-        style={styles.description}
-        multiline={true}
+      <FlexableTextArea
         value={description}
-        onContentSizeChange={(event) => {
-          setDescriptionHeight(Math.floor(event.nativeEvent.contentSize.height / styles.description.lineHeight));
-        }}
-        numberOfLines={descriptionHeight}
-        onChangeText={(text) => setDescription(text)}
-        placeholder="Optional Description" />
+        onChangeText={(text) => setDescription(text)} />
       <TouchableOpacity
         style={{backgroundColor: theme.paper.colors.accent, ...styles.button}}
         onPress={() => {
@@ -225,11 +218,6 @@ const pickerStyles: PickerStyle = {
 }
 
 const styles = StyleSheet.create({
-  description: {
-    fontSize: 16,
-    lineHeight: 22,
-    padding:3,
-  },
   button: {
     padding: 16,
     alignItems: 'center',

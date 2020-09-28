@@ -12,6 +12,7 @@ import { Contact, ContactsState } from '../../reducers/ContactsReducer';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { firebaseDocumentToArray } from '../../firebase/utilities';
+import FlexableTextArea from './FlexableTextArea';
 
 export const NewContact = (props: {
   value?: Contact
@@ -36,7 +37,6 @@ export const NewContact = (props: {
   const buttonLabel = !value || value === emptyContact ? 'Add New' : 'Edit';
   const contactsArray = firebaseDocumentToArray<Contact>(contacts);
   const nameExists = contactsArray.filter(c => c.name === name);
-  const [descriptionHeight, setDescriptionHeight] = React.useState(1);
   return (
     <SafeAreaView style={{backgroundColor: theme.paper.colors.surface}}>
       <TextInput
@@ -68,16 +68,9 @@ export const NewContact = (props: {
         value={location}
         onChangeText={(text) => setLocation(text)}
         placeholder="Optional address or location" />
-      <TextInput
-        style={styles.description}
-        multiline={true}
+      <FlexableTextArea
         value={description}
-        onContentSizeChange={(event) => {
-          setDescriptionHeight(Math.floor(event.nativeEvent.contentSize.height / styles.description.lineHeight));
-        }}
-        numberOfLines={descriptionHeight}
-        onChangeText={(text) => setDescription(text)}
-        placeholder="Optional Description" />
+        onChangeText={(text) => setDescription(text)} />
       <TouchableOpacity
         style={{backgroundColor: theme.paper.colors.accent, ...styles.button}}
         onPress={() => {
@@ -209,11 +202,6 @@ const pickerStyles: PickerStyle = {
 }
 
 const styles = StyleSheet.create({
-  description: {
-    fontSize: 16,
-    lineHeight: 22,
-    padding:3,
-  },
   button: {
     padding: 16,
     alignItems: 'center',

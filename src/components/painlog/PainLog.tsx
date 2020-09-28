@@ -15,6 +15,7 @@ import SettingsItem from '../shared/SettingsItem';
 import DataTypes from '../shared/DataTypes';
 import Slider from '@react-native-community/slider';
 import Medications from '../shared/Medications';
+import FlexableTextArea from '../shared/FlexableTextArea';
 
 type ScreenPosition = {
   x: number,
@@ -81,7 +82,6 @@ export const NewPainLogLocation = ({
     description
   };
   const buttonLabel = isNewLocation ? 'Add New' : 'Update';
-  const [descriptionHeight, setDescriptionHeight] = React.useState(1);
   const createTwoButtonAlert = (val: boolean) =>
     Alert.alert(
       "Deactivate Pain Log Location",
@@ -144,16 +144,9 @@ export const NewPainLogLocation = ({
         onValueChange={(m) => setMedications(m)}
         />
       <Divider/>
-      <TextInput
-        style={[styles.description, {backgroundColor: theme.paper.colors.surface}]}
-        multiline={true}
+      <FlexableTextArea
         value={description}
-        onContentSizeChange={(event) => {
-          setDescriptionHeight(Math.floor(event.nativeEvent.contentSize.height / styles.description.lineHeight));
-        }}
-        numberOfLines={descriptionHeight}
-        onChangeText={(text) => setDescription(text)}
-        placeholder="Optional Description" />
+        onChangeText={(text) => setDescription(text)} />
       <TouchableOpacity
         style={{backgroundColor: theme.paper.colors.accent, ...styles.button}}
         onPress={() => {
@@ -374,11 +367,6 @@ export const PainLog = ({
 }
 
 const styles = StyleSheet.create({
-  description: {
-    fontSize: 16,
-    lineHeight: 22,
-    padding:3,
-  },
   button: {
     padding: 16,
     alignItems: 'center',

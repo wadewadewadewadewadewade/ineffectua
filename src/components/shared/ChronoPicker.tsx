@@ -1,5 +1,15 @@
 import React from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { formatTime, formatDateAndTime } from '../../middleware/CalendarMiddleware';
+
+export const dateToString = (day: Date, today?: Date): string => {
+  if (today !== undefined) {
+    if (day.toISOString().replace(/T.*/,'') === today.toISOString().replace(/T.*/,'')) {
+      return formatTime(day)
+    }
+  }
+  return formatDateAndTime(day)
+}
 
 type Props = {
   value?: Date,

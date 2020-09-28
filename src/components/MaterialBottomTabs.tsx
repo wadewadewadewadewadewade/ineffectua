@@ -4,7 +4,7 @@ import { createMaterialBottomTabNavigator } from '@react-navigation/material-bot
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import PainLog from './painlog/PainLog';
 import ContactsList from './Contacts/ContactsList';
-import Agenda from './shared/Agenda';
+import Agenda from './agenda/Agenda';
 import CalendarNavigator, { CalendarStackParamList } from './calendar/CalendarNavigator';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import MedicationsList from './Medications/MedicationsList';

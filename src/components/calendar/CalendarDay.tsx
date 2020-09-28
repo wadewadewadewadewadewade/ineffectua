@@ -9,7 +9,7 @@ import { ScrollView, TouchableOpacity, TouchableWithoutFeedback } from 'react-na
 import { TextInput, Text, Button, FAB, Modal, Portal } from 'react-native-paper';
 import { CalendarStackParamList } from './CalendarNavigator';
 import { CalendarWindow, CalendarEntry, CalendarState } from '../../reducers/CalendarReducer';
-import { addDates, datesToArray, formatTime, formatDateAndTime } from '../../middleware/CalendarMiddleware';
+import { addDates, datesToArray } from '../../middleware/CalendarMiddleware';
 import { ThemeState } from '../../reducers/ThemeReducer';
 import { AuthState } from '../../reducers/AuthReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -18,7 +18,8 @@ import TypesSelector from '../shared/DataTypes';
 import { DataTypesState } from '../../reducers/DataTypesReducer';
 import { defaultColor, contrast } from '../../middleware/DataTypesMiddleware';
 import ContactsSelector from '../shared/Contacts';
-import Picker from '../shared/ChronoPicker';
+import Picker, { dateToString } from '../shared/ChronoPicker';
+import FlexableTextArea from '../shared/FlexableTextArea';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 const screenHeightMultiplier = 1.2;
@@ -42,7 +43,6 @@ const NewSlot = (props : {
     if (!user) {
       return <View></View>
     }
-    const [descriptionHeight, setDescriptionHeight] = React.useState(1);
     const save = () => {
       return saveEntry(newCalendarEntry)
     }
@@ -74,7 +74,7 @@ const NewSlot = (props : {
           <TouchableOpacity onPress={() => setPickerPhase(PickerPhases.Ends)}>
             <View style={styles.buttonRow}>
               <Text style={{color: theme.paper.colors.text}}>Ends</Text>
-              <Text>{newCalendarEntry.window.ends <= currentDay.ends ? formatTime(newCalendarEntry.window.ends) : formatDateAndTime(newCalendarEntry.window.ends)}</Text>
+              <Text>{dateToString(newCalendarEntry.window.ends, currentDay.ends)}</Text>
             </View>
           </TouchableOpacity>
           {pickerPhase === PickerPhases.Ends && <Picker
@@ -86,15 +86,9 @@ const NewSlot = (props : {
               }
               setPickerPhase(PickerPhases.Hidden)
           }}/>}
-          <TextInput
-            style={{...styles.description,backgroundColor: theme.paper.colors.surface}}
-            multiline={true}
-            value={newCalendarEntry.description}
-            onContentSizeChange={(event) => {
-              setDescriptionHeight(Math.floor(event.nativeEvent.contentSize.height / styles.description.lineHeight));
-            }}
-            numberOfLines={descriptionHeight}
-            onChangeText={(text) => setNewCalendarEntry({...newCalendarEntry, description: text})} placeholder="Optional Description" />
+        <FlexableTextArea
+          value={newCalendarEntry.description}
+          onChangeText={(text) => setNewCalendarEntry({...newCalendarEntry, description: text})} placeholder="Optional Description" />
         </ScrollView>
         <TouchableOpacity onPress={save} style={{backgroundColor: theme.paper.colors.accent, ...styles.button}}>
           <Text style={styles.buttonContents}>Add New Calendar Event</Text>
@@ -249,11 +243,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'space-between',
     height:'100%'
-  },
-  description: {
-    fontSize: 16,
-    lineHeight: 22,
-    padding:3
   },
   daygrid: {
     position: 'absolute',
