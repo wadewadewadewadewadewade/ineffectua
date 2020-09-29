@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, View, ViewStyle } from 'react-native'
+import { StyleSheet, View, ViewStyle, StyleProp } from 'react-native'
 import { Theme } from '../../reducers/ThemeReducer';
 import { TextInput } from 'react-native-paper';
 import { connect } from 'react-redux';
@@ -10,8 +10,8 @@ type FlexableTextAreaProps = {
   value?: string,
   onChangeText?: ((text: string) => void) & Function,
   onChangeLines?: ((lines: number) => void) & Function,
-  placeholder?: string
-  style?: ViewStyle
+  placeholder?: string,
+  style?: StyleProp<ViewStyle>
 }
 
 const FlexableTextArea = ({

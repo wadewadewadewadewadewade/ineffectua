@@ -7,6 +7,7 @@ import DataTypesReducer, { Action as DataTypesAction } from './DataTypesReducer'
 import ContactsReducer, { Action as ContactsAction } from './ContactsReducer';
 import MedicationsReducer, { Action as MedicationsAction } from './MedicationsReducer';
 import PainLogReducer, { Action as PainLogAction } from './PainLogReducer';
+import TagsReducer, { Action as TagsAction } from './TagsReducer';
 
 const SET_FETCHING = 'SET_FETCHING';
 
@@ -28,16 +29,7 @@ export type Action =
   | ContactsAction
   | MedicationsAction
   | PainLogAction
-
-export const reducerNames = [
-  'AuthReducer',
-  'ThemeReducer',
-  'CalendarReducer',
-  'DataTypesReducer',
-  'ContactsReducer',
-  'MedicationsReducer',
-  'PainLogReducer',
-]
+  | TagsAction
 
 // Redux: Root Reducer
 const rootReducer = combineReducers({
@@ -48,5 +40,6 @@ const rootReducer = combineReducers({
   contacts: ContactsReducer,
   medications: MedicationsReducer,
   painlog: PainLogReducer,
+  tags: TagsReducer,
 });// Exports
 export default rootReducer;

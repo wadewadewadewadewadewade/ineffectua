@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import FlexableTextArea from './FlexableTextArea';
 import { State } from '../../Types';
 import { connect } from 'react-redux';
@@ -19,10 +19,15 @@ const ComposePost = ({
   theme,
   recipientId,
 }: ComposePostProps) => {
+  const textStyle: ViewStyle = {
+    borderRadius: theme.paper.roundness,
+    borderColor: theme.paper.colors.accent,
+    backgroundColor: theme.paper.colors.onSurface,
+  }
   if (!user) {
     return (
       <View style={styles.content}>
-        <Text style={styles.text}>Please sign in</Text>
+        <Text style={[styles.text, textStyle]}>Please sign in</Text>
       </View>
     )
   }
@@ -31,7 +36,7 @@ const ComposePost = ({
   return (
     <View style={[styles.content, { flexDirection: isOneLine ? 'row' : 'column'}]}>
       <FlexableTextArea
-        style={{flex:1}}
+        style={[styles.text, textStyle]}
         value={description}
         placeholder="What's happening?"
         onChangeLines={(lines) => {
@@ -62,7 +67,6 @@ const styles = StyleSheet.create({
     padding:8,
   },
   text: {
-    textAlign: 'center',
     margin: 8,
   },
 });
