@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, StyleProp, ViewStyle, NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native';
 import RNPickerSelect, { PickerStyle } from 'react-native-picker-select';
 import { Text, TextInput } from 'react-native-paper';
 import { connect } from 'react-redux';
@@ -34,44 +34,46 @@ type Props = {
   value?: Array<string>,
   tags: TagsType,
   theme: ThemeState['theme'],
-  addNewTag: (tag: Tag, onComplete: (tag: Tag) => void) => void,
+  style: StyleProp<ViewStyle>,
+  addNewTag: (tag: Tag) => void,
   getTagsForPrefix: (prefix: string) => Promise<Array<Tag>>
 };
 
 const Tags = ({
-  value,
   tags,
   theme,
+  style,
   addNewTag,
   getTagsForPrefix,
 }: Props) => {
-  const [tagsArray, setTagsArray] = React.useState<Array<Tag>>([])
+  const [tagName, setTagName] = React.useState<string>('')
   const [tagsForPost, setTagsForPost] = React.useState<Array<Tag>>([])
   let alternateKey = 0
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-      }}
-    >
-      <Text style={{color: theme.paper.colors.text}}>Tags</Text>
-      <View>
+    <View style={[{backgroundColor: theme.paper.colors.surface, borderRadius: theme.paper.roundness}, style]}>
+      <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
+        <Text style={{color: theme.paper.colors.text}}>Tags</Text>
         {tagsForPost.map(t => (<TagComponent key={t.key || 'key' + alternateKey++} {...t} theme={theme}
           removeTag={key => setTagsForPost(tagsForPost.filter(t1 => t1.key !== key))} />))}
+        <TextInput
+          style={{backgroundColor: theme.paper.colors.surface}}
+          value={tagName}
+          onChangeText={(text: string) => {
+            setTagName(text)
+            getTagsForPrefix(text)
+          }}
+          onKeyPress={(e: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+            const key = e.nativeEvent.key
+            if (key.toLowerCase() === 'enter') {
+              addNewTag({ name: tagName })
+            }
+          }}
+        />
       </View>
-      <TextInput
-        onChangeText={(text: string) => {
-          setTagsArray(getTagsForPrefix(text))
-        }}
-      />
-      {tagsArray.length > 0 && <View style={{flex:1}}>
+      {Object.keys(tags).length > 0 && <View style={{flex:1}}>
         <RNPickerSelect
           style={pickerStyles}
-          items={tagsArray.map(t => ({label:t.name,value:t.key}))}
+          items={firebaseDocumentToArray(tags).map(t => ({label:t.name,value:t.key}))}
           onValueChange={(tagKey, itemIndex) => {
             setTagsForPost([...tagsForPost, tags[tagKey]])
           }}
@@ -113,7 +115,7 @@ interface OwnProps {
 }
 
 interface DispatchProps {
-  addNewTag: (tag: Tag, onComplete: (tag: Tag) => void) => void,
+  addNewTag: (tag: Tag) => void,
   getTagsForPrefix: (prefix: string) => Promise<Array<Tag>>
 }
 
@@ -125,10 +127,10 @@ const mapStateToProps = (state: State, ownProps: OwnProps) => {
   };
 };
 const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
-  dispatch(getTags(ownProps.value))
+  ownProps.value && dispatch(getTags(ownProps.value))
   return {
-    addNewTag: (tag: Tag, onComplete: (tag: Tag) => void) => {
-      dispatch(addTag(tag, onComplete))
+    addNewTag: (tag: Tag) => {
+      dispatch(addTag(tag, (t) => dispatch(getTags([t.name]))))
     },
     getTagsForPrefix: (prefix: string) => new Promise((s,f) => {
       dispatch(getTags([prefix]))

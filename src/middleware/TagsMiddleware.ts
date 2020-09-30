@@ -2,17 +2,17 @@ import { State } from './../Types';
 import { Tag, GetTagsAction, TagsType } from '../reducers/TagsReducer';
 import { Action } from './../reducers';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
+import { NetworkInfo } from "react-native-network-info";
 
 export const emptyTag: Tag = {name:''};
 
 const convertDocumentDataToTag = (data: firebase.firestore.DocumentData): Tag => {
   const doc = data.data()
-  const created = doc.created ? { by: doc.created.by, on: doc.created.on } : undefined
   return {
     key: data.id,
     name: doc.name,
     path: doc.path,
-    created
+    // don't add in create or searchableIndex, as that's just for server-side stuff
   }
 }
 
@@ -20,27 +20,44 @@ export const getTags = (prefixOrArray?: Array<string>): ThunkAction<Promise<void
   return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
     return new Promise<void>((resolve) => {
       const queryReference = firebase.firestore().collection('tags')
-      let query: Promise<firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>>
-      if (typeof prefixOrArray === 'string') {
-        query = queryReference.where('name', '>=', prefixOrArray).get()
+      let query: Promise<firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>> | undefined = undefined
+      if (!prefixOrArray) {
+        resolve()
+      } else if (prefixOrArray.length === 1) {
+        const prefix = prefixOrArray[0]
+        query = queryReference.where('name', '>=', prefix).get()
       } else {
         query = queryReference.where('id', 'in', prefixOrArray).get()
       }
-      query.then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-        const tags: TagsType = {};
-        const arr = querySnapshot.docs.map(d => {
-          const val = convertDocumentDataToTag(d);
-          return val
+      if (query !== undefined) {
+        query.then((querySnapshot: firebase.firestore.QuerySnapshot) => {
+          const tags: TagsType = {};
+          const arr = querySnapshot.docs.map(d => {
+            const val = convertDocumentDataToTag(d);
+            return val
+          })
+          arr.forEach(d => { if (d.key) tags[d.key] = d })
+          dispatch(GetTagsAction(tags))
         })
-        arr.forEach(d => { if (d.key) tags[d.key] = d })
-        dispatch(GetTagsAction(tags))
-      })
-      .finally(() => {
-        resolve()
-      })
+        .finally(() => {
+          resolve()
+        })
+      }
     })
   }
 }
+
+/*function createIndex(text: string): Tag['searchableIndex'] {
+  const arr = text.toLowerCase().split('');
+  const searchableIndex: Tag['searchableIndex'] = {};
+  let previousKey = '';
+  for (const char in arr) {
+    const key = previousKey + char;
+    searchableIndex[key] = true;
+    previousKey = key;
+  }
+  return searchableIndex;
+}*/
 
 export const addTag = (tag: Tag, onComplete?: (tag: Tag) => void): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
   return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
@@ -49,7 +66,9 @@ export const addTag = (tag: Tag, onComplete?: (tag: Tag) => void): ThunkAction<P
       if (user) {
         if (tag.key) {
           // its an update
-          const { key, ...data } = tag;
+          /*const { key, searchableIndex, ...data } = tag
+          tag.searchableIndex = createIndex(tag.name)*/
+          const { key, ...data } = tag
           firebase.firestore().collection('tags')
             .doc(key).update(data)
             .then(() => {
@@ -57,13 +76,33 @@ export const addTag = (tag: Tag, onComplete?: (tag: Tag) => void): ThunkAction<P
           })
         } else {
           // it's a new record
-          const newTag: Tag = {...tag, created: { by: user.uid, on: new Date() }}
-          firebase.firestore().collection('tags')
-            .add(newTag)
-            .then((value: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>) => {
-              const data = {...newTag, key: value.id}
-              onComplete && onComplete(data)
-            })
+          const createNewRecord = (ipv4Address: string | null) => {
+            const from: string | undefined = ipv4Address !== null ? ipv4Address : undefined
+            const created: Tag['created'] = {
+              by: user.uid,
+              on: new Date(),
+            }
+            if (from !== undefined) {
+              created.from = from
+            }
+            const path = tag.name.replace(/([\s]+)/g,'-')
+            /*const searchableIndex: Tag['searchableIndex'] = createIndex(tag.name)
+            const newTag: Tag = {...tag, created, searchableIndex}*/
+            const newTag: Tag = {...tag, created, path}
+            firebase.firestore().collection('tags')
+              .add(newTag)
+              .then((value: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>) => {
+                const data = {...newTag, key: value.id}
+                onComplete && onComplete(data)
+              })
+          }
+          /* I'm using NetworkInfo so i can try to put the IP of the client into Firebase for locale-searching
+             down-the-road, because Firebase Functions require met to enter my payment info again */
+          NetworkInfo.getIPV4Address().then(ipv4Address => {
+            createNewRecord(ipv4Address)
+          }).catch(err => {
+            createNewRecord(null)
+          })
         }
       }
     })

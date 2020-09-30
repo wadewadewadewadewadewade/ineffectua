@@ -4,8 +4,10 @@ export type Tag = {
   path?: string,
   created?: {
     by: string,
-    on: Date
-  }
+    on: Date,
+    from?: string
+  },
+  //searchableIndex?: { [key: string]: boolean }
 }
 
 export type TagsType = {

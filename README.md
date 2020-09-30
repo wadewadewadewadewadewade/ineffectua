@@ -259,11 +259,7 @@ I dom't know if that versioning system will work well while allowing the user to
 
 ### Notes to Self
  
-* https://callstack.github.io/react-native-paper/theming.html
-* https://github.com/react-navigation/react-navigation/tree/main/example
-* https://docs.expo.io/guides/using-firebase/
-* https://redux.js.org/recipes/usage-with-typescript
-* https://github.com/wix/react-native-calendars
+* I added react-native-network-info so I could store the IP address of the user in the DB. I would like to do this server-side, with firebase functions, but that requires me to enter my payment info again, and I'm avoiding that for now
  
 I had to edit /android/build.gradle to set the minSdkversion to 28 (>= 20) to [support multidex](https://developer.android.com/studio/build/multidex). 
  

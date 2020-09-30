@@ -50,7 +50,8 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     lineHeight: 22,
-    padding:3,
+    padding: 3,
+    minHeight: 0
   },
 })
 

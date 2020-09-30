@@ -7,6 +7,7 @@ import { AuthState } from '../../reducers/AuthReducer';
 import { Text } from 'react-native-paper';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { Theme } from '../../reducers/ThemeReducer';
+import Tags from './Tags';
 
 type ComposePostProps = {
   user: AuthState['user'],
@@ -32,27 +33,22 @@ const ComposePost = ({
     )
   }
   const [description, setDescription] = React.useState('');
-  const [isOneLine, setIsOneLine] = React.useState(true);
   return (
-    <View style={[styles.content, { flexDirection: isOneLine ? 'row' : 'column'}]}>
+    <View style={styles.content}>
       <FlexableTextArea
         style={[styles.text, textStyle]}
         value={description}
         placeholder="What's happening?"
-        onChangeLines={(lines) => {
-          if (isOneLine && lines > 1) {
-            setIsOneLine(false)
-          } else if (!isOneLine && lines === 1) {
-            setIsOneLine(true)
-          }
-        }}
         onChangeText={(text) => setDescription(text)} />
-      <TouchableHighlight
-        style={[styles.button, {borderRadius: theme.paper.roundness, backgroundColor: theme.paper.colors.accent}]}
-        onPress={() => {
-          // save post
-        }}
-      ><Text>{recipientId ? 'send' : 'post'}</Text></TouchableHighlight>
+      <View style={{flexDirection: 'row', flexWrap: 'nowrap'}}>
+        <Tags style={{flexGrow: 1, borderRadius: theme.paper.roundness}} />
+        <TouchableHighlight
+          style={[styles.button, {borderRadius: theme.paper.roundness, backgroundColor: theme.paper.colors.accent}]}
+          onPress={() => {
+            // save post
+          }}
+        ><Text>{recipientId ? 'send' : 'post'}</Text></TouchableHighlight>
+      </View>
     </View>
   )
 }
@@ -63,11 +59,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   button: {
-    marginLeft: 8,
     padding:8,
   },
   text: {
-    margin: 8,
+    margin: 0,
+    flex: 1
   },
 });
 
