@@ -1,9 +1,7 @@
 import { State } from './../Types';
-import { Tag, SetTagAction, GetTagsAction, TagsType } from '../reducers/TagsReducer';
+import { Tag, GetTagsAction, TagsType } from '../reducers/TagsReducer';
 import { Action } from './../reducers';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
-import { DocumentData, DocumentReference } from '@firebase/firestore-types';
-import { firebaseDocumentToArray } from '../firebase/utilities';
 
 export const emptyTag: Tag = {name:''};
 
@@ -62,7 +60,7 @@ export const addTag = (tag: Tag, onComplete?: (tag: Tag) => void): ThunkAction<P
           const newTag: Tag = {...tag, created: { by: user.uid, on: new Date() }}
           firebase.firestore().collection('tags')
             .add(newTag)
-            .then((value: DocumentReference<DocumentData>) => {
+            .then((value: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>) => {
               const data = {...newTag, key: value.id}
               onComplete && onComplete(data)
             })

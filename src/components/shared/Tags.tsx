@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { View, StyleSheet } from 'react-native';
 import RNPickerSelect, { PickerStyle } from 'react-native-picker-select';
-import { Text } from 'react-native-paper';
+import { Text, TextInput } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { addTag, getTags } from '../../middleware/TagsMiddleware';
@@ -34,7 +34,8 @@ type Props = {
   value?: Array<string>,
   tags: TagsType,
   theme: ThemeState['theme'],
-  addNewTag: (tag: Tag, onComplete: (tag: Tag) => void) => void
+  addNewTag: (tag: Tag, onComplete: (tag: Tag) => void) => void,
+  getTagsForPrefix: (prefix: string) => Promise<Array<Tag>>
 };
 
 const Tags = ({
@@ -42,9 +43,11 @@ const Tags = ({
   tags,
   theme,
   addNewTag,
+  getTagsForPrefix,
 }: Props) => {
-  const tagsArray = firebaseDocumentToArray<Tag>(tags);
+  const [tagsArray, setTagsArray] = React.useState<Array<Tag>>([])
   const [tagsForPost, setTagsForPost] = React.useState<Array<Tag>>([])
+  let alternateKey = 0
   return (
     <View
       style={{
@@ -55,12 +58,17 @@ const Tags = ({
         paddingVertical: 12,
       }}
     >
+      <Text style={{color: theme.paper.colors.text}}>Tags</Text>
       <View>
-        {tagsArray.map(t => (<TagComponent {...t} theme={theme}
+        {tagsForPost.map(t => (<TagComponent key={t.key || 'key' + alternateKey++} {...t} theme={theme}
           removeTag={key => setTagsForPost(tagsForPost.filter(t1 => t1.key !== key))} />))}
       </View>
-      <Text style={{color: theme.paper.colors.text}}>Tags</Text>
-      <View style={{flex:1,marginLeft:20,maxWidth:'80%'}}>
+      <TextInput
+        onChangeText={(text: string) => {
+          setTagsArray(getTagsForPrefix(text))
+        }}
+      />
+      {tagsArray.length > 0 && <View style={{flex:1}}>
         <RNPickerSelect
           style={pickerStyles}
           items={tagsArray.map(t => ({label:t.name,value:t.key}))}
@@ -68,7 +76,7 @@ const Tags = ({
             setTagsForPost([...tagsForPost, tags[tagKey]])
           }}
           />
-      </View>
+      </View>}
     </View>
   );
 }
@@ -105,7 +113,8 @@ interface OwnProps {
 }
 
 interface DispatchProps {
-  addNewTag: (tag: Tag, onComplete: (tag: Tag) => void) => void
+  addNewTag: (tag: Tag, onComplete: (tag: Tag) => void) => void,
+  getTagsForPrefix: (prefix: string) => Promise<Array<Tag>>
 }
 
 const mapStateToProps = (state: State, ownProps: OwnProps) => {
@@ -120,7 +129,10 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any
   return {
     addNewTag: (tag: Tag, onComplete: (tag: Tag) => void) => {
       dispatch(addTag(tag, onComplete))
-    }
+    },
+    getTagsForPrefix: (prefix: string) => new Promise((s,f) => {
+      dispatch(getTags([prefix]))
+    })
   };
 };// Exports
 export default connect(mapStateToProps, mapDispatchToProps)(Tags);
