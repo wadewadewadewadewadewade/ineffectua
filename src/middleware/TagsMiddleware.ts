@@ -3,6 +3,9 @@ import { Tag, GetTagsAction, TagsType } from '../reducers/TagsReducer';
 import { Action } from './../reducers';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { NetworkInfo } from "react-native-network-info";
+// for the autocomplete call, as it doesn't go through redux/thunk
+import { firebase as firebaseInstance } from '../firebase/config';
+import { AuthState } from '../reducers/AuthReducer';
 
 export const emptyTag: Tag = {name:''};
 
@@ -16,34 +19,42 @@ const convertDocumentDataToTag = (data: firebase.firestore.DocumentData): Tag =>
   }
 }
 
-export const getTags = (prefixOrArray?: Array<string>): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
-  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
-    return new Promise<void>((resolve) => {
-      const queryReference = firebase.firestore().collection('tags')
-      let query: Promise<firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>> | undefined = undefined
-      if (!prefixOrArray) {
-        resolve()
-      } else if (prefixOrArray.length === 1) {
-        const prefix = prefixOrArray[0]
-        query = queryReference.where('name', '>=', prefix).get()
-      } else {
-        query = queryReference.where('id', 'in', prefixOrArray).get()
-      }
-      if (query !== undefined) {
-        query.then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-          const tags: TagsType = {};
-          const arr = querySnapshot.docs.map(d => {
-            const val = convertDocumentDataToTag(d);
-            return val
-          })
-          arr.forEach(d => { if (d.key) tags[d.key] = d })
-          dispatch(GetTagsAction(tags))
-        })
-        .finally(() => {
-          resolve()
-        })
-      }
+export const getTagsForAutocomplete = (prefix: string, firebase = firebaseInstance) => {
+  return new Promise<Array<Tag>>((resolve,reject) => {
+    firebase.firestore().collection('tags')
+    .where('name', '>=', prefix).limit(5).get()
+    .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
+      const tags: TagsType = {};
+      const arr = querySnapshot.docs.map(d => {
+        const val = convertDocumentDataToTag(d);
+        return val
+      })
+      resolve(arr)
+    }).catch(err => reject(err))
+  })
+}
+
+export const getTagsByKeyArray = (tagIds: Array<string>, firebase = firebaseInstance, dispatch?: ThunkDispatch<State, {}, Action>) => {
+  return new Promise<Array<Tag>>((resolve, reject) => {
+    firebase.firestore().collection('tags')
+    .where('id', 'in', tagIds).get()
+    .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
+      const tags: TagsType = {};
+      const arr = querySnapshot.docs.map(d => {
+        const val = convertDocumentDataToTag(d);
+        return val
+      })
+      arr.forEach(d => { if (d.key) tags[d.key] = d })
+      dispatch && dispatch(GetTagsAction(tags))
+      resolve(arr)
     })
+    .catch(e => reject(e))
+  })
+}
+
+export const getTags = (tagIds: Array<string>): ThunkAction<Promise<Array<Tag>>, State, firebase.app.App, Action> => {
+  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<Array<Tag>> => {
+    return getTagsByKeyArray(tagIds, undefined, dispatch)
   }
 }
 
@@ -59,24 +70,22 @@ export const getTags = (prefixOrArray?: Array<string>): ThunkAction<Promise<void
   return searchableIndex;
 }*/
 
-export const addTag = (tag: Tag, onComplete?: (tag: Tag) => void): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
-  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
-    return new Promise<void>((resolve) => {
-      const { user } = getState();
-      if (user) {
-        if (tag.key) {
-          // its an update
-          /*const { key, searchableIndex, ...data } = tag
-          tag.searchableIndex = createIndex(tag.name)*/
-          const { key, ...data } = tag
-          firebase.firestore().collection('tags')
-            .doc(key).update(data)
-            .then(() => {
-              onComplete && onComplete(tag)
-          })
-        } else {
-          // it's a new record
-          const createNewRecord = (ipv4Address: string | null) => {
+export const addTag = (user: AuthState['user'], tag: Tag, firebase = firebaseInstance) => {
+  return new Promise<Tag>((resolve, reject) => {
+    if (user) {
+      if (tag.key) {
+        // its an update
+        /*const { key, searchableIndex, ...data } = tag
+        tag.searchableIndex = createIndex(tag.name)*/
+        const { key, ...data } = tag
+        firebase.firestore().collection('tags')
+          .doc(key).update(data)
+          .then(() => resolve(tag))
+          .catch(reject)
+      } else {
+        // it's a new record
+        const createNewRecord = (ipv4Address: string | null) => {
+          return new Promise<Tag>((res, rej) => {
             const from: string | undefined = ipv4Address !== null ? ipv4Address : undefined
             const created: Tag['created'] = {
               by: user.uid,
@@ -93,17 +102,41 @@ export const addTag = (tag: Tag, onComplete?: (tag: Tag) => void): ThunkAction<P
               .add(newTag)
               .then((value: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>) => {
                 const data = {...newTag, key: value.id}
-                onComplete && onComplete(data)
+                res(data)
               })
-          }
-          /* I'm using NetworkInfo so i can try to put the IP of the client into Firebase for locale-searching
-             down-the-road, because Firebase Functions require met to enter my payment info again */
-          NetworkInfo.getIPV4Address().then(ipv4Address => {
-            createNewRecord(ipv4Address)
-          }).catch(err => {
-            createNewRecord(null)
+              .catch(rej)
           })
         }
+        /* I'm using NetworkInfo so i can try to put the IP of the client into Firebase for locale-searching
+           down-the-road, because Firebase Functions require met to enter my payment info again */
+        const createnewRecordWithIP = () => {
+          return NetworkInfo.getIPV4Address().then(ipv4Address => {
+            return createNewRecord(ipv4Address)
+          }).catch(err => {
+            return createNewRecord(null)
+          })
+        }
+        getTagsForAutocomplete(tag.name, firebase).then(ta => {
+          // first check that the tag isn't alread in the DB to avoid duplicates
+          if (ta[0].name.toLowerCase() === tag.name.toLowerCase()) {
+            resolve(ta[0])
+          } else {
+            createnewRecordWithIP().then(resolve).catch(reject)
+          }
+        })
+      }
+    }
+  })
+}
+
+export const addTagWithDispatch = (tag: Tag, onComplete?: (tag: Tag) => void): ThunkAction<Promise<Tag>, State, firebase.app.App, Action> => {
+  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<Tag> => {
+    return new Promise<Tag>((resolve, reject) => {
+      const { user } = getState();
+      if (user) {
+        addTag(user, tag).then(resolve).catch(reject)
+      } else {
+        reject('Please authenticate')
       }
     })
   }

@@ -1,27 +1,27 @@
 import * as React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle, NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native';
-import RNPickerSelect, { PickerStyle } from 'react-native-picker-select';
-import { Text, TextInput } from 'react-native-paper';
+import { Text, TextInput} from 'react-native-paper';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { addTag, getTags } from '../../middleware/TagsMiddleware';
+import { addTag, getTagsForAutocomplete, getTagsByKeyArray } from '../../middleware/TagsMiddleware';
 import { State } from '../../Types';
 import { ThemeState, Theme, paperColors } from '../../reducers/ThemeReducer';
-import { firebaseDocumentToArray } from '../../firebase/utilities';
-import { TagsType, Tag } from '../../reducers/TagsReducer';
+import { Tag } from '../../reducers/TagsReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { AuthState } from '../../reducers/AuthReducer';
+import { TouchableHighlight, FlatList } from 'react-native-gesture-handler';
 
 const TagComponent = ({
-  name,
-  key,
+  tag,
   theme,
   removeTag
-}: Tag & { theme: Theme, removeTag: (key: string) => void }) => {
+}: { tag: Tag, theme: Theme, removeTag: (key: string) => void }) => {
+  const { key, name } = tag
   if (key === undefined) {
     return (<View/>)
   }
   return (
-    <View style={{borderRadius: theme.paper.roundness, backgroundColor: theme.paper.colors.backdrop}}>
+    <View style={[styles.tag, {borderRadius: theme.paper.roundness, backgroundColor: theme.paper.colors.backdrop}]}>
       <Text style={[styles.tagText, {color: paperColors(theme).onSurface}]}>{name}</Text>
       <MaterialCommunityIcons onPress={() => {
         removeTag(key)
@@ -32,64 +32,97 @@ const TagComponent = ({
 
 type Props = {
   value?: Array<string>,
-  tags: TagsType,
+  user: AuthState['user'],
   theme: ThemeState['theme'],
   style: StyleProp<ViewStyle>,
-  addNewTag: (tag: Tag) => void,
-  getTagsForPrefix: (prefix: string) => Promise<Array<Tag>>
+  addNewTag: (tag: Tag) => void
 };
 
 const Tags = ({
-  tags,
+  value,
+  user,
   theme,
   style,
   addNewTag,
-  getTagsForPrefix,
 }: Props) => {
   const [tagName, setTagName] = React.useState<string>('')
   const [tagsForPost, setTagsForPost] = React.useState<Array<Tag>>([])
+  const [suggestions, setSuggestions] = React.useState<Array<Tag>>([]);
+  console.log({tagsForPost})
+  if (value && value.length > 0) {
+    getTagsByKeyArray(value).then(t => setTagsForPost(t))
+  }
   let alternateKey = 0
+  const Suggestion = ({
+    name,
+    index,
+    onPress,
+  } : {
+    name: string,
+    index: number,
+    onPress: (index: number) => void,
+  }) => {
+    return (<TouchableHighlight style={styles.pickerItem} onPress={() => onPress(index)}><Text>{name}</Text></TouchableHighlight>)
+  }
   return (
     <View style={[{backgroundColor: theme.paper.colors.surface, borderRadius: theme.paper.roundness}, style]}>
-      <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
-        <Text style={{color: theme.paper.colors.text}}>Tags</Text>
-        {tagsForPost.map(t => (<TagComponent key={t.key || 'key' + alternateKey++} {...t} theme={theme}
+      <View style={{flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center'}}>
+        <Text style={[styles.label, {color: theme.paper.colors.text}]}>Tags</Text>
+        {tagsForPost.length > 0 && tagsForPost.map(t => (<TagComponent key={t.key || 'key' + alternateKey++} tag={t} theme={theme}
           removeTag={key => setTagsForPost(tagsForPost.filter(t1 => t1.key !== key))} />))}
-        <TextInput
-          style={{backgroundColor: theme.paper.colors.surface}}
-          value={tagName}
-          onChangeText={(text: string) => {
-            setTagName(text)
-            getTagsForPrefix(text)
-          }}
-          onKeyPress={(e: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-            const key = e.nativeEvent.key
-            if (key.toLowerCase() === 'enter') {
-              addNewTag({ name: tagName })
-            }
-          }}
-        />
-      </View>
-      {Object.keys(tags).length > 0 && <View style={{flex:1}}>
-        <RNPickerSelect
-          style={pickerStyles}
-          items={firebaseDocumentToArray(tags).map(t => ({label:t.name,value:t.key}))}
-          onValueChange={(tagKey, itemIndex) => {
-            setTagsForPost([...tagsForPost, tags[tagKey]])
-          }}
+        <View style={{position: 'relative'}}>
+          <TextInput
+            style={{backgroundColor: theme.paper.colors.surface}}
+            value={tagName}
+            onChangeText={(text: string) => {
+              setTagName(text)
+              getTagsForAutocomplete(text).then(t => setSuggestions(t))
+            }}
+            onBlur={() => {
+              // onBlur was firing before clicks inside the type-ahead suggestions could regester
+              setTimeout(() => {
+                if (tagName.length > 0) {
+                  setTagName('')
+                }
+                if (suggestions.length > 0) { // close type-ahead suggestions if they are shown
+                  setSuggestions([])
+                }
+              }, 100)
+            }}
+            onKeyPress={(e: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+              const key = e.nativeEvent.key
+              if (key.toLowerCase() === 'enter') {
+                const tagNames = tagsForPost.filter(t => t.name.toLowerCase() === tagName.toLowerCase())
+                if (tagNames.length === 0) { // if the tag isn't alread in the list, try adding it
+                  addTag(user, { name: tagName }).then(t => setTagsForPost([...tagsForPost, t]))
+                  if (suggestions.length > 0) { // close type-ahead suggestions if they are shown
+                    setSuggestions([])
+                  }
+                }
+              }
+            }}
           />
-      </View>}
+          <View style={[styles.picker, { backgroundColor: theme.paper.colors.surface }]}>
+            <FlatList<Tag>
+              data={suggestions}
+              renderItem={({item, index}) => (
+                <Suggestion
+                  name={item.name}
+                  index={index}
+                  onPress={i => {
+                    console.log({suggestions, index})
+                    setTagsForPost([...tagsForPost, suggestions[index]])
+                    setSuggestions([])
+                  }}
+                />
+              )}
+              keyExtractor={i => i.key || i.name}
+              />
+          </View>
+        </View>
+      </View>
     </View>
   );
-}
-
-const pickerStyles: PickerStyle = {
-  inputIOS: {
-    textAlign: 'right',
-  },
-  inputAndroid: {
-    textAlign: 'right',
-  }
 }
 
 const styles = StyleSheet.create({
@@ -105,8 +138,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16
   },
+  tag: {
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
+    alignItems: 'center',
+    flexGrow: 0,
+    padding: 8,
+  },
   tagText: {
     fontSize: 16
+  },
+  label: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  picker: {
+    position: 'absolute',
+    zIndex: 2,
+    left: 0,
+    right: 0,
+    top: '100%',
+  },
+  pickerItem: {
+    padding:8
   },
 });
 
@@ -115,26 +169,16 @@ interface OwnProps {
 }
 
 interface DispatchProps {
-  addNewTag: (tag: Tag) => void,
-  getTagsForPrefix: (prefix: string) => Promise<Array<Tag>>
 }
 
 const mapStateToProps = (state: State, ownProps: OwnProps) => {
   return {
     user: state.user,
     theme: state.theme,
-    tags: state.tags,
   };
 };
 const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
-  ownProps.value && dispatch(getTags(ownProps.value))
   return {
-    addNewTag: (tag: Tag) => {
-      dispatch(addTag(tag, (t) => dispatch(getTags([t.name]))))
-    },
-    getTagsForPrefix: (prefix: string) => new Promise((s,f) => {
-      dispatch(getTags([prefix]))
-    })
   };
-};// Exports
+};
 export default connect(mapStateToProps, mapDispatchToProps)(Tags);
