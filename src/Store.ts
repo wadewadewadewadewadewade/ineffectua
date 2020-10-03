@@ -22,6 +22,7 @@ const persistConfig = {
     'MedicationsReducer',
     'PainLogReducer',
     'TagsReducer',
+    'PostsReducer',
   ],
 };// Middleware: Redux Persist Persisted Reducer
 

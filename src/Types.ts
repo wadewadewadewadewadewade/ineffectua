@@ -7,6 +7,7 @@ import { Contact, ContactsState, initialState as contactsInitialState } from './
 import { Medication, MedicationsState, initialState as medicationsInitialState } from './reducers/MedicationsReducer';
 import { PainLogLocation, PainLogState, initialState as painLogInitialState } from './reducers/PainLogReducer';
 import { Tag, TagsState, initialState as tagsInitialState } from './reducers/TagsReducer';
+import { Post, PostsState, initialState as postsInitialSate } from './reducers/PostsReducer';
 
 export const NAVIGATION_PERSISTENCE_KEY = 'NAVIGATION_STATE';
 export const THEME_PERSISTENCE_KEY = 'THEME_TYPE';
@@ -18,6 +19,7 @@ export type AllTypes =
   | Medication
   | PainLogLocation
   | Tag
+  | Post
 
 export type State =
     AuthState
@@ -28,6 +30,7 @@ export type State =
   & MedicationsState
   & PainLogState
   & TagsState
+  & PostsState
 
 // Initial State
 export const initialState: State = {
@@ -39,6 +42,7 @@ export const initialState: State = {
   medications: medicationsInitialState,
   painlog: painLogInitialState,
   tags: tagsInitialState,
+  posts: postsInitialSate,
 }
 
 export type RootDrawerParamList = {

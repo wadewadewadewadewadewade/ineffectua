@@ -32,18 +32,20 @@ const TagComponent = ({
 
 type Props = {
   value?: Array<string>,
+  dynamic?: boolean,
   user: AuthState['user'],
   theme: ThemeState['theme'],
-  style: StyleProp<ViewStyle>,
-  addNewTag: (tag: Tag) => void
+  style?: StyleProp<ViewStyle>,
+  onTagsChanged?: (tags: Array<Tag>) => void
 };
 
 const Tags = ({
   value,
+  dynamic,
   user,
   theme,
   style,
-  addNewTag,
+  onTagsChanged,
 }: Props) => {
   const [tagName, setTagName] = React.useState<string>('')
   const [tagsForPost, setTagsForPost] = React.useState<Array<Tag>>([])
@@ -70,7 +72,7 @@ const Tags = ({
         <Text style={[styles.label, {color: theme.paper.colors.text}]}>Tags</Text>
         {tagsForPost.length > 0 && tagsForPost.map(t => (<TagComponent key={t.key || 'key' + alternateKey++} tag={t} theme={theme}
           removeTag={key => setTagsForPost(tagsForPost.filter(t1 => t1.key !== key))} />))}
-        <View style={{position: 'relative'}}>
+        {dynamic && <View style={{position: 'relative'}}>
           <TextInput
             style={{backgroundColor: theme.paper.colors.surface}}
             value={tagName}
@@ -94,7 +96,10 @@ const Tags = ({
               if (key.toLowerCase() === 'enter') {
                 const tagNames = tagsForPost.filter(t => t.name.toLowerCase() === tagName.toLowerCase())
                 if (tagNames.length === 0) { // if the tag isn't alread in the list, try adding it
-                  addTag(user, { name: tagName }).then(t => setTagsForPost([...tagsForPost, t]))
+                  addTag(user, { name: tagName }).then(t => {
+                    setTagsForPost([...tagsForPost, t])
+                    onTagsChanged && onTagsChanged([...tagsForPost, t])
+                  })
                   if (suggestions.length > 0) { // close type-ahead suggestions if they are shown
                     setSuggestions([])
                   }
@@ -119,7 +124,7 @@ const Tags = ({
               keyExtractor={i => i.key || i.name}
               />
           </View>
-        </View>
+        </View>}
       </View>
     </View>
   );

@@ -7,8 +7,9 @@ import { NavigationContainerRef } from '@react-navigation/native';
 import { CalendarType } from '../../reducers/CalendarReducer';
 import { formatDates, formatDatesForMarking } from '../../middleware/CalendarMiddleware';
 import { Theme, themeIsDark } from '../../reducers/ThemeReducer';
-import ComposePost from '../shared/ComposePost'
+import Posts from '../shared/Posts'
 import { DataTypesType } from '../../reducers/DataTypesReducer';
+import { PostPrivacy } from '../../reducers/PostsReducer';
 
 type AgendaProps = {
   theme: Theme,
@@ -33,7 +34,7 @@ const Agenda = ({
 
   return (
     <View>
-      <ComposePost />
+      <Posts showComposePost={true} criteria={{privacy: PostPrivacy.PUBLIC}} />
       <AgendaList
         // The list of items that have to be displayed in agenda. If you want to render item as empty date
         // the value of date key has to be an empty array []. If there exists no value for date key it is
@@ -105,7 +106,7 @@ const mapStateToProps = (state: State) => {
   return {
     theme: state.theme,
     dates: state.dates,
-    datatypes: state.datatypes
+    datatypes: state.datatypes,
   };
 };
 export default connect(mapStateToProps)(Agenda);
