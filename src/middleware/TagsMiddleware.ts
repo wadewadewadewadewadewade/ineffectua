@@ -134,7 +134,11 @@ export const addTagWithDispatch = (tag: Tag, onComplete?: (tag: Tag) => void): T
     return new Promise<Tag>((resolve, reject) => {
       const { user } = getState();
       if (user) {
-        addTag(user, tag).then(resolve).catch(reject)
+        if (onComplete !== undefined) {
+          addTag(user, tag).then(t => {resolve(t);return t}).then(onComplete).catch(reject)
+        } else {
+          addTag(user, tag).then(resolve).catch(reject)
+        }
       } else {
         reject('Please authenticate')
       }

@@ -33,9 +33,9 @@ const Agenda = ({
   }
 
   return (
-    <View>
-      <Posts showComposePost={true} criteria={{privacy: PostPrivacy.PUBLIC}} />
+    <View style={styles.container}>
       <AgendaList
+        style={styles.agenda}
         // The list of items that have to be displayed in agenda. If you want to render item as empty date
         // the value of date key has to be an empty array []. If there exists no value for date key it is
         // considered that the date in question is not yet loaded
@@ -84,22 +84,21 @@ const Agenda = ({
         refreshControl={null}
         // Agenda theme
         theme={calendarTheme}
-        style={{
-          width: '100%',
-          maxWidth: '100%'
-        }}
       />
+    <Posts showComposePost={true} criteria={{privacy: PostPrivacy.PUBLIC}} />
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  buttons: {
-    padding: 8,
+  container: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flex: 1,
   },
-  button: {
-    margin: 8,
-  },
+  agenda: {
+    flex: 1,
+  }
 });
 
 const mapStateToProps = (state: State) => {

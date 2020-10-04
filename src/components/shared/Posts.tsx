@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, StyleSheet, ViewStyle, Dimensions, FlatList } from 'react-native';
+import { View, StyleSheet, ViewStyle, FlatList } from 'react-native';
 import { Text } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
@@ -14,9 +14,6 @@ import { Tag } from '../../reducers/TagsReducer';
 import FlexableTextArea from './FlexableTextArea';
 import { AuthState } from '../../reducers/AuthReducer';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-// Screen Dimensions
-const { height, width } = Dimensions.get('window');
 
 // used for a list of posts, for comments within a post, messages between users, and for searching maybe?
 
@@ -58,12 +55,12 @@ export const ComposePost = connect((state: State) => ({ user: state.user, theme:
         onChangeText={(text) => setBody(text)} />
       <View style={{flexDirection: 'row', flexWrap: 'nowrap'}}>
         <Tags style={{flexGrow: 1, borderRadius: theme.paper.roundness}}
-          dynamic={true}
           value={tags}
           onTagsChanged={(ts: Array<Tag>) => {
+            console.log(ts.map(t => t.key as string))
             setTags(ts.map(t => t.key as string)) // using "as string" to tell typescript key won't be undefined at this point
           }} />
-        <View>
+        <View style={{paddingLeft:8}}>
           <Text>{getPostPrivacyName(privacy)}</Text>
           <Slider
             style={{flex:1}}
@@ -120,19 +117,10 @@ const Posts = ({
   posts,
   savePost,
 }: PostProps) => {
-  let alternateKey = 0
   return (
-    <View
-      style={{
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-      }}
-    >
+    <View style={styles.container}>
       {showComposePost && <ComposePost criteria={criteria} onSavePost={p => savePost(p)} />}
-      <SafeAreaView style={styles.postsContainer}>
+      <SafeAreaView>
         <FlatList
           data={posts.items}
           renderItem={p => <PostComponent post={p.item}/>}
@@ -147,13 +135,11 @@ const Posts = ({
 }
 
 const styles = StyleSheet.create({
-  postsContainer: {
-    height: height,
-    width: width,
+  container: {
+    flexGrow: 1,
   },
   composePostContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    marginBottom: 12,
   },
   composePostButton: {
     padding:8,
@@ -163,9 +149,6 @@ const styles = StyleSheet.create({
     flex: 1
   },
 });
-
-interface OwnProps {
-}
 
 interface DispatchProps {
   savePost: (post: Post) => void
@@ -178,7 +161,7 @@ const mapStateToProps = (state: State) => {
     posts: state.posts,
   };
 };
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
+const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>): DispatchProps => {
   return {
     savePost: (post: Post) => {
       dispatch(addPostWithDispatch(post))

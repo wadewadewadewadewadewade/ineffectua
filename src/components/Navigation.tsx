@@ -285,12 +285,6 @@ const Navigation = (props: {
   )
 }
 
-interface OwnProps {
-  fetchData: () => void,
-  signIn: (userState: firebase.User) => void,
-  signOut: () => void,
-}
-
 interface DispatchProps {
 }
 
@@ -300,7 +294,7 @@ const mapStateToProps = (state: State): State => {
     theme: state.theme ? state.theme : CombinedLightTheme,
   };
 };
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, Action>, ownProps: OwnProps): DispatchProps => {
+const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, Action>): DispatchProps => {
   return {
     fetchData: () => {
       dispatch(isFetching(true))
