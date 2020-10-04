@@ -56,10 +56,7 @@ export const ComposePost = connect((state: State) => ({ user: state.user, theme:
       <View style={{flexDirection: 'row', flexWrap: 'nowrap'}}>
         <Tags style={{flexGrow: 1, borderRadius: theme.paper.roundness}}
           value={tags}
-          onTagsChanged={(ts: Array<Tag>) => {
-            console.log(ts.map(t => t.key as string))
-            setTags(ts.map(t => t.key as string)) // using "as string" to tell typescript key won't be undefined at this point
-          }} />
+          onTagsChanged={tagIds => setTags(tagIds)} />
         <View style={{paddingLeft:8}}>
           <Text>{getPostPrivacyName(privacy)}</Text>
           <Slider

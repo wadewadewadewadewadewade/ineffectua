@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle, NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native';
-import { Text, TextInput} from 'react-native-paper';
+import { Text, TextInput, ActivityIndicator } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { addTagWithDispatch, getTagsForAutocomplete, getTagsByKeyArray } from '../../middleware/TagsMiddleware';
@@ -8,8 +8,8 @@ import { State } from '../../Types';
 import { ThemeState, Theme, paperColors } from '../../reducers/ThemeReducer';
 import { Tag } from '../../reducers/TagsReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { AuthState } from '../../reducers/AuthReducer';
 import { TouchableHighlight, FlatList } from 'react-native-gesture-handler';
+import { wrapPromise, WrappedPromise } from '../../middleware';
 
 const TagComponent = ({
   tag,
@@ -30,7 +30,7 @@ const TagComponent = ({
   )
 }
 
-const Suggestion = ({
+const TagSuggestion = ({
   name,
   index,
   onPress,
@@ -42,6 +42,49 @@ const Suggestion = ({
   return (<TouchableHighlight style={styles.pickerItem} onPress={() => onPress(index)}><Text>{name}</Text></TouchableHighlight>)
 }
 
+const TagList = ({
+  tagsResource,
+  theme,
+  onTagsChanged,
+} : {
+  tagsResource: WrappedPromise<Array<Tag>>,
+  theme: Theme,
+  onTagsChanged?: (tags: Array<string>) => void
+}) => {
+  const tags = tagsResource.read()
+  console.log('TagList', {tags})
+  if (onTagsChanged) {
+    return (
+      <View style={{flexDirection: 'row'}}>
+        {tags.map(t => 
+          <TagComponent
+            key={t.key as string}
+            tag={t}
+            theme={theme}
+            removeTag={key => onTagsChanged(tags.filter(t => t.key !== key).map(t => t.key as string))} />
+        )}
+        <NewTagField
+          tags={tags}
+          theme={theme}
+          onTagsChanged={(tag => 
+            onTagsChanged([...tags.map(t => t.key as string), tag.key as string])
+          )} />
+      </View>
+    )
+  } else {
+    return (
+      <View>
+        {tags.map(t =>
+          <TagComponent
+            key={t.key as string}
+            tag={t}
+            theme={theme} />
+        )}
+      </View>
+    )
+  }
+}
+
 const NewTagField = ({
   tags,
   theme,
@@ -49,7 +92,7 @@ const NewTagField = ({
 } : {
   tags: Array<Tag>,
   theme: Theme,
-  onTagsChanged: (newTag: Tag) => void
+  onTagsChanged: (newTag: Tag) => void,
 }) => {
   const [tagName, setTagName] = React.useState<string>('')
   const [suggestions, setSuggestions] = React.useState<Array<Tag>>([]);
@@ -57,7 +100,7 @@ const NewTagField = ({
   return (
     <View style={{position: 'relative'}}>
       <TextInput
-        style={{backgroundColor: theme.paper.colors.surface, marginRight: 8}}
+        style={{backgroundColor: theme.paper.colors.surface, marginHorizontal: 8}}
         value={tagName}
         onChangeText={(text: string) => {
           setTagName(text)
@@ -91,7 +134,7 @@ const NewTagField = ({
         <FlatList<Tag>
           data={suggestions}
           renderItem={({item, index}) => (
-            <Suggestion
+            <TagSuggestion
               name={item.name}
               index={index}
               onPress={i => {
@@ -112,43 +155,32 @@ type Props = {
   addTagToPost: (tag: Tag) => Promise<Tag>, 
   value?: Array<string>,
   style?: StyleProp<ViewStyle>,
-  onTagsChanged?: (tags: Array<Tag>) => void
+  onTagsChanged?: (tags: Array<string>) => void
 }
 
-type StateProps = Props & { tags: Array<Tag> }
-
-class Tags extends React.Component<Props, StateProps> {
-  constructor(props: Props) {
-    super(props)
-    const tags = new Array<Tag>()
-    this.state = {...props, tags}
-  }
-  async componentDidMount() {
-    if (this.state.value && this.state.value.length !== this.state.tags.length) {
-      //getTagsByKeyArray(this.state.value).then(tags => this.setState({tags}))
-    }
-  }
-  render() {
-    console.log('render')
-    const { theme, tags, style, onTagsChanged } = this.state
-    const isDynamic = onTagsChanged !== undefined
-    console.log({tags})
-    let alternateKey = 0
-    return (
-      <View style={[{backgroundColor: theme.paper.colors.surface, borderRadius: theme.paper.roundness}, style]}>
-        <View style={{flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center'}}>
-          <Text style={[styles.label, {color: theme.paper.colors.text}]}>Tags</Text>
-          {tags.length > 0 && tags.map(t => (<TagComponent key={t.key || 'key' + alternateKey++} tag={t} theme={theme}
-            removeTag={key => {
-              if (isDynamic) {
-                onTagsChanged && onTagsChanged(tags.filter(t1 => t1.key !== key))
-            }
-            }} />))}
-          {isDynamic && <NewTagField tags={tags} theme={theme} onTagsChanged={(tag => onTagsChanged && onTagsChanged([...tags, tag]))} />}
-        </View>
+const Tags = ({
+  value,
+  theme,
+  style,
+  onTagsChanged
+}: Props) => {
+  console.log('render', {value})
+  const tags = value ? wrapPromise(getTagsByKeyArray(value)) : wrapPromise(new Promise<Array<Tag>>(r => []))
+  return (
+    <View style={[{backgroundColor: theme.paper.colors.surface, borderRadius: theme.paper.roundness}, style]}>
+      <View style={{flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center'}}>
+        <Text style={[styles.label, {color: theme.paper.colors.text}]}>Tags</Text>
+        <React.Suspense fallback={<ActivityIndicator/>}>
+          {value && (
+            onTagsChanged ?
+              <TagList tagsResource={tags} theme={theme} onTagsChanged={onTagsChanged} />
+            :
+              <TagList tagsResource={tags} theme={theme} />
+          )}
+        </React.Suspense>
       </View>
-    )
-  }
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({

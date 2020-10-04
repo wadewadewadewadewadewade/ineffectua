@@ -34,28 +34,27 @@ export const getTagsForAutocomplete = (prefix: string, firebase = firebaseInstan
   })
 }
 
-export const getTagsByKeyArray = (tagIds: Array<string>, firebase = firebaseInstance, dispatch?: ThunkDispatch<State, {}, Action>) => {
+export const getTagsByKeyArray = (tagIds: Array<string>, firebase = firebaseInstance) => {
   return new Promise<Array<Tag>>((resolve, reject) => {
-    firebase.firestore().collection('tags')
-    .where('id', 'in', tagIds).get()
-    .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-      const tags: TagsType = {};
-      const arr = querySnapshot.docs.map(d => {
-        const val = convertDocumentDataToTag(d);
-        return val
+    console.log('fetching tags by array', {tagIds})
+    if (tagIds.length === 0) {
+      setTimeout(() => {
+        const arr = new Array<Tag>()
+        resolve(arr)
+      }, 1000)
+    } else {
+      firebase.firestore().collection('tags')
+      .where(firebase.firestore.FieldPath.documentId(), 'in', tagIds).get()
+      .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
+        const arr = querySnapshot.docs.map(d => {
+          const val = convertDocumentDataToTag(d);
+          return val
+        })
+        resolve(arr)
       })
-      arr.forEach(d => { if (d.key) tags[d.key] = d })
-      dispatch && dispatch(GetTagsAction(tags))
-      resolve(arr)
-    })
-    .catch(e => reject(e))
+      .catch(e => reject(e))
+    }
   })
-}
-
-export const getTags = (tagIds: Array<string>): ThunkAction<Promise<Array<Tag>>, State, firebase.app.App, Action> => {
-  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<Array<Tag>> => {
-    return getTagsByKeyArray(tagIds, undefined, dispatch)
-  }
 }
 
 /*function createIndex(text: string): Tag['searchableIndex'] {
