@@ -21,7 +21,7 @@ const convertDocumentDataToPost = (data: firebase.firestore.DocumentData): Post 
   return postData
 }
 
-const getPostsByCriteria = (user: AuthState['user'], criteria: PostCriteria, firebase = firebaseInstance) => {
+export const getPostsByCriteria = (user: AuthState['user'], criteria: PostCriteria, firebase = firebaseInstance) => {
   return new Promise<PostsType>((resolve, reject) => {
     if (user) {
       //firebase.firestore.setLogLevel('debug');
@@ -37,10 +37,8 @@ const getPostsByCriteria = (user: AuthState['user'], criteria: PostCriteria, fir
             const val = convertDocumentDataToPost(d);
             return val
           })
-        })
-        .finally(() => {
-          //console.log('resolving getMedications')
-          resolve()
+          resolve(posts)
+          return posts
         })
     }
   })
@@ -106,7 +104,7 @@ export const addPost = (user: AuthState['user'], post: Post, firebase = firebase
               created.from = from
             }
             const newPost: Post = {...post, created}
-            firebase.firestore().collection('tags')
+            firebase.firestore().collection('posts')
               .add(newPost)
               .then((value: firebase.firestore.DocumentReference<firebase.firestore.DocumentData>) => {
                 const data = {...newPost, key: value.id}

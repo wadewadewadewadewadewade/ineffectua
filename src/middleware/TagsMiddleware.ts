@@ -1,5 +1,5 @@
 import { State } from './../Types';
-import { Tag, GetTagsAction, TagsType } from '../reducers/TagsReducer';
+import { Tag, TagsType } from '../reducers/TagsReducer';
 import { Action } from './../reducers';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { NetworkInfo } from "react-native-network-info";
@@ -36,7 +36,6 @@ export const getTagsForAutocomplete = (prefix: string, firebase = firebaseInstan
 
 export const getTagsByKeyArray = (tagIds: Array<string>, firebase = firebaseInstance) => {
   return new Promise<Array<Tag>>((resolve, reject) => {
-    console.log('fetching tags by array', {tagIds})
     if (tagIds.length === 0) {
       setTimeout(() => {
         const arr = new Array<Tag>()

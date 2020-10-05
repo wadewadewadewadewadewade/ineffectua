@@ -52,7 +52,6 @@ const TagList = ({
   onTagsChanged?: (tags: Array<string>) => void
 }) => {
   const tags = tagsResource.read()
-  console.log('TagList', {tags})
   if (onTagsChanged) {
     return (
       <View style={{flexDirection: 'row'}}>
@@ -61,7 +60,7 @@ const TagList = ({
             key={t.key as string}
             tag={t}
             theme={theme}
-            removeTag={key => onTagsChanged(tags.filter(t => t.key !== key).map(t => t.key as string))} />
+            removeTag={key => onTagsChanged(tags.filter(ta => ta.key !== key).map(ta => ta.key as string))} />
         )}
         <NewTagField
           tags={tags}
@@ -164,7 +163,6 @@ const Tags = ({
   style,
   onTagsChanged
 }: Props) => {
-  console.log('render', {value})
   const tags = value ? wrapPromise(getTagsByKeyArray(value)) : wrapPromise(new Promise<Array<Tag>>(r => []))
   return (
     <View style={[{backgroundColor: theme.paper.colors.surface, borderRadius: theme.paper.roundness}, style]}>

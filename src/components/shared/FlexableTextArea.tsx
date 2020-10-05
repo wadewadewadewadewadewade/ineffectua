@@ -10,6 +10,7 @@ type FlexableTextAreaProps = {
   value?: string,
   onChangeText?: ((text: string) => void) & Function,
   onChangeLines?: ((lines: number) => void) & Function,
+  onSubmit?: ((text: string) => void) & Function,
   placeholder?: string,
   style?: StyleProp<ViewStyle>
 }
@@ -19,16 +20,18 @@ const FlexableTextArea = ({
   value,
   onChangeText,
   onChangeLines,
+  onSubmit,
   placeholder = "Optional Description",
   style
 }: FlexableTextAreaProps) => {
   const [height, setHeight] = React.useState(1);
+  const [body, setBody] = React.useState(value || '')
   return (
     <View style={style}>
       <TextInput
         style={[styles.description, {backgroundColor: theme.paper.colors.surface}]}
         multiline={true}
-        value={value}
+        value={body}
         onContentSizeChange={(e) => {
           const newHeight = Math.floor(e.nativeEvent.contentSize.height / styles.description.lineHeight)
           if (newHeight !== height) {
@@ -38,8 +41,19 @@ const FlexableTextArea = ({
             }
           }
         }}
+        onKeyPress={e => {
+          if (e.nativeEvent.key.toLowerCase() === 'enter') {
+            e.preventDefault()
+            const text = body
+            setBody('')
+            onSubmit && onSubmit(text)
+          }
+        }}
         numberOfLines={height}
-        onChangeText={onChangeText}
+        onChangeText={text => {
+          setBody(text)
+          onChangeText && onChangeText(body)
+        }}
         placeholder={placeholder} />
     </View>
   )

@@ -1,19 +1,18 @@
 import * as React from 'react';
 import { View, StyleSheet, ViewStyle, FlatList } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Text, ActivityIndicator } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { State } from '../../Types';
 import { ThemeState, Theme } from '../../reducers/ThemeReducer';
-import { Post, PostsState, PostCriteria, PostPrivacy, getPostPrivacyName } from '../../reducers/PostsReducer';
-import { addPostWithDispatch } from '../../middleware/PostsMiddleware'
-import { TouchableHighlight } from 'react-native-gesture-handler';
+import { Post, PostsState, PostCriteria, PostPrivacy, getPostPrivacyName, PostsType } from '../../reducers/PostsReducer';
+import { addPostWithDispatch, getPostsByCriteria } from '../../middleware/PostsMiddleware'
 import Slider from '@react-native-community/slider';
 import Tags from './Tags';
-import { Tag } from '../../reducers/TagsReducer';
 import FlexableTextArea from './FlexableTextArea';
 import { AuthState } from '../../reducers/AuthReducer';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { WrappedPromise, wrapPromise } from '../../middleware';
 
 // used for a list of posts, for comments within a post, messages between users, and for searching maybe?
 
@@ -38,70 +37,104 @@ export const ComposePost = connect((state: State) => ({ user: state.user, theme:
   }
   if (!user) {
     return (
-      <View style={styles.composePostContent}>
+      <View style={[styles.composePostContent, { backgroundColor: theme.paper.colors.surface }]}>
         <Text style={[styles.composePostText, textStyle]}>Please sign in</Text>
       </View>
     )
   }
-  const [body, setBody] = React.useState('');
   const [tags, setTags] = React.useState(new Array<string>());
   const [privacy, setPrivacy] = React.useState(0 as PostPrivacy);
-  return (
-    <View style={styles.composePostContent}>
-      <FlexableTextArea
-        style={[styles.composePostText, textStyle]}
-        value={body}
-        placeholder="What's happening?"
-        onChangeText={(text) => setBody(text)} />
-      <View style={{flexDirection: 'row', flexWrap: 'nowrap'}}>
-        <Tags style={{flexGrow: 1, borderRadius: theme.paper.roundness}}
-          value={tags}
-          onTagsChanged={tagIds => setTags(tagIds)} />
-        <View style={{paddingLeft:8}}>
-          <Text>{getPostPrivacyName(privacy)}</Text>
-          <Slider
-            style={{flex:1}}
-            value={privacy}
-            step={1}
-            minimumValue={0}
-            maximumValue={2}
-            onValueChange={(s: number) => setPrivacy(s)}
-            />
-          <TouchableHighlight
-            style={[styles.composePostButton, {borderRadius: theme.paper.roundness, backgroundColor: theme.paper.colors.accent}]}
-            onPress={() => {
-              const newPost: Post = {
-                body,
-                tags,
-                criteria: {...criteria, privacy}
-              }
-              onSavePost(newPost)
-              setBody('')
-              setTags([])
-            }}
-          ><Text>{criteria.recipientId ? 'send' : 'post'}</Text></TouchableHighlight>
+  const isMessage = criteria.recipientId !== undefined
+  const savePostIfValid = (body: string) => {
+    if (/[^\s]+/.test(body)) {
+      const newPost: Post = {
+        body,
+        tags,
+        criteria: {...criteria, privacy}
+      }
+      onSavePost(newPost)
+      tags.length > 0 && setTags([])
+    }
+  }
+  if (isMessage) {
+    return (
+      <View style={[styles.composePostContent,{ flexDirection:'column', backgroundColor: theme.paper.colors.surface }]}>
+        <FlexableTextArea
+          style={[styles.composePostText, textStyle]}
+          onSubmit={text => savePostIfValid(text)} />
+        <Text style={styles.instruction}>hit enter to send</Text>
+      </View>
+    )
+  } else {
+    return (
+      <View style={[styles.composePostContent, { backgroundColor: theme.paper.colors.surface }]}>
+        <FlexableTextArea
+          style={[styles.composePostText, textStyle]}
+          placeholder={'What\'s happening?'}
+          onSubmit={text => savePostIfValid(text)} />
+        <Text style={styles.instruction}>hit enter to send</Text>
+        <View style={{flexDirection: 'row', flexWrap: 'nowrap'}}>
+          <Tags style={{flexGrow: 1, borderRadius: theme.paper.roundness}}
+            value={tags}
+            onTagsChanged={tagIds => setTags(tagIds)} />
+          <View style={{paddingHorizontal:12}}>
+            <Text>{getPostPrivacyName(privacy)}</Text>
+            <Slider
+              style={{flex:1}}
+              value={privacy}
+              step={1}
+              minimumValue={0}
+              maximumValue={2}
+              onValueChange={(s: number) => setPrivacy(s)}
+              />
+          </View>
         </View>
       </View>
-    </View>
-  )
+    )
+  }
 })
 
 const PostComponent = ({
-  post
+  post,
+  theme,
 } : {
-  post: Post
+  post: Post,
+  theme: Theme,
 }) => {
   return (
-    <View>
-      <Text>{post.body}</Text>
+    <View style={{marginTop: 12, paddingBottom: 12, backgroundColor: theme.paper.colors.surface}}>
+      <Text style={{ padding: 12 }}>{post.body}</Text>
       <Tags value={post.tags} />
     </View>
+  )
+}
+
+const PostsList = ({
+  postsResource,
+  theme,
+} : {
+  postsResource: WrappedPromise<PostsType>,
+  theme: Theme,
+}) => {
+  const posts = postsResource.read()
+  return (
+    <SafeAreaView>
+        <FlatList
+          data={posts.items}
+          renderItem={p => <PostComponent post={p.item} theme={theme} />}
+          keyExtractor={(p,i) => p.key || 'post' + i}
+          //onEndReached={retrieveMore}
+          //refreshing={this.state.refreshing}
+          //onEndReachedThreshold={0}
+        />
+      </SafeAreaView>
   )
 }
 
 type PostProps = {
   showComposePost?: boolean,
   criteria: PostCriteria,
+  user: AuthState['user'],
   theme: ThemeState['theme'],
   posts: PostsState['posts'],
   savePost: (post: Post) => void,
@@ -110,23 +143,17 @@ type PostProps = {
 const Posts = ({
   showComposePost,
   criteria,
+  user,
   theme,
-  posts,
   savePost,
 }: PostProps) => {
+  const posts = wrapPromise(getPostsByCriteria(user, criteria))
   return (
     <View style={styles.container}>
       {showComposePost && <ComposePost criteria={criteria} onSavePost={p => savePost(p)} />}
-      <SafeAreaView>
-        <FlatList
-          data={posts.items}
-          renderItem={p => <PostComponent post={p.item}/>}
-          keyExtractor={(p,i) => p.key || 'post' + i}
-          //onEndReached={retrieveMore}
-          //refreshing={this.state.refreshing}
-          //onEndReachedThreshold={0}
-        />
-      </SafeAreaView>
+      <React.Suspense fallback={<ActivityIndicator/>}>
+        <PostsList postsResource={posts} theme={theme} />
+      </React.Suspense>
     </View>
   );
 }
@@ -138,8 +165,10 @@ const styles = StyleSheet.create({
   composePostContent: {
     marginBottom: 12,
   },
-  composePostButton: {
-    padding:8,
+  instruction: {
+    fontSize: 12,
+    color: '#888',
+    paddingHorizontal: 12,
   },
   composePostText: {
     margin: 0,
@@ -155,7 +184,6 @@ const mapStateToProps = (state: State) => {
   return {
     user: state.user,
     theme: state.theme,
-    posts: state.posts,
   };
 };
 const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>): DispatchProps => {
