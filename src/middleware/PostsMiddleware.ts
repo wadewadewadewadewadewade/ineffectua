@@ -56,6 +56,54 @@ export const getPosts = (criteria: PostCriteria): ThunkAction<Promise<PostsType>
   }
 }
 
+export type PostsObserver = (posts: PostsType) => void
+
+export class PostsSubject {
+  private observers: Array<PostsObserver> = []
+  private unsubscribe: () => void
+
+  constructor(user: AuthState['user'], criteria: PostCriteria, firebase = firebaseInstance) {
+    if (user) {
+      //firestore.setLogLevel('debug');
+      this.unsubscribe = firebase.firestore()
+        .collection('posts')
+        .orderBy('created.on')
+        .onSnapshot((documentSnapshot: firebase.firestore.QuerySnapshot) => {
+          const posts: PostsState['posts'] = {
+            items: [],
+            criteria
+          };
+          posts.items = documentSnapshot.docs.map(d => {
+            const val = convertDocumentDataToPost(d);
+            return val
+          })
+          this.notify(posts)
+        });
+    } else {
+      this.unsubscribe = () => {
+        console.warn('Unsubscribing PostsSubject that was never subscribed', {criteria})
+      }
+    }
+  }
+
+  public destroy() {
+    this.unsubscribe()
+  }
+
+  public attach(observer: PostsObserver) {
+    this.observers.push(observer)
+  }
+
+  public detach(observer: PostsObserver) {
+    this.observers = this.observers.filter(o => observer !== o)
+  }
+
+  public notify(posts: PostsType) {
+    this.observers.forEach(o => o(posts))
+  }
+
+}
+
 export const watchPosts = (criteria: PostCriteria): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
   return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
     return new Promise<void>((resolve) => {

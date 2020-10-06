@@ -6,7 +6,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import { State } from '../../Types';
 import { ThemeState, Theme } from '../../reducers/ThemeReducer';
 import { Post, PostsState, PostCriteria, PostPrivacy, getPostPrivacyName, PostsType } from '../../reducers/PostsReducer';
-import { addPostWithDispatch, getPostsByCriteria } from '../../middleware/PostsMiddleware'
+import { addPostWithDispatch, PostsSubject, PostsObserver } from '../../middleware/PostsMiddleware'
 import Slider from '@react-native-community/slider';
 import Tags from './Tags';
 import FlexableTextArea from './FlexableTextArea';
@@ -110,25 +110,36 @@ const PostComponent = ({
 }
 
 const PostsList = ({
-  postsResource,
+  postsSubject,
   theme,
 } : {
-  postsResource: WrappedPromise<PostsType>,
+  postsSubject: PostsSubject,
   theme: Theme,
 }) => {
-  const posts = postsResource.read()
-  return (
-    <SafeAreaView>
-        <FlatList
-          data={posts.items}
-          renderItem={p => <PostComponent post={p.item} theme={theme} />}
-          keyExtractor={(p,i) => p.key || 'post' + i}
-          //onEndReached={retrieveMore}
-          //refreshing={this.state.refreshing}
-          //onEndReachedThreshold={0}
-        />
-      </SafeAreaView>
-  )
+  const [posts, setPosts] = React.useState<PostsType>()
+  const onPostsUpdated: PostsObserver = (postsType: PostsType) => {
+    setPosts(postsType)
+  }
+  React.useEffect(() => {
+    postsSubject.attach(onPostsUpdated)
+    return () => postsSubject.detach(onPostsUpdated)
+  }, [])
+  if (!posts) {
+    return <ActivityIndicator />
+  } else {
+    return (
+      <SafeAreaView>
+          <FlatList
+            data={posts.items}
+            renderItem={p => <PostComponent post={p.item} theme={theme} />}
+            keyExtractor={(p,i) => p.key || 'post' + i}
+            //onEndReached={retrieveMore}
+            //refreshing={this.state.refreshing}
+            //onEndReachedThreshold={0}
+          />
+        </SafeAreaView>
+    )
+  }
 }
 
 type PostProps = {
@@ -147,13 +158,11 @@ const Posts = ({
   theme,
   savePost,
 }: PostProps) => {
-  const posts = wrapPromise(getPostsByCriteria(user, criteria))
+  const postsSubject = new PostsSubject(user, criteria)
   return (
     <View style={styles.container}>
       {showComposePost && <ComposePost criteria={criteria} onSavePost={p => savePost(p)} />}
-      <React.Suspense fallback={<ActivityIndicator/>}>
-        <PostsList postsResource={posts} theme={theme} />
-      </React.Suspense>
+      <PostsList postsSubject={postsSubject} theme={theme} />
     </View>
   );
 }
