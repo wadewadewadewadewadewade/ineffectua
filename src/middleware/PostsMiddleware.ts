@@ -67,7 +67,7 @@ export class PostsSubject {
       //firestore.setLogLevel('debug');
       this.unsubscribe = firebase.firestore()
         .collection('posts')
-        .orderBy('created.on')
+        .orderBy('created.on', 'desc')
         .onSnapshot((documentSnapshot: firebase.firestore.QuerySnapshot) => {
           const posts: PostsState['posts'] = {
             items: [],

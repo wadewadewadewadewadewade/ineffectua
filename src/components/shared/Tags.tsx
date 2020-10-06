@@ -1,11 +1,10 @@
 import * as React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle, NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native';
 import { Text, TextInput, ActivityIndicator } from 'react-native-paper';
-import { connect } from 'react-redux';
-import { ThunkDispatch } from 'redux-thunk';
-import { addTagWithDispatch, getTagsForAutocomplete, getTagsByKeyArray } from '../../middleware/TagsMiddleware';
+import { useSelector, useDispatch } from 'react-redux';
+import { getTagsForAutocomplete, getTagsByKeyArray, addTagWithDispatch } from '../../middleware/TagsMiddleware';
 import { State } from '../../Types';
-import { ThemeState, Theme, paperColors } from '../../reducers/ThemeReducer';
+import { paperColors } from '../../reducers/ThemeReducer';
 import { Tag } from '../../reducers/TagsReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { TouchableHighlight, FlatList } from 'react-native-gesture-handler';
@@ -13,13 +12,13 @@ import { wrapPromise, WrappedPromise } from '../../middleware';
 
 const TagComponent = ({
   tag,
-  theme,
   removeTag
-}: { tag: Tag, theme: Theme, removeTag?: (key: string) => void }) => {
+}: { tag: Tag, removeTag?: (key: string) => void }) => {
   const { key, name } = tag
   if (key === undefined) {
     return (<View/>)
   }
+  const theme = useSelector((state: State) => state.theme)
   return (
     <View style={[styles.tag, {borderRadius: theme.paper.roundness, backgroundColor: theme.paper.colors.backdrop}]}>
       <Text style={[styles.tagText, {color: paperColors(theme).onSurface}]}>{name}</Text>
@@ -44,11 +43,9 @@ const TagSuggestion = ({
 
 const TagList = ({
   tagsResource,
-  theme,
   onTagsChanged,
 } : {
   tagsResource: WrappedPromise<Array<Tag>>,
-  theme: Theme,
   onTagsChanged?: (tags: Array<string>) => void
 }) => {
   const tags = tagsResource.read()
@@ -59,12 +56,10 @@ const TagList = ({
           <TagComponent
             key={t.key as string}
             tag={t}
-            theme={theme}
             removeTag={key => onTagsChanged(tags.filter(ta => ta.key !== key).map(ta => ta.key as string))} />
         )}
         <NewTagField
           tags={tags}
-          theme={theme}
           onTagsChanged={(tag => 
             onTagsChanged([...tags.map(t => t.key as string), tag.key as string])
           )} />
@@ -76,8 +71,7 @@ const TagList = ({
         {tags.map(t =>
           <TagComponent
             key={t.key as string}
-            tag={t}
-            theme={theme} />
+            tag={t} />
         )}
       </View>
     )
@@ -86,18 +80,18 @@ const TagList = ({
 
 const NewTagField = ({
   tags,
-  theme,
   onTagsChanged,
 } : {
   tags: Array<Tag>,
-  theme: Theme,
   onTagsChanged: (newTag: Tag) => void,
 }) => {
   const [tagName, setTagName] = React.useState<string>('')
   const [suggestions, setSuggestions] = React.useState<Array<Tag>>([]);
   const tagIds: Array<string> = tags.map(t => t.key || t.name)
+  const theme = useSelector((state: State) => state.theme)
+  const dispatch = useDispatch()
   return (
-    <View style={{position: 'relative'}}>
+    <View style={styles.pickerContainer}>
       <TextInput
         style={{backgroundColor: theme.paper.colors.surface, marginHorizontal: 8}}
         value={tagName}
@@ -123,6 +117,8 @@ const NewTagField = ({
             if (tagName.length > 0) {
               const tagNames = tags.filter(t => t.name.toLowerCase() === tagName.toLowerCase())
               if (tagNames.length === 0) { // if the tag isn't alread in the list, try adding it
+                dispatch(addTagWithDispatch({ name: tagName }, t => onTagsChanged(t)))
+              } else {
                 onTagsChanged({ name: tagName })
               }
             }
@@ -149,9 +145,7 @@ const NewTagField = ({
   )
 }
 
-type Props = {
-  theme: ThemeState['theme'],
-  addTagToPost: (tag: Tag) => Promise<Tag>, 
+type Props = { 
   value?: Array<string>,
   style?: StyleProp<ViewStyle>,
   onTagsChanged?: (tags: Array<string>) => void
@@ -159,11 +153,11 @@ type Props = {
 
 const Tags = ({
   value,
-  theme,
   style,
   onTagsChanged
 }: Props) => {
   const tags = value ? wrapPromise(getTagsByKeyArray(value)) : wrapPromise(new Promise<Array<Tag>>(r => []))
+  const theme = useSelector((state: State) => state.theme)
   return (
     <View style={[{backgroundColor: theme.paper.colors.surface, borderRadius: theme.paper.roundness}, style]}>
       <View style={{flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center'}}>
@@ -171,9 +165,9 @@ const Tags = ({
         <React.Suspense fallback={<ActivityIndicator/>}>
           {value && (
             onTagsChanged ?
-              <TagList tagsResource={tags} theme={theme} onTagsChanged={onTagsChanged} />
+              <TagList tagsResource={tags} onTagsChanged={onTagsChanged} />
             :
-              <TagList tagsResource={tags} theme={theme} />
+              <TagList tagsResource={tags} />
           )}
         </React.Suspense>
       </View>
@@ -200,6 +194,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexGrow: 0,
     padding: 8,
+    margin: 8,
   },
   tagText: {
     fontSize: 16
@@ -208,35 +203,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
+  pickerContainer: {
+    position: 'relative'
+  },
   picker: {
     position: 'absolute',
-    zIndex: 2,
-    left: 0,
-    right: 0,
+    left: 8,
+    right: 8,
     top: '100%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
   pickerItem: {
     padding:8
   },
 });
 
-interface OwnProps {
-  value?: Array<string>
-}
-
-interface DispatchProps {
-  addTagToPost: (tag: Tag) => Promise<Tag>
-}
-
-const mapStateToProps = (state: State, ownProps: OwnProps) => {
-  return {
-    user: state.user,
-    theme: state.theme,
-  };
-};
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
-  return {
-    addTagToPost: (tag: Tag) => new Promise<Tag>((resolve, reject) => { dispatch(addTagWithDispatch(tag, resolve)) })
-  };
-};
-export default connect(mapStateToProps, mapDispatchToProps)(Tags);
+export default Tags;

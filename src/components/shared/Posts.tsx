@@ -1,10 +1,9 @@
 import * as React from 'react';
 import { View, StyleSheet, ViewStyle, FlatList } from 'react-native';
 import { Text, ActivityIndicator } from 'react-native-paper';
-import { connect } from 'react-redux';
-import { ThunkDispatch } from 'redux-thunk';
+import { useSelector, useDispatch } from 'react-redux';
 import { State } from '../../Types';
-import { ThemeState, Theme } from '../../reducers/ThemeReducer';
+import { ThemeState } from '../../reducers/ThemeReducer';
 import { Post, PostsState, PostCriteria, PostPrivacy, getPostPrivacyName, PostsType } from '../../reducers/PostsReducer';
 import { addPostWithDispatch, PostsSubject, PostsObserver } from '../../middleware/PostsMiddleware'
 import Slider from '@react-native-community/slider';
@@ -12,24 +11,19 @@ import Tags from './Tags';
 import FlexableTextArea from './FlexableTextArea';
 import { AuthState } from '../../reducers/AuthReducer';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { WrappedPromise, wrapPromise } from '../../middleware';
 
 // used for a list of posts, for comments within a post, messages between users, and for searching maybe?
 
 type ComposePostProps = {
-  user: AuthState['user'],
-  theme: Theme,
   criteria: PostCriteria,
   onSavePost: (post: Post) => void
 }
 
-export const ComposePost = connect((state: State) => ({ user: state.user, theme: state.theme }))(
-({
-  user,
-  theme,
+export const ComposePost = ({
   criteria,
   onSavePost,
 }: ComposePostProps) => {
+  const [user, theme] = useSelector((state: State) => ([state.user, state.theme]))
   const textStyle: ViewStyle = {
     borderRadius: theme.paper.roundness,
     borderColor: theme.paper.colors.accent,
@@ -58,7 +52,7 @@ export const ComposePost = connect((state: State) => ({ user: state.user, theme:
   }
   if (isMessage) {
     return (
-      <View style={[styles.composePostContent,{ flexDirection:'column', backgroundColor: theme.paper.colors.surface }]}>
+      <View style={[styles.composePostContent, { zIndex: 3, flexDirection:'column', backgroundColor: theme.paper.colors.surface }]}>
         <FlexableTextArea
           style={[styles.composePostText, textStyle]}
           onSubmit={text => savePostIfValid(text)} />
@@ -67,7 +61,7 @@ export const ComposePost = connect((state: State) => ({ user: state.user, theme:
     )
   } else {
     return (
-      <View style={[styles.composePostContent, { backgroundColor: theme.paper.colors.surface }]}>
+      <View style={[styles.composePostContent, { zIndex: 3, backgroundColor: theme.paper.colors.surface }]}>
         <FlexableTextArea
           style={[styles.composePostText, textStyle]}
           placeholder={'What\'s happening?'}
@@ -92,15 +86,14 @@ export const ComposePost = connect((state: State) => ({ user: state.user, theme:
       </View>
     )
   }
-})
+}
 
 const PostComponent = ({
   post,
-  theme,
 } : {
   post: Post,
-  theme: Theme,
 }) => {
+  const theme = useSelector((state: State) => state.theme)
   return (
     <View style={{marginTop: 12, paddingBottom: 12, backgroundColor: theme.paper.colors.surface}}>
       <Text style={{ padding: 12 }}>{post.body}</Text>
@@ -111,10 +104,8 @@ const PostComponent = ({
 
 const PostsList = ({
   postsSubject,
-  theme,
 } : {
   postsSubject: PostsSubject,
-  theme: Theme,
 }) => {
   const [posts, setPosts] = React.useState<PostsType>()
   const onPostsUpdated: PostsObserver = (postsType: PostsType) => {
@@ -131,7 +122,7 @@ const PostsList = ({
       <SafeAreaView>
           <FlatList
             data={posts.items}
-            renderItem={p => <PostComponent post={p.item} theme={theme} />}
+            renderItem={p => <PostComponent post={p.item} />}
             keyExtractor={(p,i) => p.key || 'post' + i}
             //onEndReached={retrieveMore}
             //refreshing={this.state.refreshing}
@@ -153,16 +144,18 @@ type PostProps = {
 
 const Posts = ({
   showComposePost,
-  criteria,
-  user,
-  theme,
-  savePost,
+  criteria
 }: PostProps) => {
+  const user = useSelector((state: State) => state.user)
+  const dispatch = useDispatch()
+  const savePost = (post: Post) => {
+    dispatch(addPostWithDispatch(post))
+  }
   const postsSubject = new PostsSubject(user, criteria)
   return (
     <View style={styles.container}>
       {showComposePost && <ComposePost criteria={criteria} onSavePost={p => savePost(p)} />}
-      <PostsList postsSubject={postsSubject} theme={theme} />
+      <PostsList postsSubject={postsSubject} />
     </View>
   );
 }
@@ -181,25 +174,11 @@ const styles = StyleSheet.create({
   },
   composePostText: {
     margin: 0,
-    flex: 1
+    flex: 1,
+    position: 'relative',
+    zIndex: 2,
+    elevation: 2,
   },
 });
 
-interface DispatchProps {
-  savePost: (post: Post) => void
-}
-
-const mapStateToProps = (state: State) => {
-  return {
-    user: state.user,
-    theme: state.theme,
-  };
-};
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>): DispatchProps => {
-  return {
-    savePost: (post: Post) => {
-      dispatch(addPostWithDispatch(post))
-    }
-  };
-};
-export default connect(mapStateToProps, mapDispatchToProps)(Posts);
+export default Posts;
