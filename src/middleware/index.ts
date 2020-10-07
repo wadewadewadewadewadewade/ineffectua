@@ -32,7 +32,6 @@ export function wrapPromise<T>(promise: Promise<T>): WrappedPromise<T> {
   );
   return {
     read() {
-      console.log({status, result})
       if (status === "pending") {
         throw suspender;
       } else if (status === "error") {

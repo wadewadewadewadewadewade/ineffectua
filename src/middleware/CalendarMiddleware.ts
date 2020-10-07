@@ -148,6 +148,19 @@ export const formatDateAndTime = (d: Date) => {
   return `${day} ${month} ${dayNumber}, ${hour}:${minutes}${meridian}`;
 }
 
+export const formatDateConditionally = (d: Date) => {
+  const today = new Date()
+  if (
+    d.getFullYear() === today.getFullYear() &&
+    d.getMonth() === today.getMonth() &&
+    d.getDate() === today.getDate()
+  ) {
+    return formatTime(d)
+  } else {
+    return formatDateAndTime(d)
+  }
+}
+
 const convertDocumentDataToCalendarEntry = (data: firebase.firestore.DocumentData): CalendarEntry => {
   const doc = data.data()
   return {

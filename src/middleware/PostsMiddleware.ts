@@ -1,3 +1,4 @@
+import { PostPrivacyTypes } from './../reducers/PostsReducer';
 import * as React from 'react';
 import { State } from './../Types';
 import { Post, initialCriteria, PostsState, PostCriteria, GetPostsAction, ReplacePostsAction, PostsType } from '../reducers/PostsReducer';
@@ -8,7 +9,15 @@ import { NetworkInfo } from "react-native-network-info";
 import { firebase as firebaseInstance } from '../firebase/config';
 import { AuthState } from '../reducers/AuthReducer';
 
-export const emptyPost: Post = {body: '', tags: [], criteria: initialCriteria};
+export const emptyPost: Post = {
+  body: '',
+  tags: [],
+  criteria: initialCriteria,
+  created: {
+    by: 'unknown',
+    on: new Date('1970-01-01'),
+  }
+}
 
 const convertDocumentDataToPost = (data: firebase.firestore.DocumentData): Post => {
   const doc = data.data()
@@ -16,7 +25,11 @@ const convertDocumentDataToPost = (data: firebase.firestore.DocumentData): Post 
     key: data.id,
     body: doc.body,
     tags: doc.tags,
-    criteria: doc.criteria
+    criteria: doc.criteria,
+    created: {
+      by: doc.created.by,
+      on: new Date(doc.created.on.seconds * 1000),
+    }
   }
   return postData
 }
@@ -26,20 +39,29 @@ export const getPostsByCriteria = (user: AuthState['user'], criteria: PostCriter
     if (user) {
       //firebase.firestore.setLogLevel('debug');
       firebase.firestore().collection('posts')
-        .orderBy('created.on')
+        .where('created.by', '==', user.uid)
         .get()
         .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
           const posts: PostsState['posts'] = {
             items: [],
             criteria
           };
-          posts.items = querySnapshot.docs.map(d => {
-            const val = convertDocumentDataToPost(d);
+          posts.items = querySnapshot.docs.map(p => {
+            const val = convertDocumentDataToPost(p);
             return val
           })
-          resolve(posts)
-          return posts
-        })
+          firebase.firestore().collection('posts')
+            .where('criteria.privacy', '==', PostPrivacyTypes.PUBLIC)
+            .get()
+            .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
+              querySnapshot.docs.forEach(p => {
+                posts.items.push(convertDocumentDataToPost(p))
+              })
+              posts.items = posts.items.sort((a,b) => a.created.on.getTime() - b.created.on.getTime())
+              resolve(posts)
+              return posts
+            })
+      })
     }
   })
 }

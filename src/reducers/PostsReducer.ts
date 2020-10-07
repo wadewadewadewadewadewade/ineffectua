@@ -4,24 +4,24 @@ export type Post = {
   body: string,
   tags: Array<string>,
   criteria: PostCriteria,
-  created?: {
+  created: {
     by: string,
     on: Date,
     from?: string
   },
 }
 
-export enum PostPrivacy {
+export enum PostPrivacyTypes {
   'PUBLIC' = 0,
   'PRIVATE' = 1,
   'FRIENDS' = 2,
 }
 
-export const getPostPrivacyName = (privacy: PostPrivacy) => {
+export const getPostPrivacyName = (privacy: PostPrivacyTypes) => {
   switch (privacy) {
-    case PostPrivacy.FRIENDS:
+    case PostPrivacyTypes.FRIENDS:
       return 'Friends'
-    case PostPrivacy.PRIVATE:
+    case PostPrivacyTypes.PRIVATE:
       return 'Private'
     default:
       return 'Public'
@@ -31,7 +31,7 @@ export const getPostPrivacyName = (privacy: PostPrivacy) => {
 export type PostCriteria = {
   tagId?: string,
   recipientId?: string
-  privacy: PostPrivacy
+  privacy: PostPrivacyTypes
 }
 
 export type PostsType = {
