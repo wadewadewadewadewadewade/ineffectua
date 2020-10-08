@@ -10,6 +10,7 @@ import Tags from './Tags';
 import FlexableTextArea from './FlexableTextArea';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatDateConditionally } from '../../middleware/CalendarMiddleware';
+import Animated from 'react-native-reanimated';
 
 // used for a list of posts, for comments within a post, messages between users, and for searching maybe?
 
@@ -117,10 +118,17 @@ const PostComponent = ({
   )
 }
 
+enum ScrollDirections {
+  UP,
+  DOWN,
+}
+
 const PostsList = ({
   postsSubject,
+  onScroll
 } : {
   postsSubject: PostsSubject,
+  onScroll?: (direction: ScrollDirections) => void
 }) => {
   const [posts, setPosts] = React.useState<PostsType>()
   const onPostsUpdated: PostsObserver = (postsType: PostsType) => {
@@ -133,12 +141,24 @@ const PostsList = ({
   if (!posts) {
     return <ActivityIndicator />
   } else {
+    let scrollOffset = 0
+    let scrollDirection = ScrollDirections.UP
     return (
-      <SafeAreaView>
+      <SafeAreaView style={{flex:1}}>
         <FlatList
           data={posts.items}
           renderItem={p => <PostComponent post={p.item} />}
           keyExtractor={(p,i) => p.key || 'post' + i}
+          onScroll={e => {
+            const velocityQualifies = !e.nativeEvent.velocity || e.nativeEvent.velocity.y > 1
+            const direction = e.nativeEvent.contentOffset.y - scrollOffset > 0 ?
+              ScrollDirections.DOWN : ScrollDirections.UP
+            if (velocityQualifies && direction !== scrollDirection) {
+              onScroll && onScroll(direction)
+            }
+            scrollOffset = e.nativeEvent.contentOffset.y
+            scrollDirection = direction
+          }}
           //onEndReached={retrieveMore}
           //refreshing={this.state.refreshing}
           //onEndReachedThreshold={0}
@@ -163,20 +183,64 @@ const Posts = ({
     dispatch(addPostWithDispatch(post))
   }
   const postsSubject = new PostsSubject(user, criteria)
-  return (
-    <View style={styles.container}>
-      {showComposePost && <ComposePost criteria={criteria} onSavePost={p => savePost(p)} />}
-      <PostsList postsSubject={postsSubject} />
-    </View>
-  );
+  if (showComposePost) {
+    const [height] = React.useState(new Animated.Value(0))
+    const [composePostHeight, setComposePostHeight] = React.useState(0)
+    const animateComposePost = (direction: ScrollDirections) => {    
+      const toValue = direction === ScrollDirections.UP ? composePostHeight : 0
+      const springConfig: Animated.SpringConfig = {
+        toValue,
+        stiffness: 100,
+        damping: 10,
+        mass: 1,
+        overshootClamping: false,
+        restSpeedThreshold: 0.001,
+        restDisplacementThreshold: 0.001,
+      }
+    
+      //This will animate the transalteY of the subview between 0 & 100 depending on its current state
+      //100 comes from the style below, which is the height of the subview.
+      Animated.spring(
+        height,
+        springConfig
+      ).start()
+    }
+    return (
+      <View style={styles.container}>
+        <Animated.View
+          onLayout={e => {
+            setComposePostHeight(e.nativeEvent.layout.height)
+            animateComposePost(ScrollDirections.UP)
+          }}
+          style={[styles.composePostAinmatedContainer, {height}]}
+        >
+          <ComposePost criteria={criteria} onSavePost={p => savePost(p)} />
+        </Animated.View>
+        <PostsList postsSubject={postsSubject} onScroll={d => animateComposePost(d)} />
+      </View>
+    )
+  } else {
+    return (
+      <View style={styles.container}>
+        <PostsList postsSubject={postsSubject} />
+      </View>
+    )
+  }
 }
 
 const styles = StyleSheet.create({
   container: {
-    
+    flex: 1,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  composePostAinmatedContainer: {
+    flex: 1,
+    overflow: 'hidden',
+    marginBottom: 12,
   },
   composePostContent: {
-    marginBottom: 12,
+    margin: 0,
   },
   instruction: {
     fontSize: 12,

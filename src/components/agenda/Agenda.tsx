@@ -1,6 +1,6 @@
 import React from 'react';
 import { Agenda as AgendaList, DateObject } from 'react-native-calendars';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, } from 'react-native';
 import { connect } from 'react-redux';
 import { State } from '../../Types';
 import { NavigationContainerRef } from '@react-navigation/native';
@@ -33,7 +33,7 @@ const Agenda = ({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { borderColor: 'red', borderWidth: 2 }]}>
       <AgendaList
         style={styles.agenda}
         // The list of items that have to be displayed in agenda. If you want to render item as empty date
@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     flex: 1,
+    position: 'relative',
   },
   agenda: {
     flex: 1,
