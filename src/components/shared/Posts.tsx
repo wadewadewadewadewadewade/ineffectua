@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, StyleSheet, ViewStyle, FlatList } from 'react-native';
+import { View, StyleSheet, ViewStyle, FlatList, Platform } from 'react-native';
 import { Text, ActivityIndicator } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { State } from '../../Types';
@@ -184,16 +184,28 @@ const Posts = ({
   }
   const postsSubject = new PostsSubject(user, criteria)
   if (showComposePost) {
-    const [height] = React.useState(new Animated.Value(0))
+    const height = new Animated.Value(0)
     const [composePostHeight, setComposePostHeight] = React.useState(0)
+    const [direction, setDirection] = React.useState(ScrollDirections.UP)
     console.log({composePostHeight})
     const translateY = height.interpolate({
       inputRange: [0, 0.25, 0.5, 0.75, 1],
       outputRange: [0, -0.25 * composePostHeight, -0.5 * composePostHeight, -0.75 * composePostHeight, -1 * composePostHeight]
     })
-    const animateComposePost = (direction: ScrollDirections) => {
-      console.log('scrolling', direction)
+    React.useEffect(() => {
       const toValue = direction === ScrollDirections.UP ? 0 : 1
+      const animated = Animated.timing(height,{
+        toValue,
+        easing: Easing.back(),
+        duration: 500,
+        //useNativeDriver: Platform.OS !== 'web',
+      })
+      animated.start()
+      return () => animated.stop()
+    }, [direction])
+    const animateComposePost = (d: ScrollDirections) => { // https://snack.expo.io/@xcarpentier/animation-example
+      console.log('scrolling', direction)
+      
       /*const springConfig: Animated.SpringConfig = {
         toValue,
         stiffness: 100,
@@ -207,7 +219,7 @@ const Posts = ({
         height,
         springConfig
       ).start()*/
-      Animated.timing(height,{ toValue, easing: Easing.back(), duration: 1000 }).start()
+      setDirection(d)
     }
     return (
       <View style={styles.container}>
