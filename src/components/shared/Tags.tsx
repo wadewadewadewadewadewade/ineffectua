@@ -52,7 +52,7 @@ const TagList = ({
   if (onTagsChanged) {
     return (
       <View style={{flexDirection: 'row'}}>
-        {tags.map(t => 
+        {tags && tags.length > 0 && tags.map(t => 
           <TagComponent
             key={t.key as string}
             tag={t}
@@ -68,7 +68,7 @@ const TagList = ({
   } else {
     return (
       <View>
-        {tags.map(t =>
+        {tags && tags.length > 0 && tags.map(t =>
           <TagComponent
             key={t.key as string}
             tag={t} />
@@ -156,19 +156,18 @@ const Tags = ({
   style,
   onTagsChanged
 }: Props) => {
-  const tags = value ? wrapPromise(getTagsByKeyArray(value)) : wrapPromise(new Promise<Array<Tag>>(r => []))
+  const tags = value && value.length > 0 ? wrapPromise(getTagsByKeyArray(value)) : wrapPromise(new Promise<Array<Tag>>(r => r([])))
   const theme = useSelector((state: State) => state.theme)
   return (
-    <View style={[{backgroundColor: theme.paper.colors.surface, borderRadius: theme.paper.roundness}, style]}>
+    <View style={[styles.pickerContainer, {backgroundColor: theme.paper.colors.surface, borderRadius: theme.paper.roundness}, style]}>
       <View style={{flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center'}}>
         <Text style={[styles.label, {color: theme.paper.colors.text}]}>Tags</Text>
         <React.Suspense fallback={<ActivityIndicator/>}>
-          {value && (
-            onTagsChanged ?
-              <TagList tagsResource={tags} onTagsChanged={onTagsChanged} />
-            :
-              <TagList tagsResource={tags} />
-          )}
+          {onTagsChanged ?
+            <TagList tagsResource={tags} onTagsChanged={onTagsChanged} />
+          :
+            <TagList tagsResource={tags} />
+          }
         </React.Suspense>
       </View>
     </View>
@@ -176,6 +175,9 @@ const Tags = ({
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   select: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#AAA',

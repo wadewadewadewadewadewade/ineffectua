@@ -10,7 +10,7 @@ import Tags from './Tags';
 import FlexableTextArea from './FlexableTextArea';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatDateConditionally } from '../../middleware/CalendarMiddleware';
-import Animated from 'react-native-reanimated';
+import Animated, { Easing } from 'react-native-reanimated';
 
 // used for a list of posts, for comments within a post, messages between users, and for searching maybe?
 
@@ -186,9 +186,15 @@ const Posts = ({
   if (showComposePost) {
     const [height] = React.useState(new Animated.Value(0))
     const [composePostHeight, setComposePostHeight] = React.useState(0)
-    const animateComposePost = (direction: ScrollDirections) => {    
-      const toValue = direction === ScrollDirections.UP ? composePostHeight : 0
-      const springConfig: Animated.SpringConfig = {
+    console.log({composePostHeight})
+    const translateY = height.interpolate({
+      inputRange: [0, 0.25, 0.5, 0.75, 1],
+      outputRange: [0, -0.25 * composePostHeight, -0.5 * composePostHeight, -0.75 * composePostHeight, -1 * composePostHeight]
+    })
+    const animateComposePost = (direction: ScrollDirections) => {
+      console.log('scrolling', direction)
+      const toValue = direction === ScrollDirections.UP ? 0 : 1
+      /*const springConfig: Animated.SpringConfig = {
         toValue,
         stiffness: 100,
         damping: 10,
@@ -197,22 +203,19 @@ const Posts = ({
         restSpeedThreshold: 0.001,
         restDisplacementThreshold: 0.001,
       }
-    
-      //This will animate the transalteY of the subview between 0 & 100 depending on its current state
-      //100 comes from the style below, which is the height of the subview.
       Animated.spring(
         height,
         springConfig
-      ).start()
+      ).start()*/
+      Animated.timing(height,{ toValue, easing: Easing.back(), duration: 2000 })
     }
     return (
       <View style={styles.container}>
         <Animated.View
           onLayout={e => {
             setComposePostHeight(e.nativeEvent.layout.height)
-            animateComposePost(ScrollDirections.UP)
           }}
-          style={[styles.composePostAinmatedContainer, {height}]}
+          style={[styles.composePostAnimatedContainer, {transform:[{translateY}]}]}
         >
           <ComposePost criteria={criteria} onSavePost={p => savePost(p)} />
         </Animated.View>
@@ -234,15 +237,16 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     overflow: 'hidden',
   },
-  composePostAinmatedContainer: {
-    flex: 1,
+  composePostAnimatedContainer: {
     overflow: 'hidden',
     marginBottom: 12,
   },
   composePostContent: {
+    flex: 1,
     margin: 0,
   },
   instruction: {
+    flex: 1,
     fontSize: 12,
     color: '#888',
     paddingHorizontal: 12,

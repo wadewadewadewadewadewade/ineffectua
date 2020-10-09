@@ -33,7 +33,7 @@ const Agenda = ({
   }
 
   return (
-    <View style={[styles.container, { borderColor: 'red', borderWidth: 2 }]}>
+    <View style={styles.container}>
       <AgendaList
         style={styles.agenda}
         // The list of items that have to be displayed in agenda. If you want to render item as empty date
