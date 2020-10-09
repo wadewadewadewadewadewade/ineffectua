@@ -162,7 +162,7 @@ const Tags = ({
     <View style={[styles.pickerContainer, {backgroundColor: theme.paper.colors.surface, borderRadius: theme.paper.roundness}, style]}>
       <View style={{flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center'}}>
         <Text style={[styles.label, {color: theme.paper.colors.text}]}>Tags</Text>
-        <React.Suspense fallback={<ActivityIndicator/>}>
+        <React.Suspense fallback={<ActivityIndicator style={{minHeight:64}} />}>
           {onTagsChanged ?
             <TagList tagsResource={tags} onTagsChanged={onTagsChanged} />
           :
@@ -206,7 +206,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   pickerContainer: {
-    position: 'relative'
+    position: 'relative',
+    minHeight: 64,
   },
   picker: {
     position: 'absolute',

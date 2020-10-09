@@ -93,7 +93,7 @@ const Agenda = ({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: 12,
     flex: 1,
     position: 'relative',
   },

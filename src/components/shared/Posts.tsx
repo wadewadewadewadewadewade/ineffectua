@@ -207,7 +207,7 @@ const Posts = ({
         height,
         springConfig
       ).start()*/
-      Animated.timing(height,{ toValue, easing: Easing.back(), duration: 2000 })
+      Animated.timing(height,{ toValue, easing: Easing.back(), duration: 1000 }).start()
     }
     return (
       <View style={styles.container}>
@@ -219,7 +219,9 @@ const Posts = ({
         >
           <ComposePost criteria={criteria} onSavePost={p => savePost(p)} />
         </Animated.View>
-        <PostsList postsSubject={postsSubject} onScroll={d => animateComposePost(d)} />
+        <Animated.View style={{flex: 1, marginTop: translateY}}>
+          <PostsList postsSubject={postsSubject} onScroll={d => animateComposePost(d)} />
+        </Animated.View>
       </View>
     )
   } else {
@@ -234,11 +236,9 @@ const Posts = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginBottom: 8,
     overflow: 'hidden',
   },
   composePostAnimatedContainer: {
-    overflow: 'hidden',
     marginBottom: 12,
   },
   composePostContent: {
