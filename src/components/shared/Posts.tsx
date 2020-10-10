@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, StyleSheet, ViewStyle, FlatList, Platform } from 'react-native';
+import { View, StyleSheet, ViewStyle, FlatList, Platform, Animated, Easing, LayoutChangeEvent } from 'react-native';
 import { Text, ActivityIndicator } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { State } from '../../Types';
@@ -10,7 +10,6 @@ import Tags from './Tags';
 import FlexableTextArea from './FlexableTextArea';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatDateConditionally } from '../../middleware/CalendarMiddleware';
-import Animated, { Easing } from 'react-native-reanimated';
 
 // used for a list of posts, for comments within a post, messages between users, and for searching maybe?
 
@@ -37,11 +36,13 @@ const PostPrivacy = ({
 
 type ComposePostProps = {
   criteria: PostCriteria,
+  height?: (componentHeight: number) => void,
   onSavePost: (post: Post) => void
 }
 
 const ComposePost = ({
   criteria,
+  height,
   onSavePost,
 }: ComposePostProps) => {
   const [user, theme] = useSelector((state: State) => ([state.user, state.theme]))
@@ -52,7 +53,13 @@ const ComposePost = ({
   }
   if (!user) {
     return (
-      <View style={[styles.composePostContent, { backgroundColor: theme.paper.colors.surface }]}>
+      <View
+        onLayout={(e: LayoutChangeEvent) => {
+          const value = e.nativeEvent.layout.height
+          height && height(value)
+        }}
+        style={[styles.composePostContent, { backgroundColor: theme.paper.colors.surface }]}
+      >
         <Text style={[styles.composePostText, textStyle]}>Please sign in</Text>
       </View>
     )
@@ -77,7 +84,13 @@ const ComposePost = ({
   }
   if (isMessage) {
     return (
-      <View style={[styles.composePostContent, { zIndex: 3, flexDirection:'column', backgroundColor: theme.paper.colors.surface }]}>
+      <View
+        onLayout={(e: LayoutChangeEvent) => {
+          const value = e.nativeEvent.layout.height
+          height && height(value)
+        }}
+        style={[styles.composePostContent, { zIndex: 3, flexDirection:'column', backgroundColor: theme.paper.colors.surface }]}
+      >
         <FlexableTextArea
           style={[styles.composePostText, textStyle]}
           onSubmit={text => savePostIfValid(text)} />
@@ -86,7 +99,13 @@ const ComposePost = ({
     )
   } else {
     return (
-      <View style={[styles.composePostContent, { zIndex: 3, backgroundColor: theme.paper.colors.surface }]}>
+      <View
+        onLayout={(e: LayoutChangeEvent) => {
+          const value = e.nativeEvent.layout.height
+          height && height(value)
+        }}
+        style={[styles.composePostContent, { zIndex: 3, backgroundColor: theme.paper.colors.surface }]}
+      >
         <FlexableTextArea
           style={[styles.composePostText, textStyle]}
           placeholder={'What\'s happening?'}
@@ -141,8 +160,10 @@ const PostsList = ({
   if (!posts) {
     return <ActivityIndicator />
   } else {
-    let scrollOffset = 0
-    let scrollDirection = ScrollDirections.UP
+    const scroll = {
+      offset: 0,
+      direction: ScrollDirections.UP,
+    }
     return (
       <SafeAreaView style={{flex:1}}>
         <FlatList
@@ -150,14 +171,16 @@ const PostsList = ({
           renderItem={p => <PostComponent post={p.item} />}
           keyExtractor={(p,i) => p.key || 'post' + i}
           onScroll={e => {
-            const velocityQualifies = !e.nativeEvent.velocity || e.nativeEvent.velocity.y > 1
-            const direction = e.nativeEvent.contentOffset.y - scrollOffset > 0 ?
-              ScrollDirections.DOWN : ScrollDirections.UP
-            if (velocityQualifies && direction !== scrollDirection) {
-              onScroll && onScroll(direction)
+            if (onScroll) {
+              const offset = e.nativeEvent.contentOffset.y
+              const direction = offset - scroll.offset > 0 ?
+                ScrollDirections.DOWN : ScrollDirections.UP
+              scroll.offset = e.nativeEvent.contentOffset.y
+              if (direction !== scroll.direction && ((offset > 0 && direction === ScrollDirections.DOWN) || (offset === 0 && direction === ScrollDirections.UP))) {
+                scroll.direction = direction
+                onScroll(direction)
+              }
             }
-            scrollOffset = e.nativeEvent.contentOffset.y
-            scrollDirection = direction
           }}
           //onEndReached={retrieveMore}
           //refreshing={this.state.refreshing}
@@ -185,51 +208,34 @@ const Posts = ({
   const postsSubject = new PostsSubject(user, criteria)
   if (showComposePost) {
     const height = new Animated.Value(0)
-    const [composePostHeight, setComposePostHeight] = React.useState(0)
+    let composePostHeight = 181
     const [direction, setDirection] = React.useState(ScrollDirections.UP)
-    console.log({composePostHeight})
     const translateY = height.interpolate({
       inputRange: [0, 0.25, 0.5, 0.75, 1],
-      outputRange: [0, -0.25 * composePostHeight, -0.5 * composePostHeight, -0.75 * composePostHeight, -1 * composePostHeight]
+      outputRange: [0, -0.25 * composePostHeight, -0.5 * composePostHeight, -0.75 * composePostHeight, -1 * composePostHeight],
     })
     React.useEffect(() => {
       const toValue = direction === ScrollDirections.UP ? 0 : 1
       const animated = Animated.timing(height,{
         toValue,
-        easing: Easing.back(),
+        easing: Easing.elastic(1),
         duration: 500,
-        //useNativeDriver: Platform.OS !== 'web',
+        useNativeDriver: Platform.OS !== 'web',
       })
       animated.start()
       return () => animated.stop()
     }, [direction])
     const animateComposePost = (d: ScrollDirections) => { // https://snack.expo.io/@xcarpentier/animation-example
-      console.log('scrolling', direction)
-      
-      /*const springConfig: Animated.SpringConfig = {
-        toValue,
-        stiffness: 100,
-        damping: 10,
-        mass: 1,
-        overshootClamping: false,
-        restSpeedThreshold: 0.001,
-        restDisplacementThreshold: 0.001,
+      if (d !== direction) {
+        setDirection(d)
       }
-      Animated.spring(
-        height,
-        springConfig
-      ).start()*/
-      setDirection(d)
     }
     return (
       <View style={styles.container}>
         <Animated.View
-          onLayout={e => {
-            setComposePostHeight(e.nativeEvent.layout.height)
-          }}
           style={[styles.composePostAnimatedContainer, {transform:[{translateY}]}]}
         >
-          <ComposePost criteria={criteria} onSavePost={p => savePost(p)} />
+          <ComposePost criteria={criteria} height={h => composePostHeight = h} onSavePost={p => savePost(p)} />
         </Animated.View>
         <Animated.View style={{flex: 1, marginTop: translateY}}>
           <PostsList postsSubject={postsSubject} onScroll={d => animateComposePost(d)} />

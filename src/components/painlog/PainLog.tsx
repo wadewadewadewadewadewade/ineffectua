@@ -1,7 +1,6 @@
 import React from 'react';
-import { StyleSheet, View, GestureResponderEvent, Alert, Platform, LayoutChangeEvent, ViewStyle } from 'react-native'
-import { ScrollView, TouchableOpacity, PanGestureHandler, State as PanGestureState, PanGestureHandlerStateChangeEvent } from "react-native-gesture-handler";
-import Animated from 'react-native-reanimated';
+import { StyleSheet, View, GestureResponderEvent, Alert, Platform, LayoutChangeEvent, ViewStyle, Animated } from 'react-native'
+import { ScrollView, TouchableOpacity, PanGestureHandler, State as PanGestureState, PanGestureHandlerStateChangeEvent, PanGestureHandlerGestureEvent } from "react-native-gesture-handler";
 import { Svg, Path } from 'react-native-svg'
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
@@ -183,49 +182,32 @@ const Location = ({
     zIndex: 2,
     padding: 0
   } : {};
-  const { cond, eq, add, set, Value, event } = Animated;
-  const dragX = new Value(0);
-  const dragY = new Value(0);
+  const { Value, add } = Animated;
   const offsetX = new Value(0);
   const offsetY = new Value(0);
-  const gestureState = new Value(-1);
-  const scaleMax = new Value(1.2);
-  const scaleMin = new Value(1);
-  const onGestureEvent = event([
-    {
-      nativeEvent: {
-        translationX: dragX,
-        translationY: dragY,
-        state: gestureState,
-      },
-    },
-  ]);
-  const transX = cond(
-    eq(gestureState, PanGestureState.ACTIVE),
-    add(offsetX, dragX),
-    set(offsetX, add(offsetX, dragX)),
-  );
-  const transY = cond(
-    eq(gestureState, PanGestureState.ACTIVE),
-    add(offsetY, dragY),
-    set(offsetY, add(offsetY, dragY)),
-  );
-  const scale = cond(
-    eq(gestureState, PanGestureState.ACTIVE),
-    scaleMax,
-    scaleMin,
-  );
+  const translateX = new Value(0);
+  const translateY = new Value(0);
+  const scaleRange = 0.2;
+  const scale = new Value(1);
+  const onGestureEvent = (e: PanGestureHandlerGestureEvent) => {
+    if (e.nativeEvent.state === PanGestureState.ACTIVE) {
+      add(offsetX, e.nativeEvent.translationX)
+      add(offsetY, e.nativeEvent.translationY)
+    }
+  }
   const onHandlerStateChange = (e: PanGestureHandlerStateChangeEvent) => {
     const { state } = e.nativeEvent
     switch (state) {
       case PanGestureState.BEGAN:
         add(offsetX, scaleShift.x)
         add(offsetY, scaleShift.y)
+        add(scale, scaleRange)
         break
       case PanGestureState.END:
       case PanGestureState.CANCELLED:
         add(offsetX, scaleShift.x * -1)
         add(offsetY, scaleShift.y * -1)
+        add(scale, -1 * scaleRange)
         const translate = {x: e.nativeEvent.translationX, y: e.nativeEvent.translationY}
         const newPosition = addLocations(position,translate)
         const newPositionPercentage = pixelsToPercent(newPosition, figureDimensions)
@@ -265,9 +247,7 @@ const Location = ({
           pixelsToPercentViewStyle(position, figureDimensions),
           adjustForDesktop,
           {transform: [
-            { translateX: transX },
-            { translateY: transY },
-            { scale }
+            { translateX, translateY, scale }
           ]}
         ]}
       >
