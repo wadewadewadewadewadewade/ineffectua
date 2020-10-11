@@ -85,7 +85,7 @@ const Agenda = ({
         // Agenda theme
         theme={calendarTheme}
       />
-    <Posts showComposePost={true} criteria={{privacy: PostPrivacyTypes.PUBLIC}} />
+      <Posts showComposePost={true} criteria={{privacy: PostPrivacyTypes.PUBLIC}} />
     </View>
   )
 }

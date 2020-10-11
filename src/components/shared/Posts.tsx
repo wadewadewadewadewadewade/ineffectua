@@ -161,9 +161,9 @@ const PostsList = ({
   onScroll?: (direction: ScrollDirections) => void
 }) => {
   const fetchPosts = async (key: PostCriteria, cursor = 0): Promise<Post> => {
-    return await (
-      await fetch<Post>('https://us-central1-ineffectua.cloudfunctions.net/posts/' + cursor)
-    ).json() as Post
+    const ps = await fetch('https://us-central1-ineffectua.cloudfunctions.net/posts/' + cursor)
+    const p = await ps.json()
+    return p
   }
   const {
     status,
