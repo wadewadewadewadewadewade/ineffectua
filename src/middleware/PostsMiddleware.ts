@@ -7,6 +7,8 @@ import { NetworkInfo } from "react-native-network-info";
 // for the add call when it doesn't go through redux/thunk
 import { firebase as firebaseInstance } from '../firebase/config';
 import { AuthState } from '../reducers/AuthReducer';
+import { useSelector } from 'react-redux';
+import { TypedQueryFunction } from 'react-query';
 
 export const emptyPost: Post = {
   body: '',
@@ -31,6 +33,41 @@ const convertDocumentDataToPost = (data: firebase.firestore.DocumentData): Post 
     }
   }
   return postData
+}
+
+type FetchObject = {
+  body: string,
+  tags: Array<string>,
+  criteria: PostCriteria,
+  created: {
+    by: string,
+    on: string,
+  }
+}
+
+const mapFetchToPosts = (fetchObject: Array<FetchObject>): TypedQueryFunction<Post[], [firebase.User, PostCriteria, (number | undefined)?]> => {
+  const posts = new Array<Post>()
+  if (fetchObject && fetchObject.length > 0) {
+    fetchObject.forEach(po => {
+      const { created, ...rest } = po
+      const post: Post = {...rest, created: { by: created.by, on: new Date(created.on) }}
+      posts.push(post)
+    })
+  }
+  return posts
+}
+
+export const fetchPosts = async (user: firebase.User | false, key: PostCriteria, cursor = 0): TypedQueryFunction<Post[], [firebase.User, PostCriteria, (number | undefined)?]> => {
+  if (!user) {
+    return new Promise<Array<Post>>(r => r([]))
+  } else {
+    return user.getIdToken().then(token => fetch('https://us-central1-ineffectua.cloudfunctions.net/posts/' + cursor, {
+      headers: new Headers({
+        'Authorization': 'Bearer ' + token
+      })
+    })
+    .then(promise => promise.json().then(posts => mapFetchToPosts(posts))))
+  }
 }
 
 export type PostsObserver = (posts: PostsType) => void

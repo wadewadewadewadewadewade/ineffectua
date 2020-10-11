@@ -4,7 +4,7 @@ import { Text, ActivityIndicator } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { State } from '../../Types';
 import { Post, PostCriteria, PostPrivacyTypes, getPostPrivacyName } from '../../reducers/PostsReducer';
-import { addPostWithDispatch } from '../../middleware/PostsMiddleware'
+import { addPostWithDispatch, fetchPosts } from '../../middleware/PostsMiddleware'
 import Slider from '@react-native-community/slider';
 import Tags from './Tags';
 import FlexableTextArea from './FlexableTextArea';
@@ -145,14 +145,6 @@ enum ScrollDirections {
 
 // https://react-query.tanstack.com/docs/guides/infinite-queries
 
-interface TypedResponse<T = any> extends Response {
-  
-}
-
-function fetch<T>(...args: any): Promise<TypedResponse<T>> {
-  return fetch.apply(args)
-}
-
 const PostsList = ({
   criteria,
   onScroll
@@ -160,11 +152,7 @@ const PostsList = ({
   criteria: PostCriteria,
   onScroll?: (direction: ScrollDirections) => void
 }) => {
-  const fetchPosts = async (key: PostCriteria, cursor = 0): Promise<Post> => {
-    const ps = await fetch('https://us-central1-ineffectua.cloudfunctions.net/posts/' + cursor)
-    const p = await ps.json()
-    return p
-  }
+  const [user] = useSelector((state: State) => ([state.user]))
   const {
     status,
     data,
@@ -173,9 +161,9 @@ const PostsList = ({
     fetchMore,
     //canFetchMore,
     error,
-  } = useInfiniteQuery<Post, Error, [PostCriteria, (number | undefined)?]>(
+  } = useInfiniteQuery<Array<Post>, Error, [firebase.User, PostCriteria, (number | undefined)?]>(
     'posts',
-    fetchPosts,
+    (cursor: number) => fetchPosts(user, criteria, cursor),
   )
   if (status === QueryStatus.Loading) {
     return <ActivityIndicator />
@@ -186,10 +174,11 @@ const PostsList = ({
       offset: 0,
       direction: ScrollDirections.UP,
     }
+    const posts: Array<Post> = data ? data[0] : []
     return (
       <SafeAreaView style={{flex:1}}>
         <FlatList
-          data={data}
+          data={posts}
           renderItem={p => <PostComponent post={p.item} />}
           keyExtractor={(p,i) => p.key || 'post' + i}
           onScroll={e => {
