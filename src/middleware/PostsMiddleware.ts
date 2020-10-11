@@ -45,7 +45,7 @@ type FetchObject = {
   }
 }
 
-const mapFetchToPosts = (fetchObject: Array<FetchObject>): TypedQueryFunction<Post[], [firebase.User, PostCriteria, (number | undefined)?]> => {
+const mapFetchToPosts = (fetchObject: Array<FetchObject>): Array<Post> => {
   const posts = new Array<Post>()
   if (fetchObject && fetchObject.length > 0) {
     fetchObject.forEach(po => {
@@ -57,7 +57,7 @@ const mapFetchToPosts = (fetchObject: Array<FetchObject>): TypedQueryFunction<Po
   return posts
 }
 
-export const fetchPosts = async (user: firebase.User | false, key: PostCriteria, cursor = 0): TypedQueryFunction<Post[], [firebase.User, PostCriteria, (number | undefined)?]> => {
+export const fetchPosts = async (user: firebase.User | false, key: PostCriteria, cursor = 0): Promise<Array<Post>> => {
   if (!user) {
     return new Promise<Array<Post>>(r => r([]))
   } else {

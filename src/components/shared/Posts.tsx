@@ -10,7 +10,7 @@ import Tags from './Tags';
 import FlexableTextArea from './FlexableTextArea';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatDateConditionally } from '../../middleware/CalendarMiddleware';
-import { useInfiniteQuery, QueryStatus } from 'react-query'
+import { useInfiniteQuery, QueryStatus, TypedQueryFunction } from 'react-query'
 
 // used for a list of posts, for comments within a post, messages between users, and for searching maybe?
 
@@ -153,6 +153,7 @@ const PostsList = ({
   onScroll?: (direction: ScrollDirections) => void
 }) => {
   const [user] = useSelector((state: State) => ([state.user]))
+  const fetchPostsWithCustomParams = (key: PostCriteria, cursor: number): TypedQueryFunction<Post[], [PostCriteria, number]> => fetchPosts(user, key, cursor)
   const {
     status,
     data,
@@ -161,9 +162,9 @@ const PostsList = ({
     fetchMore,
     //canFetchMore,
     error,
-  } = useInfiniteQuery<Array<Post>, Error, [firebase.User, PostCriteria, (number | undefined)?]>(
+  } = useInfiniteQuery<Array<Post>, Error, [PostCriteria, number]>(
     'posts',
-    (cursor: number) => fetchPosts(user, criteria, cursor),
+    fetchPostsWithCustomParams,
   )
   if (status === QueryStatus.Loading) {
     return <ActivityIndicator />
