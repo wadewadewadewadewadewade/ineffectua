@@ -1,7 +1,6 @@
-import { PostPrivacyTypes } from './../reducers/PostsReducer';
 import * as React from 'react';
 import { State } from './../Types';
-import { Post, initialCriteria, PostsState, PostCriteria, GetPostsAction, ReplacePostsAction, PostsType } from '../reducers/PostsReducer';
+import { Post, initialCriteria, PostsState, PostCriteria, ReplacePostsAction, PostsType } from '../reducers/PostsReducer';
 import { Action } from './../reducers';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { NetworkInfo } from "react-native-network-info";
@@ -32,50 +31,6 @@ const convertDocumentDataToPost = (data: firebase.firestore.DocumentData): Post 
     }
   }
   return postData
-}
-
-export const getPostsByCriteria = (user: AuthState['user'], criteria: PostCriteria, firebase = firebaseInstance) => {
-  return new Promise<PostsType>((resolve, reject) => {
-    if (user) {
-      //firebase.firestore.setLogLevel('debug');
-      firebase.firestore().collection('posts')
-        .where('created.by', '==', user.uid)
-        .get()
-        .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-          const posts: PostsState['posts'] = {
-            items: [],
-            criteria
-          };
-          posts.items = querySnapshot.docs.map(p => {
-            const val = convertDocumentDataToPost(p);
-            return val
-          })
-          firebase.firestore().collection('posts')
-            .where('criteria.privacy', '==', PostPrivacyTypes.PUBLIC)
-            .get()
-            .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-              querySnapshot.docs.forEach(p => {
-                posts.items.push(convertDocumentDataToPost(p))
-              })
-              posts.items = posts.items.sort((a,b) => a.created.on.getTime() - b.created.on.getTime())
-              resolve(posts)
-              return posts
-            })
-      })
-    }
-  })
-}
-
-export const getPosts = (criteria: PostCriteria): ThunkAction<Promise<PostsType>, State, firebase.app.App, Action> => {
-  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<PostsType> => {
-    return new Promise<PostsType>((resolve) => {
-      const { user } = getState();
-      getPostsByCriteria(user, criteria).then(p => {
-        dispatch(GetPostsAction(p))
-        resolve(p)
-      })
-    })
-  }
 }
 
 export type PostsObserver = (posts: PostsType) => void

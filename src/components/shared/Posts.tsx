@@ -3,13 +3,14 @@ import { View, StyleSheet, ViewStyle, FlatList, Platform, Animated, Easing, Layo
 import { Text, ActivityIndicator } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { State } from '../../Types';
-import { Post, PostCriteria, PostPrivacyTypes, getPostPrivacyName, PostsType } from '../../reducers/PostsReducer';
-import { addPostWithDispatch, PostsSubject, PostsObserver } from '../../middleware/PostsMiddleware'
+import { Post, PostCriteria, PostPrivacyTypes, getPostPrivacyName } from '../../reducers/PostsReducer';
+import { addPostWithDispatch } from '../../middleware/PostsMiddleware'
 import Slider from '@react-native-community/slider';
 import Tags from './Tags';
 import FlexableTextArea from './FlexableTextArea';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatDateConditionally } from '../../middleware/CalendarMiddleware';
+import { useInfiniteQuery, QueryStatus } from 'react-query'
 
 // used for a list of posts, for comments within a post, messages between users, and for searching maybe?
 
@@ -142,23 +143,42 @@ enum ScrollDirections {
   DOWN,
 }
 
+interface TypedResponse<T = any> extends Response {
+  
+}
+
+function fetch<T>(...args: any): Promise<TypedResponse<T>> {
+  return fetch.apply(args)
+}
+
 const PostsList = ({
-  postsSubject,
+  criteria,
   onScroll
 } : {
-  postsSubject: PostsSubject,
+  criteria: PostCriteria,
   onScroll?: (direction: ScrollDirections) => void
 }) => {
-  const [posts, setPosts] = React.useState<PostsType>()
-  const onPostsUpdated: PostsObserver = (postsType: PostsType) => {
-    setPosts(postsType)
+  const fetchPosts = async (key: PostCriteria, cursor = 0): Promise<Post> => {
+    return await (
+      await fetch<Post>('https://us-central1-ineffectua.cloudfunctions.net/posts/' + cursor)
+    ).json() as Post
   }
-  React.useEffect(() => {
-    postsSubject.attach(onPostsUpdated)
-    return () => postsSubject.detach(onPostsUpdated)
-  }, [])
-  if (!posts) {
+  const {
+    status,
+    data,
+    isFetching,
+    //isFetchingMore,
+    fetchMore,
+    //canFetchMore,
+    error,
+  } = useInfiniteQuery<Post, Error, [PostCriteria, (number | undefined)?]>(
+    'posts',
+    fetchPosts,
+  )
+  if (status === QueryStatus.Loading) {
     return <ActivityIndicator />
+  } else if (status === QueryStatus.Error) {
+    return <Text>An error occured while fetching posts: {error?.message}</Text>
   } else {
     const scroll = {
       offset: 0,
@@ -167,7 +187,7 @@ const PostsList = ({
     return (
       <SafeAreaView style={{flex:1}}>
         <FlatList
-          data={posts.items}
+          data={data}
           renderItem={p => <PostComponent post={p.item} />}
           keyExtractor={(p,i) => p.key || 'post' + i}
           onScroll={e => {
@@ -182,9 +202,9 @@ const PostsList = ({
               }
             }
           }}
-          //onEndReached={retrieveMore}
-          //refreshing={this.state.refreshing}
-          //onEndReachedThreshold={0}
+          onEndReached={fetchMore}
+          refreshing={isFetching}
+          onEndReachedThreshold={0.25}
         />
       </SafeAreaView>
     )
@@ -200,12 +220,10 @@ const Posts = ({
   showComposePost,
   criteria
 }: PostProps) => {
-  const user = useSelector((state: State) => state.user)
   const dispatch = useDispatch()
   const savePost = (post: Post) => {
     dispatch(addPostWithDispatch(post))
   }
-  const postsSubject = new PostsSubject(user, criteria)
   if (showComposePost) {
     const height = new Animated.Value(0)
     let composePostHeight = 181
@@ -238,14 +256,14 @@ const Posts = ({
           <ComposePost criteria={criteria} height={h => composePostHeight = h} onSavePost={p => savePost(p)} />
         </Animated.View>
         <Animated.View style={{flex: 1, marginTop: translateY}}>
-          <PostsList postsSubject={postsSubject} onScroll={d => animateComposePost(d)} />
+          <PostsList criteria={criteria} onScroll={d => animateComposePost(d)} />
         </Animated.View>
       </View>
     )
   } else {
     return (
       <View style={styles.container}>
-        <PostsList postsSubject={postsSubject} />
+        <PostsList criteria={criteria} />
       </View>
     )
   }
