@@ -143,6 +143,8 @@ enum ScrollDirections {
   DOWN,
 }
 
+// https://react-query.tanstack.com/docs/guides/infinite-queries
+
 interface TypedResponse<T = any> extends Response {
   
 }
