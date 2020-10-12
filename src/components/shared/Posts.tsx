@@ -10,7 +10,7 @@ import Tags from './Tags';
 import FlexableTextArea from './FlexableTextArea';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatDateConditionally } from '../../middleware/CalendarMiddleware';
-import { useInfiniteQuery, QueryStatus, TypedQueryFunction } from 'react-query'
+import { useInfiniteQuery, QueryStatus } from 'react-query'
 
 // used for a list of posts, for comments within a post, messages between users, and for searching maybe?
 
@@ -153,18 +153,21 @@ const PostsList = ({
   onScroll?: (direction: ScrollDirections) => void
 }) => {
   const [user] = useSelector((state: State) => ([state.user]))
-  const fetchPostsWithCustomParams = (key: PostCriteria, cursor: number): TypedQueryFunction<Post[], [PostCriteria, number]> => fetchPosts(user, key, cursor)
+  const fetchPostsWithCustomParams = (key: PostCriteria, cursor: number | undefined) => {
+    return fetchPosts(user, key, cursor)
+  }
   const {
     status,
     data,
     isFetching,
     //isFetchingMore,
-    fetchMore,
+    //fetchMore,
     //canFetchMore,
     error,
-  } = useInfiniteQuery<Array<Post>, Error, [PostCriteria, number]>(
-    'posts',
+  } = useInfiniteQuery<Array<Post>, Error, [PostCriteria, (number | undefined)]>(
+    JSON.stringify(criteria),
     fetchPostsWithCustomParams,
+    { suspense: true}
   )
   if (status === QueryStatus.Loading) {
     return <ActivityIndicator />
@@ -194,7 +197,7 @@ const PostsList = ({
               }
             }
           }}
-          onEndReached={fetchMore}
+          //onEndReached={fetchMore}
           refreshing={isFetching}
           onEndReachedThreshold={0.25}
         />
@@ -242,14 +245,16 @@ const Posts = ({
     }
     return (
       <View style={styles.container}>
-        <Animated.View
-          style={[styles.composePostAnimatedContainer, {transform:[{translateY}]}]}
-        >
-          <ComposePost criteria={criteria} height={h => composePostHeight = h} onSavePost={p => savePost(p)} />
-        </Animated.View>
-        <Animated.View style={{flex: 1, marginTop: translateY}}>
-          <PostsList criteria={criteria} onScroll={d => animateComposePost(d)} />
-        </Animated.View>
+        <React.Suspense fallback={<ActivityIndicator/>}>
+          <Animated.View
+            style={[styles.composePostAnimatedContainer, {transform:[{translateY}]}]}
+          >
+            <ComposePost criteria={criteria} height={h => composePostHeight = h} onSavePost={p => savePost(p)} />
+          </Animated.View>
+          <Animated.View style={{flex: 1, marginTop: translateY}}>
+            <PostsList criteria={criteria} onScroll={d => animateComposePost(d)} />
+          </Animated.View>
+        </React.Suspense>
       </View>
     )
   } else {
@@ -268,6 +273,8 @@ const styles = StyleSheet.create({
   },
   composePostAnimatedContainer: {
     marginBottom: 12,
+    elevation: 4,
+    zIndex: 4,
   },
   composePostContent: {
     flex: 1,
@@ -283,8 +290,6 @@ const styles = StyleSheet.create({
     margin: 0,
     flex: 1,
     position: 'relative',
-    zIndex: 2,
-    elevation: 2,
   },
   postmetadata: {
     fontSize: 12,

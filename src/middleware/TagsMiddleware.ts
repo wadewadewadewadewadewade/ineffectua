@@ -19,29 +19,49 @@ const convertDocumentDataToTag = (data: firebase.firestore.DocumentData): Tag =>
   }
 }
 
-export const getTagsForAutocomplete = (prefix: string, firebase = firebaseInstance) => {
+export const getTagsForAutocomplete = (prefix?: string, tagsInUse?: Array<Tag>, limit = 5, minimumCharacters = 3, firebase = firebaseInstance) => {
   return new Promise<Array<Tag>>((resolve,reject) => {
-    firebase.firestore().collection('tags')
-    .where('name', '>=', prefix).limit(5).get()
-    .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-      const tags: TagsType = {};
-      const arr = querySnapshot.docs.map(d => {
-        const val = convertDocumentDataToTag(d);
-        return val
-      })
-      resolve(arr)
-    }).catch(err => reject(err))
+    if (!prefix || prefix.length < minimumCharacters) {
+      resolve(new Array<Tag>())
+    } else if (tagsInUse && tagsInUse.length > 0) {
+      const tagIds = tagsInUse.map(t => t.key)
+      firebase.firestore().collection('tags')
+      .where('name', '>=', prefix)
+      .where(firebase.firestore.FieldPath.documentId(), 'not-in', tagIds)
+      .limit(limit).get()
+      .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
+        const tags: TagsType = {};
+        const arr = querySnapshot.docs.map(d => {
+          const val = convertDocumentDataToTag(d);
+          return val
+        })
+        resolve(arr)
+      }).catch(err => reject(err))
+    } else {
+      firebase.firestore().collection('tags')
+      .where('name', '>=', prefix)
+      .limit(limit).get()
+      .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
+        const tags: TagsType = {};
+        const arr = querySnapshot.docs.map(d => {
+          const val = convertDocumentDataToTag(d);
+          return val
+        })
+        resolve(arr)
+      }).catch(err => reject(err))
+    }
   })
 }
 
-export const getTagsByKeyArray = (tagIds: Array<string>, firebase = firebaseInstance) => {
+export const getTagsByKeyArray = (tagIdsJsonString: string | undefined, firebase = firebaseInstance) => {
   return new Promise<Array<Tag>>((resolve, reject) => {
-    if (tagIds.length === 0) {
+    if (!tagIdsJsonString || tagIdsJsonString === '[]') {
       setTimeout(() => {
         const arr = new Array<Tag>()
         resolve(arr)
       }, 1000)
     } else {
+      const tagIds = JSON.parse(tagIdsJsonString)
       firebase.firestore().collection('tags')
       .where(firebase.firestore.FieldPath.documentId(), 'in', tagIds).get()
       .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
@@ -114,7 +134,7 @@ export const addTag = (user: AuthState['user'], tag: Tag, firebase = firebaseIns
             return createNewRecord(null)
           })
         }
-        getTagsForAutocomplete(tag.name, firebase).then(ta => {
+        getTagsForAutocomplete(tag.name, [], 5, 3, firebase).then(ta => {
           // first check that the tag isn't alread in the DB to avoid duplicates
           if (ta[0].name.toLowerCase() === tag.name.toLowerCase()) {
             resolve(ta[0])

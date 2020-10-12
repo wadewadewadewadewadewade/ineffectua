@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   Platform,
   StatusBar,
@@ -29,7 +29,7 @@ import {
   createStackNavigator,
   HeaderStyleInterpolators,
 } from '@react-navigation/stack';
-import { Action, isFetching } from '../reducers';
+import { isFetching } from '../reducers';
 
 // use this to restart the app for things like changing RTL to LTR
 //import { restartApp } from './Restart';
@@ -42,24 +42,28 @@ import AuthFlow from './authentication/AuthFlow';
 import Profile from './authentication/Profile';
 
 import { NAVIGATION_PERSISTENCE_KEY, State, RootDrawerParamList, RootStackParamList } from '../Types';
-import { SignInAction, isUserAuthenticated, AuthState, SignOutAction } from '../reducers/AuthReducer';
-import { paperTheme, CombinedLightTheme, barClassName, paperColors, ThemeState } from '../reducers/ThemeReducer';
+import { SignInAction, isUserAuthenticated, SignOutAction } from '../reducers/AuthReducer';
+import { paperTheme, barClassName, paperColors } from '../reducers/ThemeReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CalendarDayProps } from './calendar/CalendarDay';
-import { ThunkDispatch } from 'redux-thunk';
 import { watchFirebaseData, getFirebaseData } from '../middleware';
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
 
-const Navigation = (props: {
-    theme: ThemeState['theme'],
-    user: AuthState['user'],
-    fetchData: () => void,
-    signIn: (userState: firebase.User) => void,
-    signOut: () => void,
-  }) => {
-  const { theme, user, fetchData, signIn, signOut } = props;
+const Navigation = () => {
+  const [theme, user] = useSelector((state: State) => ([state.theme, state.user]))
+  const dispatch = useDispatch()
+  const fetchData = () => {
+    dispatch(isFetching(true))
+    getFirebaseData(dispatch).then(() => watchFirebaseData(dispatch).then(() => dispatch(isFetching(false))))
+  }
+  const signIn = (userState: firebase.User) => {
+    dispatch(SignInAction(userState))
+  }
+  const signOut = () => {
+    dispatch(SignOutAction())
+  }
   const [dataRetrivedAndWatched, setDataRetrivedAndWatched] = React.useState(false);
   const [isReady, setIsReady] = React.useState(Platform.OS === 'web');
   const [initialState, setInitialState] = React.useState<
@@ -78,7 +82,6 @@ const Navigation = (props: {
     }
   });
   if (user && !dataRetrivedAndWatched) { // only fetch and watch data once per app-use
-    console.log('fetching')
     fetchData()
     setDataRetrivedAndWatched(true)
   }
@@ -285,27 +288,4 @@ const Navigation = (props: {
   )
 }
 
-interface DispatchProps {
-}
-
-const mapStateToProps = (state: State): State => {
-  return {
-    ...state,
-    theme: state.theme ? state.theme : CombinedLightTheme,
-  };
-};
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, Action>): DispatchProps => {
-  return {
-    fetchData: () => {
-      dispatch(isFetching(true))
-      getFirebaseData(dispatch).then(() => watchFirebaseData(dispatch).then(() => dispatch(isFetching(false))))
-    },
-    signIn: (userState: firebase.User) => {
-      dispatch(SignInAction(userState))
-    },
-    signOut: () => {
-      dispatch(SignOutAction())
-    }
-  };
-};
-export default connect(mapStateToProps, mapDispatchToProps)(Navigation)
+export default Navigation

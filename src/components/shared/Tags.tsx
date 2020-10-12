@@ -8,7 +8,7 @@ import { paperColors } from '../../reducers/ThemeReducer';
 import { Tag } from '../../reducers/TagsReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { TouchableHighlight, FlatList } from 'react-native-gesture-handler';
-import { wrapPromise, WrappedPromise } from '../../middleware';
+import { useQuery, QueryStatus } from 'react-query'
 
 const TagComponent = ({
   tag,
@@ -42,17 +42,30 @@ const TagSuggestion = ({
 }
 
 const TagList = ({
-  tagsResource,
+  value,
   onTagsChanged,
 } : {
-  tagsResource: WrappedPromise<Array<Tag>>,
+  value?: Array<string>,
   onTagsChanged?: (tags: Array<string>) => void
 }) => {
-  const tags = tagsResource.read()
-  if (onTagsChanged) {
+  if (!value) {
+    return <View/>
+  }
+  const {
+    status,
+    data,
+    isFetching,
+    error,
+  } = useQuery<Tag[], Error, [string]>(JSON.stringify(value), getTagsByKeyArray, { suspense: true })
+  const tags = data || []
+  if (status === QueryStatus.Loading || isFetching) {
+    return <ActivityIndicator />
+  } else if (status === QueryStatus.Error) {
+    return <Text>An error occured while fetching tags: {error?.message}</Text>
+  } else if (onTagsChanged) {
     return (
       <View style={{flexDirection: 'row'}}>
-        {tags && tags.length > 0 && tags.map(t => 
+        {tags.length > 0 && tags.map(t => 
           <TagComponent
             key={t.key as string}
             tag={t}
@@ -86,10 +99,14 @@ const NewTagField = ({
   onTagsChanged: (newTag: Tag) => void,
 }) => {
   const [tagName, setTagName] = React.useState<string>('')
-  const [suggestions, setSuggestions] = React.useState<Array<Tag>>([]);
-  const tagIds: Array<string> = tags.map(t => t.key || t.name)
   const theme = useSelector((state: State) => state.theme)
   const dispatch = useDispatch()
+  const {
+    status,
+    data,
+    isFetching,
+    error,
+  } = useQuery<Tag[], Error, [string, Array<Tag>]>(tagName, getTagsForAutocomplete, { suspense: false })
   return (
     <View style={styles.pickerContainer}>
       <TextInput
@@ -97,16 +114,12 @@ const NewTagField = ({
         value={tagName}
         onChangeText={(text: string) => {
           setTagName(text)
-          getTagsForAutocomplete(text).then(t => setSuggestions(t.filter(ta => tagIds.indexOf(ta.key || ta.name) === -1)))
         }}
         onBlur={() => {
           // onBlur was firing before clicks inside the type-ahead suggestions could regester
           setTimeout(() => {
             if (tagName.length > 0) {
               setTagName('')
-            }
-            if (suggestions.length > 0) { // close type-ahead suggestions if they are shown
-              setSuggestions([])
             }
           }, 100)
         }}
@@ -126,20 +139,23 @@ const NewTagField = ({
         }}
       />
       <View style={[styles.picker, { backgroundColor: theme.paper.colors.surface }]}>
-        <FlatList<Tag>
-          data={suggestions}
+        {status === QueryStatus.Loading && <ActivityIndicator />}
+        {status === QueryStatus.Error && <Text>An error occured fetching tags: {error?.message}</Text>}
+        {data && <FlatList<Tag>
+          data={data}
           renderItem={({item, index}) => (
             <TagSuggestion
               name={item.name}
               index={index}
               onPress={i => {
-                const selected = suggestions[i]
+                const selected = data[i]
                 onTagsChanged(selected)
               }}
             />
           )}
           keyExtractor={i => i.key || i.name}
-          />
+          refreshing={isFetching}
+          />}
       </View>
     </View>
   )
@@ -156,7 +172,7 @@ const Tags = ({
   style,
   onTagsChanged
 }: Props) => {
-  const tags = value && value.length > 0 ? wrapPromise(getTagsByKeyArray(value)) : wrapPromise(new Promise<Array<Tag>>(r => r([])))
+  //const tags = value && value.length > 0 ? wrapPromise(getTagsByKeyArray(value)) : wrapPromise(new Promise<Array<Tag>>(r => r([])))
   const theme = useSelector((state: State) => state.theme)
   return (
     <View style={[styles.pickerContainer, {backgroundColor: theme.paper.colors.surface, borderRadius: theme.paper.roundness}, style]}>
@@ -164,9 +180,9 @@ const Tags = ({
         <Text style={[styles.label, {color: theme.paper.colors.text}]}>Tags</Text>
         <React.Suspense fallback={<ActivityIndicator style={{minHeight:64}} />}>
           {onTagsChanged ?
-            <TagList tagsResource={tags} onTagsChanged={onTagsChanged} />
+            <TagList value={value} onTagsChanged={onTagsChanged} />
           :
-            <TagList tagsResource={tags} />
+            <TagList value={value} />
           }
         </React.Suspense>
       </View>
@@ -221,7 +237,8 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 4,
+    zIndex: 4,
   },
   pickerItem: {
     padding:8

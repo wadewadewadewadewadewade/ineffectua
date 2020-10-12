@@ -7,8 +7,6 @@ import { NetworkInfo } from "react-native-network-info";
 // for the add call when it doesn't go through redux/thunk
 import { firebase as firebaseInstance } from '../firebase/config';
 import { AuthState } from '../reducers/AuthReducer';
-import { useSelector } from 'react-redux';
-import { TypedQueryFunction } from 'react-query';
 
 export const emptyPost: Post = {
   body: '',
