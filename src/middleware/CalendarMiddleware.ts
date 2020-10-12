@@ -1,5 +1,5 @@
 import { State } from './../Types';
-import { GetDatesAction, ReplaceDatesAction, CalendarState } from './../reducers/CalendarReducer';
+import { GetDatesAction, ReplaceDatesAction, CalendarState, CalendarWindow } from './../reducers/CalendarReducer';
 import { Action } from './../reducers';
 import { CalendarEntry } from '../reducers/CalendarReducer';
 import { CalendarDot, MultiDotMarking } from 'react-native-calendars';
@@ -71,6 +71,11 @@ function dateDiff(a: Date, b: Date): string {
   }
   response.minutes = Math.floor(span / (_MS_PER_DAY / (24 * 60)))
   return response.toString()
+}
+
+export const addDays = function(date: Date, days: number) {
+  date.setDate(date.getDate() + days);
+  return date;
 }
 
 export const datesToArray = (dates: CalendarState['dates'], oldest?: Date, newest?: Date): Array<CalendarEntry> => {
@@ -159,6 +164,22 @@ export const formatDateConditionally = (d: Date) => {
   } else {
     return formatDateAndTime(d)
   }
+}
+
+export const dateInDateWindow = (date: CalendarEntry, window: CalendarWindow) => {
+  // check if date ends before window ends and date ends after window starts (end within window)
+  if (date.window.ends < window.ends && date.window.ends > window.starts) {
+    return true
+  }
+  // then check if date starts after window starts and date starts before window ends (starts within window)
+  if (date.window.starts > window.starts && date.window.starts < window.ends) {
+    return true
+  }
+  // finally, check if date starts before window starts and date ends after window ends (exlipses window)
+  if (date.window.starts < window.starts && date.window.ends > window.ends) {
+    return true
+  }
+  return false
 }
 
 const convertDocumentDataToCalendarEntry = (data: firebase.firestore.DocumentData): CalendarEntry => {

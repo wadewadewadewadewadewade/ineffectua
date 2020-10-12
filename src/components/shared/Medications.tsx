@@ -3,13 +3,12 @@ import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import RNPickerSelect, { PickerStyle } from 'react-native-picker-select';
 import { Text, Button, Modal, Portal, TextInput } from 'react-native-paper';
-import { connect } from 'react-redux';
-import { ThunkDispatch } from 'redux-thunk';
+import { useSelector, useDispatch } from 'react-redux';
 import { addMedication, emptyMedication, newMedicationName } from '../../middleware/MedicationsMiddleware';
 import { State } from '../../Types';
 import { ThemeState, paperColors } from '../../reducers/ThemeReducer';
 import { Medication, MedicationsState } from '../../reducers/MedicationsReducer';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity, FlatList } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DataTypes from './DataTypes';
 import Contacts from './Contacts';
@@ -28,10 +27,9 @@ type NewMedicationProps = {
 
 export const NewMedication = ({
   value,
-  medications,
-  theme,
-  saveNewMedication
+  saveNewMedication,
 }: NewMedicationProps) => {
+  const [theme, medications] = useSelector((state: State) => [state.theme, state.medications])
   const [name, setName] = React.useState(value?.name || '');
   const [active, setActive] = React.useState(value?.active || false);
   const [nameTouched, setNameTouched] = React.useState(false);
@@ -117,20 +115,32 @@ export const NewMedication = ({
 }
 
 type Props = {
-  value?: Array<string>;
-  onValueChange: (medications: Array<string>) => void;
-  theme: ThemeState['theme'],
-  medications: MedicationsState['medications'],
-  addNewMedication: (medication: Medication, onComplete: (medication: Medication) => void) => void
+  value?: Array<string>,
+  display?: 'list',
+  onValueChange?: (medications: Array<string>) => void,
 };
+
+const MedicationItem = ({
+  medication
+} : {
+  medication: Medication
+}) => {
+  return (
+    <View style={styles.medicationItem}>
+      <Text style={styles.medicationItemName}>{medication.name}</Text>
+    </View>
+  )
+}
 
 const Medications = ({
   value,
+  display,
   onValueChange,
-  theme,
-  medications,
-  addNewMedication
 }: Props) => {
+  const [theme, medications] = useSelector((state: State) => [state.theme, state.medications])
+  const dispatch = useDispatch()
+  const addNewMedication = (medication: Medication, onComplete: (medication: Medication) => void) =>
+    dispatch(addMedication(medication, onComplete))
   const [visible, setVisible] = React.useState(false);
   const [newMedications, setNewMedications] = React.useState(value || new Array<string>());
   const medicationsArray = firebaseDocumentToArray(medications, {name:newMedicationName,active:true});
@@ -147,34 +157,43 @@ const Medications = ({
     >
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
+          flexDirection: display === 'list' ? 'column' : 'row',
+          alignItems: display === 'list' ? 'flex-start' : 'center',
           justifyContent: 'space-between',
         }}
       >
-        <Text style={{color: theme.paper.colors.text}}>Medication</Text>
-        <View style={styles.pickerView}>
-          <RNPickerSelect
-            ref={(r) => pickerRef = r}
-            style={pickerStyles}
-            items={medicationsArray.map(c => ({label:c.name,value:c.name}))}
-            onValueChange={(itemValue, itemIndex) => {
-              if (itemValue) {
-                const sel = medicationsArray.filter(c => c.name === itemValue.toString())[0];
-                if (sel.name === newMedicationName) {
-                  setVisible(true);
-                } else if (sel.key) {
-                  setNewMedications([...newMedications, sel.key]);
-                  if (pickerRef) {
-                    pickerRef.setState({value:undefined})
-                    pickerRef.forceUpdate()
-                  }
-                  onValueChange([...newMedications, sel.key]);
-                }
-              }
-            }}
+        <Text style={{color: theme.paper.colors.text}}>Medication{display === 'list' && medicationsArray.length > 1 && 's'}</Text>
+        {display === 'list' ?
+          <SafeAreaView style={{paddingLeft:12}}>
+            <FlatList
+              data={medicationsArray}
+              keyExtractor={i => i.key || i.name}
+              renderItem={({item, index}) => (<MedicationItem medication={item} />)}
             />
-        </View>
+          </SafeAreaView>
+        : <View style={styles.pickerView}>
+            <RNPickerSelect
+              ref={(r) => pickerRef = r}
+              style={pickerStyles}
+              items={medicationsArray.map(c => ({label:c.name,value:c.name}))}
+              onValueChange={(itemValue, itemIndex) => {
+                if (itemValue) {
+                  const sel = medicationsArray.filter(c => c.name === itemValue.toString())[0];
+                  if (sel.name === newMedicationName) {
+                    setVisible(true);
+                  } else if (sel.key) {
+                    setNewMedications([...newMedications, sel.key]);
+                    if (pickerRef) {
+                      pickerRef.setState({value:undefined})
+                      pickerRef.forceUpdate()
+                    }
+                    onValueChange && onValueChange([...newMedications, sel.key]);
+                  }
+                }
+              }}
+              />
+          </View>
+        }
       </View>
       {newMedications && newMedications.map((cId: string) => medications[cId] && 
         <View key={cId} style={styles.existingMedications}>
@@ -195,7 +214,7 @@ const Medications = ({
                   if (c.key) {
                     setVisible(false);
                     setNewMedications([...newMedications, c.key]);
-                    onValueChange(newMedications);
+                    onValueChange && onValueChange(newMedications);
                   }
                 })
               } else {
@@ -262,27 +281,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textTransform: 'uppercase',
   },
+  medicationItem: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  medicationItemName: {
+    fontSize: 12,
+  },
 });
 
-interface OwnProps {
-}
-
-interface DispatchProps {
-  addNewMedication: (Medication: Medication, onComplete: (medication: Medication) => void) => void
-}
-
-const mapStateToProps = (state: State) => {
-  return {
-    user: state.user,
-    theme: state.theme,
-    medications: state.medications
-  };
-};
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
-  return {
-    addNewMedication: (medication: Medication, onComplete: (medication: Medication) => void) => {
-      dispatch(addMedication(medication, onComplete))
-    }
-  };
-};// Exports
-export default connect(mapStateToProps, mapDispatchToProps)(Medications);
+export default Medications;

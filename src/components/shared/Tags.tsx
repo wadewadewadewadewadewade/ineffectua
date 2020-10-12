@@ -2,13 +2,14 @@ import * as React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle, NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native';
 import { Text, TextInput, ActivityIndicator } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
-import { getTagsForAutocomplete, getTagsByKeyArray, addTagWithDispatch } from '../../middleware/TagsMiddleware';
+import { getTagsForAutocomplete, getTagsByKeyArray, addTagWithDispatch, getTagIdsForUser } from '../../middleware/TagsMiddleware';
 import { State } from '../../Types';
 import { paperColors } from '../../reducers/ThemeReducer';
 import { Tag } from '../../reducers/TagsReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { TouchableHighlight, FlatList } from 'react-native-gesture-handler';
 import { useQuery, QueryStatus } from 'react-query'
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const TagComponent = ({
   tag,
@@ -65,23 +66,23 @@ const TagList = ({
   } else if (onTagsChanged) {
     return (
       <View style={{flexDirection: 'row'}}>
-        {tags.length > 0 && tags.map(t => 
+        {tags.length > 0 && tags.map((t: Tag) => 
           <TagComponent
             key={t.key as string}
             tag={t}
-            removeTag={key => onTagsChanged(tags.filter(ta => ta.key !== key).map(ta => ta.key as string))} />
+            removeTag={key => onTagsChanged(tags.filter((ta: Tag) => ta.key !== key).map((ta: Tag) => ta.key as string))} />
         )}
         <NewTagField
           tags={tags}
           onTagsChanged={(tag => 
-            onTagsChanged([...tags.map(t => t.key as string), tag.key as string])
+            onTagsChanged([...tags.map((t: Tag) => t.key as string), tag.key as string])
           )} />
       </View>
     )
   } else {
     return (
       <View>
-        {tags && tags.length > 0 && tags.map(t =>
+        {tags && tags.length > 0 && tags.map((t: Tag) =>
           <TagComponent
             key={t.key as string}
             tag={t} />
@@ -163,16 +164,22 @@ const NewTagField = ({
 
 type Props = { 
   value?: Array<string>,
+  userId?: string,
   style?: StyleProp<ViewStyle>,
   onTagsChanged?: (tags: Array<string>) => void
 }
 
 const Tags = ({
   value,
+  userId,
   style,
   onTagsChanged
 }: Props) => {
-  //const tags = value && value.length > 0 ? wrapPromise(getTagsByKeyArray(value)) : wrapPromise(new Promise<Array<Tag>>(r => r([])))
+  const [tagIds, setTagIds] = React.useState(value)
+  const userTagIds = useQuery<string[], Error, [string]>(userId, getTagIdsForUser, { suspense: true }).data
+  if (!value && !tagIds && userId) {
+    setTagIds(userTagIds)
+  }
   const theme = useSelector((state: State) => state.theme)
   return (
     <View style={[styles.pickerContainer, {backgroundColor: theme.paper.colors.surface, borderRadius: theme.paper.roundness}, style]}>
@@ -180,9 +187,9 @@ const Tags = ({
         <Text style={[styles.label, {color: theme.paper.colors.text}]}>Tags</Text>
         <React.Suspense fallback={<ActivityIndicator style={{minHeight:64}} />}>
           {onTagsChanged ?
-            <TagList value={value} onTagsChanged={onTagsChanged} />
+            <TagList value={tagIds} onTagsChanged={onTagsChanged} />
           :
-            <TagList value={value} />
+            <TagList value={tagIds} />
           }
         </React.Suspense>
       </View>

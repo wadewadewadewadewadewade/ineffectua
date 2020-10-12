@@ -3,24 +3,23 @@ import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import RNPickerSelect, { PickerStyle } from 'react-native-picker-select';
 import { Text, Button, Modal, Portal, TextInput } from 'react-native-paper';
-import { connect } from 'react-redux';
+import { connect, useSelector, useDispatch } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { addContact, emptyContact, newContactName } from '../../middleware/ContactsMiddleware';
 import { State } from '../../Types';
 import { ThemeState, paperColors } from '../../reducers/ThemeReducer';
 import { Contact, ContactsState } from '../../reducers/ContactsReducer';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity, FlatList } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { firebaseDocumentToArray } from '../../firebase/utilities';
 import FlexableTextArea from './FlexableTextArea';
 
 export const NewContact = (props: {
   value?: Contact
-  contacts: ContactsState['contacts'],
-  theme: ThemeState['theme'],
   saveNewContact: (contact?: Contact) => void
 }) => {
-  const { value, contacts, theme, saveNewContact } = props;
+  const [theme, contacts] = useSelector((state: State) => [state.theme, state.contacts])
+  const { value, saveNewContact } = props;
   const [name, setName] = React.useState(value?.name || '');
   const [nameTouched, setNameTouched] = React.useState(false);
   const [number, setNumber] = React.useState(value?.number || '');
@@ -83,29 +82,61 @@ export const NewContact = (props: {
   )
 }
 
+const ContactItem = ({
+  contact
+} : {
+  contact: Contact
+}) => {
+  return (
+    <View style={styles.contactItem}>
+      <Text style={styles.contactItemName}>{contact.name}</Text>
+    </View>
+  )
+}
+
 type Props = {
-  value?: Array<string>;
-  limit?: number;
-  onValueChange: (contacts: Array<string>) => void;
-  theme: ThemeState['theme'],
-  contacts: ContactsState['contacts'],
-  addNewContact: (contact: Contact, onComplete: (contact: Contact) => void) => void
+  value?: Array<string>,
+  display?: 'list',
+  limit?: number,
+  onValueChange?: (contacts: Array<string>) => void,
 };
 
 const Contacts = ({
   value,
+  display,
   limit,
   onValueChange,
-  theme,
-  contacts,
-  addNewContact
 }: Props) => {
+  const [theme, contacts] = useSelector((state: State) => [state.theme, state.contacts])
+  const dispatch = useDispatch()
+  const addNewContact = (contact: Contact, onComplete: (contact: Contact) => void) =>
+    dispatch(addContact(contact, onComplete))
   const [visible, setVisible] = React.useState(false);
   const [newContacts, setNewContacts] = React.useState(value || new Array<string>());
   const contactsArray = firebaseDocumentToArray<Contact>(contacts, {name:newContactName});
   let pickerRef: RNPickerSelect | null = null;
-  return limit === 1 ? (
-    <View style={styles.pickerView}>
+  if (display === 'list') {
+    return (
+      <View style={{
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+      }}>
+        <Text style={{color: theme.paper.colors.text}}>Contacts</Text>
+        <SafeAreaView style={{paddingLeft:12}}>
+          <FlatList
+            data={contactsArray}
+            keyExtractor={i => i.key || i.name}
+            renderItem={({item, index}) => (<ContactItem contact={item} />)}
+          />
+        </SafeAreaView>
+      </View>
+    )
+  } else if (limit === 1) {
+    return (
+      <View style={styles.pickerView}>
       <RNPickerSelect
         ref={(r) => pickerRef = r}
         style={pickerStyles}
@@ -121,75 +152,76 @@ const Contacts = ({
                 pickerRef.setState({value:undefined})
                 pickerRef.forceUpdate()
               }
-              onValueChange([...newContacts, sel.key]);
+              onValueChange && onValueChange([...newContacts, sel.key]);
             }
           }
         }}
         />
-    </View>
-    ) : (
-    <View
-      style={{
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-      }}
-    >
-      <Text style={{color: theme.paper.colors.text}}>Contact</Text>
-      {newContacts && newContacts.map((cId: string) => contacts[cId] && 
-        <View style={styles.existingContacts}>
-          <Text style={styles.existingContactsText}>{contacts[cId].name}</Text>
-          <MaterialCommunityIcons onPress={() => {
-            setNewContacts(newContacts.filter(c => c !== cId))
-          }} style={styles.existingContactsIcon} name="delete" color={paperColors(theme).text} size={26} />
-        </View>)}
-      <View style={styles.pickerView}>
-        <RNPickerSelect
-          ref={(r) => pickerRef = r}
-          style={pickerStyles}
-          items={contactsArray.map(c => ({label:c.name,value:c.name}))}
-          onValueChange={(itemValue, itemIndex) => {
-            if (itemValue) {
-              const sel = contactsArray.filter(c => c.name === itemValue.toString())[0];
-              if (sel.name === newContactName) {
-                setVisible(true);
-              } else if (sel.key) {
-                setNewContacts([...newContacts, sel.key]);
-                if (pickerRef) {
-                  pickerRef.setState({value:undefined})
-                  pickerRef.forceUpdate()
-                }
-                onValueChange([...newContacts, sel.key]);
-              }
-            }
-          }}
-          />
       </View>
-      <Portal>
-        <Modal visible={visible}>
-          <NewContact
-            value={emptyContact}
-            contacts={contacts}
-            theme={theme}
-            saveNewContact={(contact?: Contact)=> {
-              if (contact) {
-                addNewContact(contact, (c: Contact) => {
-                  if (c.key) {
-                    setVisible(false);
-                    setNewContacts([...newContacts, c.key]);
-                    onValueChange(newContacts);
+    )
+  } else {
+    return (
+      <View
+        style={{
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+        }}
+      >
+        <Text style={{color: theme.paper.colors.text}}>Contact</Text>
+        {newContacts && newContacts.map((cId: string) => contacts[cId] && 
+          <View style={styles.existingContacts}>
+            <Text style={styles.existingContactsText}>{contacts[cId].name}</Text>
+            <MaterialCommunityIcons onPress={() => {
+              setNewContacts(newContacts.filter(c => c !== cId))
+            }} style={styles.existingContactsIcon} name="delete" color={paperColors(theme).text} size={26} />
+          </View>)}
+        <View style={styles.pickerView}>
+          <RNPickerSelect
+            ref={(r) => pickerRef = r}
+            style={pickerStyles}
+            items={contactsArray.map(c => ({label:c.name,value:c.name}))}
+            onValueChange={(itemValue, itemIndex) => {
+              if (itemValue) {
+                const sel = contactsArray.filter(c => c.name === itemValue.toString())[0];
+                if (sel.name === newContactName) {
+                  setVisible(true);
+                } else if (sel.key) {
+                  setNewContacts([...newContacts, sel.key]);
+                  if (pickerRef) {
+                    pickerRef.setState({value:undefined})
+                    pickerRef.forceUpdate()
                   }
-                })
-              } else {
-                setVisible(false)
+                  onValueChange && onValueChange([...newContacts, sel.key]);
+                }
               }
-            }} />
-        </Modal>
-      </Portal>
-    </View>
-  );
+            }}
+            />
+        </View>
+        <Portal>
+          <Modal visible={visible}>
+            <NewContact
+              value={emptyContact}
+              saveNewContact={(contact?: Contact)=> {
+                if (contact) {
+                  addNewContact(contact, (c: Contact) => {
+                    if (c.key) {
+                      setVisible(false);
+                      setNewContacts([...newContacts, c.key]);
+                      onValueChange && onValueChange(newContacts);
+                    }
+                  })
+                } else {
+                  setVisible(false)
+                }
+              }} />
+          </Modal>
+        </Portal>
+      </View>
+    )
+  }
 }
 
 const pickerStyles: PickerStyle = {
@@ -238,27 +270,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textTransform: 'uppercase',
   },
+  contactItem: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  contactItemName: {
+    fontSize: 12,
+  },
 });
 
-interface OwnProps {
-}
-
-interface DispatchProps {
-  addNewContact: (Contact: Contact, onComplete: (contact: Contact) => void) => void
-}
-
-const mapStateToProps = (state: State) => {
-  return {
-    user: state.user,
-    theme: state.theme,
-    contacts: state.contacts
-  };
-};
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
-  return {
-    addNewContact: (contact: Contact, onComplete: (contact: Contact) => void) => {
-      dispatch(addContact(contact, onComplete))
-    }
-  };
-};// Exports
-export default connect(mapStateToProps, mapDispatchToProps)(Contacts);
+export default Contacts;

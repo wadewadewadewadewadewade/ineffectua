@@ -4,12 +4,13 @@ import { StyleSheet, View, Text, } from 'react-native';
 import { connect } from 'react-redux';
 import { State } from '../../Types';
 import { NavigationContainerRef } from '@react-navigation/native';
-import { CalendarType } from '../../reducers/CalendarReducer';
-import { formatDates, formatDatesForMarking } from '../../middleware/CalendarMiddleware';
+import { CalendarType, CalendarWindow } from '../../reducers/CalendarReducer';
+import { formatDates, formatDatesForMarking, dateInDateWindow, addDays } from '../../middleware/CalendarMiddleware';
 import { Theme, themeIsDark } from '../../reducers/ThemeReducer';
 import Posts from '../shared/Posts'
 import { DataTypesType } from '../../reducers/DataTypesReducer';
 import { PostPrivacyTypes } from '../../reducers/PostsReducer';
+import { firebaseDocumentToArray } from '../../firebase/utilities';
 
 type AgendaProps = {
   theme: Theme,
@@ -31,10 +32,15 @@ const Agenda = ({
     agendaTodayColor: 'red',
     agendaKnobColor: 'blue'
   }
-
+  const datesArray = firebaseDocumentToArray(dates)
+  const upcomingWeek: CalendarWindow = {
+    starts: new Date(),
+    ends: addDays(new Date(), 7)
+  }
+  const datesThisWeek = datesArray.filter(d => dateInDateWindow(d, upcomingWeek))
   return (
     <View style={styles.container}>
-      <AgendaList
+      {datesThisWeek.length > 0 && <AgendaList
         style={styles.agenda}
         // The list of items that have to be displayed in agenda. If you want to render item as empty date
         // the value of date key has to be an empty array []. If there exists no value for date key it is
@@ -84,7 +90,7 @@ const Agenda = ({
         refreshControl={null}
         // Agenda theme
         theme={calendarTheme}
-      />
+      />}
       <Posts showComposePost={true} criteria={{privacy: PostPrivacyTypes.PUBLIC}} />
     </View>
   )

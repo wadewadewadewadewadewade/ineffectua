@@ -1,5 +1,5 @@
 import { State } from './../Types';
-import { Tag, TagsType } from '../reducers/TagsReducer';
+import { Tag, UserTag, TagsType } from '../reducers/TagsReducer';
 import { Action } from './../reducers';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { NetworkInfo } from "react-native-network-info";
@@ -16,6 +16,15 @@ const convertDocumentDataToTag = (data: firebase.firestore.DocumentData): Tag =>
     name: doc.name,
     path: doc.path,
     // don't add in create or searchableIndex, as that's just for server-side stuff
+  }
+}
+
+const convertDocumentDataToUserTag = (data: firebase.firestore.DocumentData): UserTag => {
+  const doc = data.data()
+  return {
+    key: data.id,
+    name: doc.name,
+    tagId: doc.tagId,
   }
 }
 
@@ -36,7 +45,7 @@ export const getTagsForAutocomplete = (prefix?: string, tagsInUse?: Array<Tag>, 
           return val
         })
         resolve(arr)
-      }).catch(err => reject(err))
+      }).catch((err: Error) => reject(err))
     } else {
       firebase.firestore().collection('tags')
       .where('name', '>=', prefix)
@@ -72,6 +81,24 @@ export const getTagsByKeyArray = (tagIdsJsonString: string | undefined, firebase
         resolve(arr)
       })
       .catch(e => reject(e))
+    }
+  })
+}
+
+export const getTagIdsForUser = (userId?: string, firebase = firebaseInstance) => {
+  return new Promise<Array<string>>((resolve,reject) => {
+    if (!userId) {
+      resolve(new Array<string>())
+    } else {
+      firebase.firestore().collection('users')
+      .doc(userId).collection('tags')
+      .get()
+      .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
+        const userTags = querySnapshot.docs.map(tagIdDoc => convertDocumentDataToUserTag(tagIdDoc))
+        const userTagIds = userTags.map(ut => ut.tagId)
+        resolve(userTagIds)
+        return userTagIds
+      })
     }
   })
 }

@@ -10,6 +10,12 @@ export type Tag = {
   //searchableIndex?: { [key: string]: boolean }
 }
 
+export type UserTag = {
+  key?: string,
+  name: string,
+  tagId: string,
+}
+
 export type TagsType = {
   [id: string]: Tag
 }

@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { firebase } from '../../firebase/config';
 import { ScrollView, StyleSheet, Dimensions, ScaledSize, View } from 'react-native';
-import { Subheading, Avatar, Button, Divider, Text } from 'react-native-paper';
+import { Subheading, Avatar, Button, Divider, Text, ActivityIndicator } from 'react-native-paper';
 import SettingsItem from '../shared/SettingsItem';
 import { NavigationContainerRef } from '@react-navigation/native';
-import { connect } from 'react-redux';
+import { connect, useSelector, useDispatch } from 'react-redux';
 import { isUserAuthenticated, AuthState } from '../../reducers/AuthReducer';
 import { State } from '../../Types';
 import { ToggleThemeAction, ThemeState } from '../../reducers/ThemeReducer';
@@ -15,14 +15,22 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { getFirebaseData } from '../../middleware';
 import { isFetching, FetchingAction } from '../../reducers';
+import Tags from '../shared/Tags';
+import Medications from '../shared/Medications';
+import Contacts from '../shared/Contacts';
+
+enum ProfileViews {
+  'PRIVATE' =0,
+  'PUBLIC' = 1
+}
 
 const TabsLinks = ({
-  color,
   navigationRef
 }: {
-  color: string,
   navigationRef: NavigationContainerRef | null
 }) => {
+  const [theme] = useSelector((state: State) => ([state.theme]))
+  const color = theme.paper.colors.text
   return (
     <View>
       <View style={{flexDirection:'row',justifyContent:'space-between',paddingVertical:16}}>
@@ -49,40 +57,39 @@ const TabsLinks = ({
 
 const Profile =
 ({
-  authenticated,
-  user,
-  theme,
-  toggleTheme,
-  logout,
-  refreshDataFromFirebase,
+  userId,
   navigationRef,
-  fetching
 }: {
-  authenticated: boolean,
-  user: AuthState['user'],
-  theme: ThemeState['theme'],
-  toggleTheme: () => void,
-  logout: () => void,
-  refreshDataFromFirebase: () => Promise<void>,
+  userId?: string,
   navigationRef: NavigationContainerRef | null,
-  fetching: (is: boolean) => FetchingAction,
 }) => {
-  const thumbnail = null //user !== null && user.photoURL !== null ? require(user.photoURL) : null;
+  const [theme, user] = useSelector((state: State) => ([state.theme, state.user]))
+  const dispatch = useDispatch()
+  const toggleTheme = () => dispatch(ToggleThemeAction())
+  const logout = () => dispatch(signOut())
+  const refreshDataFromFirebase = () => getFirebaseData(dispatch)
+  const fetching = (is:boolean) => dispatch(isFetching(is))
+  const thumbnail = user && user.photoURL !== null && user.photoURL.length > 0 ? require(user.photoURL) : null;
   const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
   const isLandscapeOnPhone = dimensions.width > dimensions.height && dimensions.height <= 420;
-
   React.useEffect(() => {
     const onDimensionsChange = ({ window }: { window: ScaledSize }) => {
       setDimensions(window);
     };
-
     Dimensions.addEventListener('change', onDimensionsChange);
-
     return () => Dimensions.removeEventListener('change', onDimensionsChange);
   }, []);
-
-  return (
-    authenticated ? (
+  const view = user && user.uid === userId ? ProfileViews.PUBLIC : ProfileViews.PRIVATE
+  if (!user) {
+    return (
+      <View/>
+    )
+  } else if (view === ProfileViews.PUBLIC) {
+    return (
+      <View/>
+    )
+  } else {
+    return (
       <ScrollView style={styles.content}>
         {thumbnail ? (<Avatar.Image source={thumbnail} style={styles.image} />) : null}
         <Subheading>Hi{user && user.displayName !== null ? ' ' + user.displayName : ''}!</Subheading>
@@ -92,7 +99,16 @@ const Profile =
           onValueChange={() => toggleTheme()}
         />
         <Divider />
-        {isLandscapeOnPhone && <TabsLinks navigationRef={navigationRef} color={theme.paper.colors.text} />}
+        {isLandscapeOnPhone && <TabsLinks navigationRef={navigationRef} />}
+        <Divider />
+        <Suspense fallback={<ActivityIndicator/>}>
+          <Tags userId={user.uid} />
+        </Suspense>
+        <Divider />
+        <Medications display='list' />
+        <Divider />
+        <Contacts display='list' />
+        <Divider />
         <Button onPress={() => {
           fetching(true)
           refreshDataFromFirebase().finally(() => fetching(false))
@@ -104,14 +120,8 @@ const Profile =
           Sign Out
         </Button>
       </ScrollView>
-    ) : (
-      <ScrollView style={styles.content}>
-        <Text>
-          Sign In
-        </Text>
-      </ScrollView>
     )
-  );
+  }
 }
 
 const styles = StyleSheet.create({
@@ -132,32 +142,4 @@ const styles = StyleSheet.create({
   }
 });
 
-interface OwnProps {
-}
-
-interface DispatchProps {
-  toggleTheme: () => void,
-  logout: () => void,
-  refreshDataFromFirebase: () => Promise<void>,
-  fetching: (is: boolean) => FetchingAction
-}
-
-const mapStateToProps = (state: State) => {
-  return {
-    authenticated: isUserAuthenticated(state.user),
-    user: state.user,
-    theme: state.theme
-  };
-};
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
-  // Action
-  return {
-    toggleTheme: () => dispatch(ToggleThemeAction()),
-    logout: () => {
-      dispatch(signOut())
-    },
-    refreshDataFromFirebase: () => getFirebaseData(dispatch),
-    fetching: (is:boolean) => dispatch(isFetching(is))
-  };
-};// Exports
-export default connect(mapStateToProps, mapDispatchToProps)(Profile)
+export default Profile
