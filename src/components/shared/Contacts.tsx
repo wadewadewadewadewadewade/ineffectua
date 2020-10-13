@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { addContact, emptyContact, newContactName, getContactsByUserId } from '../../middleware/ContactsMiddleware';
 import { State } from '../../Types';
 import { paperColors } from '../../reducers/ThemeReducer';
-import { Contact, ContactsState } from '../../reducers/ContactsReducer';
+import { Contact } from '../../reducers/ContactsReducer';
 import { TouchableOpacity, FlatList } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { firebaseDocumentToArray } from '../../firebase/utilities';
@@ -108,26 +108,25 @@ const Contacts = ({
   userId,
   onValueChange,
 }: Props) => {
+  const [theme, stateContacts] = useSelector((state: State) => [state.theme, state.contacts])  
   const [ready, setReady] = React.useState(false)
-  const [contacts, setContacts] = React.useState<ContactsState['contacts']>()
+  const [contacts, setContacts] = React.useState(stateContacts)
   React.useEffect(() => {
     const getContacts = async () => {
       try {
         if (userId !== undefined) {
-          setContacts(await getContactsByUserId(userId))
+          getContactsByUserId(userId).then(c => setContacts(c)).then(() => setReady(true))
         } else {
-          setContacts(useSelector((state: State) => state.contacts))
+          setReady(true)
         }
       } catch (e) {
-        console.error(e)
-      } finally {
+        console.error('Contacts', e)
         setReady(true)
       }
     }
 
     !ready && getContacts();
-  }, []);
-  const theme = useSelector((state: State) => state.theme)  
+  }, [ready]);
   const dispatch = useDispatch()
   const addNewContact = React.useCallback(
     (contact: Contact, onComplete: (contact: Contact) => void) => dispatch(addContact(contact, onComplete)),

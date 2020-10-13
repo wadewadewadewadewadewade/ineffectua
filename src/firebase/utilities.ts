@@ -2,7 +2,7 @@ import * as React from 'react';
 import { AllTypes } from '../Types';
 
 export function firebaseDocumentToArray<T>(items: {[index: string]: T}, optionalItem?: T) {
-  const itemsAsArray = React.useMemo<Array<T>>(() => {
+  const itemsAsArray = () => {
     const arr = new Array<T>();
     if (items) {
       const keys = Object.keys(items);
@@ -16,6 +16,6 @@ export function firebaseDocumentToArray<T>(items: {[index: string]: T}, optional
       arr.push(optionalItem)
     }
     return arr;
-  }, [items, optionalItem])
-  return itemsAsArray
+  }
+  return itemsAsArray()
 }

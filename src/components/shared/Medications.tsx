@@ -139,27 +139,26 @@ const Medications = ({
   userId,
   onValueChange,
 }: Props) => {
-  const theme = useSelector((state: State) => state.theme)
+  const [theme, stateMedications] = useSelector((state: State) => [state.theme, state.medications])
   const dispatch = useDispatch()
   const [ready, setReady] = React.useState(false)
-  const [medications, setMedications] = React.useState<MedicationsState['medications']>()
+  const [medications, setMedications] = React.useState(stateMedications)
   React.useEffect(() => {
     const getMedications = async () => {
       try {
         if (userId !== undefined) {
-          setMedications(await getMedicationsByUserId(userId))
+          getMedicationsByUserId(userId).then(m => setMedications(m)).then(() => setReady(true))
         } else {
-          setMedications(useSelector((state: State) => state.medications))
+          setReady(true)
         }
       } catch (e) {
-        console.error(e)
-      } finally {
+        console.error('Medications', e)
         setReady(true)
       }
     }
 
     !ready && getMedications();
-  }, []);
+  }, [ready]);
   const addNewMedication = React.useCallback(
     (medication: Medication, onComplete: (medication: Medication) => void) => dispatch(addMedication(medication, onComplete)),
     [dispatch]

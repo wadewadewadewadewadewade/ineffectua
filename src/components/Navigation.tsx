@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch, connect } from 'react-redux';
 import {
   Platform,
   StatusBar,
@@ -55,10 +55,15 @@ const Stack = createStackNavigator<RootStackParamList>();
 const Navigation = () => {
   const [theme, user] = useSelector((state: State) => ([state.theme, state.user]))
   const dispatch = useDispatch()
-  const fetchData = () => {
-    dispatch(isFetching(true))
-    getFirebaseData(dispatch).then(() => watchFirebaseData(dispatch).then(() => dispatch(isFetching(false))))
-  }
+  const fetchData = React.useCallback(
+    () => {
+      dispatch(isFetching(true))
+      getFirebaseData(dispatch)
+      .then(() => watchFirebaseData(dispatch)
+        .then(() => dispatch(isFetching(false)))
+      )
+    }, [dispatch]
+  )
   const signIn = React.useCallback(
     (userState: User) => !user && dispatch(SignInAction(userState)),
     [dispatch, user]
@@ -81,7 +86,12 @@ const Navigation = () => {
         }
       } else {
         if (!user) {
-          getUserById(userState.uid).then(u => signIn(u))
+          getUserById(userState.uid).then(u => {
+            if (u) {
+              u.getIdToken = (forceRefresh?: boolean | undefined) => userState.getIdToken(forceRefresh)
+              signIn(u)
+            }
+          })
         }
       }
     });
@@ -168,7 +178,7 @@ const Navigation = () => {
     };
 
     !isReady && restoreState();
-  }, []);
+  }, [isReady]);
 
   const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
 
@@ -295,4 +305,4 @@ const Navigation = () => {
   )
 }
 
-export default Navigation
+export default connect()(Navigation)

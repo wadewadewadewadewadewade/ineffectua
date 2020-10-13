@@ -80,15 +80,19 @@ const SideBar = ({
   navigationRef: NavigationContainerRef | null,
 }) => {
   const userId = getUserIdFromRoute(navigationRef) // no userId supplied means private
-  const [user, setUser] = React.useState<User>(false)
+  const [ready, setReady] = React.useState(false)
+  const [user, setUser] = React.useState<User>(useSelector((state: State) => state.user))
   const [error, setError] = React.useState<Error | undefined>()
-  if (user === false) {
-    if (userId) {
-      getUserById(userId).then(u => setUser(u)).catch(e => setError(e))
-    } else {
-      setUser(useSelector((state: State) => state.user))
+  React.useEffect(() => {
+    const getUserConditionally = async () => {
+      if (userId) {
+        getUserById(userId).then(u => setUser(u)).catch(e => setError(e)).then(() => setReady(true))
+      } else {
+        setReady(true)
+      }
     }
-  }
+    !ready && getUserConditionally()
+  }, [ready])
   const profileView = userId !== undefined && user !== false && userId !== user.uid ? ProfileViews.PUBLIC : ProfileViews.PRIVATE
   const theme = useSelector((state: State) => state.theme)
   const dispatch = useDispatch()
@@ -96,7 +100,7 @@ const SideBar = ({
   const logout = () => dispatch(signOut())
   const refreshDataFromFirebase = () => getFirebaseData(dispatch)
   const fetching = (is:boolean) => dispatch(isFetching(is))
-  const thumbnail = user !== false && user.photoURL !== undefined && user.photoURL.href ? require(user.photoURL.href) : null;
+  const thumbnail = user !== false && user.photoURL !== undefined && user.photoURL.href ? user.photoURL.href : null;
   const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
   const isLandscapeOnPhone = dimensions.width > dimensions.height && dimensions.height <= 420;
   React.useEffect(() => {
@@ -121,7 +125,7 @@ const SideBar = ({
   } else if (profileView === ProfileViews.PRIVATE) {
     return (
       <ScrollView style={styles.content}>
-        {thumbnail ? (<Avatar.Image source={thumbnail} style={styles.image} />) : null}
+        {thumbnail ? (<Avatar.Image source={{uri: thumbnail}} style={styles.image} />) : null}
         <Subheading>Hi{user && user.displayName !== null ? ' ' + user.displayName : ''}!</Subheading>
         <SettingsItem
           label="Dark theme"
@@ -155,7 +159,7 @@ const SideBar = ({
     // public
     return (
       <ScrollView style={styles.content}>
-        {thumbnail ? (<Avatar.Image source={thumbnail} style={styles.image} />) : null}
+        {thumbnail ? (<Avatar.Image source={{uri: thumbnail}} style={styles.image} />) : null}
         <Subheading>{user && user.displayName !== null ? ' ' + user.displayName : ''}!</Subheading>
         {isLandscapeOnPhone && <TabsLinks navigationRef={navigationRef} />}
         <Divider />
@@ -176,16 +180,20 @@ const ProfilePage = ({
 } : {
   navigationRef: NavigationContainerRef | null,
 }) => {
+  const [ready, setReady] = React.useState(false)
   const userId = getUserIdFromRoute(navigationRef) // no userId supplied means private
-  const [user, setUser] = React.useState<User>(false)
+  const [user, setUser] = React.useState<User>(useSelector((state: State) => state.user))
   const [error, setError] = React.useState<Error | undefined>()
-  if (user === false) {
-    if (userId) {
-      getUserById(userId).then(u => setUser(u)).catch(e => setError(e))
-    } else {
-      setUser(useSelector((state: State) => state.user))
+  React.useEffect(() => {
+    const getUserConditionally = async () => {
+      if (userId) {
+        getUserById(userId).then(u => setUser(u)).catch(e => setError(e)).then(() => setReady(true))
+      } else {
+        setReady(true)
+      }
     }
-  }
+    !ready && getUserConditionally()
+  }, [ready])
   const profileView = userId !== undefined && user !== false && userId !== user.uid ? ProfileViews.PUBLIC : ProfileViews.PRIVATE
   const theme = useSelector((state: State) => state.theme)
   const dispatch = useDispatch()
@@ -193,7 +201,7 @@ const ProfilePage = ({
   const logout = () => dispatch(signOut())
   const refreshDataFromFirebase = () => getFirebaseData(dispatch)
   const fetching = (is:boolean) => dispatch(isFetching(is))
-  const thumbnail = user !== false && user.photoURL !== undefined && user.photoURL.href ? require(user.photoURL.href) : null;
+  const thumbnail = user !== false && user.photoURL !== undefined && user.photoURL.href ? user.photoURL.href : null;
   if (error) {
     return (
       <View>
@@ -209,7 +217,7 @@ const ProfilePage = ({
   } else if (profileView === ProfileViews.PRIVATE) {
     return (
       <ScrollView style={styles.content}>
-        {thumbnail ? (<Avatar.Image source={thumbnail} style={styles.image} />) : null}
+        {thumbnail ? (<Avatar.Image source={{uri: thumbnail}} style={styles.image} />) : null}
         <Subheading>Hi{user && user.displayName !== null ? ' ' + user.displayName : ''}!</Subheading>
         <SettingsItem
           label="Dark theme"
@@ -241,7 +249,7 @@ const ProfilePage = ({
     // public
     return (
       <ScrollView style={styles.content}>
-        {thumbnail ? (<Avatar.Image source={thumbnail} style={styles.image} />) : null}
+        {thumbnail ? (<Avatar.Image source={{uri: thumbnail}} style={styles.image} />) : null}
         <Subheading>{user && user.displayName !== null ? ' ' + user.displayName : ''}!</Subheading>
         <Suspense fallback={<ActivityIndicator/>}>
           <Tags userId={user.uid} />

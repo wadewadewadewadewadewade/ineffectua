@@ -6,7 +6,7 @@ import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { NetworkInfo } from "react-native-network-info";
 // for the add call when it doesn't go through redux/thunk
 import { firebase as firebaseInstance } from '../firebase/config';
-import { AuthState } from '../reducers/AuthReducer';
+import { AuthState, User } from '../reducers/AuthReducer';
 
 export const emptyPost: Post = {
   body: '',
@@ -55,16 +55,20 @@ const mapFetchToPosts = (fetchObject: Array<FetchObject>): Array<Post> => {
   return posts
 }
 
-export const fetchPosts = async (user: firebase.User | false, key: PostCriteria, cursor = 0): Promise<Array<Post>> => {
+export const fetchPosts = async (user: User | false, key: PostCriteria, cursor = 0): Promise<Array<Post>> => {
   if (!user) {
     return new Promise<Array<Post>>(r => r([]))
   } else {
-    return user.getIdToken().then(token => fetch('https://us-central1-ineffectua.cloudfunctions.net/posts/' + cursor, {
-      headers: new Headers({
-        'Authorization': 'Bearer ' + token
+    if (user.getIdToken) {
+      return user.getIdToken().then(token => fetch('https://us-central1-ineffectua.cloudfunctions.net/posts/' + cursor, {
+        headers: new Headers({
+          'Authorization': 'Bearer ' + token
+        })
       })
-    })
-    .then(promise => promise.json().then(posts => mapFetchToPosts(posts))))
+      .then(promise => promise.json().then(posts => mapFetchToPosts(posts))))
+    } else {
+      return new Promise<Array<Post>>(r=>[])
+    }
   }
 }
 

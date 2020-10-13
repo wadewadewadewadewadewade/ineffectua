@@ -14,8 +14,26 @@ const firebaseUserToUser = (user: firebase.User, passedEmailAddress: string) => 
   const data: User = {
     uid,
     email: email ? email : passedEmailAddress,
+    getIdToken: (forceRefresh?: boolean | undefined) => user.getIdToken(forceRefresh),
     displayName: displayName ? displayName : undefined,
     photoURL: photoURL && photoURL.length > 0 ? new URL(photoURL) : undefined
+  }
+  return data
+}
+
+const firebaseUserDocumentToUser = (userDocument: firebaseInstance.firestore.DocumentData) => {
+  const { 
+    uid,
+    email,
+    displayName,
+    photoURL,
+  } = userDocument;
+  const data: User = {
+    uid,
+    email,
+    displayName,
+    photoURL: photoURL && photoURL.length > 0 ? new URL(photoURL) : undefined,
+    public: userDocument.public
   }
   return data
 }
@@ -30,13 +48,7 @@ export const getUserById = (userId: string, firebase = firebaseInstance): Promis
       if (userData === undefined) {
         reject('No user information was returned')
       } else {
-        const user: User = {
-          uid: userData.uid,
-          email: userData.email,
-          displayName: userData.displayName ? userData.displayName : undefined,
-          photoURL: userData.photoURL ? userData.photoURL : undefined,
-          public: userData.public ? userData.public : undefined
-        }
+        const user: User = firebaseUserDocumentToUser(userData)
         resolve(user)
       }
     })

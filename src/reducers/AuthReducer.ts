@@ -3,6 +3,7 @@
 export type User = {
   uid: string,
   email: string,
+  getIdToken?: (forceRefresh?: boolean | undefined) => Promise<string>,
   displayName?: string,
   photoURL?: URL,
   public?: {
