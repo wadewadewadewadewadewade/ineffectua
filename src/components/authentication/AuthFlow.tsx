@@ -5,22 +5,22 @@ import { useTheme } from '@react-navigation/native';
 import {
   createStackNavigator, StackNavigationProp,
 } from '@react-navigation/stack';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { isUserAuthenticated } from '../../reducers/AuthReducer';
 import { authenticate, signOut } from '../../middleware/AuthMiddleware';
 import { State, RootDrawerParamList } from '../../Types'
 import { Svg, G, Path } from 'react-native-svg';
-import { ThunkDispatch } from 'redux-thunk';
 
 type AuthStackParams = {
   SignIn: undefined;
   Success: undefined;
 };
 
-const SignInScreen = (props: {
-  auth: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => void
-}) => {
-  const { auth } = props;
+const SignInScreen = () => {
+  const dispatch = useDispatch()
+  const auth = (emailAddress: string, pass: string, errorCallback?: (e: any) => void, isCreation?: boolean) => {
+    dispatch(authenticate(emailAddress, pass, errorCallback, isCreation))
+  }
   const { colors } = useTheme();
   const [email, onChangeEmail] = React.useState('Email');
   const [password, onChangePassword] = React.useState('Password');
@@ -298,10 +298,11 @@ const SignInScreen = (props: {
   );
 };
 
-const AuthenticationSuccessScreen = (props: {
-  logout: () => void
-}) => {
-  const { logout } = props;
+const AuthenticationSuccessScreen = () => {
+  const dispatch = useDispatch()
+  const logout = () => {
+    dispatch(signOut())
+  }
   return (
     <View style={styles.content}>
       <Title style={styles.text}>Signed in successfully 🎉</Title>
@@ -317,23 +318,18 @@ const SimpleStack = createStackNavigator<AuthStackParams>();
 const SimpleStackScreen = (props: any) => {
   const {
     navigation,
-    authenticated,
-    auth,
-    logout,
     isSignout
   } : {
     navigation: StackNavigationProp<RootDrawerParamList, "Root"> | undefined,
-    authenticated: boolean,
-    auth: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => void,
-    logout: () => void,
     isSignout: boolean
   } = props
+  const [user] = useSelector((state: State) => ([state.user]))
   navigation && React.useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
   }, [navigation]);
-
+  const authenticated = isUserAuthenticated(user)
   if (authenticated && navigation) {
     navigation.popToTop()
   }
@@ -348,13 +344,13 @@ const SimpleStackScreen = (props: any) => {
             animationTypeForReplace: isSignout ? 'pop' : 'push',
             headerShown: false
           }}
-          children={() => <SignInScreen auth={auth} />}
+          children={() => <SignInScreen />}
         />
       ) : (
         <SimpleStack.Screen
           name="Success"
           options={{ title: 'Authentication Success' }}
-          children={() => <AuthenticationSuccessScreen logout={logout} />}
+          children={() => <AuthenticationSuccessScreen />}
         />
       )}
     </SimpleStack.Navigator>
@@ -398,28 +394,4 @@ const styles = StyleSheet.create({
   }
 });
 
-interface OwnProps {
-}
-
-interface DispatchProps {
-  auth: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => void,
-  logout: () => void,
-}
-
-const mapStateToProps = (state: State, ownProps: OwnProps): {authenticated: boolean, isSignout: boolean} => {
-  return {
-    authenticated: isUserAuthenticated(state.user),
-    isSignout: false
-  };
-};
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
-  return {
-    auth: (email: string, password: string, errorCallback?: (e: any) => void, isCreation?: boolean) => {
-      dispatch(authenticate(email, password, errorCallback, isCreation))
-    },
-    logout: () => {
-      dispatch(signOut())
-    },
-  };
-};
-export default connect(mapStateToProps, mapDispatchToProps)(SimpleStackScreen)
+export default SimpleStackScreen

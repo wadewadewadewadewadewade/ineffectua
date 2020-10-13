@@ -1,20 +1,17 @@
 import React, { Suspense } from 'react';
-import { firebase } from '../../firebase/config';
 import { ScrollView, StyleSheet, Dimensions, ScaledSize, View } from 'react-native';
 import { Subheading, Avatar, Button, Divider, Text, ActivityIndicator } from 'react-native-paper';
 import SettingsItem from '../shared/SettingsItem';
 import { NavigationContainerRef } from '@react-navigation/native';
-import { connect, useSelector, useDispatch } from 'react-redux';
-import { isUserAuthenticated, AuthState } from '../../reducers/AuthReducer';
+import { useSelector, useDispatch } from 'react-redux';
 import { State } from '../../Types';
-import { ToggleThemeAction, ThemeState } from '../../reducers/ThemeReducer';
+import { ToggleThemeAction } from '../../reducers/ThemeReducer';
 import { themeIsDark } from '../../reducers/ThemeReducer';
 import { signOut } from '../../middleware/AuthMiddleware';
-import { ThunkDispatch } from 'redux-thunk';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { getFirebaseData } from '../../middleware';
-import { isFetching, FetchingAction } from '../../reducers';
+import { isFetching } from '../../reducers';
 import Tags from '../shared/Tags';
 import Medications from '../shared/Medications';
 import Contacts from '../shared/Contacts';
@@ -85,10 +82,31 @@ const Profile =
       <View/>
     )
   } else if (view === ProfileViews.PUBLIC) {
+    // load user from route params; should handle full page
+    //const targetUser = navigationRef?.getCurrentRoute()?.params?.userId
     return (
-      <View/>
+      <ScrollView style={styles.content}>
+        {thumbnail ? (<Avatar.Image source={thumbnail} style={styles.image} />) : null}
+        <Subheading>Hi{user && user.displayName !== null ? ' ' + user.displayName : ''}!</Subheading>
+        <SettingsItem
+          label="Dark theme"
+          value={themeIsDark(theme)}
+          onValueChange={() => toggleTheme()}
+        />
+        <Divider />
+        {isLandscapeOnPhone && <TabsLinks navigationRef={navigationRef} />}
+        <Divider />
+        <Suspense fallback={<ActivityIndicator/>}>
+          <Tags userId={user.uid} />
+        </Suspense>
+        <Divider />
+        <Medications display='list' />
+        <Divider />
+        <Contacts display='list' />
+      </ScrollView>
     )
   } else {
+    // private view; should handle left column or full page
     return (
       <ScrollView style={styles.content}>
         {thumbnail ? (<Avatar.Image source={thumbnail} style={styles.image} />) : null}
