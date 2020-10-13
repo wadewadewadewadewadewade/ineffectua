@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { State } from '../../Types';
 import { ToggleThemeAction } from '../../reducers/ThemeReducer';
 import { themeIsDark } from '../../reducers/ThemeReducer';
-import { signOut } from '../../middleware/AuthMiddleware';
+import { signOut, getUserById } from '../../middleware/AuthMiddleware';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { getFirebaseData } from '../../middleware';
@@ -15,10 +15,16 @@ import { isFetching } from '../../reducers';
 import Tags from '../shared/Tags';
 import Medications from '../shared/Medications';
 import Contacts from '../shared/Contacts';
+import { User } from '../../reducers/AuthReducer';
 
 enum ProfileViews {
-  'PRIVATE' =0,
+  'PRIVATE' = 0,
   'PUBLIC' = 1
+}
+
+enum ProfileLayouts {
+  'SIDEBAR' = 0,
+  'PAGE' = 1
 }
 
 const TabsLinks = ({
@@ -52,21 +58,29 @@ const TabsLinks = ({
   )
 }
 
-const Profile =
-({
-  userId,
+const SideBar = ({
   navigationRef,
-}: {
-  userId?: string,
+} : {
   navigationRef: NavigationContainerRef | null,
 }) => {
-  const [theme, user] = useSelector((state: State) => ([state.theme, state.user]))
+  const userId = (navigationRef?.getCurrentRoute()?.params as { userId: string | undefined }).userId // no userId supplied means private
+  const [user, setUser] = React.useState<User>(false)
+  const [error, setError] = React.useState<Error | undefined>()
+  if (user === false) {
+    if (userId) {
+      getUserById(userId).then(u => setUser(u)).catch(e => setError(e))
+    } else {
+      setUser(useSelector((state: State) => state.user))
+    }
+  }
+  const profileView = userId !== undefined && user !== false && userId !== user.uid ? ProfileViews.PUBLIC : ProfileViews.PRIVATE
+  const theme = useSelector((state: State) => state.theme)
   const dispatch = useDispatch()
   const toggleTheme = () => dispatch(ToggleThemeAction())
   const logout = () => dispatch(signOut())
   const refreshDataFromFirebase = () => getFirebaseData(dispatch)
   const fetching = (is:boolean) => dispatch(isFetching(is))
-  const thumbnail = user && user.photoURL !== null && user.photoURL.length > 0 ? require(user.photoURL) : null;
+  const thumbnail = user !== false && user.photoURL !== undefined ? require(user.photoURL.href) : null;
   const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
   const isLandscapeOnPhone = dimensions.width > dimensions.height && dimensions.height <= 420;
   React.useEffect(() => {
@@ -76,37 +90,19 @@ const Profile =
     Dimensions.addEventListener('change', onDimensionsChange);
     return () => Dimensions.removeEventListener('change', onDimensionsChange);
   }, []);
-  const view = user && user.uid === userId ? ProfileViews.PUBLIC : ProfileViews.PRIVATE
-  if (!user) {
+  if (error) {
     return (
-      <View/>
+      <View>
+        <Text>An error occured: {error.message}</Text>
+      </View>
     )
-  } else if (view === ProfileViews.PUBLIC) {
-    // load user from route params; should handle full page
-    //const targetUser = navigationRef?.getCurrentRoute()?.params?.userId
+  } else if (user === false) {
     return (
-      <ScrollView style={styles.content}>
-        {thumbnail ? (<Avatar.Image source={thumbnail} style={styles.image} />) : null}
-        <Subheading>Hi{user && user.displayName !== null ? ' ' + user.displayName : ''}!</Subheading>
-        <SettingsItem
-          label="Dark theme"
-          value={themeIsDark(theme)}
-          onValueChange={() => toggleTheme()}
-        />
-        <Divider />
-        {isLandscapeOnPhone && <TabsLinks navigationRef={navigationRef} />}
-        <Divider />
-        <Suspense fallback={<ActivityIndicator/>}>
-          <Tags userId={user.uid} />
-        </Suspense>
-        <Divider />
-        <Medications display='list' />
-        <Divider />
-        <Contacts display='list' />
-      </ScrollView>
+      <View>
+        <Text>Please sign in</Text>
+      </View>
     )
-  } else {
-    // private view; should handle left column or full page
+  } else if (profileView === ProfileViews.PRIVATE) {
     return (
       <ScrollView style={styles.content}>
         {thumbnail ? (<Avatar.Image source={thumbnail} style={styles.image} />) : null}
@@ -138,6 +134,127 @@ const Profile =
           Sign Out
         </Button>
       </ScrollView>
+    )
+  } else {
+    // public
+    return (
+      <ScrollView style={styles.content}>
+        {thumbnail ? (<Avatar.Image source={thumbnail} style={styles.image} />) : null}
+        <Subheading>{user && user.displayName !== null ? ' ' + user.displayName : ''}!</Subheading>
+        {isLandscapeOnPhone && <TabsLinks navigationRef={navigationRef} />}
+        <Divider />
+        <Suspense fallback={<ActivityIndicator/>}>
+          <Tags userId={user.uid} />
+        </Suspense>
+        <Divider />
+        <Medications display='list' />
+        <Divider />
+        <Contacts display='list' />
+      </ScrollView>
+    )
+  }
+}
+
+const ProfilePage = ({
+  navigationRef,
+} : {
+  navigationRef: NavigationContainerRef | null,
+}) => {
+  const userId = (navigationRef?.getCurrentRoute()?.params as { userId: string | undefined }).userId // no userId supplied means private
+  const [user, setUser] = React.useState<User>(false)
+  const [error, setError] = React.useState<Error | undefined>()
+  if (user === false) {
+    if (userId) {
+      getUserById(userId).then(u => setUser(u)).catch(e => setError(e))
+    } else {
+      setUser(useSelector((state: State) => state.user))
+    }
+  }
+  const profileView = userId !== undefined && user !== false && userId !== user.uid ? ProfileViews.PUBLIC : ProfileViews.PRIVATE
+  const theme = useSelector((state: State) => state.theme)
+  const dispatch = useDispatch()
+  const toggleTheme = () => dispatch(ToggleThemeAction())
+  const logout = () => dispatch(signOut())
+  const refreshDataFromFirebase = () => getFirebaseData(dispatch)
+  const fetching = (is:boolean) => dispatch(isFetching(is))
+  const thumbnail = user !== false && user.photoURL !== undefined ? require(user.photoURL.href) : null;
+  if (error) {
+    return (
+      <View>
+        <Text>An error occured: {error.message}</Text>
+      </View>
+    )
+  } else if (user === false) {
+    return (
+      <View>
+        <Text>Please sign in</Text>
+      </View>
+    )
+  } else if (profileView === ProfileViews.PRIVATE) {
+    return (
+      <ScrollView style={styles.content}>
+        {thumbnail ? (<Avatar.Image source={thumbnail} style={styles.image} />) : null}
+        <Subheading>Hi{user && user.displayName !== null ? ' ' + user.displayName : ''}!</Subheading>
+        <SettingsItem
+          label="Dark theme"
+          value={themeIsDark(theme)}
+          onValueChange={() => toggleTheme()}
+        />
+        <Divider />
+        <Suspense fallback={<ActivityIndicator/>}>
+          <Tags userId={user.uid} />
+        </Suspense>
+        <Divider />
+        <Medications userId={user.uid} />
+        <Divider />
+        <Contacts userId={user.uid} />
+        <Divider />
+        <Button onPress={() => {
+          fetching(true)
+          refreshDataFromFirebase().finally(() => fetching(false))
+        }} style={styles.button}>
+          <Text>Refresh Data</Text>
+        </Button>
+        <Divider />
+        <Button onPress={() => logout()} style={styles.button}>
+          Sign Out
+        </Button>
+      </ScrollView>
+    )
+  } else {
+    // public
+    return (
+      <ScrollView style={styles.content}>
+        {thumbnail ? (<Avatar.Image source={thumbnail} style={styles.image} />) : null}
+        <Subheading>{user && user.displayName !== null ? ' ' + user.displayName : ''}!</Subheading>
+        <Suspense fallback={<ActivityIndicator/>}>
+          <Tags userId={user.uid} />
+        </Suspense>
+        <Divider />
+        <Medications userId={user.uid} display='list' />
+        <Divider />
+        <Contacts userId={user.uid} display='list' />
+      </ScrollView>
+    )
+  }
+}
+
+const Profile =
+({
+  layout,
+  navigationRef,
+}: {
+  layout?: ProfileLayouts,
+  navigationRef: NavigationContainerRef | null,
+}) => {
+  const pageLayout = layout ? layout : ProfileLayouts.SIDEBAR
+  if (pageLayout === ProfileLayouts.PAGE) {
+    return (
+      <ProfilePage navigationRef={navigationRef} />
+    )
+  } else {
+    return (
+      <SideBar navigationRef={navigationRef} />
     )
   }
 }

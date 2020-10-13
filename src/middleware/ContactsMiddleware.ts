@@ -5,6 +5,7 @@ import { Action } from './../reducers';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { DocumentData, DocumentReference } from '@firebase/firestore-types';
 import { firebaseDocumentToArray } from '../firebase/utilities';
+import { firebase as firebaseInstance } from '../firebase/config';
 
 export const newContactName = '+ Add New Contact';
 export const emptyContact: Contact = {name:'',};
@@ -38,6 +39,24 @@ const convertDocumentDataToContact = (data: firebase.firestore.DocumentData): Co
     contactData.created = new Date(doc.created.seconds * 1000)
   }
   return contactData
+}
+
+
+export const getContactsByUserId = (userId: string, firebase = firebaseInstance): Promise<ContactsState['contacts']> => {
+  return new Promise<ContactsState['contacts']>((resolve) => {
+    firebase.firestore().collection('users')
+    .doc(userId).collection('medications')
+    .get()
+    .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
+      const contacts: ContactsState['contacts'] = {};
+      const arr = querySnapshot.docs.map(d => {
+        const val = convertDocumentDataToContact(d);
+        return val
+      })
+      arr.forEach(d => { if (d.key) contacts[d.key] = d })
+      resolve(contacts)
+    })
+  })
 }
 
 export const getContacts = (): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {

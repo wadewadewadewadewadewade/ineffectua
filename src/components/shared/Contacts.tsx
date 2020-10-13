@@ -2,10 +2,10 @@ import * as React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import RNPickerSelect, { PickerStyle } from 'react-native-picker-select';
-import { Text, Button, Modal, Portal, TextInput } from 'react-native-paper';
+import { Text, Button, Modal, Portal, TextInput, ActivityIndicator } from 'react-native-paper';
 import { connect, useSelector, useDispatch } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { addContact, emptyContact, newContactName } from '../../middleware/ContactsMiddleware';
+import { addContact, emptyContact, newContactName, getContactsByUserId } from '../../middleware/ContactsMiddleware';
 import { State } from '../../Types';
 import { ThemeState, paperColors } from '../../reducers/ThemeReducer';
 import { Contact, ContactsState } from '../../reducers/ContactsReducer';
@@ -98,6 +98,7 @@ type Props = {
   value?: Array<string>,
   display?: 'list',
   limit?: number,
+  userId?: string,
   onValueChange?: (contacts: Array<string>) => void,
 };
 
@@ -105,122 +106,144 @@ const Contacts = ({
   value,
   display,
   limit,
+  userId,
   onValueChange,
 }: Props) => {
-  const [theme, contacts] = useSelector((state: State) => [state.theme, state.contacts])
+  const theme = useSelector((state: State) => state.theme)
+  const [contacts, setContacts] = React.useState<ContactsState['contacts'] | false>(false)
+  const [error, setError] = React.useState<Error | undefined>()
+  if (contacts === false) {
+    if (userId) {
+      getContactsByUserId(userId).then(c => setContacts(c)).catch(e => setError(e))
+    } else {
+      setContacts(useSelector((state: State) => state.contacts))
+    }
+  }
   const dispatch = useDispatch()
   const addNewContact = (contact: Contact, onComplete: (contact: Contact) => void) =>
     dispatch(addContact(contact, onComplete))
   const [visible, setVisible] = React.useState(false);
   const [newContacts, setNewContacts] = React.useState(value || new Array<string>());
-  const contactsArray = firebaseDocumentToArray<Contact>(contacts, {name:newContactName});
-  let pickerRef: RNPickerSelect | null = null;
-  if (display === 'list') {
+  if (contacts === false) {
     return (
-      <View style={{
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-      }}>
-        <Text style={{color: theme.paper.colors.text}}>Contacts</Text>
-        <SafeAreaView style={{paddingLeft:12}}>
-          <FlatList
-            data={contactsArray}
-            keyExtractor={i => i.key || i.name}
-            renderItem={({item, index}) => (<ContactItem contact={item} />)}
-          />
-        </SafeAreaView>
-      </View>
+      <ActivityIndicator />
     )
-  } else if (limit === 1) {
+  } else if (error) {
     return (
-      <View style={styles.pickerView}>
-      <RNPickerSelect
-        ref={(r) => pickerRef = r}
-        style={pickerStyles}
-        items={contactsArray.map(c => ({label:c.name,value:c.name}))}
-        onValueChange={(itemValue, itemIndex) => {
-          if (itemValue) {
-            const sel = contactsArray.filter(c => c.name === itemValue.toString())[0];
-            if (sel.name === newContactName) {
-              setVisible(true);
-            } else if (sel.key) {
-              setNewContacts([...newContacts, sel.key]);
-              if (pickerRef) {
-                pickerRef.setState({value:undefined})
-                pickerRef.forceUpdate()
-              }
-              onValueChange && onValueChange([...newContacts, sel.key]);
-            }
-          }
-        }}
-        />
+      <View>
+        <Text>An error occured: {error.message}</Text>
       </View>
     )
   } else {
-    return (
-      <View
-        style={{
+    const contactsArray = firebaseDocumentToArray<Contact>(contacts, userId ? undefined : {name:newContactName});
+    let pickerRef: RNPickerSelect | null = null;
+    if (display === 'list') {
+      return (
+        <View style={{
           flexDirection: 'column',
           alignItems: 'flex-start',
           justifyContent: 'space-between',
           paddingHorizontal: 16,
           paddingVertical: 12,
-        }}
-      >
-        <Text style={{color: theme.paper.colors.text}}>Contact</Text>
-        {newContacts && newContacts.map((cId: string) => contacts[cId] && 
-          <View style={styles.existingContacts}>
-            <Text style={styles.existingContactsText}>{contacts[cId].name}</Text>
-            <MaterialCommunityIcons onPress={() => {
-              setNewContacts(newContacts.filter(c => c !== cId))
-            }} style={styles.existingContactsIcon} name="delete" color={paperColors(theme).text} size={26} />
-          </View>)}
-        <View style={styles.pickerView}>
-          <RNPickerSelect
-            ref={(r) => pickerRef = r}
-            style={pickerStyles}
-            items={contactsArray.map(c => ({label:c.name,value:c.name}))}
-            onValueChange={(itemValue, itemIndex) => {
-              if (itemValue) {
-                const sel = contactsArray.filter(c => c.name === itemValue.toString())[0];
-                if (sel.name === newContactName) {
-                  setVisible(true);
-                } else if (sel.key) {
-                  setNewContacts([...newContacts, sel.key]);
-                  if (pickerRef) {
-                    pickerRef.setState({value:undefined})
-                    pickerRef.forceUpdate()
-                  }
-                  onValueChange && onValueChange([...newContacts, sel.key]);
-                }
-              }
-            }}
+        }}>
+          <Text style={{color: theme.paper.colors.text}}>Contacts</Text>
+          <SafeAreaView style={{paddingLeft:12}}>
+            <FlatList
+              data={contactsArray}
+              keyExtractor={i => i.key || i.name}
+              renderItem={({item, index}) => (<ContactItem contact={item} />)}
             />
+          </SafeAreaView>
         </View>
-        <Portal>
-          <Modal visible={visible}>
-            <NewContact
-              value={emptyContact}
-              saveNewContact={(contact?: Contact)=> {
-                if (contact) {
-                  addNewContact(contact, (c: Contact) => {
-                    if (c.key) {
-                      setVisible(false);
-                      setNewContacts([...newContacts, c.key]);
-                      onValueChange && onValueChange(newContacts);
-                    }
-                  })
-                } else {
-                  setVisible(false)
+      )
+    } else if (limit === 1) {
+      return (
+        <View style={styles.pickerView}>
+        <RNPickerSelect
+          ref={(r) => pickerRef = r}
+          style={pickerStyles}
+          items={contactsArray.map(c => ({label:c.name,value:c.name}))}
+          onValueChange={(itemValue, itemIndex) => {
+            if (itemValue) {
+              const sel = contactsArray.filter(c => c.name === itemValue.toString())[0];
+              if (sel.name === newContactName) {
+                setVisible(true);
+              } else if (sel.key) {
+                setNewContacts([...newContacts, sel.key]);
+                if (pickerRef) {
+                  pickerRef.setState({value:undefined})
+                  pickerRef.forceUpdate()
                 }
-              }} />
-          </Modal>
-        </Portal>
-      </View>
-    )
+                onValueChange && onValueChange([...newContacts, sel.key]);
+              }
+            }
+          }}
+          />
+        </View>
+      )
+    } else {
+      return (
+        <View
+          style={{
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+          }}
+        >
+          <Text style={{color: theme.paper.colors.text}}>Contact</Text>
+          {newContacts && newContacts.map((cId: string) => contacts[cId] && 
+            <View style={styles.existingContacts}>
+              <Text style={styles.existingContactsText}>{contacts[cId].name}</Text>
+              <MaterialCommunityIcons onPress={() => {
+                setNewContacts(newContacts.filter(c => c !== cId))
+              }} style={styles.existingContactsIcon} name="delete" color={paperColors(theme).text} size={26} />
+            </View>)}
+          <View style={styles.pickerView}>
+            <RNPickerSelect
+              ref={(r) => pickerRef = r}
+              style={pickerStyles}
+              items={contactsArray.map(c => ({label:c.name,value:c.name}))}
+              onValueChange={(itemValue, itemIndex) => {
+                if (itemValue) {
+                  const sel = contactsArray.filter(c => c.name === itemValue.toString())[0];
+                  if (sel.name === newContactName) {
+                    setVisible(true);
+                  } else if (sel.key) {
+                    setNewContacts([...newContacts, sel.key]);
+                    if (pickerRef) {
+                      pickerRef.setState({value:undefined})
+                      pickerRef.forceUpdate()
+                    }
+                    onValueChange && onValueChange([...newContacts, sel.key]);
+                  }
+                }
+              }}
+              />
+          </View>
+          <Portal>
+            <Modal visible={visible}>
+              <NewContact
+                value={emptyContact}
+                saveNewContact={(contact?: Contact)=> {
+                  if (contact) {
+                    addNewContact(contact, (c: Contact) => {
+                      if (c.key) {
+                        setVisible(false);
+                        setNewContacts([...newContacts, c.key]);
+                        onValueChange && onValueChange(newContacts);
+                      }
+                    })
+                  } else {
+                    setVisible(false)
+                  }
+                }} />
+            </Modal>
+          </Portal>
+        </View>
+      )
+    }
   }
 }
 

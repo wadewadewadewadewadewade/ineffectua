@@ -1,4 +1,14 @@
-import { User } from 'firebase';
+//import { User } from 'firebase';
+
+export type User = {
+  uid: string,
+  email: string,
+  displayName?: string,
+  photoURL?: URL,
+  public?: {
+    [item: string]: boolean
+  }
+} | false
 
 export const RESTORE_TOKEN = 'RESTORE_TOKEN';
 export const SIGN_IN = 'SIGN_IN';

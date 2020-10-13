@@ -5,6 +5,7 @@ import { Action } from './../reducers';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import { DocumentData, DocumentReference } from '@firebase/firestore-types';
 import { firebaseDocumentToArray } from '../firebase/utilities';
+import { firebase as firebaseInstance } from '../firebase/config';
 
 export const newMedicationName = '+ Add New Medication';
 export const emptyMedication: Medication = {name:'',active:true};
@@ -39,6 +40,23 @@ const convertDocumentDataToMedication = (data: firebase.firestore.DocumentData):
     medicaitonData.created = new Date(doc.created.seconds * 1000)
   }
   return medicaitonData
+}
+
+export const getMedicationsByUserId = (userId: string, firebase = firebaseInstance): Promise<MedicationsState['medications']> => {
+  return new Promise<MedicationsState['medications']>((resolve) => {
+    firebase.firestore().collection('users')
+    .doc(userId).collection('medications')
+    .get()
+    .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
+      const medications: MedicationsState['medications'] = {};
+      const arr = querySnapshot.docs.map(d => {
+        const val = convertDocumentDataToMedication(d);
+        return val
+      })
+      arr.forEach(d => { if (d.key) medications[d.key] = d })
+      resolve(medications)
+    })
+  })
 }
 
 export const getMedications = (): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {

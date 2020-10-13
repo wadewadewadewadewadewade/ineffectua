@@ -2,9 +2,9 @@ import * as React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import RNPickerSelect, { PickerStyle } from 'react-native-picker-select';
-import { Text, Button, Modal, Portal, TextInput } from 'react-native-paper';
+import { Text, Button, Modal, Portal, TextInput, ActivityIndicator } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
-import { addMedication, emptyMedication, newMedicationName } from '../../middleware/MedicationsMiddleware';
+import { addMedication, emptyMedication, newMedicationName, getMedicationsByUserId } from '../../middleware/MedicationsMiddleware';
 import { State } from '../../Types';
 import { ThemeState, paperColors } from '../../reducers/ThemeReducer';
 import { Medication, MedicationsState } from '../../reducers/MedicationsReducer';
@@ -117,6 +117,7 @@ export const NewMedication = ({
 type Props = {
   value?: Array<string>,
   display?: 'list',
+  userId?: string,
   onValueChange?: (medications: Array<string>) => void,
 };
 
@@ -135,96 +136,118 @@ const MedicationItem = ({
 const Medications = ({
   value,
   display,
+  userId,
   onValueChange,
 }: Props) => {
-  const [theme, medications] = useSelector((state: State) => [state.theme, state.medications])
+  const theme = useSelector((state: State) => state.theme)
+  const [medications, setMedications] = React.useState<MedicationsState['medications'] | false>(false)
+  const [error, setError] = React.useState<Error | undefined>()
+  if (medications === false) {
+    if (userId) {
+      getMedicationsByUserId(userId).then(m => setMedications(m)).catch(e => setError(e))
+    } else {
+      setMedications(useSelector((state: State) => state.medications))
+    }
+  }
   const dispatch = useDispatch()
   const addNewMedication = (medication: Medication, onComplete: (medication: Medication) => void) =>
     dispatch(addMedication(medication, onComplete))
   const [visible, setVisible] = React.useState(false);
   const [newMedications, setNewMedications] = React.useState(value || new Array<string>());
-  const medicationsArray = firebaseDocumentToArray(medications, {name:newMedicationName,active:true});
-  let pickerRef: RNPickerSelect | null = null;
-  return (
-    <View
-      style={{
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-      }}
-    >
+  if (medications === false) {
+    return (
+      <ActivityIndicator />
+    )
+  } else if (error) {
+    return (
+      <View>
+        <Text>An error occured: {error.message}</Text>
+      </View>
+    )
+  } else {
+    const medicationsArray = firebaseDocumentToArray(medications, userId ? undefined : {name:newMedicationName,active:true});
+    let pickerRef: RNPickerSelect | null = null;
+    return (
       <View
         style={{
-          flexDirection: display === 'list' ? 'column' : 'row',
-          alignItems: display === 'list' ? 'flex-start' : 'center',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
           justifyContent: 'space-between',
+          paddingHorizontal: 16,
+          paddingVertical: 12,
         }}
       >
-        <Text style={{color: theme.paper.colors.text}}>Medication{display === 'list' && medicationsArray.length > 1 && 's'}</Text>
-        {display === 'list' ?
-          <SafeAreaView style={{paddingLeft:12}}>
-            <FlatList
-              data={medicationsArray}
-              keyExtractor={i => i.key || i.name}
-              renderItem={({item, index}) => (<MedicationItem medication={item} />)}
-            />
-          </SafeAreaView>
-        : <View style={styles.pickerView}>
-            <RNPickerSelect
-              ref={(r) => pickerRef = r}
-              style={pickerStyles}
-              items={medicationsArray.map(c => ({label:c.name,value:c.name}))}
-              onValueChange={(itemValue, itemIndex) => {
-                if (itemValue) {
-                  const sel = medicationsArray.filter(c => c.name === itemValue.toString())[0];
-                  if (sel.name === newMedicationName) {
-                    setVisible(true);
-                  } else if (sel.key) {
-                    setNewMedications([...newMedications, sel.key]);
-                    if (pickerRef) {
-                      pickerRef.setState({value:undefined})
-                      pickerRef.forceUpdate()
-                    }
-                    onValueChange && onValueChange([...newMedications, sel.key]);
-                  }
-                }
-              }}
+        <View
+          style={{
+            flexDirection: display === 'list' ? 'column' : 'row',
+            alignItems: display === 'list' ? 'flex-start' : 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Text style={{color: theme.paper.colors.text}}>Medication{display === 'list' && medicationsArray.length > 1 && 's'}</Text>
+          {display === 'list' ?
+            <SafeAreaView style={{paddingLeft:12}}>
+              <FlatList
+                data={medicationsArray}
+                keyExtractor={i => i.key || i.name}
+                renderItem={({item, index}) => (<MedicationItem medication={item} />)}
               />
-          </View>
-        }
-      </View>
-      {newMedications && newMedications.map((cId: string) => medications[cId] && 
-        <View key={cId} style={styles.existingMedications}>
-          <Text style={styles.existingMedicationsText}>{medications[cId].name}</Text>
-          <MaterialCommunityIcons onPress={() => {
-            setNewMedications(newMedications.filter(c => c !== cId))
-          }} style={styles.existingMedicationsIcon} name="delete" color={paperColors(theme).text} size={26} />
-        </View>)}
-      <Portal>
-        <Modal visible={visible}>
-          <NewMedication
-            value={emptyMedication}
-            medications={medications}
-            theme={theme}
-            saveNewMedication={(medication?: Medication)=> {
-              if (medication) {
-                addNewMedication(medication, (c: Medication) => {
-                  if (c.key) {
-                    setVisible(false);
-                    setNewMedications([...newMedications, c.key]);
-                    onValueChange && onValueChange(newMedications);
+            </SafeAreaView>
+          : <View style={styles.pickerView}>
+              <RNPickerSelect
+                ref={(r) => pickerRef = r}
+                style={pickerStyles}
+                items={medicationsArray.map(c => ({label:c.name,value:c.name}))}
+                onValueChange={(itemValue, itemIndex) => {
+                  if (itemValue) {
+                    const sel = medicationsArray.filter(c => c.name === itemValue.toString())[0];
+                    if (sel.name === newMedicationName) {
+                      setVisible(true);
+                    } else if (sel.key) {
+                      setNewMedications([...newMedications, sel.key]);
+                      if (pickerRef) {
+                        pickerRef.setState({value:undefined})
+                        pickerRef.forceUpdate()
+                      }
+                      onValueChange && onValueChange([...newMedications, sel.key]);
+                    }
                   }
-                })
-              } else {
-                setVisible(false)
-              }
-            }} />
-        </Modal>
-      </Portal>
-    </View>
-  );
+                }}
+                />
+            </View>
+          }
+        </View>
+        {newMedications && newMedications.map((cId: string) => medications[cId] && 
+          <View key={cId} style={styles.existingMedications}>
+            <Text style={styles.existingMedicationsText}>{medications[cId].name}</Text>
+            <MaterialCommunityIcons onPress={() => {
+              setNewMedications(newMedications.filter(c => c !== cId))
+            }} style={styles.existingMedicationsIcon} name="delete" color={paperColors(theme).text} size={26} />
+          </View>)}
+        <Portal>
+          <Modal visible={visible}>
+            <NewMedication
+              value={emptyMedication}
+              medications={medications}
+              theme={theme}
+              saveNewMedication={(medication?: Medication)=> {
+                if (medication) {
+                  addNewMedication(medication, (c: Medication) => {
+                    if (c.key) {
+                      setVisible(false);
+                      setNewMedications([...newMedications, c.key]);
+                      onValueChange && onValueChange(newMedications);
+                    }
+                  })
+                } else {
+                  setVisible(false)
+                }
+              }} />
+          </Modal>
+        </Portal>
+      </View>
+    );
+  }
 }
 
 const pickerStyles: PickerStyle = {
