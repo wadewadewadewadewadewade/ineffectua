@@ -42,11 +42,12 @@ import AuthFlow from './authentication/AuthFlow';
 import Profile from './authentication/Profile';
 
 import { NAVIGATION_PERSISTENCE_KEY, State, RootDrawerParamList, RootStackParamList } from '../Types';
-import { SignInAction, isUserAuthenticated, SignOutAction } from '../reducers/AuthReducer';
+import { SignInAction, isUserAuthenticated, SignOutAction, User } from '../reducers/AuthReducer';
 import { paperTheme, barClassName, paperColors } from '../reducers/ThemeReducer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CalendarDayProps } from './calendar/CalendarDay';
 import { watchFirebaseData, getFirebaseData } from '../middleware';
+import { getUserById } from '../middleware/AuthMiddleware';
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -58,29 +59,35 @@ const Navigation = () => {
     dispatch(isFetching(true))
     getFirebaseData(dispatch).then(() => watchFirebaseData(dispatch).then(() => dispatch(isFetching(false))))
   }
-  const signIn = (userState: firebase.User) => {
-    dispatch(SignInAction(userState))
-  }
-  const signOut = () => {
-    dispatch(SignOutAction())
-  }
+  const signIn = React.useCallback(
+    (userState: User) => !user && dispatch(SignInAction(userState)),
+    [dispatch, user]
+  )
+  const signOut = () => React.useCallback(
+    () => dispatch(SignOutAction()),
+    [dispatch]
+  )
   const [dataRetrivedAndWatched, setDataRetrivedAndWatched] = React.useState(false);
   const [isReady, setIsReady] = React.useState(Platform.OS === 'web');
   const [initialState, setInitialState] = React.useState<
     InitialState | undefined
   >();
 
-  firebase.auth().onAuthStateChanged(userState => {
-    if (userState === null) {
-      if (user) {
-        signOut()
+  React.useEffect(() => {
+    const unsubscribe = firebase.auth().onAuthStateChanged((userState: firebase.User | null) => {
+      if (userState === null) {
+        if (user) {
+          signOut()
+        }
+      } else {
+        if (!user) {
+          getUserById(userState.uid).then(u => signIn(u))
+        }
       }
-    } else {
-      if (!user) {
-        signIn(userState)
-      }
-    }
-  });
+    });
+    return () => unsubscribe()
+  }, [user])
+
   if (user && !dataRetrivedAndWatched) { // only fetch and watch data once per app-use
     fetchData()
     setDataRetrivedAndWatched(true)
@@ -160,7 +167,7 @@ const Navigation = () => {
       }
     };
 
-    restoreState();
+    !isReady && restoreState();
   }, []);
 
   const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));

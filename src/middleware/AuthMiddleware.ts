@@ -26,7 +26,19 @@ export const getUserById = (userId: string, firebase = firebaseInstance): Promis
     .doc(userId)
     .get()
     .then((value: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>) => {
-      resolve(value.data() as User)
+      const userData = value.data()
+      if (userData === undefined) {
+        reject('No user information was returned')
+      } else {
+        const user: User = {
+          uid: userData.uid,
+          email: userData.email,
+          displayName: userData.displayName ? userData.displayName : undefined,
+          photoURL: userData.photoURL ? userData.photoURL : undefined,
+          public: userData.public ? userData.public : undefined
+        }
+        resolve(user)
+      }
     })
   })
 }

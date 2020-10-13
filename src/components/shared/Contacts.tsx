@@ -3,11 +3,10 @@ import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import RNPickerSelect, { PickerStyle } from 'react-native-picker-select';
 import { Text, Button, Modal, Portal, TextInput, ActivityIndicator } from 'react-native-paper';
-import { connect, useSelector, useDispatch } from 'react-redux';
-import { ThunkDispatch } from 'redux-thunk';
+import { useSelector, useDispatch } from 'react-redux';
 import { addContact, emptyContact, newContactName, getContactsByUserId } from '../../middleware/ContactsMiddleware';
 import { State } from '../../Types';
-import { ThemeState, paperColors } from '../../reducers/ThemeReducer';
+import { paperColors } from '../../reducers/ThemeReducer';
 import { Contact, ContactsState } from '../../reducers/ContactsReducer';
 import { TouchableOpacity, FlatList } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -109,30 +108,36 @@ const Contacts = ({
   userId,
   onValueChange,
 }: Props) => {
-  const theme = useSelector((state: State) => state.theme)
-  const [contacts, setContacts] = React.useState<ContactsState['contacts'] | false>(false)
-  const [error, setError] = React.useState<Error | undefined>()
-  if (contacts === false) {
-    if (userId) {
-      getContactsByUserId(userId).then(c => setContacts(c)).catch(e => setError(e))
-    } else {
-      setContacts(useSelector((state: State) => state.contacts))
+  const [ready, setReady] = React.useState(false)
+  const [contacts, setContacts] = React.useState<ContactsState['contacts']>()
+  React.useEffect(() => {
+    const getContacts = async () => {
+      try {
+        if (userId !== undefined) {
+          setContacts(await getContactsByUserId(userId))
+        } else {
+          setContacts(useSelector((state: State) => state.contacts))
+        }
+      } catch (e) {
+        console.error(e)
+      } finally {
+        setReady(true)
+      }
     }
-  }
+
+    !ready && getContacts();
+  }, []);
+  const theme = useSelector((state: State) => state.theme)  
   const dispatch = useDispatch()
-  const addNewContact = (contact: Contact, onComplete: (contact: Contact) => void) =>
-    dispatch(addContact(contact, onComplete))
+  const addNewContact = React.useCallback(
+    (contact: Contact, onComplete: (contact: Contact) => void) => dispatch(addContact(contact, onComplete)),
+    [dispatch]
+  )
   const [visible, setVisible] = React.useState(false);
   const [newContacts, setNewContacts] = React.useState(value || new Array<string>());
-  if (contacts === false) {
+  if (!ready || contacts === undefined) {
     return (
       <ActivityIndicator />
-    )
-  } else if (error) {
-    return (
-      <View>
-        <Text>An error occured: {error.message}</Text>
-      </View>
     )
   } else {
     const contactsArray = firebaseDocumentToArray<Contact>(contacts, userId ? undefined : {name:newContactName});

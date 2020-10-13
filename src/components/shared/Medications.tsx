@@ -140,29 +140,35 @@ const Medications = ({
   onValueChange,
 }: Props) => {
   const theme = useSelector((state: State) => state.theme)
-  const [medications, setMedications] = React.useState<MedicationsState['medications'] | false>(false)
-  const [error, setError] = React.useState<Error | undefined>()
-  if (medications === false) {
-    if (userId) {
-      getMedicationsByUserId(userId).then(m => setMedications(m)).catch(e => setError(e))
-    } else {
-      setMedications(useSelector((state: State) => state.medications))
-    }
-  }
   const dispatch = useDispatch()
-  const addNewMedication = (medication: Medication, onComplete: (medication: Medication) => void) =>
-    dispatch(addMedication(medication, onComplete))
+  const [ready, setReady] = React.useState(false)
+  const [medications, setMedications] = React.useState<MedicationsState['medications']>()
+  React.useEffect(() => {
+    const getMedications = async () => {
+      try {
+        if (userId !== undefined) {
+          setMedications(await getMedicationsByUserId(userId))
+        } else {
+          setMedications(useSelector((state: State) => state.medications))
+        }
+      } catch (e) {
+        console.error(e)
+      } finally {
+        setReady(true)
+      }
+    }
+
+    !ready && getMedications();
+  }, []);
+  const addNewMedication = React.useCallback(
+    (medication: Medication, onComplete: (medication: Medication) => void) => dispatch(addMedication(medication, onComplete)),
+    [dispatch]
+  )
   const [visible, setVisible] = React.useState(false);
   const [newMedications, setNewMedications] = React.useState(value || new Array<string>());
-  if (medications === false) {
+  if (!ready || medications === undefined) {
     return (
       <ActivityIndicator />
-    )
-  } else if (error) {
-    return (
-      <View>
-        <Text>An error occured: {error.message}</Text>
-      </View>
     )
   } else {
     const medicationsArray = firebaseDocumentToArray(medications, userId ? undefined : {name:newMedicationName,active:true});

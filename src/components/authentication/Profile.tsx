@@ -27,6 +27,22 @@ enum ProfileLayouts {
   'PAGE' = 1
 }
 
+const getUserIdFromRoute = (navigationRef: NavigationContainerRef | null) => {
+  if (navigationRef !== null) {
+    const route = navigationRef.getCurrentRoute()
+    if (route !== undefined) {
+      const params = route.params
+      if (params !== undefined && 'userId' in params) {
+        const { userId } = params as { userId?: string }
+        if (userId !== undefined) {
+          return userId
+        }
+      }
+    }
+  }
+  return undefined
+}
+
 const TabsLinks = ({
   navigationRef
 }: {
@@ -63,7 +79,7 @@ const SideBar = ({
 } : {
   navigationRef: NavigationContainerRef | null,
 }) => {
-  const userId = (navigationRef?.getCurrentRoute()?.params as { userId: string | undefined }).userId // no userId supplied means private
+  const userId = getUserIdFromRoute(navigationRef) // no userId supplied means private
   const [user, setUser] = React.useState<User>(false)
   const [error, setError] = React.useState<Error | undefined>()
   if (user === false) {
@@ -80,7 +96,7 @@ const SideBar = ({
   const logout = () => dispatch(signOut())
   const refreshDataFromFirebase = () => getFirebaseData(dispatch)
   const fetching = (is:boolean) => dispatch(isFetching(is))
-  const thumbnail = user !== false && user.photoURL !== undefined ? require(user.photoURL.href) : null;
+  const thumbnail = user !== false && user.photoURL !== undefined && user.photoURL.href ? require(user.photoURL.href) : null;
   const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
   const isLandscapeOnPhone = dimensions.width > dimensions.height && dimensions.height <= 420;
   React.useEffect(() => {
@@ -160,7 +176,7 @@ const ProfilePage = ({
 } : {
   navigationRef: NavigationContainerRef | null,
 }) => {
-  const userId = (navigationRef?.getCurrentRoute()?.params as { userId: string | undefined }).userId // no userId supplied means private
+  const userId = getUserIdFromRoute(navigationRef) // no userId supplied means private
   const [user, setUser] = React.useState<User>(false)
   const [error, setError] = React.useState<Error | undefined>()
   if (user === false) {
@@ -177,7 +193,7 @@ const ProfilePage = ({
   const logout = () => dispatch(signOut())
   const refreshDataFromFirebase = () => getFirebaseData(dispatch)
   const fetching = (is:boolean) => dispatch(isFetching(is))
-  const thumbnail = user !== false && user.photoURL !== undefined ? require(user.photoURL.href) : null;
+  const thumbnail = user !== false && user.photoURL !== undefined && user.photoURL.href ? require(user.photoURL.href) : null;
   if (error) {
     return (
       <View>
