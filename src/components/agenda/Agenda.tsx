@@ -121,6 +121,7 @@ const Agenda = ({dates, navigation, theme, datatypes}: AgendaProps) => {
       <Posts
         showComposePost={true}
         criteria={{privacy: PostPrivacyTypes.PUBLIC}}
+        navigationRef={navigation}
       />
     </View>
   );

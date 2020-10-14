@@ -9,7 +9,7 @@ import {
   Easing,
   LayoutChangeEvent,
 } from 'react-native';
-import {Text, ActivityIndicator} from 'react-native-paper';
+import {Text, ActivityIndicator, Avatar} from 'react-native-paper';
 import {useSelector, useDispatch} from 'react-redux';
 import {State} from '../../Types';
 import {
@@ -27,7 +27,11 @@ import Tags from './Tags';
 import FlexableTextArea from './FlexableTextArea';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {formatDateConditionally} from '../../middleware/CalendarMiddleware';
-import {useInfiniteQuery, QueryStatus} from 'react-query';
+import {useInfiniteQuery, QueryStatus, useQuery} from 'react-query';
+import {User} from '../../reducers/AuthReducer';
+import {getUserById} from '../../middleware/AuthMiddleware';
+import {TouchableHighlight} from 'react-native-gesture-handler';
+import {NavigationContainerRef} from '@react-navigation/native';
 
 // used for a list of posts, for comments within a post, messages between users, and for searching maybe?
 
@@ -151,7 +155,68 @@ const ComposePost = ({criteria, height, onSavePost}: ComposePostProps) => {
   }
 };
 
-const PostComponent = ({post}: {post: Post}) => {
+const PostUser = ({
+  userId,
+  navigationRef,
+}: {
+  userId: string;
+  navigationRef: NavigationContainerRef | null;
+}) => {
+  const {status, data, isFetching, error} = useQuery<User, Error, [string]>(
+    userId,
+    getUserById,
+    {
+      suspense: true,
+    },
+  );
+  const thumbnail =
+    data !== false &&
+    data !== undefined &&
+    data.photoURL !== undefined &&
+    data.photoURL.href
+      ? data.photoURL.href
+      : null;
+  if (status === QueryStatus.Loading || isFetching) {
+    return <View />;
+  } else if (status === QueryStatus.Error) {
+    return <Text style={styles.errorText}>An error occured: {error}</Text>;
+  } else if (data === false || data === undefined) {
+    return <Text style={styles.errorText}>No user {userId} found</Text>;
+  } else {
+    return (
+      <TouchableHighlight
+        onPress={() =>
+          navigationRef?.navigate('Root', {
+            screen: 'Profile',
+            params: {userId: data.uid},
+          })
+        }>
+        <View style={styles.postUser}>
+          {thumbnail ? (
+            <Avatar.Image
+              source={{uri: thumbnail}}
+              style={styles.postUserImage}
+            />
+          ) : (
+            <Text style={styles.postUserName}>
+              {data.displayName !== null && data.displayName !== undefined
+                ? ' ' + data.displayName
+                : ''}
+            </Text>
+          )}
+        </View>
+      </TouchableHighlight>
+    );
+  }
+};
+
+const PostComponent = ({
+  post,
+  navigationRef,
+}: {
+  post: Post;
+  navigationRef: NavigationContainerRef | null;
+}) => {
   const theme = useSelector((state: State) => state.theme);
   return (
     <View
@@ -159,10 +224,23 @@ const PostComponent = ({post}: {post: Post}) => {
         styles.postComponentContainer,
         {backgroundColor: theme.paper.colors.surface},
       ]}>
-      <Text style={styles.postmetadata}>
-        {formatDateConditionally(post.created.on)}
-      </Text>
-      <Text style={styles.postBody}>{post.body}</Text>
+      <View style={styles.row}>
+        <Text style={styles.postBody}>{post.body}</Text>
+        <View style={styles.postMetadataContainer}>
+          <React.Suspense fallback={<ActivityIndicator />}>
+            <PostUser userId={post.created.by} navigationRef={navigationRef} />
+          </React.Suspense>
+          <Text style={styles.postMetadataText}>
+            {post.criteria.privacy !== PostPrivacyTypes.PUBLIC &&
+              (post.criteria.privacy === PostPrivacyTypes.FRIENDS
+                ? ' friends only'
+                : 'private')}
+          </Text>
+          <Text style={styles.postMetadataText}>
+            {formatDateConditionally(post.created.on)}
+          </Text>
+        </View>
+      </View>
       <Tags value={post.tags} />
     </View>
   );
@@ -178,9 +256,11 @@ enum ScrollDirections {
 const PostsList = ({
   criteria,
   onScroll,
+  navigationRef,
 }: {
   criteria: PostCriteria;
   onScroll?: (direction: ScrollDirections) => void;
+  navigationRef: NavigationContainerRef | null;
 }) => {
   const [user] = useSelector((state: State) => [state.user]);
   const fetchPostsWithCustomParams = (
@@ -216,7 +296,9 @@ const PostsList = ({
       <SafeAreaView style={styles.flex}>
         <FlatList
           data={posts}
-          renderItem={(p) => <PostComponent post={p.item} />}
+          renderItem={(p) => (
+            <PostComponent post={p.item} navigationRef={navigationRef} />
+          )}
           keyExtractor={(p, i) => p.key || 'post' + i}
           onScroll={(e) => {
             if (onScroll) {
@@ -248,9 +330,10 @@ const PostsList = ({
 type PostProps = {
   showComposePost?: boolean;
   criteria: PostCriteria;
+  navigationRef: NavigationContainerRef | null;
 };
 
-const Posts = ({showComposePost, criteria}: PostProps) => {
+const Posts = ({showComposePost, criteria, navigationRef}: PostProps) => {
   const dispatch = useDispatch();
   const savePost = (post: Post) => {
     dispatch(addPostWithDispatch(post));
@@ -304,6 +387,7 @@ const Posts = ({showComposePost, criteria}: PostProps) => {
             <PostsList
               criteria={criteria}
               onScroll={(d) => animateComposePost(d)}
+              navigationRef={navigationRef}
             />
           </Animated.View>
         </React.Suspense>
@@ -312,13 +396,28 @@ const Posts = ({showComposePost, criteria}: PostProps) => {
   } else {
     return (
       <View style={styles.container}>
-        <PostsList criteria={criteria} />
+        <PostsList criteria={criteria} navigationRef={navigationRef} />
       </View>
     );
   }
 };
 
 const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+  },
+  errorText: {
+    color: 'red',
+  },
+  postUser: {
+    flexDirection: 'column',
+  },
+  postUserImage: {
+    width: 25,
+  },
+  postUserName: {
+    fontSize: 10,
+  },
   container: {
     flex: 1,
     overflow: 'hidden',
@@ -351,7 +450,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'nowrap',
   },
-  postmetadata: {
+  postMetadataContainer: {
+    alignContent: 'flex-end',
+  },
+  postMetadataText: {
     fontSize: 12,
     color: '#888',
     textAlign: 'right',
