@@ -1,107 +1,133 @@
 import * as React from 'react';
-import { View, FlatList, StyleSheet, Linking } from 'react-native';
-import { Text, Modal, Portal, FAB } from 'react-native-paper';
-import { useScrollToTop } from '@react-navigation/native';
-import { connect } from 'react-redux';
-import { ThunkDispatch } from 'redux-thunk';
-import { State } from '../../Types';
-import { addMedication, emptyMedication } from '../../middleware/MedicationsMiddleware';
-import { ThemeState, paperColors } from '../../reducers/ThemeReducer';
-import { MedicationsState, Medication } from '../../reducers/MedicationsReducer';
-import { NewMedication } from '../shared/Medications'
-import { TouchableHighlight } from 'react-native-gesture-handler';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { firebaseDocumentToArray } from '../../firebase/utilities';
+import {View, FlatList, StyleSheet, Linking} from 'react-native';
+import {Text, Modal, Portal, FAB} from 'react-native-paper';
+import {useScrollToTop} from '@react-navigation/native';
+import {connect} from 'react-redux';
+import {ThunkDispatch} from 'redux-thunk';
+import {State} from '../../Types';
+import {
+  addMedication,
+  emptyMedication,
+} from '../../middleware/MedicationsMiddleware';
+import {ThemeState, paperColors} from '../../reducers/ThemeReducer';
+import {MedicationsState, Medication} from '../../reducers/MedicationsReducer';
+import {NewMedication} from '../shared/Medications';
+import {TouchableHighlight} from 'react-native-gesture-handler';
+import {MaterialCommunityIcons} from '@expo/vector-icons';
+import {firebaseDocumentToArray} from '../../firebase/utilities';
 
-const MedicationItem = React.memo((
-  { item, theme, onPress }:
-  { item: Medication, theme: ThemeState['theme'], onPress: (medication: Medication) => void }
-) => {
-    const { colors } = theme.navigation;
+const MedicationItem = React.memo(
+  ({
+    item,
+    theme,
+    onPress,
+  }: {
+    item: Medication;
+    theme: ThemeState['theme'];
+    onPress: (medication: Medication) => void;
+  }) => {
+    const {colors} = theme.navigation;
 
     return (
-      <TouchableHighlight onPress={() => onPress(item)} style={styles.existingMedication}>
-        <View style={[styles.item, { backgroundColor: colors.card }]}>
+      <TouchableHighlight
+        onPress={() => onPress(item)}
+        style={styles.existingMedication}>
+        <View style={[styles.item, {backgroundColor: colors.card}]}>
           <View style={styles.avatar}>
             <Text style={styles.letter}>
               {item.name.slice(0, 1).toUpperCase()}
             </Text>
           </View>
           <View style={styles.details}>
-            <Text style={[styles.name, { color: colors.text }]}>{item.name}</Text>
-            <Text style={[styles.number, { color: colors.text, opacity: 0.5 }]}>
-              {item.refills + ' refill'}{item.refills !== 1 && 's'}
+            <Text style={[styles.name, {color: colors.text}]}>{item.name}</Text>
+            <Text style={[styles.number, {color: colors.text}]}>
+              {item.refills + ' refill'}
+              {item.refills !== 1 && 's'}
             </Text>
           </View>
           <View style={styles.links}>
-            <MaterialCommunityIcons onPress={() => {
-              Linking.openURL('https://en.wikipedia.org/wiki/' + encodeURIComponent(item.name));
-            }} name="information" color={paperColors(theme).text} size={26} />
+            <MaterialCommunityIcons
+              onPress={() => {
+                Linking.openURL(
+                  'https://en.wikipedia.org/wiki/' +
+                    encodeURIComponent(item.name),
+                );
+              }}
+              name="information"
+              color={paperColors(theme).text}
+              size={26}
+            />
           </View>
         </View>
       </TouchableHighlight>
     );
-  }
+  },
 );
 
 const ItemSeparator = (theme: ThemeState['theme']) => {
-  const { colors } = theme.navigation;
+  const {colors} = theme.navigation;
 
-  return (
-    <View style={[styles.separator, { backgroundColor: colors.border }]} />
-  );
+  return <View style={[styles.separator, {backgroundColor: colors.border}]} />;
 };
 
 type Props = {
-  theme: ThemeState['theme'],
-  medications: MedicationsState['medications'],
-  addNewMedication: (medication: Medication, onComplete: (medication: Medication) => void) => void
-}
+  theme: ThemeState['theme'];
+  medications: MedicationsState['medications'];
+  addNewMedication: (
+    medication: Medication,
+    onComplete: (medication: Medication) => void,
+  ) => void;
+};
 
 export const MedicationsList = ({
   theme,
   medications,
-  addNewMedication
+  addNewMedication,
 }: Props) => {
   let dummyForType: Medication | undefined;
-  const [addOrEditMedicationId, setAddOrEditMedicationId] = React.useState(dummyForType);
+  const [addOrEditMedicationId, setAddOrEditMedicationId] = React.useState(
+    dummyForType,
+  );
 
   const ref = React.useRef<FlatList<Medication>>(null);
 
   useScrollToTop(ref);
 
-  const renderItem = ({ item }: { item: Medication }) => <MedicationItem
-    item={item}
-    theme={theme}
-    onPress={(medication: Medication) => {
-      setAddOrEditMedicationId(medication)
-    }} />;
+  const renderItem = ({item}: {item: Medication}) => (
+    <MedicationItem
+      item={item}
+      theme={theme}
+      onPress={(medication: Medication) => {
+        setAddOrEditMedicationId(medication);
+      }}
+    />
+  );
 
   return (
-    <View
-      style={styles.container}
-    >
+    <View style={styles.container}>
       <FlatList
         ref={ref}
         data={firebaseDocumentToArray(medications)}
         keyExtractor={(_, i) => String(i)}
         renderItem={renderItem}
         ItemSeparatorComponent={() => ItemSeparator(theme)}
-        style={{width:'100%'}}
+        style={styles.wide}
       />
-      {addOrEditMedicationId === undefined && <FAB
-        style={styles.fab}
-        small
-        icon={() => <MaterialCommunityIcons name="plus" size={24} />}
-        onPress={() => setAddOrEditMedicationId(emptyMedication)}
-      />}
+      {addOrEditMedicationId === undefined && (
+        <FAB
+          style={styles.fab}
+          small
+          icon={() => <MaterialCommunityIcons name="plus" size={24} />}
+          onPress={() => setAddOrEditMedicationId(emptyMedication)}
+        />
+      )}
       <Portal>
         <Modal visible={addOrEditMedicationId !== undefined}>
           <NewMedication
             value={addOrEditMedicationId}
             medications={medications}
             theme={theme}
-            saveNewMedication={(medication?: Medication)=> {
+            saveNewMedication={(medication?: Medication) => {
               if (medication) {
                 addNewMedication(medication, (m: Medication) => {
                   if (m.key) {
@@ -109,28 +135,32 @@ export const MedicationsList = ({
                     //setNewMedications([...newMedications, c.key]);
                     //onValueChange(newMedications);
                   }
-                })
+                });
               } else {
                 setAddOrEditMedicationId(undefined);
               }
-            }} />
+            }}
+          />
         </Modal>
       </Portal>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
+  wide: {
+    width: '100%',
+  },
   container: {
     flexDirection: 'column',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    height:'100%',
+    height: '100%',
   },
   existingMedication: {
-    display:'flex',
+    display: 'flex',
     backgroundColor: '#0f0',
   },
   item: {
@@ -152,7 +182,7 @@ const styles = StyleSheet.create({
   },
   details: {
     margin: 8,
-    flexGrow:1,
+    flexGrow: 1,
   },
   links: {
     flexDirection: 'column',
@@ -163,6 +193,7 @@ const styles = StyleSheet.create({
   },
   number: {
     fontSize: 12,
+    opacity: 0.5,
   },
   separator: {
     height: StyleSheet.hairlineWidth,
@@ -175,25 +206,33 @@ const styles = StyleSheet.create({
   },
 });
 
-interface OwnProps {
-}
+interface OwnProps {}
 
 interface DispatchProps {
-  addNewMedication: (Medication: Medication, onComplete: (medication: Medication) => void) => void
+  addNewMedication: (
+    Medication: Medication,
+    onComplete: (medication: Medication) => void,
+  ) => void;
 }
 
 const mapStateToProps = (state: State) => {
   return {
     user: state.user,
     theme: state.theme,
-    medications: state.medications
+    medications: state.medications,
   };
 };
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
+const mapDispatchToProps = (
+  dispatch: ThunkDispatch<State, firebase.app.App, any>,
+  ownProps: OwnProps,
+): DispatchProps => {
   return {
-    addNewMedication: (medication: Medication, onComplete: (medication: Medication) => void) => {
-      dispatch(addMedication(medication, onComplete))
-    }
+    addNewMedication: (
+      medication: Medication,
+      onComplete: (medication: Medication) => void,
+    ) => {
+      dispatch(addMedication(medication, onComplete));
+    },
   };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(MedicationsList);

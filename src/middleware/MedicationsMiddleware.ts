@@ -1,142 +1,216 @@
-import * as React from 'react';
-import { State } from './../Types';
-import { Medication, GetMedicationsAction, ReplaceMedicationsAction, MedicationsState } from '../reducers/MedicationsReducer';
-import { Action } from './../reducers';
-import { ThunkAction, ThunkDispatch } from 'redux-thunk';
-import { DocumentData, DocumentReference } from '@firebase/firestore-types';
-import { firebaseDocumentToArray } from '../firebase/utilities';
-import { firebase as firebaseInstance } from '../firebase/config';
+import {State} from './../Types';
+import {
+  Medication,
+  GetMedicationsAction,
+  ReplaceMedicationsAction,
+  MedicationsState,
+} from '../reducers/MedicationsReducer';
+import {Action} from './../reducers';
+import {ThunkAction, ThunkDispatch} from 'redux-thunk';
+import {DocumentData, DocumentReference} from '@firebase/firestore-types';
+import {firebaseDocumentToArray} from '../firebase/utilities';
+import {firebase as firebaseInstance} from '../firebase/config';
 
 export const newMedicationName = '+ Add New Medication';
-export const emptyMedication: Medication = {name:'',active:true};
+export const emptyMedication: Medication = {name: '', active: true};
 
-export const medicaitonIsValid = (medicaiton: Medication, Medications: MedicationsState['medications']): boolean => {
-  const { name } = medicaiton;
-  if (name && name.trim().length > 0) { // no null or empty names or colors
-    if (name.trim() !== newMedicationName) { // no reserved names
-      const preexistingMedicationsByname = firebaseDocumentToArray(Medications).filter(m => m.name = name.trim())
-      if (preexistingMedicationsByname.length === 0) { // no duplicate names
-        return true      
+export const medicaitonIsValid = (
+  medicaiton: Medication,
+  Medications: MedicationsState['medications'],
+): boolean => {
+  const {name} = medicaiton;
+  if (name && name.trim().length > 0) {
+    // no null or empty names or colors
+    if (name.trim() !== newMedicationName) {
+      // no reserved names
+      const preexistingMedicationsByname = firebaseDocumentToArray(
+        Medications,
+      ).filter((m) => (m.name = name.trim()));
+      if (preexistingMedicationsByname.length === 0) {
+        // no duplicate names
+        return true;
       }
     }
   }
-  return false
-}
+  return false;
+};
 
-const convertDocumentDataToMedication = (data: firebase.firestore.DocumentData): Medication => {
-  const doc = data.data()
+const convertDocumentDataToMedication = (
+  data: firebase.firestore.DocumentData,
+): Medication => {
+  const doc = data.data();
   const medicaitonData: Medication = {
     key: data.id,
-    created: doc.created && doc.created.seconds && new Date(doc.created.seconds * 1000),
+    created:
+      doc.created &&
+      doc.created.seconds &&
+      new Date(doc.created.seconds * 1000),
     typeId: doc.typeId,
     name: doc.name,
     active: doc.active,
     prescribed: doc.prescribed, // ContactID
-    lastFilled: doc.lastFilled && doc.lastFilled.seconds && new Date(doc.lastFilled.seconds * 1000),
+    lastFilled:
+      doc.lastFilled &&
+      doc.lastFilled.seconds &&
+      new Date(doc.lastFilled.seconds * 1000),
     refills: doc.refills,
-    description: doc.description
-  }
+    description: doc.description,
+  };
   if (doc.created && doc.created.seconds) {
-    medicaitonData.created = new Date(doc.created.seconds * 1000)
+    medicaitonData.created = new Date(doc.created.seconds * 1000);
   }
-  return medicaitonData
-}
+  return medicaitonData;
+};
 
-export const getMedicationsByUserId = (userId: string, firebase = firebaseInstance): Promise<MedicationsState['medications']> => {
+export const getMedicationsByUserId = (
+  userId: string,
+  firebase = firebaseInstance,
+): Promise<MedicationsState['medications']> => {
   return new Promise<MedicationsState['medications']>((resolve) => {
-    firebase.firestore().collection('users')
-    .doc(userId).collection('medications')
-    .get()
-    .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-      const medications: MedicationsState['medications'] = {};
-      const arr = querySnapshot.docs.map(d => {
-        const val = convertDocumentDataToMedication(d);
-        return val
-      })
-      arr.forEach(d => { if (d.key) medications[d.key] = d })
-      resolve(medications)
-    })
-  })
-}
+    firebase
+      .firestore()
+      .collection('users')
+      .doc(userId)
+      .collection('medications')
+      .get()
+      .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
+        const medications: MedicationsState['medications'] = {};
+        const arr = querySnapshot.docs.map((d) => {
+          const val = convertDocumentDataToMedication(d);
+          return val;
+        });
+        arr.forEach((d) => {
+          if (d.key) {
+            medications[d.key] = d;
+          }
+        });
+        resolve(medications);
+      });
+  });
+};
 
-export const getMedications = (): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
-  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
+export const getMedications = (): ThunkAction<
+  Promise<void>,
+  State,
+  firebase.app.App,
+  Action
+> => {
+  return (
+    dispatch: ThunkDispatch<State, {}, Action>,
+    getState: () => State,
+    firebase: firebase.app.App,
+  ): Promise<void> => {
     return new Promise<void>((resolve) => {
-      const { user } = getState();
+      const {user} = getState();
       if (user) {
         //firebase.firestore.setLogLevel('debug');
-        firebase.firestore().collection('users')
-          .doc(user.uid).collection('medications')
+        firebase
+          .firestore()
+          .collection('users')
+          .doc(user.uid)
+          .collection('medications')
           .get()
           .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
             const medication: MedicationsState['medications'] = {};
-            const arr = querySnapshot.docs.map(d => {
+            const arr = querySnapshot.docs.map((d) => {
               const val = convertDocumentDataToMedication(d);
-              return val
-            })
-            arr.forEach(d => { if (d.key) medication[d.key] = d })
-            dispatch(GetMedicationsAction(medication))
+              return val;
+            });
+            arr.forEach((d) => {
+              if (d.key) {
+                medication[d.key] = d;
+              }
+            });
+            dispatch(GetMedicationsAction(medication));
           })
           .finally(() => {
             //console.log('resolving getMedications')
-            resolve()
-          })
+            resolve();
+          });
       }
-    })
-  }
-}
+    });
+  };
+};
 
-export const watchMedications = (): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
-  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
+export const watchMedications = (): ThunkAction<
+  Promise<void>,
+  State,
+  firebase.app.App,
+  Action
+> => {
+  return (
+    dispatch: ThunkDispatch<State, {}, Action>,
+    getState: () => State,
+    firebase: firebase.app.App,
+  ): Promise<void> => {
     return new Promise<void>((resolve) => {
-      const { user } = getState();
+      const {user} = getState();
       if (user) {
         //firestore.setLogLevel('debug');
-        firebase.firestore()
+        firebase
+          .firestore()
           .collection('users')
           .doc(user.uid)
           .collection('medications')
           .orderBy('name')
           .onSnapshot((documentSnapshot: firebase.firestore.QuerySnapshot) => {
             const medications: MedicationsState['medications'] = {};
-            const arr = documentSnapshot.docs.map(d => {
+            const arr = documentSnapshot.docs.map((d) => {
               const val = convertDocumentDataToMedication(d);
-              return val
-            })
-            arr.forEach(d => { if (d.key) medications[d.key] = d })
+              return val;
+            });
+            arr.forEach((d) => {
+              if (d.key) {
+                medications[d.key] = d;
+              }
+            });
             dispatch(ReplaceMedicationsAction(medications));
           });
       }
-    })
-  }
-}
+    });
+  };
+};
 
-export const addMedication = (medicaiton: Medication, onComplete?: (Medication: Medication) => void): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
-  return (dispatch: ThunkDispatch<State, {}, Action>, getState: () => State, firebase: firebase.app.App): Promise<void> => {
+export const addMedication = (
+  medicaiton: Medication,
+  onComplete?: (Medication: Medication) => void,
+): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
+  return (
+    dispatch: ThunkDispatch<State, {}, Action>,
+    getState: () => State,
+    firebase: firebase.app.App,
+  ): Promise<void> => {
     return new Promise<void>((resolve) => {
-      const { user } = getState();
+      const {user} = getState();
       if (user) {
         if (medicaiton.key) {
           // its an update
-          const { key, ...data } = medicaiton;
-          firebase.firestore().collection('users')
-            .doc(user.uid).collection('medications')
-            .doc(key).update(data)
+          const {key, ...data} = medicaiton;
+          firebase
+            .firestore()
+            .collection('users')
+            .doc(user.uid)
+            .collection('medications')
+            .doc(key)
+            .update(data)
             .then(() => {
-              onComplete && onComplete(medicaiton)
-          })
+              onComplete && onComplete(medicaiton);
+            });
         } else {
           // it's a new record
-          medicaiton.created = new Date(Date.now())
-          firebase.firestore().collection('users')
-            .doc(user.uid).collection('medications')
+          medicaiton.created = new Date(Date.now());
+          firebase
+            .firestore()
+            .collection('users')
+            .doc(user.uid)
+            .collection('medications')
             .add(medicaiton)
             .then((value: DocumentReference<DocumentData>) => {
-              const data = {...medicaiton, key: value.id}
-              onComplete && onComplete(data)
-            })
+              const data = {...medicaiton, key: value.id};
+              onComplete && onComplete(data);
+            });
         }
       }
-    })
-  }
-}
+    });
+  };
+};

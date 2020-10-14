@@ -1,6 +1,6 @@
 declare var window: any;
 
-const localStorage = window.localStorage
+const localStorage = window.localStorage;
 
 export default {
   getItem(key: string) {

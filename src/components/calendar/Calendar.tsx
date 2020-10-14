@@ -1,40 +1,31 @@
 import React from 'react';
-import { CalendarList, DateObject } from 'react-native-calendars';
-import { StyleSheet, View } from 'react-native';
-import { connect } from 'react-redux';
-import { State } from '../../Types';
-import { CalendarState } from '../../reducers/CalendarReducer';
-import { formatDatesForMarking } from '../../middleware/CalendarMiddleware';
-import { themeIsDark, ThemeState } from '../../reducers/ThemeReducer';
-import { CalendarStackParamList } from './CalendarNavigator';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { DataTypesState } from '../../reducers/DataTypesReducer';
-
-let temp = 0;
+import {CalendarList, DateObject} from 'react-native-calendars';
+import {StyleSheet, View} from 'react-native';
+import {useSelector} from 'react-redux';
+import {State} from '../../Types';
+import {formatDatesForMarking} from '../../middleware/CalendarMiddleware';
+import {themeIsDark} from '../../reducers/ThemeReducer';
+import {CalendarStackParamList} from './CalendarNavigator';
+import {StackNavigationProp} from '@react-navigation/stack';
 
 const Calendar = (props: {
-  dates: CalendarState['dates'],
-  theme: ThemeState['theme'],
-  datatypes: DataTypesState['datatypes'],
-  navigation: StackNavigationProp<CalendarStackParamList, 'Calendar'>
+  navigation: StackNavigationProp<CalendarStackParamList, 'Calendar'>;
 }) => {
-  const {
-    dates,
-    navigation,
-    theme,
-    datatypes
-  } = props;
+  const {navigation} = props;
+  const [dates, theme, datatypes] = useSelector((state: State) => [
+    state.dates,
+    state.theme,
+    state.datatypes,
+  ]);
   const calendarTheme = {
     ...theme.paper,
     arrowColor: themeIsDark(theme) ? '#666' : '#ccc',
-    calendarBackground: themeIsDark(theme) ? '#000' : '#fff'
-  }
+    calendarBackground: themeIsDark(theme) ? '#000' : '#fff',
+  };
   /*const current = new Date(),
     month = current.getMonth() + 1,
     year = current.getFullYear(),
-    lastDay = new Date(year, month + 1, 0).getDate()*/;
-
-  return (
+    lastDay = new Date(year, month + 1, 0).getDate()*/ return (
     <View>
       <CalendarList
         // Initially visible month. Default = Date()
@@ -44,16 +35,25 @@ const Calendar = (props: {
         // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
         //maxDate={'2012-05-30'}
         markedDates={formatDatesForMarking(dates, datatypes)}
-        markingType='multi-dot'
+        markingType="multi-dot"
         //displayLoadingIndicator={true}
         // Handler which gets executed on day press. Default = undefined
-        onDayPress={(day: DateObject) => navigation.navigate('CalendarDay', { date: day, title: 'Calendar: ' + new Date(Date.parse(day.dateString)).toDateString() })}
+        onDayPress={(day: DateObject) =>
+          navigation.navigate('CalendarDay', {
+            date: day,
+            title:
+              'Calendar: ' +
+              new Date(Date.parse(day.dateString)).toDateString(),
+          })
+        }
         // Handler which gets executed on day long press. Default = undefined
         //onDayLongPress={(day: DateObject) => navigation.navigate('ModalScreen', { component: CalendarEntry, date: day })}
         // Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
         monthFormat={'yyyy MM'}
         // Handler which gets executed when visible month changes in calendar. Default = undefined
-        onMonthChange={(mo: DateObject) => {console.log('month changed', mo)}}
+        onMonthChange={(mo: DateObject) => {
+          console.log('month changed', mo);
+        }}
         // Hide month navigation arrows. Default = false
         //hideArrows={true}
         // Replace default arrows with custom ones (direction can be 'left' or 'right')
@@ -92,14 +92,11 @@ const Calendar = (props: {
         scrollEnabled={true}
         // Enable or disable vertical scroll indicator. Default = false
         showScrollIndicator={true}
-        style={{
-          width: '100%',
-          maxWidth: '100%'
-        }}
+        style={styles.flex}
       />
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   buttons: {
@@ -108,14 +105,9 @@ const styles = StyleSheet.create({
   button: {
     margin: 8,
   },
+  flex: {
+    flex: 1,
+  },
 });
 
-const mapStateToProps = (state: State) => {
-  return {
-    user: state.user,
-    theme: state.theme,
-    dates: state.dates,
-    datatypes: state.datatypes
-  };
-};
-export default connect(mapStateToProps)(Calendar);
+export default Calendar;

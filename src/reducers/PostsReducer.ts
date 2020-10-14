@@ -1,15 +1,14 @@
-
 export type Post = {
-  key?: string,
-  body: string,
-  tags: Array<string>,
-  criteria: PostCriteria,
+  key?: string;
+  body: string;
+  tags: Array<string>;
+  criteria: PostCriteria;
   created: {
-    by: string,
-    on: Date,
-    from?: string
-  },
-}
+    by: string;
+    on: Date;
+    from?: string;
+  };
+};
 
 export enum PostPrivacyTypes {
   'PUBLIC' = 0,
@@ -20,76 +19,79 @@ export enum PostPrivacyTypes {
 export const getPostPrivacyName = (privacy: PostPrivacyTypes) => {
   switch (privacy) {
     case PostPrivacyTypes.FRIENDS:
-      return 'Friends'
+      return 'Friends';
     case PostPrivacyTypes.PRIVATE:
-      return 'Private'
+      return 'Private';
     default:
-      return 'Public'
+      return 'Public';
   }
-}
+};
 
 export type PostCriteria = {
-  tagId?: string,
-  recipientId?: string
-  privacy: PostPrivacyTypes
-}
+  tagId?: string;
+  recipientId?: string;
+  privacy: PostPrivacyTypes;
+};
 
 export type PostsType = {
-  items: Array<Post>,
-  criteria: PostCriteria
-}
+  items: Array<Post>;
+  criteria: PostCriteria;
+};
 
 export type PostsState = {
-  posts:PostsType
-}
+  posts: PostsType;
+};
 
-export const initialCriteria: PostCriteria = { privacy: 0 }
-export const initialState: PostsType = { items: [], criteria: initialCriteria};
+export const initialCriteria: PostCriteria = {privacy: 0};
+export const initialState: PostsType = {items: [], criteria: initialCriteria};
 
-export const GET_POSTS= 'GET_POSTS';
-export const SET_POSTS= 'SET_POSTS';
-export const REPLACE_POSTS= 'REPLACE_POSTS';
+export const GET_POSTS = 'GET_POSTS';
+export const SET_POSTS = 'SET_POSTS';
+export const REPLACE_POSTS = 'REPLACE_POSTS';
 
-export type Action = {
-    type: 'SET_POSTS';
-    posts: PostsType
-  } | {
-    type: 'GET_POSTS';
-    posts: PostsType
-  } | {
-    type: 'REPLACE_POSTS';
-    posts: PostsType
-  };
+export type Action =
+  | {
+      type: 'SET_POSTS';
+      posts: PostsType;
+    }
+  | {
+      type: 'GET_POSTS';
+      posts: PostsType;
+    }
+  | {
+      type: 'REPLACE_POSTS';
+      posts: PostsType;
+    };
 
 export const GetPostsAction = (posts: PostsType): Action => ({
   type: GET_POSTS,
-  posts
+  posts,
 });
 
 export const SetPostsAction = (posts: PostsType): Action => ({
   type: SET_POSTS,
-  posts
+  posts,
 });
 
 export const ReplacePostsAction = (posts: PostsType): Action => ({
   type: SET_POSTS,
-  posts
+  posts,
 });
 
 export default function PostsReducer(
   prevState = initialState,
-  action: Action
+  action: Action,
 ): PostsType {
   switch (action.type) {
     case GET_POSTS:
     case SET_POSTS:
       return {
         ...prevState,
-        ...action.posts
+        ...action.posts,
       };
     case REPLACE_POSTS:
-      return action.posts
+      return action.posts;
     default:
-      return prevState
+      return prevState;
   }
 }

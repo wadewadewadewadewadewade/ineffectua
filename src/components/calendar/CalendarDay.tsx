@@ -1,24 +1,32 @@
 import React from 'react';
-import { DateObject } from 'react-native-calendars';
-import { StyleSheet, ScaledSize, Dimensions, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { connect } from 'react-redux';
-import { State } from '../../Types';
-import { RouteProp } from '@react-navigation/native';
-import { ScrollView, TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler';
-import { TextInput, Text, Button, FAB, Modal, Portal } from 'react-native-paper';
-import { CalendarStackParamList } from './CalendarNavigator';
-import { CalendarWindow, CalendarEntry, CalendarState } from '../../reducers/CalendarReducer';
-import { addDates, datesToArray } from '../../middleware/CalendarMiddleware';
-import { ThemeState } from '../../reducers/ThemeReducer';
-import { AuthState } from '../../reducers/AuthReducer';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { ThunkDispatch } from 'redux-thunk';
+import {DateObject} from 'react-native-calendars';
+import {StyleSheet, ScaledSize, Dimensions, View} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {connect} from 'react-redux';
+import {State} from '../../Types';
+import {RouteProp} from '@react-navigation/native';
+import {
+  ScrollView,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from 'react-native-gesture-handler';
+import {TextInput, Text, Button, FAB, Modal, Portal} from 'react-native-paper';
+import {CalendarStackParamList} from './CalendarNavigator';
+import {
+  CalendarWindow,
+  CalendarEntry,
+  CalendarState,
+} from '../../reducers/CalendarReducer';
+import {addDates, datesToArray} from '../../middleware/CalendarMiddleware';
+import {ThemeState} from '../../reducers/ThemeReducer';
+import {AuthState} from '../../reducers/AuthReducer';
+import {MaterialCommunityIcons} from '@expo/vector-icons';
+import {ThunkDispatch} from 'redux-thunk';
 import TypesSelector from '../shared/DataTypes';
-import { DataTypesState } from '../../reducers/DataTypesReducer';
-import { defaultColor, contrast } from '../../middleware/DataTypesMiddleware';
+import {DataTypesState} from '../../reducers/DataTypesReducer';
+import {defaultColor, contrast} from '../../middleware/DataTypesMiddleware';
 import ContactsSelector from '../shared/Contacts';
-import Picker, { dateToString } from '../shared/ChronoPicker';
+import Picker, {dateToString} from '../shared/ChronoPicker';
 import FlexableTextArea from '../shared/FlexableTextArea';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
@@ -27,222 +35,328 @@ const screenHeightMultiplier = 1.2;
 enum PickerPhases {
   Hidden,
   Starts,
-  Ends
+  Ends,
 }
 
-const NewSlot = (props : {
-    currentDay: CalendarWindow,
-    saveEntry: (entry: CalendarEntry) => void,
-    theme: ThemeState['theme'],
-    user: AuthState['user'],
-    entry: CalendarEntry
-  }): JSX.Element => {
-    const { user, theme, currentDay, saveEntry, entry } = props;
-    const [newCalendarEntry, setNewCalendarEntry] = React.useState(entry);
-    const [pickerPhase, setPickerPhase] = React.useState(PickerPhases.Hidden);
-    if (!user) {
-      return <View></View>
-    }
-    const save = () => {
-      return saveEntry(newCalendarEntry)
-    }
-    return (
-      <SafeAreaView>
-        <ScrollView>
-          <TextInput value={newCalendarEntry.title} onChangeText={(text) => setNewCalendarEntry({...newCalendarEntry, title: text})} placeholder="Add title" />
-          <TypesSelector 
-            dataTypeId={entry.typeId}
-            onValueChange={(datatype) => setNewCalendarEntry({...newCalendarEntry, typeId: datatype.key})} />
-          <View style={{height:StyleSheet.hairlineWidth,backgroundColor:'#AAA'}}></View>
-          <ContactsSelector
-            value={newCalendarEntry.contacts}
-            onValueChange={(contacts: Array<string>) => setNewCalendarEntry({...newCalendarEntry, contacts})} />
-          <TouchableOpacity onPress={() => setPickerPhase(PickerPhases.Starts)}>
-            <View style={{...styles.buttonRow, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#AAA'}}>
-              <Text style={{color: theme.paper.colors.text}}>From</Text>
-              <Text>{newCalendarEntry.window.starts.toLocaleTimeString()}</Text>
-            </View>
-          </TouchableOpacity>
-          {pickerPhase === PickerPhases.Starts && <Picker
+const NewSlot = (props: {
+  currentDay: CalendarWindow;
+  saveEntry: (entry: CalendarEntry) => void;
+  theme: ThemeState['theme'];
+  user: AuthState['user'];
+  entry: CalendarEntry;
+}): JSX.Element => {
+  const {user, theme, currentDay, saveEntry, entry} = props;
+  const [newCalendarEntry, setNewCalendarEntry] = React.useState(entry);
+  const [pickerPhase, setPickerPhase] = React.useState(PickerPhases.Hidden);
+  if (!user) {
+    return <View />;
+  }
+  const save = () => {
+    return saveEntry(newCalendarEntry);
+  };
+  return (
+    <SafeAreaView>
+      <ScrollView>
+        <TextInput
+          value={newCalendarEntry.title}
+          onChangeText={(text) =>
+            setNewCalendarEntry({...newCalendarEntry, title: text})
+          }
+          placeholder="Add title"
+        />
+        <TypesSelector
+          dataTypeId={entry.typeId}
+          onValueChange={(datatype) =>
+            setNewCalendarEntry({...newCalendarEntry, typeId: datatype.key})
+          }
+        />
+        <View
+          style={[{height: StyleSheet.hairlineWidth}, styles.fadedBackground]}
+        />
+        <ContactsSelector
+          value={newCalendarEntry.contacts}
+          onValueChange={(contacts: Array<string>) =>
+            setNewCalendarEntry({...newCalendarEntry, contacts})
+          }
+        />
+        <TouchableOpacity onPress={() => setPickerPhase(PickerPhases.Starts)}>
+          <View
+            style={[
+              styles.buttonRow,
+              styles.fadedTopBorder,
+              {borderTopWidth: StyleSheet.hairlineWidth},
+            ]}>
+            <Text style={{color: theme.paper.colors.text}}>From</Text>
+            <Text>{newCalendarEntry.window.starts.toLocaleTimeString()}</Text>
+          </View>
+        </TouchableOpacity>
+        {pickerPhase === PickerPhases.Starts && (
+          <Picker
             value={newCalendarEntry.window.starts}
             onResult={(d?: Date) => {
               if (d) {
-                setNewCalendarEntry({...newCalendarEntry, window: { starts: d, ends: newCalendarEntry.window.ends }})
+                setNewCalendarEntry({
+                  ...newCalendarEntry,
+                  window: {starts: d, ends: newCalendarEntry.window.ends},
+                });
               }
-              setPickerPhase(PickerPhases.Hidden)
-          }}/>}
-          <TouchableOpacity onPress={() => setPickerPhase(PickerPhases.Ends)}>
-            <View style={styles.buttonRow}>
-              <Text style={{color: theme.paper.colors.text}}>Ends</Text>
-              <Text>{dateToString(newCalendarEntry.window.ends, currentDay.ends)}</Text>
-            </View>
-          </TouchableOpacity>
-          {pickerPhase === PickerPhases.Ends && <Picker
+              setPickerPhase(PickerPhases.Hidden);
+            }}
+          />
+        )}
+        <TouchableOpacity onPress={() => setPickerPhase(PickerPhases.Ends)}>
+          <View style={styles.buttonRow}>
+            <Text style={{color: theme.paper.colors.text}}>Ends</Text>
+            <Text>
+              {dateToString(newCalendarEntry.window.ends, currentDay.ends)}
+            </Text>
+          </View>
+        </TouchableOpacity>
+        {pickerPhase === PickerPhases.Ends && (
+          <Picker
             value={newCalendarEntry.window.ends}
             minimum={newCalendarEntry.window.starts}
             onResult={(d?: Date) => {
               if (d) {
-                setNewCalendarEntry({...newCalendarEntry, window: { starts: newCalendarEntry.window.starts, ends: d }})
+                setNewCalendarEntry({
+                  ...newCalendarEntry,
+                  window: {starts: newCalendarEntry.window.starts, ends: d},
+                });
               }
-              setPickerPhase(PickerPhases.Hidden)
-          }}/>}
+              setPickerPhase(PickerPhases.Hidden);
+            }}
+          />
+        )}
         <FlexableTextArea
           value={newCalendarEntry.description}
-          onChangeText={(text) => setNewCalendarEntry({...newCalendarEntry, description: text})} placeholder="Optional Description" />
-        </ScrollView>
-        <TouchableOpacity onPress={save} style={{backgroundColor: theme.paper.colors.accent, ...styles.button}}>
-          <Text style={styles.buttonContents}>Add New Calendar Event</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    )
-}
+          onChangeText={(text) =>
+            setNewCalendarEntry({...newCalendarEntry, description: text})
+          }
+          placeholder="Optional Description"
+        />
+      </ScrollView>
+      <TouchableOpacity
+        onPress={save}
+        style={{backgroundColor: theme.paper.colors.accent, ...styles.button}}>
+        <Text style={styles.buttonContents}>Add New Calendar Event</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
+  );
+};
 
-const TimeSlot = (props : {
-  date: CalendarEntry,
-  color: string,
-  window: CalendarWindow,
-  index: number,
-  total: number,
-  screenHeight: number,
-  borderRadius: number,
-  openModal: (entry: CalendarEntry) => void
+const TimeSlot = (props: {
+  date: CalendarEntry;
+  color: string;
+  window: CalendarWindow;
+  index: number;
+  total: number;
+  screenHeight: number;
+  borderRadius: number;
+  openModal: (entry: CalendarEntry) => void;
 }): JSX.Element => {
-  const { date, color, window, total, screenHeight, borderRadius, openModal } = props;
-  const { starts, ends } = date.window;
-  const dateIsContainedWithinDay = ends.getTime() < window.starts.getTime() + oneDayInMilliseconds;
-  const heightInPercentage = ((starts.getTime() - window.starts.getTime()) / oneDayInMilliseconds);
+  const {
+    date,
+    color,
+    window,
+    total,
+    screenHeight,
+    borderRadius,
+    openModal,
+  } = props;
+  const {starts, ends} = date.window;
+  const dateIsContainedWithinDay =
+    ends.getTime() < window.starts.getTime() + oneDayInMilliseconds;
+  const heightInPercentage =
+    (starts.getTime() - window.starts.getTime()) / oneDayInMilliseconds;
   const marginTop = heightInPercentage * screenHeight;
-  const height = !dateIsContainedWithinDay ? (1 - heightInPercentage) * screenHeight : (ends.getTime() - starts.getTime()) / oneDayInMilliseconds * screenHeight;
-  const width = 1 / total * 100 + '%';
+  const height = !dateIsContainedWithinDay
+    ? (1 - heightInPercentage) * screenHeight
+    : ((ends.getTime() - starts.getTime()) / oneDayInMilliseconds) *
+      screenHeight;
+  const width = (1 / total) * 100 + '%';
   return (
-    <View style={{width, marginTop, height, backgroundColor: color, borderRadius, ...styles.timeslot}}>
-      <TouchableWithoutFeedback onPress={() => openModal(date)} style={{width:'100%',height:'100%'}}>
-        <Text style={{color: contrast(color), ...styles.timeslotText}}>{date.title}</Text>
+    <View
+      style={{
+        width,
+        marginTop,
+        height,
+        backgroundColor: color,
+        borderRadius,
+        ...styles.timeslot,
+      }}>
+      <TouchableWithoutFeedback
+        onPress={() => openModal(date)}
+        style={styles.flex}>
+        <Text style={{color: contrast(color), ...styles.timeslotText}}>
+          {date.title}
+        </Text>
       </TouchableWithoutFeedback>
     </View>
-  )
-}
+  );
+};
 
 export type CalendarDayProps = {
-  date: DateObject,
-  title: string
-}
+  date: DateObject;
+  title: string;
+};
 
 const CalendarDay = (props: {
-    dates: CalendarState['dates'],
-    user: AuthState['user'],
-    theme: ThemeState['theme'],
-    datatypes: DataTypesState['datatypes'],
-    route: RouteProp<CalendarStackParamList, 'CalendarDay'>,
-    saveDates: (entry: CalendarEntry, onComplete: () => void) => void
-  }) => {
-    const [visible, setVisible] = React.useState(false);
-    const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
-    React.useEffect(() => {
-      const onDimensionsChange = (p2: { window: ScaledSize, screen: ScaledSize }) => {
-        setDimensions(p2.window);
-      };
-      Dimensions.addEventListener('change', onDimensionsChange);
-      return () => Dimensions.removeEventListener('change', onDimensionsChange);
-    }, []);
-    const {
-      dates,
-      user,
-      theme,
-      datatypes,
-      route,
-      saveDates
-    } = props;
-    const { date } = route.params;
-    const thisDate = new Date(date.year, date.month - 1, date.day);
-    const window: CalendarWindow = {
-      starts: thisDate,
-      ends: new Date((thisDate.getTime() - 1) + 1000 * 60 * 60 * 24)
+  dates: CalendarState['dates'];
+  user: AuthState['user'];
+  theme: ThemeState['theme'];
+  datatypes: DataTypesState['datatypes'];
+  route: RouteProp<CalendarStackParamList, 'CalendarDay'>;
+  saveDates: (entry: CalendarEntry, onComplete: () => void) => void;
+}) => {
+  const [visible, setVisible] = React.useState(false);
+  const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
+  React.useEffect(() => {
+    const onDimensionsChange = (p2: {
+      window: ScaledSize;
+      screen: ScaledSize;
+    }) => {
+      setDimensions(p2.window);
+    };
+    Dimensions.addEventListener('change', onDimensionsChange);
+    return () => Dimensions.removeEventListener('change', onDimensionsChange);
+  }, []);
+  const {dates, user, theme, datatypes, route, saveDates} = props;
+  const {date} = route.params;
+  const thisDate = new Date(date.year, date.month - 1, date.day);
+  const window: CalendarWindow = {
+    starts: thisDate,
+    ends: new Date(thisDate.getTime() - 1 + 1000 * 60 * 60 * 24),
+  };
+  const datesArray = datesToArray(dates, window.starts, window.ends);
+  const dayGrid: Array<JSX.Element> = React.useMemo(() => {
+    let grid = [];
+    for (let i = 1; i < 24; i++) {
+      grid.push(
+        <View
+          key={i}
+          style={{
+            backgroundColor: theme.paper.colors.disabled,
+            ...styles.dayrow,
+          }}>
+          <Text
+            style={{
+              backgroundColor: theme.paper.colors.background,
+              color: theme.paper.colors.disabled,
+              ...styles.gridtext,
+            }}>
+            {i <= 12 ? i : i - 12}
+            {i <= 12 ? 'am' : 'pm'}
+          </Text>
+        </View>,
+      );
     }
-    if (!user) {
-      return <View></View>
+    return grid;
+  }, [theme.paper.colors.background, theme.paper.colors.disabled]);
+  const emptyCalendarEntry: CalendarEntry = {
+    title: '',
+    window: {
+      starts: new Date(),
+      ends: new Date(),
+    },
+  };
+  const [newCalendarEntry, setNewCalendarEntry] = React.useState(
+    emptyCalendarEntry,
+  );
+  const openModal = (entry?: CalendarEntry) => {
+    if (entry) {
+      setNewCalendarEntry(entry);
     }
-    const datesArray = datesToArray(dates, window.starts, window.ends);
-    const dayGrid: Array<JSX.Element> = React.useMemo(() => {
-      let grid = []
-      for(let i=1;i<24;i++) {
-        grid.push(
-          <View key={i} style={{backgroundColor: theme.paper.colors.disabled, ...styles.dayrow}}>
-            <Text style={{backgroundColor: theme.paper.colors.background, color: theme.paper.colors.disabled, ...styles.gridtext}}>{i<=12?i:i-12}{i<=12?'am':'pm'}</Text>
-          </View>
-        )
-      }
-      return grid;
-    }, [])
-    const emptyCalendarEntry: CalendarEntry = {
-      title: '',
-      window: {
-        starts: new Date(),
-        ends: new Date()
-      }
-    }
-    const [newCalendarEntry, setNewCalendarEntry] = React.useState(emptyCalendarEntry);
-    const openModal = (entry?: CalendarEntry) => {
-      if (entry) {
-        setNewCalendarEntry(entry)
-      }
-      setVisible(true)
-    }
-    const closeModal = () => {
-      setNewCalendarEntry(emptyCalendarEntry);
-      setVisible(false);
-    }
-    return (
-      <View style={styles.container}>
-        <ScrollView contentOffset={{x: dimensions.height * 0.2, y: 0}} style={{position: 'relative'}}>
-          <View style={{ height: dimensions.height * screenHeightMultiplier, ...styles.entry }}>
-            <View style={styles.daygrid}>
-              {dayGrid}
-            </View>
-          </View>
-          <View style={styles.timeslots}>
-            {datesArray
-              .map((d: CalendarEntry, i: number) => <TimeSlot
-                key={d.key}
-                date={d}
-                color={d.typeId && datatypes && datatypes[d.typeId] ? datatypes[d.typeId].color : defaultColor}
-                window={window}
-                index={i}
-                total={datesArray.length}
-                screenHeight={dimensions.height * screenHeightMultiplier}
-                borderRadius={theme.paper.roundness}
-              openModal={(entry: CalendarEntry) => openModal(entry)}/>)
-            }
-          </View>
-        </ScrollView>
-        {!visible && <FAB
+    setVisible(true);
+  };
+  const closeModal = () => {
+    setNewCalendarEntry(emptyCalendarEntry);
+    setVisible(false);
+  };
+  if (!user) {
+    return <View />;
+  }
+  return (
+    <View style={styles.container}>
+      <ScrollView
+        contentOffset={{x: dimensions.height * 0.2, y: 0}}
+        style={styles.relative}>
+        <View
+          style={{
+            height: dimensions.height * screenHeightMultiplier,
+            ...styles.entry,
+          }}>
+          <View style={styles.daygrid}>{dayGrid}</View>
+        </View>
+        <View style={styles.timeslots}>
+          {datesArray.map((d: CalendarEntry, i: number) => (
+            <TimeSlot
+              key={d.key}
+              date={d}
+              color={
+                d.typeId && datatypes && datatypes[d.typeId]
+                  ? datatypes[d.typeId].color
+                  : defaultColor
+              }
+              window={window}
+              index={i}
+              total={datesArray.length}
+              screenHeight={dimensions.height * screenHeightMultiplier}
+              borderRadius={theme.paper.roundness}
+              openModal={(entry: CalendarEntry) => openModal(entry)}
+            />
+          ))}
+        </View>
+      </ScrollView>
+      {!visible && (
+        <FAB
           style={styles.fab}
           small
           icon={() => <MaterialCommunityIcons name="plus" size={24} />}
           onPress={() => openModal()}
-        />}
-        <Portal>
-          <Modal visible={visible} onDismiss={() => closeModal()}>
-            <View style={{backgroundColor: theme.paper.colors.surface}}>
-              <NewSlot
-                currentDay={window}
-                entry={newCalendarEntry}
-                saveEntry={(entry: CalendarEntry) => {saveDates(entry, () => closeModal())}}
-                theme={theme}
-                user={user} />
-              <Button onPress={() => closeModal()} style={{paddingVertical:8}}><Text>cancel</Text></Button>
-            </View>
-          </Modal>
-        </Portal>
-      </View>
-    )
-}
+        />
+      )}
+      <Portal>
+        <Modal visible={visible} onDismiss={() => closeModal()}>
+          <View style={{backgroundColor: theme.paper.colors.surface}}>
+            <NewSlot
+              currentDay={window}
+              entry={newCalendarEntry}
+              saveEntry={(entry: CalendarEntry) => {
+                saveDates(entry, () => closeModal());
+              }}
+              theme={theme}
+              user={user}
+            />
+            <Button onPress={() => closeModal()} style={styles.cancelButton}>
+              <Text>cancel</Text>
+            </Button>
+          </View>
+        </Modal>
+      </Portal>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
+  relative: {
+    position: 'relative',
+  },
+  fadedBackground: {
+    backgroundColor: '#AAA',
+  },
+  fadedTopBorder: {
+    borderTopColor: '#AAA',
+  },
+  cancelButton: {
+    paddingVertical: 8,
+  },
+  flex: {
+    flex: 1,
+  },
   container: {
     flexDirection: 'column',
     justifyContent: 'space-between',
-    height:'100%'
+    height: '100%',
   },
   daygrid: {
     position: 'absolute',
@@ -251,31 +365,31 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     flexDirection: 'column',
-    justifyContent: 'space-evenly'
+    justifyContent: 'space-evenly',
   },
   dayrow: {
     height: 1,
     overflow: 'visible',
     alignItems: 'center',
     marginRight: 8,
-    flexDirection: 'row'
+    flexDirection: 'row',
   },
   gridtext: {
     padding: 8,
     fontSize: 12,
     textAlign: 'right',
-    lineHeight: 12
+    lineHeight: 12,
   },
   buttons: {
     paddingHorizontal: 8,
-    paddingVertical: 20
+    paddingVertical: 20,
   },
   button: {
     paddingHorizontal: 8,
     paddingVertical: 20,
     alignItems: 'center',
   },
-  buttonContents : {
+  buttonContents: {
     fontSize: 16,
     textAlign: 'center',
     textTransform: 'uppercase',
@@ -283,14 +397,14 @@ const styles = StyleSheet.create({
   buttonRow: {
     fontSize: 12,
     paddingHorizontal: 16,
-    paddingVertical:24,
+    paddingVertical: 24,
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#AAA',
   },
   entry: {
-    position:'relative'
+    position: 'relative',
   },
   fab: {
     position: 'absolute',
@@ -307,19 +421,18 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     flexGrow: 1,
     flexShrink: 1,
-    padding:8,
-    marginRight:8
+    padding: 8,
+    marginRight: 8,
   },
   timeslotText: {
     overflow: 'hidden',
-  }
+  },
 });
 
-interface OwnProps {
-}
+interface OwnProps {}
 
 interface DispatchProps {
-  saveDates: (entry: CalendarEntry, onComplete: () => void) => void
+  saveDates: (entry: CalendarEntry, onComplete: () => void) => void;
 }
 
 const mapStateToProps = (state: State) => {
@@ -331,11 +444,14 @@ const mapStateToProps = (state: State) => {
     datatypes: state.datatypes,
   };
 };
-const mapDispatchToProps = (dispatch: ThunkDispatch<State, firebase.app.App, any>, ownProps: OwnProps): DispatchProps => {
+const mapDispatchToProps = (
+  dispatch: ThunkDispatch<State, firebase.app.App, any>,
+  ownProps: OwnProps,
+): DispatchProps => {
   return {
     saveDates: (entry: CalendarEntry, onComplete: () => void) => {
-      dispatch(addDates(entry, onComplete))
-    }
+      dispatch(addDates(entry, onComplete));
+    },
   };
-};// Exports
+}; // Exports
 export default connect(mapStateToProps, mapDispatchToProps)(CalendarDay);

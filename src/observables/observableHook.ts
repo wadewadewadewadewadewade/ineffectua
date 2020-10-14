@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
-import { Observable } from "./observable";
+import {useEffect, useState} from 'react';
+import {Observable} from './observable';
 
 export function useObservable<T>(observable: Observable<T>): T {
-    const [val, setVal] = useState(observable.get());
+  const [val, setVal] = useState(observable.get());
 
-    useEffect(() => {
-        return observable.subscribe(setVal);
-    }, [observable]);
+  useEffect(() => {
+    return observable.subscribe(setVal);
+  }, [observable]);
 
-    return val;
+  return val;
 }

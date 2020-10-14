@@ -1,110 +1,137 @@
-import React, { Suspense } from 'react';
-import { ScrollView, StyleSheet, Dimensions, ScaledSize, View } from 'react-native';
-import { Subheading, Avatar, Button, Divider, Text, ActivityIndicator } from 'react-native-paper';
+import React, {Suspense} from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  Dimensions,
+  ScaledSize,
+  View,
+} from 'react-native';
+import {
+  Subheading,
+  Avatar,
+  Button,
+  Divider,
+  Text,
+  ActivityIndicator,
+} from 'react-native-paper';
 import SettingsItem from '../shared/SettingsItem';
-import { NavigationContainerRef } from '@react-navigation/native';
-import { useSelector, useDispatch } from 'react-redux';
-import { State } from '../../Types';
-import { ToggleThemeAction } from '../../reducers/ThemeReducer';
-import { themeIsDark } from '../../reducers/ThemeReducer';
-import { signOut, getUserById } from '../../middleware/AuthMiddleware';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { TouchableHighlight } from 'react-native-gesture-handler';
-import { getFirebaseData } from '../../middleware';
-import { isFetching } from '../../reducers';
+import {NavigationContainerRef} from '@react-navigation/native';
+import {useSelector, useDispatch} from 'react-redux';
+import {State} from '../../Types';
+import {ToggleThemeAction} from '../../reducers/ThemeReducer';
+import {themeIsDark} from '../../reducers/ThemeReducer';
+import {signOut, getUserById} from '../../middleware/AuthMiddleware';
+import {MaterialCommunityIcons} from '@expo/vector-icons';
+import {TouchableHighlight} from 'react-native-gesture-handler';
+import {getFirebaseData} from '../../middleware';
+import {isFetching} from '../../reducers';
 import Tags from '../shared/Tags';
 import Medications from '../shared/Medications';
 import Contacts from '../shared/Contacts';
-import { User } from '../../reducers/AuthReducer';
+import {User} from '../../reducers/AuthReducer';
 
 enum ProfileViews {
   'PRIVATE' = 0,
-  'PUBLIC' = 1
+  'PUBLIC' = 1,
 }
 
 enum ProfileLayouts {
   'SIDEBAR' = 0,
-  'PAGE' = 1
+  'PAGE' = 1,
 }
 
 const getUserIdFromRoute = (navigationRef: NavigationContainerRef | null) => {
   if (navigationRef !== null) {
-    const route = navigationRef.getCurrentRoute()
+    const route = navigationRef.getCurrentRoute();
     if (route !== undefined) {
-      const params = route.params
+      const params = route.params;
       if (params !== undefined && 'userId' in params) {
-        const { userId } = params as { userId?: string }
+        const {userId} = params as {userId?: string};
         if (userId !== undefined) {
-          return userId
+          return userId;
         }
       }
     }
   }
-  return undefined
-}
+  return undefined;
+};
 
 const TabsLinks = ({
-  navigationRef
+  navigationRef,
 }: {
-  navigationRef: NavigationContainerRef | null
+  navigationRef: NavigationContainerRef | null;
 }) => {
-  const [theme] = useSelector((state: State) => ([state.theme]))
-  const color = theme.paper.colors.text
+  const [theme] = useSelector((state: State) => [state.theme]);
+  const color = theme.paper.colors.text;
   return (
     <View>
-      <View style={{flexDirection:'row',justifyContent:'space-between',paddingVertical:16}}>
+      <View style={styles.row}>
         <TouchableHighlight onPress={() => navigationRef?.navigate('Agenda')}>
           <MaterialCommunityIcons name="home" color={color} size={26} />
         </TouchableHighlight>
         <TouchableHighlight onPress={() => navigationRef?.navigate('Calendar')}>
           <MaterialCommunityIcons name="calendar" color={color} size={26} />
         </TouchableHighlight>
-        <TouchableHighlight onPress={() => navigationRef?.navigate('ContactsList')}>
+        <TouchableHighlight
+          onPress={() => navigationRef?.navigate('ContactsList')}>
           <MaterialCommunityIcons name="contacts" color={color} size={26} />
         </TouchableHighlight>
-        <TouchableHighlight onPress={() => navigationRef?.navigate('MedicationsList')}>
+        <TouchableHighlight
+          onPress={() => navigationRef?.navigate('MedicationsList')}>
           <MaterialCommunityIcons name="pill" color={color} size={26} />
         </TouchableHighlight>
         <TouchableHighlight onPress={() => navigationRef?.navigate('PainLog')}>
           <MaterialCommunityIcons name="human" color={color} size={26} />
         </TouchableHighlight>
       </View>
-      <Divider/>
+      <Divider />
     </View>
-  )
-}
+  );
+};
 
 const SideBar = ({
   navigationRef,
-} : {
-  navigationRef: NavigationContainerRef | null,
+}: {
+  navigationRef: NavigationContainerRef | null;
 }) => {
-  const userId = getUserIdFromRoute(navigationRef) // no userId supplied means private
-  const [ready, setReady] = React.useState(false)
-  const [user, setUser] = React.useState<User>(useSelector((state: State) => state.user))
-  const [error, setError] = React.useState<Error | undefined>()
+  const userId = getUserIdFromRoute(navigationRef); // no userId supplied means private
+  const [ready, setReady] = React.useState(false);
+  const [user, setUser] = React.useState<User>(
+    useSelector((state: State) => state.user),
+  );
+  const [error, setError] = React.useState<Error | undefined>();
   React.useEffect(() => {
     const getUserConditionally = async () => {
       if (userId) {
-        getUserById(userId).then(u => setUser(u)).catch(e => setError(e)).then(() => setReady(true))
+        getUserById(userId)
+          .then((u) => setUser(u))
+          .catch((e) => setError(e))
+          .then(() => setReady(true));
       } else {
-        setReady(true)
+        setReady(true);
       }
-    }
-    !ready && getUserConditionally()
-  }, [ready])
-  const profileView = userId !== undefined && user !== false && userId !== user.uid ? ProfileViews.PUBLIC : ProfileViews.PRIVATE
-  const theme = useSelector((state: State) => state.theme)
-  const dispatch = useDispatch()
-  const toggleTheme = () => dispatch(ToggleThemeAction())
-  const logout = () => dispatch(signOut())
-  const refreshDataFromFirebase = () => getFirebaseData(dispatch)
-  const fetching = (is:boolean) => dispatch(isFetching(is))
-  const thumbnail = user !== false && user.photoURL !== undefined && user.photoURL.href ? user.photoURL.href : null;
+    };
+    !ready && getUserConditionally();
+  }, [ready, userId]);
+  const profileView =
+    userId !== undefined && user !== false && userId !== user.uid
+      ? ProfileViews.PUBLIC
+      : ProfileViews.PRIVATE;
+  const theme = useSelector((state: State) => state.theme);
+  const dispatch = useDispatch();
+  const toggleTheme = () => dispatch(ToggleThemeAction());
+  const logout = () => dispatch(signOut());
+  const refreshDataFromFirebase = () => getFirebaseData(dispatch);
+  const fetching = (is: boolean) => dispatch(isFetching(is));
+  const thumbnail =
+    user !== false && user.photoURL !== undefined && user.photoURL.href
+      ? user.photoURL.href
+      : null;
   const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
-  const isLandscapeOnPhone = dimensions.width > dimensions.height && dimensions.height <= 420;
+  const isLandscapeOnPhone =
+    dimensions.width > dimensions.height && dimensions.height <= 420;
   React.useEffect(() => {
-    const onDimensionsChange = ({ window }: { window: ScaledSize }) => {
+    const onDimensionsChange = ({window}: {window: ScaledSize}) => {
       setDimensions(window);
     };
     Dimensions.addEventListener('change', onDimensionsChange);
@@ -115,18 +142,22 @@ const SideBar = ({
       <View>
         <Text>An error occured: {error.message}</Text>
       </View>
-    )
+    );
   } else if (user === false) {
     return (
       <View>
         <Text>Please sign in</Text>
       </View>
-    )
+    );
   } else if (profileView === ProfileViews.PRIVATE) {
     return (
       <ScrollView style={styles.content}>
-        {thumbnail ? (<Avatar.Image source={{uri: thumbnail}} style={styles.image} />) : null}
-        <Subheading>Hi{user && user.displayName !== null ? ' ' + user.displayName : ''}!</Subheading>
+        {thumbnail ? (
+          <Avatar.Image source={{uri: thumbnail}} style={styles.image} />
+        ) : null}
+        <Subheading>
+          Hi{user && user.displayName !== null ? ' ' + user.displayName : ''}!
+        </Subheading>
         <SettingsItem
           label="Dark theme"
           value={themeIsDark(theme)}
@@ -135,18 +166,20 @@ const SideBar = ({
         <Divider />
         {isLandscapeOnPhone && <TabsLinks navigationRef={navigationRef} />}
         <Divider />
-        <Suspense fallback={<ActivityIndicator/>}>
+        <Suspense fallback={<ActivityIndicator />}>
           <Tags userId={user.uid} />
         </Suspense>
         <Divider />
-        <Medications display='list' />
+        <Medications display="list" />
         <Divider />
-        <Contacts display='list' />
+        <Contacts display="list" />
         <Divider />
-        <Button onPress={() => {
-          fetching(true)
-          refreshDataFromFirebase().finally(() => fetching(false))
-        }} style={styles.button}>
+        <Button
+          onPress={() => {
+            fetching(true);
+            refreshDataFromFirebase().finally(() => fetching(false));
+          }}
+          style={styles.button}>
           <Text>Refresh Data</Text>
         </Button>
         <Divider />
@@ -154,78 +187,97 @@ const SideBar = ({
           Sign Out
         </Button>
       </ScrollView>
-    )
+    );
   } else {
     // public
     return (
       <ScrollView style={styles.content}>
-        {thumbnail ? (<Avatar.Image source={{uri: thumbnail}} style={styles.image} />) : null}
-        <Subheading>{user && user.displayName !== null ? ' ' + user.displayName : ''}!</Subheading>
+        {thumbnail ? (
+          <Avatar.Image source={{uri: thumbnail}} style={styles.image} />
+        ) : null}
+        <Subheading>
+          {user && user.displayName !== null ? ' ' + user.displayName : ''}!
+        </Subheading>
         {isLandscapeOnPhone && <TabsLinks navigationRef={navigationRef} />}
         <Divider />
-        <Suspense fallback={<ActivityIndicator/>}>
+        <Suspense fallback={<ActivityIndicator />}>
           <Tags userId={user.uid} />
         </Suspense>
         <Divider />
-        <Medications display='list' />
+        <Medications display="list" />
         <Divider />
-        <Contacts display='list' />
+        <Contacts display="list" />
       </ScrollView>
-    )
+    );
   }
-}
+};
 
 const ProfilePage = ({
   navigationRef,
-} : {
-  navigationRef: NavigationContainerRef | null,
+}: {
+  navigationRef: NavigationContainerRef | null;
 }) => {
-  const [ready, setReady] = React.useState(false)
-  const userId = getUserIdFromRoute(navigationRef) // no userId supplied means private
-  const [user, setUser] = React.useState<User>(useSelector((state: State) => state.user))
-  const [error, setError] = React.useState<Error | undefined>()
+  const [ready, setReady] = React.useState(false);
+  const userId = getUserIdFromRoute(navigationRef); // no userId supplied means private
+  const [user, setUser] = React.useState<User>(
+    useSelector((state: State) => state.user),
+  );
+  const [error, setError] = React.useState<Error | undefined>();
   React.useEffect(() => {
     const getUserConditionally = async () => {
       if (userId) {
-        getUserById(userId).then(u => setUser(u)).catch(e => setError(e)).then(() => setReady(true))
+        getUserById(userId)
+          .then((u) => setUser(u))
+          .catch((e) => setError(e))
+          .then(() => setReady(true));
       } else {
-        setReady(true)
+        setReady(true);
       }
-    }
-    !ready && getUserConditionally()
-  }, [ready])
-  const profileView = userId !== undefined && user !== false && userId !== user.uid ? ProfileViews.PUBLIC : ProfileViews.PRIVATE
-  const theme = useSelector((state: State) => state.theme)
-  const dispatch = useDispatch()
-  const toggleTheme = () => dispatch(ToggleThemeAction())
-  const logout = () => dispatch(signOut())
-  const refreshDataFromFirebase = () => getFirebaseData(dispatch)
-  const fetching = (is:boolean) => dispatch(isFetching(is))
-  const thumbnail = user !== false && user.photoURL !== undefined && user.photoURL.href ? user.photoURL.href : null;
+    };
+    !ready && getUserConditionally();
+  }, [ready, userId]);
+  const profileView =
+    userId !== undefined && user !== false && userId !== user.uid
+      ? ProfileViews.PUBLIC
+      : ProfileViews.PRIVATE;
+  const theme = useSelector((state: State) => state.theme);
+  const dispatch = useDispatch();
+  const toggleTheme = () => dispatch(ToggleThemeAction());
+  const logout = () => dispatch(signOut());
+  const refreshDataFromFirebase = () => getFirebaseData(dispatch);
+  const fetching = (is: boolean) => dispatch(isFetching(is));
+  const thumbnail =
+    user !== false && user.photoURL !== undefined && user.photoURL.href
+      ? user.photoURL.href
+      : null;
   if (error) {
     return (
       <View>
         <Text>An error occured: {error.message}</Text>
       </View>
-    )
+    );
   } else if (user === false) {
     return (
       <View>
         <Text>Please sign in</Text>
       </View>
-    )
+    );
   } else if (profileView === ProfileViews.PRIVATE) {
     return (
       <ScrollView style={styles.content}>
-        {thumbnail ? (<Avatar.Image source={{uri: thumbnail}} style={styles.image} />) : null}
-        <Subheading>Hi{user && user.displayName !== null ? ' ' + user.displayName : ''}!</Subheading>
+        {thumbnail ? (
+          <Avatar.Image source={{uri: thumbnail}} style={styles.image} />
+        ) : null}
+        <Subheading>
+          Hi{user && user.displayName !== null ? ' ' + user.displayName : ''}!
+        </Subheading>
         <SettingsItem
           label="Dark theme"
           value={themeIsDark(theme)}
           onValueChange={() => toggleTheme()}
         />
         <Divider />
-        <Suspense fallback={<ActivityIndicator/>}>
+        <Suspense fallback={<ActivityIndicator />}>
           <Tags userId={user.uid} />
         </Suspense>
         <Divider />
@@ -233,10 +285,12 @@ const ProfilePage = ({
         <Divider />
         <Contacts userId={user.uid} />
         <Divider />
-        <Button onPress={() => {
-          fetching(true)
-          refreshDataFromFirebase().finally(() => fetching(false))
-        }} style={styles.button}>
+        <Button
+          onPress={() => {
+            fetching(true);
+            refreshDataFromFirebase().finally(() => fetching(false));
+          }}
+          style={styles.button}>
           <Text>Refresh Data</Text>
         </Button>
         <Divider />
@@ -244,46 +298,50 @@ const ProfilePage = ({
           Sign Out
         </Button>
       </ScrollView>
-    )
+    );
   } else {
     // public
     return (
       <ScrollView style={styles.content}>
-        {thumbnail ? (<Avatar.Image source={{uri: thumbnail}} style={styles.image} />) : null}
-        <Subheading>{user && user.displayName !== null ? ' ' + user.displayName : ''}!</Subheading>
-        <Suspense fallback={<ActivityIndicator/>}>
+        {thumbnail ? (
+          <Avatar.Image source={{uri: thumbnail}} style={styles.image} />
+        ) : null}
+        <Subheading>
+          {user && user.displayName !== null ? ' ' + user.displayName : ''}!
+        </Subheading>
+        <Suspense fallback={<ActivityIndicator />}>
           <Tags userId={user.uid} />
         </Suspense>
         <Divider />
-        <Medications userId={user.uid} display='list' />
+        <Medications userId={user.uid} display="list" />
         <Divider />
-        <Contacts userId={user.uid} display='list' />
+        <Contacts userId={user.uid} display="list" />
       </ScrollView>
-    )
+    );
   }
-}
+};
 
-const Profile =
-({
+const Profile = ({
   layout,
   navigationRef,
 }: {
-  layout?: ProfileLayouts,
-  navigationRef: NavigationContainerRef | null,
+  layout?: ProfileLayouts;
+  navigationRef: NavigationContainerRef | null;
 }) => {
-  const pageLayout = layout ? layout : ProfileLayouts.SIDEBAR
+  const pageLayout = layout ? layout : ProfileLayouts.SIDEBAR;
   if (pageLayout === ProfileLayouts.PAGE) {
-    return (
-      <ProfilePage navigationRef={navigationRef} />
-    )
+    return <ProfilePage navigationRef={navigationRef} />;
   } else {
-    return (
-      <SideBar navigationRef={navigationRef} />
-    )
+    return <SideBar navigationRef={navigationRef} />;
   }
-}
+};
 
 const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+  },
   content: {
     flexDirection: 'column',
     paddingHorizontal: 16,
@@ -297,8 +355,8 @@ const styles = StyleSheet.create({
     margin: 8,
   },
   image: {
-    alignItems: 'center'
-  }
+    alignItems: 'center',
+  },
 });
 
-export default Profile
+export default Profile;

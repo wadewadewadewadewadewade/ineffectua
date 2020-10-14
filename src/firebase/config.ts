@@ -30,10 +30,14 @@ if (!firebase.apps.length) {
     });*/
   } catch (err) {
     // not an actual error when we're hot-reloading
-    if (!/(already exists|Setting a timer for a long period of time)/.test(err.message)) {
-      console.error('Firebase initialization error', err.stack)
+    if (
+      !/(already exists|Setting a timer for a long period of time)/.test(
+        err.message,
+      )
+    ) {
+      console.error('Firebase initialization error', err.stack);
     }
   }
 }
 
-export { firebase };
+export {firebase};
