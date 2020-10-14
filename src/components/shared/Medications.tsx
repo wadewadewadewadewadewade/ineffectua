@@ -302,14 +302,7 @@ const Medications = ({
   } else {
     return (
       <View style={styles.container}>
-        <View
-          style={[
-            styles.spaceBetween,
-            {
-              flexDirection: display === 'list' ? 'column' : 'row',
-              alignItems: display === 'list' ? 'flex-start' : 'center',
-            },
-          ]}>
+        <View style={styles.spaceBetween}>
           <Text style={{color: theme.paper.colors.text}}>Medication</Text>
           <View style={styles.pickerView}>
             <RNPickerSelect
