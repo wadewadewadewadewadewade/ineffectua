@@ -79,5 +79,5 @@ export type RootStackParamList = {
   Tabs: MaterialBottomTabParams;
   AuthFlow: undefined;
   NotFound: undefined;
-  ModalScreen: undefined;
+  Profile: undefined;
 };

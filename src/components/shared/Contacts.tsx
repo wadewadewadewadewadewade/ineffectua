@@ -133,16 +133,22 @@ const SideBar = ({
   const contactsArray = firebaseDocumentToArray<Contact>(contacts);
   return (
     <View style={styles.container}>
-      <View>
-        <TouchableHighlight
-          onPress={() => {
-            navigationRef?.navigate('Tabs', {screen: 'ContactsList'});
-          }}>
+      <TouchableHighlight
+        onPress={() => {
+          navigationRef?.navigate('Tabs', {screen: 'ContactsList'});
+        }}>
+        <View style={styles.row}>
           <Text style={[styles.labelFont, {color: theme.paper.colors.text}]}>
             Contacts
           </Text>
-        </TouchableHighlight>
-      </View>
+          <MaterialCommunityIcons
+            style={styles.navigateIcon}
+            name="chevron-right"
+            color={paperColors(theme).text}
+            size={26}
+          />
+        </View>
+      </TouchableHighlight>
       <SafeAreaView style={styles.sidebarInset}>
         <FlatList
           data={contactsArray}
@@ -156,7 +162,7 @@ const SideBar = ({
 
 type Props = {
   value?: Array<string>;
-  display?: 'list' | 'page';
+  display?: 'list' | 'page' | 'summary';
   limit?: number;
   userId?: string;
   navigationRef?: NavigationContainerRef | null; // need this for the side bar only
@@ -221,6 +227,31 @@ const Contacts = ({
           contacts={contacts}
           navigationRef={navigationRef === undefined ? null : navigationRef}
         />
+      );
+    } else if (display === 'summary') {
+      return (
+        <View style={styles.container}>
+          <TouchableHighlight
+            onPress={() => {
+              navigationRef?.navigate('Tabs', {screen: 'ContactsList'});
+            }}>
+            <View style={styles.row}>
+              <Text
+                style={[styles.labelFont, {color: theme.paper.colors.text}]}>
+                Contacts
+              </Text>
+              <MaterialCommunityIcons
+                style={styles.navigateIcon}
+                name="chevron-right"
+                color={paperColors(theme).text}
+                size={26}
+              />
+            </View>
+          </TouchableHighlight>
+          {contactsArray.map((c) => (
+            <ContactItem contact={c} />
+          ))}
+        </View>
       );
     } else if (limit === 1) {
       return (
@@ -333,7 +364,13 @@ const pickerStyles: PickerStyle = {
 };
 
 const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+  },
   labelFont: {
+    fontSize: 16,
+  },
+  navigateIcon: {
     fontSize: 16,
   },
   container: {

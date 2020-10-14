@@ -40,7 +40,7 @@ import MaterialBottomTabs from './MaterialBottomTabs';
 import NotFound from './NotFound';
 import AuthFlow from './authentication/AuthFlow';
 
-import Profile from './authentication/Profile';
+import Profile, {ProfileLayouts} from './authentication/Profile';
 
 import {
   NAVIGATION_PERSISTENCE_KEY,
@@ -324,6 +324,18 @@ const Navigation = () => {
                           ),
                     })}
                     component={MaterialBottomTabs}
+                  />
+                  <Stack.Screen
+                    name="Profile"
+                    children={() => {
+                      return (
+                        <Profile
+                          layout={ProfileLayouts.PAGE}
+                          navigationRef={navigationRef.current}
+                        />
+                      );
+                    }}
+                    options={{title: 'Profile'}}
                   />
                   <Stack.Screen
                     name="NotFound"

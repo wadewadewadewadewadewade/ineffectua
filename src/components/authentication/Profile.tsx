@@ -18,7 +18,7 @@ import SettingsItem from '../shared/SettingsItem';
 import {NavigationContainerRef} from '@react-navigation/native';
 import {useSelector, useDispatch} from 'react-redux';
 import {State} from '../../Types';
-import {ToggleThemeAction} from '../../reducers/ThemeReducer';
+import {ToggleThemeAction, paperColors} from '../../reducers/ThemeReducer';
 import {themeIsDark} from '../../reducers/ThemeReducer';
 import {signOut, getUserById} from '../../middleware/AuthMiddleware';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
@@ -35,7 +35,7 @@ enum ProfileViews {
   'PUBLIC' = 1,
 }
 
-enum ProfileLayouts {
+export enum ProfileLayouts {
   'SIDEBAR' = 0,
   'PAGE' = 1,
 }
@@ -152,12 +152,26 @@ const SideBar = ({
   } else if (profileView === ProfileViews.PRIVATE) {
     return (
       <ScrollView style={styles.content}>
-        {thumbnail ? (
-          <Avatar.Image source={{uri: thumbnail}} style={styles.image} />
-        ) : null}
-        <Subheading>
-          Hi{user && user.displayName !== null ? ' ' + user.displayName : ''}!
-        </Subheading>
+        <View style={styles.row}>
+          <View style={styles.avatarAndName}>
+            {thumbnail ? (
+              <Avatar.Image source={{uri: thumbnail}} style={styles.image} />
+            ) : null}
+            <Text style={styles.name}>
+              Hi
+              {user && user.displayName !== null ? ' ' + user.displayName : ''}!
+            </Text>
+          </View>
+          <MaterialCommunityIcons
+            onPress={() => {
+              navigationRef?.navigate('Root', {screen: 'Profile'});
+            }}
+            style={styles.settingsIcon}
+            name="cogs"
+            color={paperColors(theme).text}
+            size={26}
+          />
+        </View>
         <SettingsItem
           label="Dark theme"
           value={themeIsDark(theme)}
@@ -281,9 +295,17 @@ const ProfilePage = ({
           <Tags userId={user.uid} />
         </Suspense>
         <Divider />
-        <Medications userId={user.uid} navigationRef={navigationRef} />
+        <Medications
+          display="summary"
+          userId={user.uid}
+          navigationRef={navigationRef}
+        />
         <Divider />
-        <Contacts userId={user.uid} navigationRef={navigationRef} />
+        <Contacts
+          display="summary"
+          userId={user.uid}
+          navigationRef={navigationRef}
+        />
         <Divider />
         <Button
           onPress={() => {
@@ -349,6 +371,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 16,
+  },
+  avatarAndName: {
+    flex: 1,
+  },
+  settingsIcon: {
+    fontSize: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
   },
   content: {
     flexDirection: 'column',

@@ -183,16 +183,22 @@ const SideBar = ({
   const medicationsArray = firebaseDocumentToArray<Medication>(medications);
   return (
     <View style={styles.container}>
-      <View>
-        <TouchableHighlight
-          onPress={() => {
-            navigationRef?.navigate('Tabs', {screen: 'MedicationsList'});
-          }}>
+      <TouchableHighlight
+        onPress={() => {
+          navigationRef?.navigate('Tabs', {screen: 'MedicationsList'});
+        }}>
+        <View style={styles.row}>
           <Text style={[styles.labelFont, {color: theme.paper.colors.text}]}>
             Medications
           </Text>
-        </TouchableHighlight>
-      </View>
+          <MaterialCommunityIcons
+            style={styles.navigateIcon}
+            name="chevron-right"
+            color={paperColors(theme).text}
+            size={26}
+          />
+        </View>
+      </TouchableHighlight>
       <SafeAreaView style={styles.sidebarInset}>
         <FlatList
           data={medicationsArray}
@@ -206,7 +212,7 @@ const SideBar = ({
 
 type Props = {
   value?: Array<string>;
-  display?: 'list';
+  display?: 'list' | 'summary' | 'component';
   userId?: string;
   navigationRef?: NavigationContainerRef | null; // need this for the side bar only
   onValueChange?: (medications: Array<string>) => void;
@@ -269,6 +275,30 @@ const Medications = ({
         navigationRef={navigationRef === undefined ? null : navigationRef}
       />
     );
+  } else if (display === 'summary') {
+    return (
+      <View style={styles.container}>
+        <TouchableHighlight
+          onPress={() => {
+            navigationRef?.navigate('Tabs', {screen: 'MedicationsList'});
+          }}>
+          <View style={styles.row}>
+            <Text style={[styles.labelFont, {color: theme.paper.colors.text}]}>
+              Medications
+            </Text>
+            <MaterialCommunityIcons
+              style={styles.navigateIcon}
+              name="chevron-right"
+              color={paperColors(theme).text}
+              size={26}
+            />
+          </View>
+        </TouchableHighlight>
+        {medicationsArray.map((m) => (
+          <MedicationItem medication={m} />
+        ))}
+      </View>
+    );
   } else {
     return (
       <View style={styles.container}>
@@ -280,9 +310,7 @@ const Medications = ({
               alignItems: display === 'list' ? 'flex-start' : 'center',
             },
           ]}>
-          <Text style={{color: theme.paper.colors.text}}>
-            Medication{display === 'list' && medicationsArray.length > 1 && 's'}
-          </Text>
+          <Text style={{color: theme.paper.colors.text}}>Medication</Text>
           <View style={styles.pickerView}>
             <RNPickerSelect
               ref={(r) => (pickerRef = r)}
@@ -371,6 +399,9 @@ const pickerStyles: PickerStyle = {
 };
 
 const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+  },
   labelFont: {
     fontSize: 16,
   },
@@ -379,6 +410,9 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     paddingVertical: 8,
+  },
+  navigateIcon: {
+    fontSize: 16,
   },
   label: {
     width: '20%',
