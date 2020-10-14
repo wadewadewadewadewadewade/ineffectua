@@ -18,12 +18,17 @@ import {
   getContactsByUserId,
 } from '../../middleware/ContactsMiddleware';
 import {State} from '../../Types';
-import {paperColors} from '../../reducers/ThemeReducer';
-import {Contact} from '../../reducers/ContactsReducer';
-import {TouchableOpacity, FlatList} from 'react-native-gesture-handler';
+import {paperColors, Theme} from '../../reducers/ThemeReducer';
+import {Contact, ContactsType} from '../../reducers/ContactsReducer';
+import {
+  TouchableOpacity,
+  FlatList,
+  TouchableHighlight,
+} from 'react-native-gesture-handler';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import {firebaseDocumentToArray} from '../../firebase/utilities';
 import FlexableTextArea from './FlexableTextArea';
+import {NavigationContainerRef} from '@react-navigation/native';
 
 export const NewContact = (props: {
   value?: Contact;
@@ -116,15 +121,56 @@ const ContactItem = ({contact}: {contact: Contact}) => {
   );
 };
 
+const SideBar = ({
+  contacts,
+  navigationRef,
+  theme,
+}: {
+  contacts: ContactsType;
+  navigationRef: NavigationContainerRef | null;
+  theme: Theme;
+}) => {
+  const contactsArray = firebaseDocumentToArray<Contact>(contacts);
+  return (
+    <View style={styles.container}>
+      <View>
+        <TouchableHighlight
+          onPress={() => {
+            navigationRef?.navigate('Tabs', {screen: 'ContactsList'});
+          }}>
+          <Text style={[styles.labelFont, {color: theme.paper.colors.text}]}>
+            Contacts
+          </Text>
+        </TouchableHighlight>
+      </View>
+      <SafeAreaView style={styles.sidebarInset}>
+        <FlatList
+          data={contactsArray}
+          keyExtractor={(i) => i.key || i.name}
+          renderItem={({item, index}) => <ContactItem contact={item} />}
+        />
+      </SafeAreaView>
+    </View>
+  );
+};
+
 type Props = {
   value?: Array<string>;
-  display?: 'list';
+  display?: 'list' | 'page';
   limit?: number;
   userId?: string;
+  navigationRef?: NavigationContainerRef | null; // need this for the side bar only
   onValueChange?: (contacts: Array<string>) => void;
 };
 
-const Contacts = ({value, display, limit, userId, onValueChange}: Props) => {
+const Contacts = ({
+  value,
+  display,
+  limit,
+  userId,
+  navigationRef,
+  onValueChange,
+}: Props) => {
   const [theme, stateContacts] = useSelector((state: State) => [
     state.theme,
     state.contacts,
@@ -138,7 +184,8 @@ const Contacts = ({value, display, limit, userId, onValueChange}: Props) => {
           getContactsByUserId(userId)
             .then((c) => setContacts(c))
             .then(() => setReady(true));
-        } else {
+        } else if (Object.keys(stateContacts).length > 0) {
+          setContacts(stateContacts);
           setReady(true);
         }
       } catch (e) {
@@ -148,7 +195,7 @@ const Contacts = ({value, display, limit, userId, onValueChange}: Props) => {
     };
 
     !ready && getContacts();
-  }, [ready, userId]);
+  }, [ready, stateContacts, userId]);
   const dispatch = useDispatch();
   const addNewContact = React.useCallback(
     (contact: Contact, onComplete: (contact: Contact) => void) =>
@@ -159,26 +206,21 @@ const Contacts = ({value, display, limit, userId, onValueChange}: Props) => {
   const [newContacts, setNewContacts] = React.useState(
     value || new Array<string>(),
   );
+  const contactsArray = firebaseDocumentToArray<Contact>(
+    contacts,
+    userId ? undefined : {name: newContactName},
+  );
+  let pickerRef: RNPickerSelect | null = null;
   if (!ready || contacts === undefined) {
     return <ActivityIndicator />;
   } else {
-    const contactsArray = firebaseDocumentToArray<Contact>(
-      contacts,
-      userId ? undefined : {name: newContactName},
-    );
-    let pickerRef: RNPickerSelect | null = null;
     if (display === 'list') {
       return (
-        <View style={styles.container}>
-          <Text style={{color: theme.paper.colors.text}}>Contacts</Text>
-          <SafeAreaView style={styles.sidebarInset}>
-            <FlatList
-              data={contactsArray}
-              keyExtractor={(i) => i.key || i.name}
-              renderItem={({item, index}) => <ContactItem contact={item} />}
-            />
-          </SafeAreaView>
-        </View>
+        <SideBar
+          theme={theme}
+          contacts={contacts}
+          navigationRef={navigationRef === undefined ? null : navigationRef}
+        />
       );
     } else if (limit === 1) {
       return (
@@ -291,6 +333,9 @@ const pickerStyles: PickerStyle = {
 };
 
 const styles = StyleSheet.create({
+  labelFont: {
+    fontSize: 16,
+  },
   container: {
     flexDirection: 'column',
     alignItems: 'flex-start',
@@ -325,6 +370,12 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   existingContactsIcon: {
+    fontSize: 20,
+    width: '10%',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  navigatieIcon: {
     fontSize: 20,
     width: '10%',
     paddingVertical: 8,

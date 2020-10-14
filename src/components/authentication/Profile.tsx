@@ -170,9 +170,9 @@ const SideBar = ({
           <Tags userId={user.uid} />
         </Suspense>
         <Divider />
-        <Medications display="list" />
+        <Medications display="list" navigationRef={navigationRef} />
         <Divider />
-        <Contacts display="list" />
+        <Contacts display="list" navigationRef={navigationRef} />
         <Divider />
         <Button
           onPress={() => {
@@ -204,9 +204,9 @@ const SideBar = ({
           <Tags userId={user.uid} />
         </Suspense>
         <Divider />
-        <Medications display="list" />
+        <Medications display="list" navigationRef={navigationRef} />
         <Divider />
-        <Contacts display="list" />
+        <Contacts display="list" navigationRef={navigationRef} />
       </ScrollView>
     );
   }
@@ -268,7 +268,7 @@ const ProfilePage = ({
         {thumbnail ? (
           <Avatar.Image source={{uri: thumbnail}} style={styles.image} />
         ) : null}
-        <Subheading>
+        <Subheading style={styles.name}>
           Hi{user && user.displayName !== null ? ' ' + user.displayName : ''}!
         </Subheading>
         <SettingsItem
@@ -281,9 +281,9 @@ const ProfilePage = ({
           <Tags userId={user.uid} />
         </Suspense>
         <Divider />
-        <Medications userId={user.uid} />
+        <Medications userId={user.uid} navigationRef={navigationRef} />
         <Divider />
-        <Contacts userId={user.uid} />
+        <Contacts userId={user.uid} navigationRef={navigationRef} />
         <Divider />
         <Button
           onPress={() => {
@@ -306,16 +306,24 @@ const ProfilePage = ({
         {thumbnail ? (
           <Avatar.Image source={{uri: thumbnail}} style={styles.image} />
         ) : null}
-        <Subheading>
+        <Subheading style={styles.name}>
           {user && user.displayName !== null ? ' ' + user.displayName : ''}!
         </Subheading>
         <Suspense fallback={<ActivityIndicator />}>
           <Tags userId={user.uid} />
         </Suspense>
         <Divider />
-        <Medications userId={user.uid} display="list" />
+        <Medications
+          userId={user.uid}
+          display="list"
+          navigationRef={navigationRef}
+        />
         <Divider />
-        <Contacts userId={user.uid} display="list" />
+        <Contacts
+          userId={user.uid}
+          display="list"
+          navigationRef={navigationRef}
+        />
       </ScrollView>
     );
   }
@@ -355,7 +363,10 @@ const styles = StyleSheet.create({
     margin: 8,
   },
   image: {
-    alignItems: 'center',
+    alignSelf: 'center',
+  },
+  name: {
+    textAlign: 'center',
   },
 });
 

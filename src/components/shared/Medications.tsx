@@ -18,9 +18,17 @@ import {
   getMedicationsByUserId,
 } from '../../middleware/MedicationsMiddleware';
 import {State} from '../../Types';
-import {ThemeState, paperColors} from '../../reducers/ThemeReducer';
-import {Medication, MedicationsState} from '../../reducers/MedicationsReducer';
-import {TouchableOpacity, FlatList} from 'react-native-gesture-handler';
+import {ThemeState, paperColors, Theme} from '../../reducers/ThemeReducer';
+import {
+  Medication,
+  MedicationsState,
+  MedicationsType,
+} from '../../reducers/MedicationsReducer';
+import {
+  TouchableOpacity,
+  FlatList,
+  TouchableHighlight,
+} from 'react-native-gesture-handler';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import DataTypes from './DataTypes';
 import Contacts from './Contacts';
@@ -29,6 +37,7 @@ import SettingsItem from './SettingsItem';
 import {formatDateAndTime} from '../../middleware/CalendarMiddleware';
 import {firebaseDocumentToArray} from '../../firebase/utilities';
 import FlexableTextArea from './FlexableTextArea';
+import {NavigationContainerRef} from '@react-navigation/native';
 
 type NewMedicationProps = {
   value?: Medication;
@@ -154,13 +163,6 @@ export const NewMedication = ({
   );
 };
 
-type Props = {
-  value?: Array<string>;
-  display?: 'list';
-  userId?: string;
-  onValueChange?: (medications: Array<string>) => void;
-};
-
 const MedicationItem = ({medication}: {medication: Medication}) => {
   return (
     <View style={styles.medicationItem}>
@@ -169,7 +171,54 @@ const MedicationItem = ({medication}: {medication: Medication}) => {
   );
 };
 
-const Medications = ({value, display, userId, onValueChange}: Props) => {
+const SideBar = ({
+  medications,
+  navigationRef,
+  theme,
+}: {
+  medications: MedicationsType;
+  navigationRef: NavigationContainerRef | null;
+  theme: Theme;
+}) => {
+  const medicationsArray = firebaseDocumentToArray<Medication>(medications);
+  return (
+    <View style={styles.container}>
+      <View>
+        <TouchableHighlight
+          onPress={() => {
+            navigationRef?.navigate('Tabs', {screen: 'MedicationsList'});
+          }}>
+          <Text style={[styles.labelFont, {color: theme.paper.colors.text}]}>
+            Medications
+          </Text>
+        </TouchableHighlight>
+      </View>
+      <SafeAreaView style={styles.sidebarInset}>
+        <FlatList
+          data={medicationsArray}
+          keyExtractor={(i) => i.key || i.name}
+          renderItem={({item, index}) => <MedicationItem medication={item} />}
+        />
+      </SafeAreaView>
+    </View>
+  );
+};
+
+type Props = {
+  value?: Array<string>;
+  display?: 'list';
+  userId?: string;
+  navigationRef?: NavigationContainerRef | null; // need this for the side bar only
+  onValueChange?: (medications: Array<string>) => void;
+};
+
+const Medications = ({
+  value,
+  display,
+  userId,
+  navigationRef,
+  onValueChange,
+}: Props) => {
   const [theme, stateMedications] = useSelector((state: State) => [
     state.theme,
     state.medications,
@@ -184,7 +233,8 @@ const Medications = ({value, display, userId, onValueChange}: Props) => {
           getMedicationsByUserId(userId)
             .then((m) => setMedications(m))
             .then(() => setReady(true));
-        } else {
+        } else if (Object.keys(stateMedications).length > 0) {
+          setMedications(stateMedications);
           setReady(true);
         }
       } catch (e) {
@@ -194,7 +244,7 @@ const Medications = ({value, display, userId, onValueChange}: Props) => {
     };
 
     !ready && getMedications();
-  }, [ready, userId]);
+  }, [ready, stateMedications, userId]);
   const addNewMedication = React.useCallback(
     (medication: Medication, onComplete: (medication: Medication) => void) =>
       dispatch(addMedication(medication, onComplete)),
@@ -204,14 +254,22 @@ const Medications = ({value, display, userId, onValueChange}: Props) => {
   const [newMedications, setNewMedications] = React.useState(
     value || new Array<string>(),
   );
+  const medicationsArray = firebaseDocumentToArray(
+    medications,
+    userId ? undefined : {name: newMedicationName, active: true},
+  );
+  let pickerRef: RNPickerSelect | null = null;
   if (!ready || medications === undefined) {
     return <ActivityIndicator />;
-  } else {
-    const medicationsArray = firebaseDocumentToArray(
-      medications,
-      userId ? undefined : {name: newMedicationName, active: true},
+  } else if (display === 'list') {
+    return (
+      <SideBar
+        theme={theme}
+        medications={medications}
+        navigationRef={navigationRef === undefined ? null : navigationRef}
+      />
     );
-    let pickerRef: RNPickerSelect | null = null;
+  } else {
     return (
       <View style={styles.container}>
         <View
@@ -225,46 +283,34 @@ const Medications = ({value, display, userId, onValueChange}: Props) => {
           <Text style={{color: theme.paper.colors.text}}>
             Medication{display === 'list' && medicationsArray.length > 1 && 's'}
           </Text>
-          {display === 'list' ? (
-            <SafeAreaView style={styles.sidebarInset}>
-              <FlatList
-                data={medicationsArray}
-                keyExtractor={(i) => i.key || i.name}
-                renderItem={({item, index}) => (
-                  <MedicationItem medication={item} />
-                )}
-              />
-            </SafeAreaView>
-          ) : (
-            <View style={styles.pickerView}>
-              <RNPickerSelect
-                ref={(r) => (pickerRef = r)}
-                style={pickerStyles}
-                items={medicationsArray.map((c) => ({
-                  label: c.name,
-                  value: c.name,
-                }))}
-                onValueChange={(itemValue, itemIndex) => {
-                  if (itemValue) {
-                    const sel = medicationsArray.filter(
-                      (c) => c.name === itemValue.toString(),
-                    )[0];
-                    if (sel.name === newMedicationName) {
-                      setVisible(true);
-                    } else if (sel.key) {
-                      setNewMedications([...newMedications, sel.key]);
-                      if (pickerRef) {
-                        pickerRef.setState({value: undefined});
-                        pickerRef.forceUpdate();
-                      }
-                      onValueChange &&
-                        onValueChange([...newMedications, sel.key]);
+          <View style={styles.pickerView}>
+            <RNPickerSelect
+              ref={(r) => (pickerRef = r)}
+              style={pickerStyles}
+              items={medicationsArray.map((c) => ({
+                label: c.name,
+                value: c.name,
+              }))}
+              onValueChange={(itemValue, itemIndex) => {
+                if (itemValue) {
+                  const sel = medicationsArray.filter(
+                    (c) => c.name === itemValue.toString(),
+                  )[0];
+                  if (sel.name === newMedicationName) {
+                    setVisible(true);
+                  } else if (sel.key) {
+                    setNewMedications([...newMedications, sel.key]);
+                    if (pickerRef) {
+                      pickerRef.setState({value: undefined});
+                      pickerRef.forceUpdate();
                     }
+                    onValueChange &&
+                      onValueChange([...newMedications, sel.key]);
                   }
-                }}
-              />
-            </View>
-          )}
+                }
+              }}
+            />
+          </View>
         </View>
         {newMedications &&
           newMedications.map(
@@ -325,6 +371,9 @@ const pickerStyles: PickerStyle = {
 };
 
 const styles = StyleSheet.create({
+  labelFont: {
+    fontSize: 16,
+  },
   sidebarInset: {
     paddingLeft: 12,
   },
@@ -382,6 +431,12 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   existingMedicationsIcon: {
+    fontSize: 20,
+    width: '10%',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  goIcon: {
     fontSize: 20,
     width: '10%',
     paddingVertical: 8,
