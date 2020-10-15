@@ -15,6 +15,7 @@ import {firebase as firebaseInstance} from '../firebase/config';
 import {AuthState, User} from '../reducers/AuthReducer';
 
 export const emptyPost: Post = {
+  key: '',
   body: '',
   tags: [],
   criteria: initialCriteria,
@@ -42,6 +43,7 @@ const convertDocumentDataToPost = (
 };
 
 type FetchObject = {
+  key: string;
   body: string;
   tags: Array<string>;
   criteria: PostCriteria;
@@ -75,9 +77,10 @@ export const fetchPosts = async (
     return new Promise<Array<Post>>((r) => r([]));
   } else {
     if (user.getIdToken) {
+      const path = key.key ? `${key.key.type}/${key.key.id}/` : 'posts';
       return user.getIdToken().then((token) =>
         fetch(
-          'https://us-central1-ineffectua.cloudfunctions.net/posts/' + cursor,
+          `https://us-central1-ineffectua.cloudfunctions.net/${path}/${cursor}`,
           {
             headers: new Headers({
               Authorization: 'Bearer ' + token,
@@ -184,14 +187,15 @@ export const addPost = (
   post: Post,
   firebase = firebaseInstance,
 ) => {
+  const collectionName = post.criteria.key ? post.criteria.key.type : 'posts';
   return new Promise<Post>((resolve, reject) => {
     if (user) {
-      if (post.key) {
+      if (post.key !== '') {
         // its an update
         const {key, ...data} = post;
         firebase
           .firestore()
-          .collection('posts')
+          .collection(collectionName)
           .doc(key)
           .update(data)
           .then(() => resolve(post))
@@ -209,10 +213,11 @@ export const addPost = (
             if (from !== undefined) {
               created.from = from;
             }
-            const newPost: Post = {...post, created};
+            const {key, ...rest} = post;
+            const newPost = {...rest, created};
             firebase
               .firestore()
-              .collection('posts')
+              .collection(collectionName)
               .add(newPost)
               .then(
                 (
@@ -246,7 +251,7 @@ export const addPost = (
 };
 
 export const addPostWithDispatch = (
-  tag: Post,
+  post: Post,
 ): ThunkAction<Promise<Post>, State, firebase.app.App, Action> => {
   return (
     dispatch: ThunkDispatch<State, {}, Action>,
@@ -256,7 +261,7 @@ export const addPostWithDispatch = (
     return new Promise<Post>((resolve, reject) => {
       const {user} = getState();
       if (user) {
-        addPost(user, tag).then(resolve).catch(reject);
+        addPost(user, post).then(resolve).catch(reject);
       } else {
         reject('Please authenticate');
       }

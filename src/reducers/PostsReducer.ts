@@ -1,5 +1,5 @@
 export type Post = {
-  key?: string;
+  key: string;
   body: string;
   tags: Array<string>;
   criteria: PostCriteria;
@@ -14,6 +14,7 @@ export enum PostPrivacyTypes {
   'PUBLIC' = 0,
   'PRIVATE' = 1,
   'FRIENDS' = 2,
+  'PUBLICANDFRIENDS' = 3,
 }
 
 export const getPostPrivacyName = (privacy: PostPrivacyTypes) => {
@@ -28,8 +29,10 @@ export const getPostPrivacyName = (privacy: PostPrivacyTypes) => {
 };
 
 export type PostCriteria = {
-  tagId?: string;
-  recipientId?: string;
+  key?: {
+    id: string,
+    type: 'post' | 'user' | 'tag',
+  };
   privacy: PostPrivacyTypes;
 };
 

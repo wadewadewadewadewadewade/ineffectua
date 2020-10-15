@@ -6,7 +6,7 @@ import {
   FlatList,
   LayoutChangeEvent,
 } from 'react-native';
-import {Text, ActivityIndicator, Avatar} from 'react-native-paper';
+import {Text, ActivityIndicator, Avatar, Divider} from 'react-native-paper';
 import {useSelector, useDispatch} from 'react-redux';
 import {State} from '../../Types';
 import {
@@ -30,6 +30,7 @@ import {User} from '../../reducers/AuthReducer';
 import {getUserById} from '../../middleware/AuthMiddleware';
 import {TouchableHighlight} from 'react-native-gesture-handler';
 import {NavigationContainerRef} from '@react-navigation/native';
+import {MaterialCommunityIcons} from '@expo/vector-icons';
 
 // used for a list of posts, for comments within a post, messages between users, and for searching maybe?
 
@@ -74,11 +75,12 @@ const ComposePost = ({criteria, height, onSavePost}: ComposePostProps) => {
     backgroundColor: theme.paper.colors.onSurface,
   };
   const [tags, setTags] = React.useState(new Array<string>());
-  const isMessage = criteria.recipientId !== undefined;
+  const isMessage = criteria.key !== undefined && criteria.key.type === 'user';
   let privacy = PostPrivacyTypes.PUBLIC;
   const savePostIfValid = (body: string) => {
     if (/[^\s]+/.test(body)) {
       const newPost: Post = {
+        key: '',
         body,
         tags,
         criteria: {...criteria, privacy},
@@ -219,38 +221,64 @@ const PostUser = ({
 const PostComponent = ({
   post,
   navigationRef,
+  inset,
 }: {
   post: Post;
   navigationRef: NavigationContainerRef | null;
+  inset: number;
 }) => {
   const theme = useSelector((state: State) => state.theme);
+  const [exposeComments, setExposeComments] = React.useState(false);
+  const commentsInset = 12;
+  const maxInset = 3;
   return (
-    <View
-      style={[
-        styles.postComponentContainer,
-        {backgroundColor: theme.paper.colors.surface},
-      ]}>
-      <View style={styles.row}>
-        <Text style={styles.postBody}>{post.body}</Text>
-        <View style={styles.postMetadataContainer}>
-          <React.Suspense fallback={<ActivityIndicator />}>
-            <PostUser userId={post.created.by} navigationRef={navigationRef} />
-          </React.Suspense>
-          <Text style={styles.postMetadataText}>
-            {post.criteria.privacy !== PostPrivacyTypes.PUBLIC &&
-              (post.criteria.privacy === PostPrivacyTypes.FRIENDS
-                ? 'friends only'
-                : 'private')}
-          </Text>
-          <Text style={styles.postMetadataText}>
-            {formatDateConditionally(post.created.on).replace(
-              /(monday |tuesday |wednesday |thursday |friday |saturday |sunday )/i,
-              '',
-            )}
-          </Text>
+    <View>
+      <View
+        style={[
+          styles.postComponentContainer,
+          {backgroundColor: theme.paper.colors.surface},
+        ]}>
+        <View style={styles.row}>
+          <Text style={styles.postBody}>{post.body}</Text>
+          <View style={styles.postMetadataContainer}>
+            <React.Suspense fallback={<ActivityIndicator />}>
+              <PostUser userId={post.created.by} navigationRef={navigationRef} />
+            </React.Suspense>
+            <Text style={styles.postMetadataText}>
+              {post.criteria.privacy !== PostPrivacyTypes.PUBLIC &&
+                (post.criteria.privacy === PostPrivacyTypes.FRIENDS
+                  ? 'friends only'
+                  : 'private')}
+            </Text>
+            <Text style={styles.postMetadataText}>
+              {formatDateConditionally(post.created.on).replace(
+                /(monday |tuesday |wednesday |thursday |friday |saturday |sunday )/i,
+                '',
+              )}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.row}>
+          <MaterialCommunityIcons
+            style={styles.commentsIcon}
+            name={exposeComments ? 'comment' : 'comment-outline'}
+            onPress={() => exposeComments ? setExposeComments(false) : setExposeComments(true)}
+            color={theme.paper.colors.text}
+            size={26}
+          />
+          <View style={[styles.verticalDivider, {borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: theme.navigation.colors.border}]} />
+          <Tags value={post.tags} />
         </View>
       </View>
-      <Tags value={post.tags} />
+      {exposeComments && (
+        <View style={[styles.comments, { paddingLeft: inset > maxInset ? 3 * commentsInset : inset * commentsInset}]}>
+          <Posts
+            showComposePost={true}
+            navigationRef={navigationRef}
+            criteria={{key: {id: post.key, type: 'post'}, privacy: PostPrivacyTypes.PUBLICANDFRIENDS}}
+          />
+        </View>
+      )}
     </View>
   );
 };
@@ -261,10 +289,12 @@ const PostsList = ({
   criteria,
   showComposePost,
   navigationRef,
+  inset,
 }: {
   criteria: PostCriteria;
   showComposePost?: boolean;
   navigationRef: NavigationContainerRef | null;
+  inset: number;
 }) => {
   const [user] = useSelector((state: State) => [state.user]);
   const dispatch = useDispatch();
@@ -311,10 +341,10 @@ const PostsList = ({
                 onSavePost={(p2) => savePost(p2)}
               />
             ) : (
-              <PostComponent post={p.item} navigationRef={navigationRef} />
+              <PostComponent inset={inset + 1} post={p.item} navigationRef={navigationRef} />
             )
           }
-          keyExtractor={(p, i) => p.key || 'post' + i}
+          keyExtractor={(p, i) => p.key}
           //onEndReached={fetchMore}
           refreshing={isFetching}
           onEndReachedThreshold={0.25}
@@ -328,13 +358,15 @@ type PostProps = {
   showComposePost?: boolean;
   criteria: PostCriteria;
   navigationRef: NavigationContainerRef | null;
+  inset?: number;
 };
 
-const Posts = ({showComposePost, criteria, navigationRef}: PostProps) => {
+const Posts = ({showComposePost, criteria, navigationRef, inset = 0}: PostProps) => {
   return (
     <View style={styles.container}>
       <React.Suspense fallback={<ActivityIndicator />}>
         <PostsList
+          inset={inset}
           criteria={criteria}
           showComposePost={showComposePost === true}
           navigationRef={navigationRef}
@@ -345,6 +377,19 @@ const Posts = ({showComposePost, criteria, navigationRef}: PostProps) => {
 };
 
 const styles = StyleSheet.create({
+  comments: {
+    maxHeight: 500,
+    paddingTop: 12,
+  },
+  commentsIcon: {
+    padding: 8,
+    marginLeft: 12,
+    alignSelf: 'center',
+  },
+  verticalDivider: {
+    width: 0,
+    marginHorizontal: 12,
+  },
   row: {
     flexDirection: 'row',
   },
