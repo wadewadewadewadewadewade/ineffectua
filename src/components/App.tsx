@@ -3,7 +3,6 @@ import {YellowBox} from 'react-native';
 import {PersistGate} from 'redux-persist/integration/react';
 import {Provider as ReduxProvider} from 'react-redux';
 import {store, persistor} from '../Store';
-// eslint-disable-next-line import/no-unresolved
 import {enableScreens} from 'react-native-screens';
 import Navigation from './Navigation';
 import {QueryCache, ReactQueryCacheProvider} from 'react-query'; // https://react-query.tanstack.com/docs/guides/suspense
@@ -13,6 +12,7 @@ const queryCache = new QueryCache({
   defaultConfig: {
     queries: {
       suspense: true,
+      refetchOnWindowFocus: false,
     },
   },
 });

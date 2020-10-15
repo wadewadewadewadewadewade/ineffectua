@@ -4,9 +4,6 @@ import {
   StyleSheet,
   ViewStyle,
   FlatList,
-  Platform,
-  Animated,
-  Easing,
   LayoutChangeEvent,
 } from 'react-native';
 import {Text, ActivityIndicator, Avatar} from 'react-native-paper';
@@ -21,6 +18,7 @@ import {
 import {
   addPostWithDispatch,
   fetchPosts,
+  emptyPost,
 } from '../../middleware/PostsMiddleware';
 import Slider from '@react-native-community/slider';
 import Tags from './Tags';
@@ -162,7 +160,8 @@ const PostUser = ({
   userId: string;
   navigationRef: NavigationContainerRef | null;
 }) => {
-  const {status, data, error} = useQuery<User, Error>(userId, getUserById, {
+  const [rerun, setRerun] = React.useState(true);
+  const {status, data, error, refetch} = useQuery<User>(userId, getUserById, {
     suspense: true,
   });
   const thumbnail =
@@ -179,35 +178,39 @@ const PostUser = ({
   } else if (data === false || data === undefined) {
     return <Text style={styles.errorText}>No user {userId} found</Text>;
   } else {
+    if (rerun) {
+      setRerun(false);
+      refetch(); // I had to do this because I was always getting [], maybe becuse of caching an earlier request?
+    }
     return (
       <View style={styles.postUser}>
-        {thumbnail ? (
-          <Avatar.Image
-            onTouchEnd={() => {
-              navigationRef?.navigate('Root', {
-                screen: 'Profile',
-                params: {userId: data.uid},
-              });
-            }}
-            size={40}
-            source={{uri: thumbnail}}
-            style={styles.postUserImage}
-          />
-        ) : (
-          <TouchableHighlight
-            onPress={() =>
-              navigationRef?.navigate('Root', {
-                screen: 'Profile',
-                params: {userId: data.uid},
-              })
-            }>
+        <TouchableHighlight
+          onPress={() =>
+            navigationRef?.navigate('Root', {
+              screen: 'Profile',
+              params: {userId: data.uid},
+            })
+          }>
+          {thumbnail ? (
+            <Avatar.Image
+              onTouchEnd={() => {
+                navigationRef?.navigate('Root', {
+                  screen: 'Profile',
+                  params: {userId: data.uid},
+                });
+              }}
+              size={40}
+              source={{uri: thumbnail}}
+              style={styles.postUserImage}
+            />
+          ) : (
             <Text style={styles.postUserName}>
               {data.displayName !== null && data.displayName !== undefined
                 ? ' ' + data.displayName
                 : ''}
             </Text>
-          </TouchableHighlight>
-        )}
+          )}
+        </TouchableHighlight>
       </View>
     );
   }
@@ -236,7 +239,7 @@ const PostComponent = ({
           <Text style={styles.postMetadataText}>
             {post.criteria.privacy !== PostPrivacyTypes.PUBLIC &&
               (post.criteria.privacy === PostPrivacyTypes.FRIENDS
-                ? ' friends only'
+                ? 'friends only'
                 : 'private')}
           </Text>
           <Text style={styles.postMetadataText}>
@@ -252,23 +255,22 @@ const PostComponent = ({
   );
 };
 
-enum ScrollDirections {
-  UP,
-  DOWN,
-}
-
 // https://react-query.tanstack.com/docs/guides/infinite-queries
 
 const PostsList = ({
   criteria,
-  onScroll,
+  showComposePost,
   navigationRef,
 }: {
   criteria: PostCriteria;
-  onScroll?: (direction: ScrollDirections) => void;
+  showComposePost?: boolean;
   navigationRef: NavigationContainerRef | null;
 }) => {
   const [user] = useSelector((state: State) => [state.user]);
+  const dispatch = useDispatch();
+  const savePost = (post: Post) => {
+    dispatch(addPostWithDispatch(post));
+  };
   const fetchPostsWithCustomParams = (
     key: PostCriteria,
     cursor: number | undefined,
@@ -293,37 +295,26 @@ const PostsList = ({
   } else if (status === QueryStatus.Error) {
     return <Text>An error occured while fetching posts: {error?.message}</Text>;
   } else {
-    const scroll = {
-      offset: 0,
-      direction: ScrollDirections.UP,
-    };
-    const posts: Array<Post> = data ? data[0] : [];
+    const posts: Array<Post> = data
+      ? showComposePost
+        ? [emptyPost, ...data[0]]
+        : data[0]
+      : [];
     return (
       <SafeAreaView style={styles.flex}>
         <FlatList
           data={posts}
-          renderItem={(p) => (
-            <PostComponent post={p.item} navigationRef={navigationRef} />
-          )}
+          renderItem={(p) =>
+            p.item === emptyPost ? (
+              <ComposePost
+                criteria={criteria}
+                onSavePost={(p2) => savePost(p2)}
+              />
+            ) : (
+              <PostComponent post={p.item} navigationRef={navigationRef} />
+            )
+          }
           keyExtractor={(p, i) => p.key || 'post' + i}
-          onScroll={(e) => {
-            if (onScroll) {
-              const offset = e.nativeEvent.contentOffset.y;
-              const direction =
-                offset - scroll.offset > 0
-                  ? ScrollDirections.DOWN
-                  : ScrollDirections.UP;
-              scroll.offset = e.nativeEvent.contentOffset.y;
-              if (
-                direction !== scroll.direction &&
-                ((offset > 0 && direction === ScrollDirections.DOWN) ||
-                  (offset === 0 && direction === ScrollDirections.UP))
-              ) {
-                scroll.direction = direction;
-                onScroll(direction);
-              }
-            }
-          }}
           //onEndReached={fetchMore}
           refreshing={isFetching}
           onEndReachedThreshold={0.25}
@@ -340,72 +331,17 @@ type PostProps = {
 };
 
 const Posts = ({showComposePost, criteria, navigationRef}: PostProps) => {
-  const dispatch = useDispatch();
-  const savePost = (post: Post) => {
-    dispatch(addPostWithDispatch(post));
-  };
-  const [direction, setDirection] = React.useState(ScrollDirections.UP);
-  let composePostHeight = 181;
-  const height = new Animated.Value(0);
-  const translateY = height.interpolate({
-    inputRange: [0, 0.25, 0.5, 0.75, 1],
-    outputRange: [
-      0,
-      -0.25 * composePostHeight,
-      -0.5 * composePostHeight,
-      -0.75 * composePostHeight,
-      -1 * composePostHeight,
-    ],
-  });
-  React.useEffect(() => {
-    const toValue = direction === ScrollDirections.UP ? 0 : 1;
-    const animated = Animated.timing(height, {
-      toValue,
-      easing: Easing.elastic(1),
-      duration: 500,
-      useNativeDriver: Platform.OS !== 'web',
-    });
-    animated.start();
-    return () => animated.stop();
-  }, [direction]);
-  const animateComposePost = (d: ScrollDirections) => {
-    // https://snack.expo.io/@xcarpentier/animation-example
-    if (d !== direction) {
-      setDirection(d);
-    }
-  };
-  if (showComposePost) {
-    return (
-      <View style={styles.container}>
-        <React.Suspense fallback={<ActivityIndicator />}>
-          <Animated.View
-            style={[
-              styles.composePostAnimatedContainer,
-              {transform: [{translateY}]},
-            ]}>
-            <ComposePost
-              criteria={criteria}
-              height={(h) => (composePostHeight = h)}
-              onSavePost={(p) => savePost(p)}
-            />
-          </Animated.View>
-          <Animated.View style={[styles.flex, {marginTop: translateY}]}>
-            <PostsList
-              criteria={criteria}
-              onScroll={(d) => animateComposePost(d)}
-              navigationRef={navigationRef}
-            />
-          </Animated.View>
-        </React.Suspense>
-      </View>
-    );
-  } else {
-    return (
-      <View style={styles.container}>
-        <PostsList criteria={criteria} navigationRef={navigationRef} />
-      </View>
-    );
-  }
+  return (
+    <View style={styles.container}>
+      <React.Suspense fallback={<ActivityIndicator />}>
+        <PostsList
+          criteria={criteria}
+          showComposePost={showComposePost === true}
+          navigationRef={navigationRef}
+        />
+      </React.Suspense>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
