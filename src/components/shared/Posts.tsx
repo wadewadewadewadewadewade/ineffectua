@@ -162,13 +162,9 @@ const PostUser = ({
   userId: string;
   navigationRef: NavigationContainerRef | null;
 }) => {
-  const {status, data, isFetching, error} = useQuery<User, Error, [string]>(
-    userId,
-    getUserById,
-    {
-      suspense: true,
-    },
-  );
+  const {status, data, error} = useQuery<User, Error>(userId, getUserById, {
+    suspense: true,
+  });
   const thumbnail =
     data !== false &&
     data !== undefined &&
@@ -176,7 +172,7 @@ const PostUser = ({
     data.photoURL.href
       ? data.photoURL.href
       : null;
-  if (status === QueryStatus.Loading || isFetching) {
+  if (status === QueryStatus.Loading) {
     return <View />;
   } else if (status === QueryStatus.Error) {
     return <Text style={styles.errorText}>An error occured: {error}</Text>;
@@ -184,28 +180,35 @@ const PostUser = ({
     return <Text style={styles.errorText}>No user {userId} found</Text>;
   } else {
     return (
-      <TouchableHighlight
-        onPress={() =>
-          navigationRef?.navigate('Root', {
-            screen: 'Profile',
-            params: {userId: data.uid},
-          })
-        }>
-        <View style={styles.postUser}>
-          {thumbnail ? (
-            <Avatar.Image
-              source={{uri: thumbnail}}
-              style={styles.postUserImage}
-            />
-          ) : (
+      <View style={styles.postUser}>
+        {thumbnail ? (
+          <Avatar.Image
+            onTouchEnd={() => {
+              navigationRef?.navigate('Root', {
+                screen: 'Profile',
+                params: {userId: data.uid},
+              });
+            }}
+            size={40}
+            source={{uri: thumbnail}}
+            style={styles.postUserImage}
+          />
+        ) : (
+          <TouchableHighlight
+            onPress={() =>
+              navigationRef?.navigate('Root', {
+                screen: 'Profile',
+                params: {userId: data.uid},
+              })
+            }>
             <Text style={styles.postUserName}>
               {data.displayName !== null && data.displayName !== undefined
                 ? ' ' + data.displayName
                 : ''}
             </Text>
-          )}
-        </View>
-      </TouchableHighlight>
+          </TouchableHighlight>
+        )}
+      </View>
     );
   }
 };
@@ -237,7 +240,10 @@ const PostComponent = ({
                 : 'private')}
           </Text>
           <Text style={styles.postMetadataText}>
-            {formatDateConditionally(post.created.on)}
+            {formatDateConditionally(post.created.on).replace(
+              /(monday |tuesday |wednesday |thursday |friday |saturday |sunday )/i,
+              '',
+            )}
           </Text>
         </View>
       </View>
@@ -411,12 +417,16 @@ const styles = StyleSheet.create({
   },
   postUser: {
     flexDirection: 'column',
+    alignItems: 'flex-end',
+    padding: 8,
+    minWidth: 70,
   },
   postUserImage: {
-    width: 25,
+    backgroundColor: 'transparent',
   },
   postUserName: {
     fontSize: 10,
+    maxWidth: 65,
   },
   container: {
     flex: 1,
@@ -461,6 +471,7 @@ const styles = StyleSheet.create({
   },
   postBody: {
     padding: 12,
+    flex: 1,
   },
   postPrivacyContainer: {
     paddingHorizontal: 12,
