@@ -79,9 +79,8 @@ export const fetchPosts = async (
     if (user.getIdToken) {
       const criteria: PostCriteria = JSON.parse(key);
       const path = criteria.key
-        ? `${criteria.key.type}/${criteria.key.id}/`
+        ? `${criteria.key.type}/${criteria.key.id}`
         : 'posts';
-      console.log({path, criteria});
       return user.getIdToken().then((token) =>
         fetch(
           `https://us-central1-ineffectua.cloudfunctions.net/${path}/${cursor}`,
@@ -210,15 +209,15 @@ export const addPost = (
           return new Promise<Post>((res, rej) => {
             const from: string | undefined =
               ipv4Address !== null ? ipv4Address : undefined;
-            const created: Post['created'] = {
+            const newCreated: Post['created'] = {
               by: user.uid,
               on: new Date(),
             };
             if (from !== undefined) {
-              created.from = from;
+              newCreated.from = from;
             }
-            const {key, ...rest} = post;
-            const newPost = {...rest, created};
+            const {key, created, ...rest} = post;
+            const newPost = {...rest, created: newCreated};
             firebase
               .firestore()
               .collection(collectionName)
@@ -229,7 +228,7 @@ export const addPost = (
                     firebase.firestore.DocumentData
                   >,
                 ) => {
-                  const data = {...newPost, key: value.id};
+                  const data: Post = {...newPost, key: value.id};
                   res(data);
                 },
               )
