@@ -69,14 +69,13 @@ const mapFetchToPosts = (fetchObject: Array<FetchObject>): Array<Post> => {
 
 export const fetchPosts = async (
   user: User | false,
-  key: string,
+  criteria: PostCriteria,
   cursor = 0,
 ): Promise<Array<Post>> => {
   if (!user) {
     return new Promise<Array<Post>>((r) => r([]));
   } else {
     if (user.getIdToken) {
-      const criteria: PostCriteria = JSON.parse(key);
       const path = criteria.key
         ? `${criteria.key.type}/${criteria.key.id}`
         : 'posts';

@@ -87,7 +87,7 @@ const TagList = ({
 }) => {
   const {status, data, isFetching, error} = useQuery<Tag[], Error, [string]>(
     JSON.stringify(value),
-    getTagsByKeyArray,
+    (tagIds) => getTagsByKeyArray(tagIds ? JSON.parse(tagIds) : []),
     {suspense: true},
   );
   const tags = data || [];
@@ -150,7 +150,7 @@ const NewTagField = ({
   const {status, data, isFetching, error} = useQuery<
     Tag[],
     Error,
-    [string, Array<Tag>]
+    [string, Array<string>]
   >(tagName, getTagsForAutocomplete, {suspense: false});
   return (
     <View style={styles.pickerContainer}>

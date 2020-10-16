@@ -299,7 +299,11 @@ const PostComponent = ({
             showComposePost={true}
             navigationRef={navigationRef}
             criteria={{
-              key: {id: post.key, type: 'comments'},
+              key: {
+                id: post.key,
+                type: 'comments',
+              },
+              privacy: PostPrivacyTypes.PUBLIC,
             }}
           />
         </View>

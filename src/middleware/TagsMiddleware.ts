@@ -2,24 +2,11 @@ import {State} from './../Types';
 import {Tag, UserTag} from '../reducers/TagsReducer';
 import {Action} from './../reducers';
 import {ThunkAction, ThunkDispatch} from 'redux-thunk';
-import {NetworkInfo} from 'react-native-network-info';
 // for the autocomplete call, as it doesn't go through redux/thunk
 import {firebase as firebaseInstance} from '../firebase/config';
 import {AuthState} from '../reducers/AuthReducer';
 
 export const emptyTag: Tag = {name: ''};
-
-const convertDocumentDataToTag = (
-  data: firebase.firestore.DocumentData,
-): Tag => {
-  const doc = data.data();
-  return {
-    key: data.id,
-    name: doc.name,
-    path: doc.path,
-    // don't add in create or searchableIndex, as that's just for server-side stuff
-  };
-};
 
 const convertDocumentDataToUserTag = (
   data: firebase.firestore.DocumentData,
@@ -32,79 +19,49 @@ const convertDocumentDataToUserTag = (
   };
 };
 
+type FetchObject = {
+  key: string;
+  name: string;
+  path: string;
+};
+
+const mapFetchToTags = (fetchObject: Array<FetchObject>): Array<Tag> => {
+  const posts = new Array<Tag>();
+  if (fetchObject && fetchObject.length > 0) {
+    fetchObject.forEach((po) => {
+      posts.push(po);
+    });
+  }
+  return posts;
+};
+
 export const getTagsForAutocomplete = (
-  prefix?: string,
-  tagsInUse?: Array<Tag>,
-  limit = 5,
+  prefix: string,
+  tagsInUse: Array<string>,
   minimumCharacters = 3,
-  firebase = firebaseInstance,
-) => {
-  return new Promise<Array<Tag>>((resolve, reject) => {
-    if (!prefix || prefix.length < minimumCharacters) {
-      resolve(new Array<Tag>());
-    } else if (tagsInUse && tagsInUse.length > 0) {
-      const tagIds = tagsInUse.map((t) => t.key);
-      firebase
-        .firestore()
-        .collection('tags')
-        .where('name', '>=', prefix)
-        .where(firebase.firestore.FieldPath.documentId(), 'not-in', tagIds)
-        .limit(limit)
-        .get()
-        .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-          const arr = querySnapshot.docs.map((d) => {
-            const val = convertDocumentDataToTag(d);
-            return val;
-          });
-          resolve(arr);
-        })
-        .catch((err: Error) => reject(err));
-    } else {
-      firebase
-        .firestore()
-        .collection('tags')
-        .where('name', '>=', prefix)
-        .limit(limit)
-        .get()
-        .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-          const arr = querySnapshot.docs.map((d) => {
-            const val = convertDocumentDataToTag(d);
-            return val;
-          });
-          resolve(arr);
-        })
-        .catch((err) => reject(err));
-    }
-  });
+): Promise<Array<Tag>> => {
+  if (!prefix || prefix.length < minimumCharacters) {
+    return new Promise<Array<Tag>>((r) => r([]));
+  } else {
+    const tagsInUseJson =
+      tagsInUse && tagsInUse.length > 0 ? JSON.stringify(tagsInUse) : '[]';
+    return fetch(
+      `https://us-central1-ineffectua.cloudfunctions.net/api/v1/tags/${prefix}/${tagsInUseJson}`,
+    ).then((promise) => promise.json().then((tags) => mapFetchToTags(tags)));
+  }
 };
 
 export const getTagsByKeyArray = (
-  tagIdsJsonString: string | undefined,
-  firebase = firebaseInstance,
-) => {
-  return new Promise<Array<Tag>>((resolve, reject) => {
-    if (!tagIdsJsonString || tagIdsJsonString === '[]') {
-      setTimeout(() => {
-        const arr = new Array<Tag>();
-        resolve(arr);
-      }, 1000);
-    } else {
-      const tagIds = JSON.parse(tagIdsJsonString);
-      firebase
-        .firestore()
-        .collection('tags')
-        .where(firebase.firestore.FieldPath.documentId(), 'in', tagIds)
-        .get()
-        .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-          const arr = querySnapshot.docs.map((d) => {
-            const val = convertDocumentDataToTag(d);
-            return val;
-          });
-          resolve(arr);
-        })
-        .catch((e) => reject(e));
-    }
-  });
+  tagIds: Array<string>,
+): Promise<Array<Tag>> => {
+  if (!tagIds || tagIds.length < 1) {
+    return new Promise<Array<Tag>>((r) => r([]));
+  } else {
+    const tagsInUseJson = JSON.stringify(tagIds);
+    return fetch(
+      `https://us-central1-ineffectua.cloudfunctions.net/api/v1/tags/${tagsInUseJson}`,
+    ).then((promise) => promise.json().then((tags) => mapFetchToTags(tags)));
+  }
 };
 
 export const getTagIdsForUser = (
@@ -145,82 +102,28 @@ export const getTagIdsForUser = (
   return searchableIndex;
 }*/
 
-export const addTag = (
-  user: AuthState['user'],
-  tag: Tag,
-  firebase = firebaseInstance,
-) => {
-  return new Promise<Tag>((resolve, reject) => {
-    if (user) {
-      if (tag.key) {
-        // its an update
-        /*const { key, searchableIndex, ...data } = tag
-        tag.searchableIndex = createIndex(tag.name)*/
-        const {key, ...data} = tag;
-        firebase
-          .firestore()
-          .collection('tags')
-          .doc(key)
-          .update(data)
-          .then(() => resolve(tag))
-          .catch(reject);
-      } else {
-        // it's a new record
-        const createNewRecord = (ipv4Address: string | null) => {
-          return new Promise<Tag>((res, rej) => {
-            const from: string | undefined =
-              ipv4Address !== null ? ipv4Address : undefined;
-            const created: Tag['created'] = {
-              by: user.uid,
-              on: new Date(),
-            };
-            if (from !== undefined) {
-              created.from = from;
-            }
-            const path = tag.name.replace(/([\s]+)/g, '-');
-            /*const searchableIndex: Tag['searchableIndex'] = createIndex(tag.name)
-            const newTag: Tag = {...tag, created, searchableIndex}*/
-            const newTag: Tag = {...tag, created, path};
-            firebase
-              .firestore()
-              .collection('tags')
-              .add(newTag)
-              .then(
-                (
-                  value: firebase.firestore.DocumentReference<
-                    firebase.firestore.DocumentData
-                  >,
-                ) => {
-                  const data = {...newTag, key: value.id};
-                  res(data);
-                },
-              )
-              .catch(rej);
-          });
-        };
-        /* I'm using NetworkInfo so i can try to put the IP of the client into Firebase for locale-searching
-           down-the-road, because Firebase Functions require met to enter my payment info again */
-        const createnewRecordWithIP = () => {
-          return NetworkInfo.getIPV4Address()
-            .then((ipv4Address) => {
-              return createNewRecord(ipv4Address);
-            })
-            .catch((err) => {
-              console.info("Can't get IP for tag geolocation", err);
-              return createNewRecord(null);
-            });
-        };
-        getTagsForAutocomplete(tag.name, [], 5, 3, firebase).then((ta) => {
-          // first check that the tag isn't alread in the DB to avoid duplicates
-          if (ta[0].name.toLowerCase() === tag.name.toLowerCase()) {
-            resolve(ta[0]);
-          } else {
-            createnewRecordWithIP().then(resolve).catch(reject);
-          }
-        });
-      }
-    }
-  });
+export const addTag = (user: AuthState['user'], tag: Tag) => {
+  if (!user) {
+    return new Promise<string>((re, rj) => rj('not authenticated'));
+  } else if (user.getIdToken) {
+    return user.getIdToken().then(async (token) =>
+      (
+        await fetch(
+          'https://us-central1-ineffectua.cloudfunctions.net/api/v1/tags',
+          {
+            method: 'PUT',
+            headers: new Headers({
+              Authorization: 'Bearer ' + token,
+              ContentType: 'application/json',
+            }),
+            body: JSON.stringify(tag),
+          },
+        )
+      ).json(),
+    );
+  } else {
+    return new Promise<string>((re, rj) => rj('unknown authentication error'));
+  }
 };
 
 export const addTagWithDispatch = (
