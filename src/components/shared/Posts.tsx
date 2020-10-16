@@ -300,7 +300,6 @@ const PostComponent = ({
             navigationRef={navigationRef}
             criteria={{
               key: {id: post.key, type: 'comments'},
-              privacy: PostPrivacyTypes.PUBLICANDFRIENDS,
             }}
           />
         </View>

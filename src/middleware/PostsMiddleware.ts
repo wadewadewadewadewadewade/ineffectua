@@ -70,14 +70,18 @@ const mapFetchToPosts = (fetchObject: Array<FetchObject>): Array<Post> => {
 
 export const fetchPosts = async (
   user: User | false,
-  key: PostCriteria,
+  key: string,
   cursor = 0,
 ): Promise<Array<Post>> => {
   if (!user) {
     return new Promise<Array<Post>>((r) => r([]));
   } else {
     if (user.getIdToken) {
-      const path = key.key ? `${key.key.type}/${key.key.id}/` : 'posts';
+      const criteria: PostCriteria = JSON.parse(key);
+      const path = criteria.key
+        ? `${criteria.key.type}/${criteria.key.id}/`
+        : 'posts';
+      console.log({path, criteria});
       return user.getIdToken().then((token) =>
         fetch(
           `https://us-central1-ineffectua.cloudfunctions.net/${path}/${cursor}`,
