@@ -9,7 +9,6 @@ import {
 } from '../reducers/PostsReducer';
 import {Action} from './../reducers';
 import {ThunkAction, ThunkDispatch} from 'redux-thunk';
-import {NetworkInfo} from 'react-native-network-info';
 // for the add call when it doesn't go through redux/thunk
 import {firebase as firebaseInstance} from '../firebase/config';
 import {AuthState, User} from '../reducers/AuthReducer';
@@ -83,7 +82,7 @@ export const fetchPosts = async (
         : 'posts';
       return user.getIdToken().then((token) =>
         fetch(
-          `https://us-central1-ineffectua.cloudfunctions.net/${path}/${cursor}`,
+          `https://us-central1-ineffectua.cloudfunctions.net/api/v1/${path}/${cursor}`,
           {
             headers: new Headers({
               Authorization: 'Bearer ' + token,
@@ -185,83 +184,44 @@ export const watchPosts = (
   };
 };
 
-export const addPost = (
-  user: AuthState['user'],
+export const addPost = async (
+  user: User | false,
   post: Post,
   firebase = firebaseInstance,
-) => {
-  const collectionName = post.criteria.key ? post.criteria.key.type : 'posts';
-  return new Promise<Post>((resolve, reject) => {
-    if (user) {
-      if (post.key !== '') {
-        // its an update
-        const {key, ...data} = post;
-        firebase
-          .firestore()
-          .collection(collectionName)
-          .doc(key)
-          .update(data)
-          .then(() => resolve(post))
-          .catch(reject);
-      } else {
-        // it's a new record
-        const createNewRecord = (ipv4Address: string | null) => {
-          return new Promise<Post>((res, rej) => {
-            const from: string | undefined =
-              ipv4Address !== null ? ipv4Address : undefined;
-            const newCreated: Post['created'] = {
-              by: user.uid,
-              on: new Date(),
-            };
-            if (from !== undefined) {
-              newCreated.from = from;
-            }
-            const {key, created, ...rest} = post;
-            const newPost = {...rest, created: newCreated};
-            firebase
-              .firestore()
-              .collection(collectionName)
-              .add(newPost)
-              .then(
-                (
-                  value: firebase.firestore.DocumentReference<
-                    firebase.firestore.DocumentData
-                  >,
-                ) => {
-                  const data: Post = {...newPost, key: value.id};
-                  res(data);
-                },
-              )
-              .catch(rej);
-          });
-        };
-        /* I'm using NetworkInfo so i can try to put the IP of the client into Firebase for locale-searching
-           down-the-road, because Firebase Functions require met to enter my payment info again */
-        const createnewRecordWithIP = () => {
-          return NetworkInfo.getIPV4Address()
-            .then((ipv4Address) => {
-              return createNewRecord(ipv4Address);
-            })
-            .catch((err) => {
-              console.info("Can't get IP for post geolocation", err);
-              return createNewRecord(null);
-            });
-        };
-        createnewRecordWithIP().then(resolve).catch(reject);
-      }
-    }
-  });
+): Promise<string> => {
+  if (!user) {
+    return new Promise<string>((re, rj) => rj('not authenticated'));
+  } else if (user.getIdToken) {
+    const path = post.criteria.key ? `${post.criteria.key.type}` : 'posts';
+    return user.getIdToken().then(async (token) =>
+      (
+        await fetch(
+          `https://us-central1-ineffectua.cloudfunctions.net/api/v1/${path}`,
+          {
+            method: 'PUT',
+            headers: new Headers({
+              Authorization: 'Bearer ' + token,
+              ContentType: 'application/json',
+            }),
+            body: JSON.stringify(post),
+          },
+        )
+      ).json(),
+    );
+  } else {
+    return new Promise<string>((re, rj) => rj('unknown authentication error'));
+  }
 };
 
 export const addPostWithDispatch = (
   post: Post,
-): ThunkAction<Promise<Post>, State, firebase.app.App, Action> => {
+): ThunkAction<Promise<string>, State, firebase.app.App, Action> => {
   return (
     dispatch: ThunkDispatch<State, {}, Action>,
     getState: () => State,
     firebase: firebase.app.App,
-  ): Promise<Post> => {
-    return new Promise<Post>((resolve, reject) => {
+  ): Promise<string> => {
+    return new Promise<string>((resolve, reject) => {
       const {user} = getState();
       if (user) {
         addPost(user, post).then(resolve).catch(reject);
