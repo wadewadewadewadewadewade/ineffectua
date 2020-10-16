@@ -6,7 +6,7 @@ import {
   FlatList,
   LayoutChangeEvent,
 } from 'react-native';
-import {Text, ActivityIndicator, Avatar, Divider} from 'react-native-paper';
+import {Text, ActivityIndicator, Avatar} from 'react-native-paper';
 import {useSelector, useDispatch} from 'react-redux';
 import {State} from '../../Types';
 import {
@@ -75,7 +75,8 @@ const ComposePost = ({criteria, height, onSavePost}: ComposePostProps) => {
     backgroundColor: theme.paper.colors.onSurface,
   };
   const [tags, setTags] = React.useState(new Array<string>());
-  const isMessage = criteria.key !== undefined && criteria.key.type === 'user';
+  const isMessage =
+    criteria.key !== undefined && criteria.key.type === 'messages';
   let privacy = PostPrivacyTypes.PUBLIC;
   const savePostIfValid = (body: string) => {
     if (/[^\s]+/.test(body)) {
@@ -242,7 +243,10 @@ const PostComponent = ({
           <Text style={styles.postBody}>{post.body}</Text>
           <View style={styles.postMetadataContainer}>
             <React.Suspense fallback={<ActivityIndicator />}>
-              <PostUser userId={post.created.by} navigationRef={navigationRef} />
+              <PostUser
+                userId={post.created.by}
+                navigationRef={navigationRef}
+              />
             </React.Suspense>
             <Text style={styles.postMetadataText}>
               {post.criteria.privacy !== PostPrivacyTypes.PUBLIC &&
@@ -262,20 +266,42 @@ const PostComponent = ({
           <MaterialCommunityIcons
             style={styles.commentsIcon}
             name={exposeComments ? 'comment' : 'comment-outline'}
-            onPress={() => exposeComments ? setExposeComments(false) : setExposeComments(true)}
+            onPress={() =>
+              exposeComments
+                ? setExposeComments(false)
+                : setExposeComments(true)
+            }
             color={theme.paper.colors.text}
             size={26}
           />
-          <View style={[styles.verticalDivider, {borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: theme.navigation.colors.border}]} />
+          <View
+            style={[
+              styles.verticalDivider,
+              {
+                borderLeftWidth: StyleSheet.hairlineWidth,
+                borderLeftColor: theme.navigation.colors.border,
+              },
+            ]}
+          />
           <Tags value={post.tags} />
         </View>
       </View>
       {exposeComments && (
-        <View style={[styles.comments, { paddingLeft: inset > maxInset ? 3 * commentsInset : inset * commentsInset}]}>
+        <View
+          style={[
+            styles.comments,
+            {
+              paddingLeft:
+                inset > maxInset ? 3 * commentsInset : inset * commentsInset,
+            },
+          ]}>
           <Posts
             showComposePost={true}
             navigationRef={navigationRef}
-            criteria={{key: {id: post.key, type: 'post'}, privacy: PostPrivacyTypes.PUBLICANDFRIENDS}}
+            criteria={{
+              key: {id: post.key, type: 'comments'},
+              privacy: PostPrivacyTypes.PUBLICANDFRIENDS,
+            }}
           />
         </View>
       )}
@@ -341,7 +367,11 @@ const PostsList = ({
                 onSavePost={(p2) => savePost(p2)}
               />
             ) : (
-              <PostComponent inset={inset + 1} post={p.item} navigationRef={navigationRef} />
+              <PostComponent
+                inset={inset + 1}
+                post={p.item}
+                navigationRef={navigationRef}
+              />
             )
           }
           keyExtractor={(p, i) => p.key}
@@ -361,7 +391,12 @@ type PostProps = {
   inset?: number;
 };
 
-const Posts = ({showComposePost, criteria, navigationRef, inset = 0}: PostProps) => {
+const Posts = ({
+  showComposePost,
+  criteria,
+  navigationRef,
+  inset = 0,
+}: PostProps) => {
   return (
     <View style={styles.container}>
       <React.Suspense fallback={<ActivityIndicator />}>

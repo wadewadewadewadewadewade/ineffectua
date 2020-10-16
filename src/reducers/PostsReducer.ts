@@ -23,6 +23,8 @@ export const getPostPrivacyName = (privacy: PostPrivacyTypes) => {
       return 'Friends';
     case PostPrivacyTypes.PRIVATE:
       return 'Private';
+    case PostPrivacyTypes.PUBLICANDFRIENDS:
+      return 'Public + Friends';
     default:
       return 'Public';
   }
@@ -30,8 +32,8 @@ export const getPostPrivacyName = (privacy: PostPrivacyTypes) => {
 
 export type PostCriteria = {
   key?: {
-    id: string,
-    type: 'post' | 'user' | 'tag',
+    id: string;
+    type: 'posts' | 'comments' | 'messages';
   };
   privacy: PostPrivacyTypes;
 };
