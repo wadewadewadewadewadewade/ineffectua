@@ -212,6 +212,35 @@ export const addPost = async (
   }
 };
 
+export const deletePost = (user: User, post: Post): Promise<void> => {
+  return new Promise<void>((resolve, reject) => {
+    if (!user) {
+      reject('not authenticated');
+    } else if (user.getIdToken) {
+      const path = post.criteria.key ? `${post.criteria.key.type}` : 'posts';
+      user
+        .getIdToken()
+        .then(async (token) =>
+          fetch(
+            `https://us-central1-ineffectua.cloudfunctions.net/api/v1/${path}`,
+            {
+              method: 'DELETE',
+              headers: new Headers({
+                Authorization: 'Bearer ' + token,
+                ContentType: 'application/json',
+              }),
+              body: JSON.stringify(post),
+            },
+          ),
+        )
+        .then(() => resolve())
+        .catch((e) => reject(e));
+    } else {
+      reject('unknown authentication error');
+    }
+  });
+};
+
 export const getPostById = (
   user: User,
   criteria: PostCriteria,

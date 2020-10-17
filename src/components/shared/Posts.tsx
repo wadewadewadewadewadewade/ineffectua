@@ -5,6 +5,8 @@ import {
   ViewStyle,
   FlatList,
   LayoutChangeEvent,
+  Alert,
+  Platform,
 } from 'react-native';
 import {Text, ActivityIndicator, Avatar} from 'react-native-paper';
 import {useSelector} from 'react-redux';
@@ -20,6 +22,7 @@ import {
   emptyPost,
   addPost,
   getPostById,
+  deletePost,
 } from '../../middleware/PostsMiddleware';
 import Slider from '@react-native-community/slider';
 import Tags from './Tags';
@@ -229,15 +232,40 @@ const PostComponent = ({
   post,
   navigationRef,
   inset,
+  onDeletePost,
 }: {
   post: Post;
   navigationRef: NavigationContainerRef | null;
   inset: number;
+  onDeletePost: (post: Post) => void;
 }) => {
-  const theme = useSelector((state: State) => state.theme);
+  const [theme, user] = useSelector((state: State) => [
+    state.theme,
+    state.user,
+  ]);
   const [exposeComments, setExposeComments] = React.useState(false);
   const commentsInset = 12;
   const maxInset = 3;
+  const createTwoButtonAlert = () => {
+    if (Platform.OS === 'web') {
+      // Alert doesn't seem to work in expo/web https://github.com/expo/expo/issues/6560
+      onDeletePost(post);
+    } else {
+      Alert.alert(
+        'Delete post',
+        'Are you sure? This action is not reversable.',
+        [
+          {
+            text: 'Cancel',
+            //onPress: () => console.log("Cancel Pressed"),
+            style: 'cancel',
+          },
+          {text: 'OK', onPress: () => onDeletePost(post)},
+        ],
+        {cancelable: true},
+      );
+    }
+  };
   return (
     <View>
       <View
@@ -269,8 +297,32 @@ const PostComponent = ({
           </View>
         </View>
         <View style={styles.row}>
+          {user && user.uid === post.created.by && (
+            <View style={styles.row}>
+              <MaterialCommunityIcons
+                style={styles.firstIcon}
+                name={'delete'}
+                onPress={createTwoButtonAlert}
+                color={theme.paper.colors.text}
+                size={26}
+              />
+              <View
+                style={[
+                  styles.verticalDivider,
+                  {
+                    borderLeftWidth: StyleSheet.hairlineWidth,
+                    borderLeftColor: theme.navigation.colors.border,
+                  },
+                ]}
+              />
+            </View>
+          )}
           <MaterialCommunityIcons
-            style={styles.commentsIcon}
+            style={
+              user && user.uid === post.created.by
+                ? styles.secondIcon
+                : styles.firstIcon
+            }
             name={exposeComments ? 'comment' : 'comment-outline'}
             onPress={() =>
               exposeComments
@@ -333,30 +385,39 @@ const PostsList = ({
 }) => {
   const [user] = useSelector((state: State) => [state.user]);
   const fetchPostsWithCustomParams = (
-    key: PostCriteria,
+    key: string,
     cursor: number | undefined,
   ) => {
-    return fetchPosts(user, key, cursor);
+    const crit = JSON.parse(key) as PostCriteria;
+    return fetchPosts(user, crit, cursor);
   };
   const {
     status,
     data,
     isFetching,
+    refetch,
     //isFetchingMore,
     //fetchMore,
     //canFetchMore,
     error,
-  } = useInfiniteQuery<Array<Post>, Error, [PostCriteria, number | undefined]>(
+  } = useInfiniteQuery<Array<Post>, Error, [string, number | undefined]>(
     JSON.stringify(criteria),
     fetchPostsWithCustomParams,
     {suspense: true},
   );
-  const [mutate] = useMutation(
-    (post: Post): Promise<Post> =>
-      addPost(user, post).then((key) => getPostById(user, criteria, key)),
+  const [mutateAdd] = useMutation((post: Post) =>
+    addPost(user, post)
+      .then((key) => getPostById(user, criteria, key))
+      .then(() => refetch()),
+  );
+  const [mutateDelete] = useMutation((post: Post) =>
+    deletePost(user, post).then(() => refetch()),
   );
   const savePost = (post: Post) => {
-    mutate(post);
+    mutateAdd(post);
+  };
+  const removePost = (post: Post) => {
+    mutateDelete(post);
   };
   if (status === QueryStatus.Loading) {
     return <ActivityIndicator />;
@@ -371,6 +432,9 @@ const PostsList = ({
     return (
       <SafeAreaView style={styles.flex}>
         <FlatList
+          nestedScrollEnabled={true}
+          windowSize={10}
+          style={styles.flex}
           data={posts}
           renderItem={(p) =>
             p.item === emptyPost ? (
@@ -383,6 +447,7 @@ const PostsList = ({
                 inset={inset + 1}
                 post={p.item}
                 navigationRef={navigationRef}
+                onDeletePost={(p2) => removePost(p2)}
               />
             )
           }
@@ -425,12 +490,15 @@ const Posts = ({
 
 const styles = StyleSheet.create({
   comments: {
-    maxHeight: 500,
     paddingTop: 12,
   },
-  commentsIcon: {
+  firstIcon: {
     padding: 8,
     marginLeft: 12,
+    alignSelf: 'center',
+  },
+  secondIcon: {
+    padding: 8,
     alignSelf: 'center',
   },
   verticalDivider: {
@@ -458,7 +526,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    overflow: 'hidden',
   },
   composePostAnimatedContainer: {
     marginBottom: 12,
