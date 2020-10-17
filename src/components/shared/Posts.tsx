@@ -7,7 +7,7 @@ import {
   LayoutChangeEvent,
 } from 'react-native';
 import {Text, ActivityIndicator, Avatar} from 'react-native-paper';
-import {useSelector, useDispatch} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {State} from '../../Types';
 import {
   Post,
@@ -16,16 +16,22 @@ import {
   getPostPrivacyName,
 } from '../../reducers/PostsReducer';
 import {
-  addPostWithDispatch,
   fetchPosts,
   emptyPost,
+  addPost,
+  getPostById,
 } from '../../middleware/PostsMiddleware';
 import Slider from '@react-native-community/slider';
 import Tags from './Tags';
 import FlexableTextArea from './FlexableTextArea';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {formatDateConditionally} from '../../middleware/CalendarMiddleware';
-import {useInfiniteQuery, QueryStatus, useQuery} from 'react-query';
+import {
+  useInfiniteQuery,
+  QueryStatus,
+  useQuery,
+  useMutation,
+} from 'react-query';
 import {User} from '../../reducers/AuthReducer';
 import {getUserById} from '../../middleware/AuthMiddleware';
 import {TouchableHighlight} from 'react-native-gesture-handler';
@@ -326,10 +332,6 @@ const PostsList = ({
   inset: number;
 }) => {
   const [user] = useSelector((state: State) => [state.user]);
-  const dispatch = useDispatch();
-  const savePost = (post: Post) => {
-    dispatch(addPostWithDispatch(post));
-  };
   const fetchPostsWithCustomParams = (
     key: PostCriteria,
     cursor: number | undefined,
@@ -349,6 +351,13 @@ const PostsList = ({
     fetchPostsWithCustomParams,
     {suspense: true},
   );
+  const [mutate] = useMutation(
+    (post: Post): Promise<Post> =>
+      addPost(user, post).then((key) => getPostById(user, criteria, key)),
+  );
+  const savePost = (post: Post) => {
+    mutate(post);
+  };
   if (status === QueryStatus.Loading) {
     return <ActivityIndicator />;
   } else if (status === QueryStatus.Error) {

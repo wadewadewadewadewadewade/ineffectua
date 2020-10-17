@@ -1,4 +1,4 @@
-import { UserName } from './../reducers/AuthReducer';
+import {UserName} from './../reducers/AuthReducer';
 import {State} from './../Types';
 import {
   Post,
@@ -212,28 +212,34 @@ export const addPost = async (
   }
 };
 
-export const addPostWithDispatch = (
-  post: Post,
-): ThunkAction<Promise<string>, State, firebase.app.App, Action> => {
-  return (
-    dispatch: ThunkDispatch<State, {}, Action>,
-    getState: () => State,
-    firebase: firebase.app.App,
-  ): Promise<string> => {
-    return new Promise<string>((resolve, reject) => {
-      const {user} = getState();
-      if (user) {
-        addPost(user, post).then(resolve).catch(reject);
-      } else {
-        reject('Please authenticate');
-      }
-    });
-  };
+export const getPostById = (
+  user: User,
+  criteria: PostCriteria,
+  key: string,
+): Promise<Post> => {
+  if (!user) {
+    return new Promise<Post>((re, rj) => rj('not authenticated'));
+  } else if (user.getIdToken) {
+    const path = criteria.key ? `${criteria.key.type}` : 'posts';
+    return user.getIdToken().then(async (token) =>
+      (
+        await fetch(
+          `https://us-central1-ineffectua.cloudfunctions.net/api/v1/${path}/${key}`,
+          {
+            headers: new Headers({
+              Authorization: 'Bearer ' + token,
+              ContentType: 'application/json',
+            }),
+          },
+        )
+      ).json(),
+    );
+  } else {
+    return new Promise<Post>((re, rj) => rj('unknown authentication error'));
+  }
 };
 
-export const getUserMessageNames = (
-  user: User,
-): Promise<Array<UserName>> => {
+export const getUserMessageNames = (user: User): Promise<Array<UserName>> => {
   if (!user) {
     return new Promise<Array<UserName>>((re, rj) => rj('not authenticated'));
   } else if (user.getIdToken) {
@@ -251,6 +257,8 @@ export const getUserMessageNames = (
       ).json(),
     );
   } else {
-    return new Promise<Array<UserName>>((re, rj) => rj('unknown authentication error'));
+    return new Promise<Array<UserName>>((re, rj) =>
+      rj('unknown authentication error'),
+    );
   }
 };
