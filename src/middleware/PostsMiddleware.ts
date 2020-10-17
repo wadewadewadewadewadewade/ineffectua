@@ -1,3 +1,4 @@
+import { UserName } from './../reducers/AuthReducer';
 import {State} from './../Types';
 import {
   Post,
@@ -186,7 +187,6 @@ export const watchPosts = (
 export const addPost = async (
   user: User | false,
   post: Post,
-  firebase = firebaseInstance,
 ): Promise<string> => {
   if (!user) {
     return new Promise<string>((re, rj) => rj('not authenticated'));
@@ -229,4 +229,28 @@ export const addPostWithDispatch = (
       }
     });
   };
+};
+
+export const getUserMessageNames = (
+  user: User,
+): Promise<Array<UserName>> => {
+  if (!user) {
+    return new Promise<Array<UserName>>((re, rj) => rj('not authenticated'));
+  } else if (user.getIdToken) {
+    return user.getIdToken().then(async (token) =>
+      (
+        await fetch(
+          'https://us-central1-ineffectua.cloudfunctions.net/api/v1/messages',
+          {
+            headers: new Headers({
+              Authorization: 'Bearer ' + token,
+              ContentType: 'application/json',
+            }),
+          },
+        )
+      ).json(),
+    );
+  } else {
+    return new Promise<Array<UserName>>((re, rj) => rj('unknown authentication error'));
+  }
 };

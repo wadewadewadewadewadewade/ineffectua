@@ -328,9 +328,13 @@ const ProfilePage = ({
         {thumbnail ? (
           <Avatar.Image source={{uri: thumbnail}} style={styles.image} />
         ) : null}
-        <Subheading style={styles.name}>
-          {user && user.displayName !== null ? ' ' + user.displayName : ''}!
-        </Subheading>
+        {user && user.displayName !== null &&
+          <Subheading style={styles.name}>{user.displayName}</Subheading>
+        }
+        <Button
+          theme={theme.paper}
+          onPress={() => navigationRef?.navigate('Root', {screen: 'Messaging', props: {userId: user.uid}})}
+        >Message</Button>
         <Suspense fallback={<ActivityIndicator />}>
           <Tags userId={user.uid} />
         </Suspense>

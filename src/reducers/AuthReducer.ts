@@ -13,6 +13,12 @@ export type User =
     }
   | false;
 
+export type UserName = {
+  uid: string;
+  email: string;
+  displayName?: string;
+};
+
 export const RESTORE_TOKEN = 'RESTORE_TOKEN';
 export const SIGN_IN = 'SIGN_IN';
 export const SIGN_OUT = 'SIGN_OUT';

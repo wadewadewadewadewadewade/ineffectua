@@ -60,6 +60,7 @@ import {CalendarDayProps} from './calendar/CalendarDay';
 import {watchFirebaseData, getFirebaseData} from '../middleware';
 import {getUserById} from '../middleware/AuthMiddleware';
 import {ThunkDispatch} from 'redux-thunk';
+import Messaging from './authentication/Messaging';
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -336,6 +337,17 @@ const Navigation = () => {
                       );
                     }}
                     options={{title: 'Profile'}}
+                  />
+                  <Stack.Screen
+                    name="Messaging"
+                    children={() => {
+                      return (
+                        <Messaging
+                          navigationRef={navigationRef.current}
+                        />
+                      );
+                    }}
+                    options={{title: 'Messaging'}}
                   />
                   <Stack.Screen
                     name="NotFound"
