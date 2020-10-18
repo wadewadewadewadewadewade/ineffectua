@@ -1,14 +1,7 @@
-import {State} from './../Types';
-import {
-  DataType,
-  GetDataTypesAction,
-  ReplaceDataTypesAction,
-  DataTypesType,
-} from '../reducers/DataTypesReducer';
-import {Action} from './../reducers';
-import {ThunkAction, ThunkDispatch} from 'redux-thunk';
-import {DocumentData, DocumentReference} from '@firebase/firestore-types';
+import {DataType, DataTypesType} from '../reducers/DataTypesReducer';
 import {firebaseDocumentToArray} from '../firebase/utilities';
+import {User} from '../reducers/AuthReducer';
+import {getFirebaseDataWithUser, setFirebaseDataWithUser} from './Utilities';
 
 export const newTypeTitle = '+ Add New Type';
 export const defaultTypeTitle = 'Default';
@@ -83,7 +76,7 @@ export const dataTypeIsValid = (
   return false;
 };
 
-const convertDocumentDataToDataType = (
+/*const convertDocumentDataToDataType = (
   data: firebase.firestore.DocumentData,
 ): DataType => {
   const doc = data.data();
@@ -92,128 +85,12 @@ const convertDocumentDataToDataType = (
     title: doc.title,
     color: doc.color,
   };
+};*/
+
+export const getDatatypes = (user: User): Promise<DataTypesType> => {
+  return getFirebaseDataWithUser(user, 'users/datatypes');
 };
 
-export const getDataTypes = (): ThunkAction<
-  Promise<void>,
-  State,
-  firebase.app.App,
-  Action
-> => {
-  return (
-    dispatch: ThunkDispatch<State, {}, Action>,
-    getState: () => State,
-    firebase: firebase.app.App,
-  ): Promise<void> => {
-    return new Promise<void>((resolve) => {
-      const {user} = getState();
-      if (user) {
-        firebase
-          .firestore()
-          .collection('users')
-          .doc(user.uid)
-          .collection('datatypes')
-          .get()
-          .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-            const datatypes: DataTypesType = {};
-            const arr = querySnapshot.docs.map((d) => {
-              const val = convertDocumentDataToDataType(d);
-              return val;
-            });
-            arr.forEach((d) => {
-              if (d.key) {
-                datatypes[d.key] = d;
-              }
-            });
-            dispatch(GetDataTypesAction(datatypes));
-          })
-          .finally(() => {
-            //console.log('resolving getDataTypes')
-            resolve();
-          });
-      }
-    });
-  };
-};
-
-export const watchDataTypes = (): ThunkAction<
-  Promise<void>,
-  State,
-  firebase.app.App,
-  Action
-> => {
-  return (
-    dispatch: ThunkDispatch<State, {}, Action>,
-    getState: () => State,
-    firebase: firebase.app.App,
-  ): Promise<void> => {
-    return new Promise<void>((resolve) => {
-      const {user} = getState();
-      if (user) {
-        //firestore.setLogLevel('debug');
-        firebase
-          .firestore()
-          .collection('users')
-          .doc(user.uid)
-          .collection('datatypes')
-          .orderBy('window.starts')
-          .onSnapshot((documentSnapshot: firebase.firestore.QuerySnapshot) => {
-            const datatypes: DataTypesType = {};
-            const arr = documentSnapshot.docs.map((d) => {
-              const val = convertDocumentDataToDataType(d);
-              return val;
-            });
-            arr.forEach((d) => {
-              if (d.key) {
-                datatypes[d.key] = d;
-              }
-            });
-            dispatch(ReplaceDataTypesAction(datatypes));
-          });
-      }
-    });
-  };
-};
-
-export const addDataType = (
-  dataType: DataType,
-  onComplete?: (datatype: DataType) => void,
-): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
-  return (
-    dispatch: ThunkDispatch<State, {}, Action>,
-    getState: () => State,
-    firebase: firebase.app.App,
-  ): Promise<void> => {
-    return new Promise<void>((resolve) => {
-      const {user} = getState();
-      if (user) {
-        if (dataType.key) {
-          // its an update
-          const {key, ...data} = dataType;
-          firebase
-            .firestore()
-            .collection('users')
-            .doc(user.uid)
-            .collection('datatypes')
-            .doc(key)
-            .update(data)
-            .then(() => {
-              onComplete && onComplete(dataType);
-            });
-        } else {
-          // it's a new record
-          firebase
-            .firestore()
-            .collection('users')
-            .doc(user.uid)
-            .collection('datatypes')
-            .add(dataType)
-            .then((value: DocumentReference<DocumentData>) => {
-              const data = {...dataType, key: value.id};
-              onComplete && onComplete(data);
-            });
-        }
-      }
-    });
-  };
+export const addDatatype = (user: User, date: DataType): Promise<DataType> => {
+  return setFirebaseDataWithUser(user, 'users/datatypes', date);
 };

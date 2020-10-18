@@ -34,6 +34,7 @@ import {
   useQuery,
   useMutation,
   queryCache,
+  useQueryCache,
 } from 'react-query';
 import {User} from '../../reducers/AuthReducer';
 import {getUserById} from '../../middleware/AuthMiddleware';
@@ -391,6 +392,7 @@ const PostsList = ({
   ) => {
     return fetchPosts(user, crit, cursor);
   };
+  const collection = criteria.key ? criteria.key.type : 'posts';
   const {
     status,
     data,
@@ -403,21 +405,34 @@ const PostsList = ({
     Array<Post>,
     Error,
     [string, PostCriteria, number | undefined]
-  >(['posts', criteria], fetchPostsWithCustomParams, {suspense: true});
+  >([collection, criteria], fetchPostsWithCustomParams, {suspense: true});
+  const cache = useQueryCache();
   const [mutateAdd] = useMutation((post: Post) => addPost(user, post), {
-    onSuccess: (d) =>
-      data &&
-      data[0] &&
-      queryCache.setQueryData(['posts', criteria], [d, ...data[0]]),
+    onSuccess: (d) => {
+      queryCache.setQueryData<Array<Post>>([collection, criteria], (old) => {
+        if (old) {
+          return [d, ...old];
+        } else {
+          return [d];
+        }
+      });
+    },
+    onSettled: () => cache.invalidateQueries([collection, criteria]),
   });
   const [mutateDelete] = useMutation((post: Post) => deletePost(user, post), {
-    onSuccess: (d, v) =>
-      data &&
-      data[0] &&
+    onSuccess: (d, v) => {
       queryCache.setQueryData(
-        criteria,
-        data[0].filter((p) => p.key !== v.key),
-      ),
+        [collection, criteria],
+        (old: Array<Post> | undefined) => {
+          if (old) {
+            return old.filter((val) => val.key !== v.key);
+          } else {
+            return [];
+          }
+        },
+      );
+    },
+    onSettled: () => cache.invalidateQueries([collection, criteria]),
   });
   const savePost = (post: Post) => {
     mutateAdd(post);
@@ -441,7 +456,7 @@ const PostsList = ({
         <FlatList
           nestedScrollEnabled={true}
           windowSize={10}
-          style={styles.flex}
+          style={styles.postList}
           data={posts}
           renderItem={(p) =>
             p.item === emptyPost ? (
@@ -498,6 +513,8 @@ const Posts = ({
 const styles = StyleSheet.create({
   comments: {
     paddingTop: 12,
+    borderLeftColor: '#888',
+    borderLeftWidth: 2,
   },
   firstIcon: {
     padding: 8,
@@ -517,6 +534,10 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: 'red',
+  },
+  postList: {
+    flex: 1,
+    overflow: 'visible',
   },
   postUser: {
     flexDirection: 'column',
@@ -542,6 +563,9 @@ const styles = StyleSheet.create({
   composePostContent: {
     flex: 1,
     margin: 0,
+    elevation: 3,
+    zIndex: 3,
+    overflow: 'visible',
   },
   instruction: {
     flex: 1,

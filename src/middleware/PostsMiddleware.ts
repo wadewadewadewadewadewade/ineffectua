@@ -1,18 +1,7 @@
 import {UserName} from './../reducers/AuthReducer';
-import {State} from './../Types';
-import {
-  Post,
-  initialCriteria,
-  PostsState,
-  PostCriteria,
-  ReplacePostsAction,
-  PostsType,
-} from '../reducers/PostsReducer';
-import {Action} from './../reducers';
-import {ThunkAction, ThunkDispatch} from 'redux-thunk';
-// for the add call when it doesn't go through redux/thunk
-import {firebase as firebaseInstance} from '../firebase/config';
-import {AuthState, User} from '../reducers/AuthReducer';
+import {Post, initialCriteria, PostCriteria} from '../reducers/PostsReducer';
+import {User} from '../reducers/AuthReducer';
+import {setFirebaseDataWithUser, getFirebaseDataWithUser} from './Utilities';
 
 export const emptyPost: Post = {
   key: '',
@@ -25,7 +14,7 @@ export const emptyPost: Post = {
   },
 };
 
-const convertDocumentDataToPost = (
+/*const convertDocumentDataToPost = (
   data: firebase.firestore.DocumentData,
 ): Post => {
   const doc = data.data();
@@ -66,39 +55,25 @@ const mapFetchToPosts = (fetchObject: Array<FetchObject>): Array<Post> => {
     });
   }
   return posts;
-};
+};*/
 
 export const fetchPosts = async (
   user: User | false,
   criteria: PostCriteria,
   cursor = 0,
 ): Promise<Array<Post>> => {
-  if (!user) {
-    return new Promise<Array<Post>>((r) => r([]));
-  } else {
-    if (user.getIdToken) {
-      const path = criteria.key
-        ? `${criteria.key.type}/${criteria.key.id}`
-        : 'posts';
-      return user.getIdToken().then((token) =>
-        fetch(
-          `https://us-central1-ineffectua.cloudfunctions.net/api/v1/${path}/${cursor}`,
-          {
-            headers: new Headers({
-              Authorization: 'Bearer ' + token,
-            }),
-          },
-        ).then((promise) =>
-          promise.json().then((posts) => mapFetchToPosts(posts)),
-        ),
-      );
-    } else {
-      return new Promise<Array<Post>>((r) => []);
+  const path = criteria.key
+    ? `${criteria.key.type}/${criteria.key.id}`
+    : 'posts';
+  return getFirebaseDataWithUser<Array<Post>>(user, path, cursor).then((v) => {
+    for (let p in v) {
+      v[p].created.on = new Date(v[p].created.on);
     }
-  }
+    return v;
+  });
 };
 
-export type PostsObserver = (posts: PostsType) => void;
+/*export type PostsObserver = (posts: PostsType) => void;
 
 export class PostsSubject {
   private observers: Array<PostsObserver> = [];
@@ -150,95 +125,19 @@ export class PostsSubject {
   public notify(posts: PostsType) {
     this.observers.forEach((o) => o(posts));
   }
-}
-
-export const watchPosts = (
-  criteria: PostCriteria,
-): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
-  return (
-    dispatch: ThunkDispatch<State, {}, Action>,
-    getState: () => State,
-    firebase: firebase.app.App,
-  ): Promise<void> => {
-    return new Promise<void>((resolve) => {
-      const {user} = getState();
-      if (user) {
-        //firestore.setLogLevel('debug');
-        firebase
-          .firestore()
-          .collection('posts')
-          .orderBy('created.on')
-          .onSnapshot((documentSnapshot: firebase.firestore.QuerySnapshot) => {
-            const posts: PostsState['posts'] = {
-              items: [],
-              criteria,
-            };
-            posts.items = documentSnapshot.docs.map((d) => {
-              const val = convertDocumentDataToPost(d);
-              return val;
-            });
-            dispatch(ReplacePostsAction(posts));
-          });
-      }
-    });
-  };
-};
+}*/
 
 export const addPost = async (
   user: User | false,
   post: Post,
 ): Promise<Post> => {
-  if (!user) {
-    return new Promise<Post>((re, rj) => rj('not authenticated'));
-  } else if (user.getIdToken) {
-    const path = post.criteria.key ? `${post.criteria.key.type}` : 'posts';
-    return user.getIdToken().then(async (token) =>
-      (
-        await fetch(
-          `https://us-central1-ineffectua.cloudfunctions.net/api/v1/${path}`,
-          {
-            method: 'PUT',
-            headers: new Headers({
-              Authorization: 'Bearer ' + token,
-              ContentType: 'application/json',
-            }),
-            body: JSON.stringify(post),
-          },
-        )
-      ).json(),
-    );
-  } else {
-    return new Promise<Post>((re, rj) => rj('unknown authentication error'));
-  }
+  const path = post.criteria.key ? `${post.criteria.key.type}` : 'posts';
+  return setFirebaseDataWithUser(user, path, post);
 };
 
-export const deletePost = (user: User, post: Post): Promise<void> => {
-  return new Promise<void>((resolve, reject) => {
-    if (!user) {
-      reject('not authenticated');
-    } else if (user.getIdToken) {
-      const path = post.criteria.key ? `${post.criteria.key.type}` : 'posts';
-      user
-        .getIdToken()
-        .then(async (token) =>
-          fetch(
-            `https://us-central1-ineffectua.cloudfunctions.net/api/v1/${path}`,
-            {
-              method: 'DELETE',
-              headers: new Headers({
-                Authorization: 'Bearer ' + token,
-                ContentType: 'application/json',
-              }),
-              body: JSON.stringify(post),
-            },
-          ),
-        )
-        .then(() => resolve())
-        .catch((e) => reject(e));
-    } else {
-      reject('unknown authentication error');
-    }
-  });
+export const deletePost = (user: User, post: Post): Promise<Post> => {
+  const path = post.criteria.key ? `${post.criteria.key.type}` : 'posts';
+  return setFirebaseDataWithUser(user, path, post, 'DELETE');
 };
 
 export const getPostById = (
@@ -246,48 +145,13 @@ export const getPostById = (
   criteria: PostCriteria,
   key: string,
 ): Promise<Post> => {
-  if (!user) {
-    return new Promise<Post>((re, rj) => rj('not authenticated'));
-  } else if (user.getIdToken) {
-    const path = criteria.key ? `${criteria.key.type}` : 'posts';
-    return user.getIdToken().then(async (token) =>
-      (
-        await fetch(
-          `https://us-central1-ineffectua.cloudfunctions.net/api/v1/${path}/${key}`,
-          {
-            headers: new Headers({
-              Authorization: 'Bearer ' + token,
-              ContentType: 'application/json',
-            }),
-          },
-        )
-      ).json(),
-    );
-  } else {
-    return new Promise<Post>((re, rj) => rj('unknown authentication error'));
-  }
+  const path = criteria.key ? `${criteria.key.type}` : 'posts';
+  return getFirebaseDataWithUser<Post>(user, `${path}/${key}`).then((p) => {
+    p.created.on = new Date(p.created.on);
+    return p;
+  });
 };
 
 export const getUserMessageNames = (user: User): Promise<Array<UserName>> => {
-  if (!user) {
-    return new Promise<Array<UserName>>((re, rj) => rj('not authenticated'));
-  } else if (user.getIdToken) {
-    return user.getIdToken().then(async (token) =>
-      (
-        await fetch(
-          'https://us-central1-ineffectua.cloudfunctions.net/api/v1/messages',
-          {
-            headers: new Headers({
-              Authorization: 'Bearer ' + token,
-              ContentType: 'application/json',
-            }),
-          },
-        )
-      ).json(),
-    );
-  } else {
-    return new Promise<Array<UserName>>((re, rj) =>
-      rj('unknown authentication error'),
-    );
-  }
+  return getFirebaseDataWithUser(user, 'messages');
 };

@@ -1,32 +1,79 @@
-import React from 'react';
+import React, {Suspense} from 'react';
 import {CalendarList, DateObject} from 'react-native-calendars';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
 import {useSelector} from 'react-redux';
 import {State} from '../../Types';
-import {formatDatesForMarking} from '../../middleware/CalendarMiddleware';
+import {
+  formatDatesForMarking,
+  getDates,
+} from '../../middleware/CalendarMiddleware';
 import {themeIsDark} from '../../reducers/ThemeReducer';
 import {CalendarStackParamList} from './CalendarNavigator';
 import {StackNavigationProp} from '@react-navigation/stack';
+import {getDatatypes} from '../../middleware/DataTypesMiddleware';
+import {useQuery, QueryStatus} from 'react-query';
+import {CalendarType} from '../../reducers/CalendarReducer';
+import {DataTypesType} from '../../reducers/DataTypesReducer';
+import {ActivityIndicator} from 'react-native-paper';
 
-const Calendar = (props: {
+const CalendarListComponent = ({
+  navigation,
+}: {
   navigation: StackNavigationProp<CalendarStackParamList, 'Calendar'>;
 }) => {
-  const {navigation} = props;
-  const [dates, theme, datatypes] = useSelector((state: State) => [
-    state.dates,
+  const [user, theme] = useSelector((state: State) => [
+    state.user,
     state.theme,
-    state.datatypes,
   ]);
   const calendarTheme = {
     ...theme.paper,
     arrowColor: themeIsDark(theme) ? '#666' : '#ccc',
     calendarBackground: themeIsDark(theme) ? '#000' : '#fff',
   };
-  /*const current = new Date(),
-    month = current.getMonth() + 1,
-    year = current.getFullYear(),
-    lastDay = new Date(year, month + 1, 0).getDate()*/ return (
-    <View>
+  // START dates and datatypes fetch and reconcile in multipp useQuery
+  const fetchDates = (path: string) => getDates(user);
+  const fetchDatatypes = (path: string) => getDatatypes(user);
+  const datesQuery = useQuery<
+    CalendarType,
+    Error,
+    [string, number | undefined]
+  >('user/calendar', fetchDates, {suspense: true});
+  const dataTypesQuery = useQuery<
+    DataTypesType,
+    Error,
+    [string, number | undefined]
+  >('user/calendar', fetchDatatypes, {suspense: true});
+  const getLowestStatus = (statuses: Array<QueryStatus>) => {
+    const namesToNumbers = {
+      error: 0,
+      loading: 1,
+      success: 2,
+      idle: 3,
+    };
+    const numbersToNames = [
+      QueryStatus.Error,
+      QueryStatus.Loading,
+      QueryStatus.Success,
+      QueryStatus.Idle,
+    ];
+    const statusesAsNumbers: Array<number> = statuses
+      .map((s) => namesToNumbers[s])
+      .sort((a, b) => a - b);
+    return numbersToNames[statusesAsNumbers[0]];
+  };
+  const status = getLowestStatus([datesQuery.status, dataTypesQuery.status]);
+  const error = datesQuery.error || dataTypesQuery.error;
+  const dates = datesQuery.data || {};
+  const datatypes = dataTypesQuery.data || {};
+  // END dates and datatypes fetch and reconcile in multipp useQuery
+  if (!user) {
+    return <View />;
+  } else if (status === QueryStatus.Loading) {
+    return <ActivityIndicator />;
+  } else if (status === QueryStatus.Error) {
+    return <Text>An error occured while fetching posts: {error?.message}</Text>;
+  } else {
+    return (
       <CalendarList
         // Initially visible month. Default = Date()
         //current={year + '-' + (month < 10 ? '0' + month : month) + '-01'}
@@ -94,6 +141,19 @@ const Calendar = (props: {
         showScrollIndicator={true}
         style={styles.flex}
       />
+    );
+  }
+};
+
+const Calendar = (props: {
+  navigation: StackNavigationProp<CalendarStackParamList, 'Calendar'>;
+}) => {
+  const {navigation} = props;
+  return (
+    <View>
+      <Suspense fallback={<ActivityIndicator />}>
+        <CalendarListComponent navigation={navigation} />
+      </Suspense>
     </View>
   );
 };

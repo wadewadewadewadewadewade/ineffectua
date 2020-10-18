@@ -2,7 +2,7 @@ import React from 'react';
 import {DateObject} from 'react-native-calendars';
 import {StyleSheet, ScaledSize, Dimensions, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {connect} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {State} from '../../Types';
 import {RouteProp} from '@react-navigation/native';
 import {
@@ -10,24 +10,46 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native-gesture-handler';
-import {TextInput, Text, Button, FAB, Modal, Portal} from 'react-native-paper';
+import {
+  TextInput,
+  Text,
+  Button,
+  FAB,
+  Modal,
+  Portal,
+  ActivityIndicator,
+} from 'react-native-paper';
 import {CalendarStackParamList} from './CalendarNavigator';
 import {
   CalendarWindow,
   CalendarEntry,
-  CalendarState,
+  CalendarType,
 } from '../../reducers/CalendarReducer';
-import {addDates, datesToArray} from '../../middleware/CalendarMiddleware';
+import {
+  addDate,
+  datesToArray,
+  getDates,
+} from '../../middleware/CalendarMiddleware';
 import {ThemeState} from '../../reducers/ThemeReducer';
 import {AuthState} from '../../reducers/AuthReducer';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
-import {ThunkDispatch} from 'redux-thunk';
 import TypesSelector from '../shared/DataTypes';
-import {DataTypesState} from '../../reducers/DataTypesReducer';
-import {defaultColor, contrast} from '../../middleware/DataTypesMiddleware';
+import {DataTypesType} from '../../reducers/DataTypesReducer';
+import {
+  defaultColor,
+  contrast,
+  getDatatypes,
+} from '../../middleware/DataTypesMiddleware';
 import ContactsSelector from '../shared/Contacts';
 import Picker, {dateToString} from '../shared/ChronoPicker';
 import FlexableTextArea from '../shared/FlexableTextArea';
+import {
+  useQuery,
+  QueryStatus,
+  useMutation,
+  useQueryCache,
+  queryCache,
+} from 'react-query';
 
 const oneDayInMilliseconds = 1000 * 60 * 60 * 24;
 const screenHeightMultiplier = 1.2;
@@ -201,13 +223,12 @@ export type CalendarDayProps = {
 };
 
 const CalendarDay = (props: {
-  dates: CalendarState['dates'];
-  user: AuthState['user'];
-  theme: ThemeState['theme'];
-  datatypes: DataTypesState['datatypes'];
   route: RouteProp<CalendarStackParamList, 'CalendarDay'>;
-  saveDates: (entry: CalendarEntry, onComplete: () => void) => void;
 }) => {
+  const [user, theme] = useSelector((state: State) => [
+    state.user,
+    state.theme,
+  ]);
   const [visible, setVisible] = React.useState(false);
   const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
   React.useEffect(() => {
@@ -220,14 +241,68 @@ const CalendarDay = (props: {
     Dimensions.addEventListener('change', onDimensionsChange);
     return () => Dimensions.removeEventListener('change', onDimensionsChange);
   }, []);
-  const {dates, user, theme, datatypes, route, saveDates} = props;
+  const {route} = props;
   const {date} = route.params;
   const thisDate = new Date(date.year, date.month - 1, date.day);
   const window: CalendarWindow = {
     starts: thisDate,
     ends: new Date(thisDate.getTime() - 1 + 1000 * 60 * 60 * 24),
   };
-  const datesArray = datesToArray(dates, window.starts, window.ends);
+  // START dates and datatypes fetch and reconcile in multipp useQuery
+  const cache = useQueryCache();
+  const fetchDates = (path: string) => getDates(user);
+  const fetchDatatypes = (path: string) => getDatatypes(user);
+  const datesQuery = useQuery<
+    CalendarType,
+    Error,
+    [string, number | undefined]
+  >('users/calendar', fetchDates, {suspense: true});
+  const dataTypesQuery = useQuery<
+    DataTypesType,
+    Error,
+    [string, number | undefined]
+  >('users/calendar', fetchDatatypes, {suspense: true});
+  const getLowestStatus = (statuses: Array<QueryStatus>) => {
+    const namesToNumbers = {
+      error: 0,
+      loading: 1,
+      success: 2,
+      idle: 3,
+    };
+    const numbersToNames = [
+      QueryStatus.Error,
+      QueryStatus.Loading,
+      QueryStatus.Success,
+      QueryStatus.Idle,
+    ];
+    const statusesAsNumbers: Array<number> = statuses
+      .map((s) => namesToNumbers[s])
+      .sort((a, b) => a - b);
+    return numbersToNames[statusesAsNumbers[0]];
+  };
+  const status = getLowestStatus([datesQuery.status, dataTypesQuery.status]);
+  const error = datesQuery.error || dataTypesQuery.error;
+  // END dates and datatypes fetch and reconcile in multipp useQuery
+  const datesArray = datesQuery.data
+    ? datesToArray(datesQuery.data, window.starts, window.ends)
+    : [];
+  const datatypes = dataTypesQuery.data;
+  const [saveDate] = useMutation((d: CalendarEntry) => addDate(user, d), {
+    onSuccess: (d) => {
+      queryCache.setQueryData<CalendarType>('users/calendar', (old) => {
+        const newDate: CalendarType = {};
+        if (d.key) {
+          newDate[d.key] = d;
+        }
+        if (old) {
+          return {...old, ...newDate};
+        } else {
+          return newDate;
+        }
+      });
+    },
+    onSettled: () => cache.invalidateQueries('users/calendar'),
+  });
   const dayGrid: Array<JSX.Element> = React.useMemo(() => {
     let grid = [];
     for (let i = 1; i < 24; i++) {
@@ -274,67 +349,72 @@ const CalendarDay = (props: {
   };
   if (!user) {
     return <View />;
-  }
-  return (
-    <View style={styles.container}>
-      <ScrollView
-        contentOffset={{x: dimensions.height * 0.2, y: 0}}
-        style={styles.relative}>
-        <View
-          style={{
-            height: dimensions.height * screenHeightMultiplier,
-            ...styles.entry,
-          }}>
-          <View style={styles.daygrid}>{dayGrid}</View>
-        </View>
-        <View style={styles.timeslots}>
-          {datesArray.map((d: CalendarEntry, i: number) => (
-            <TimeSlot
-              key={d.key}
-              date={d}
-              color={
-                d.typeId && datatypes && datatypes[d.typeId]
-                  ? datatypes[d.typeId].color
-                  : defaultColor
-              }
-              window={window}
-              index={i}
-              total={datesArray.length}
-              screenHeight={dimensions.height * screenHeightMultiplier}
-              borderRadius={theme.paper.roundness}
-              openModal={(entry: CalendarEntry) => openModal(entry)}
-            />
-          ))}
-        </View>
-      </ScrollView>
-      {!visible && (
-        <FAB
-          style={styles.fab}
-          small
-          icon={() => <MaterialCommunityIcons name="plus" size={24} />}
-          onPress={() => openModal()}
-        />
-      )}
-      <Portal>
-        <Modal visible={visible} onDismiss={() => closeModal()}>
-          <View style={{backgroundColor: theme.paper.colors.surface}}>
-            <NewSlot
-              currentDay={window}
-              entry={newCalendarEntry}
-              saveEntry={(entry: CalendarEntry) => {
-                saveDates(entry, () => closeModal());
-              }}
-              theme={theme}
-              user={user}
-            />
-            <Button onPress={() => closeModal()} style={styles.cancelButton}>
-              <Text>cancel</Text>
-            </Button>
+  } else if (status === QueryStatus.Loading) {
+    return <ActivityIndicator />;
+  } else if (status === QueryStatus.Error) {
+    return <Text>An error occured while fetching posts: {error?.message}</Text>;
+  } else {
+    return (
+      <View style={styles.container}>
+        <ScrollView
+          contentOffset={{x: dimensions.height * 0.2, y: 0}}
+          style={styles.relative}>
+          <View
+            style={{
+              height: dimensions.height * screenHeightMultiplier,
+              ...styles.entry,
+            }}>
+            <View style={styles.daygrid}>{dayGrid}</View>
           </View>
-        </Modal>
-      </Portal>
-    </View>
-  );
+          <View style={styles.timeslots}>
+            {datesArray.map((d: CalendarEntry, i: number) => (
+              <TimeSlot
+                key={d.key}
+                date={d}
+                color={
+                  d.typeId && datatypes && datatypes[d.typeId]
+                    ? datatypes[d.typeId].color
+                    : defaultColor
+                }
+                window={window}
+                index={i}
+                total={datesArray.length}
+                screenHeight={dimensions.height * screenHeightMultiplier}
+                borderRadius={theme.paper.roundness}
+                openModal={(entry: CalendarEntry) => openModal(entry)}
+              />
+            ))}
+          </View>
+        </ScrollView>
+        {!visible && (
+          <FAB
+            style={styles.fab}
+            small
+            icon={() => <MaterialCommunityIcons name="plus" size={24} />}
+            onPress={() => openModal()}
+          />
+        )}
+        <Portal>
+          <Modal visible={visible} onDismiss={() => closeModal()}>
+            <View style={{backgroundColor: theme.paper.colors.surface}}>
+              <NewSlot
+                currentDay={window}
+                entry={newCalendarEntry}
+                saveEntry={(entry: CalendarEntry) => {
+                  saveDate(entry).then(() => closeModal());
+                }}
+                theme={theme}
+                user={user}
+              />
+              <Button onPress={() => closeModal()} style={styles.cancelButton}>
+                <Text>cancel</Text>
+              </Button>
+            </View>
+          </Modal>
+        </Portal>
+      </View>
+    );
+  }
 };
 
 const styles = StyleSheet.create({
@@ -429,29 +509,4 @@ const styles = StyleSheet.create({
   },
 });
 
-interface OwnProps {}
-
-interface DispatchProps {
-  saveDates: (entry: CalendarEntry, onComplete: () => void) => void;
-}
-
-const mapStateToProps = (state: State) => {
-  return {
-    authenticated: state.user !== false,
-    user: state.user,
-    theme: state.theme,
-    dates: state.dates,
-    datatypes: state.datatypes,
-  };
-};
-const mapDispatchToProps = (
-  dispatch: ThunkDispatch<State, firebase.app.App, any>,
-  ownProps: OwnProps,
-): DispatchProps => {
-  return {
-    saveDates: (entry: CalendarEntry, onComplete: () => void) => {
-      dispatch(addDates(entry, onComplete));
-    },
-  };
-}; // Exports
-export default connect(mapStateToProps, mapDispatchToProps)(CalendarDay);
+export default CalendarDay;

@@ -28,7 +28,7 @@ import {
   createStackNavigator,
   HeaderStyleInterpolators,
 } from '@react-navigation/stack';
-import {isFetching, Action} from '../reducers';
+import {Action} from '../reducers';
 
 // use this to restart the app for things like changing RTL to LTR
 //import {restartApp} from './Restart';
@@ -55,7 +55,6 @@ import {
 import {paperTheme, barClassName, paperColors} from '../reducers/ThemeReducer';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import {CalendarDayProps} from './calendar/CalendarDay';
-import {watchFirebaseData, getFirebaseData} from '../middleware';
 import {getUserById} from '../middleware/AuthMiddleware';
 import {ThunkDispatch} from 'redux-thunk';
 import Messaging from './authentication/Messaging';
@@ -69,12 +68,6 @@ const Navigation = () => {
     state.user,
   ]);
   const dispatch = useDispatch<ThunkDispatch<State, {}, Action>>();
-  const fetchData = React.useCallback(() => {
-    dispatch(isFetching(true));
-    getFirebaseData(dispatch).then(() =>
-      watchFirebaseData(dispatch).then(() => dispatch(isFetching(false))),
-    );
-  }, [dispatch]);
   const signIn = React.useCallback(
     (userState: User) => !user && dispatch(SignInAction(userState)),
     [dispatch, user],
@@ -82,9 +75,6 @@ const Navigation = () => {
   const signOut = React.useCallback(() => dispatch(SignOutAction()), [
     dispatch,
   ]);
-  const [dataRetrivedAndWatched, setDataRetrivedAndWatched] = React.useState(
-    false,
-  );
   const [isReady, setIsReady] = React.useState(Platform.OS === 'web');
   const [initialState, setInitialState] = React.useState<
     InitialState | undefined
@@ -112,12 +102,6 @@ const Navigation = () => {
       });
     return () => unsubscribe();
   }, [user, signIn, signOut]);
-
-  if (user && !dataRetrivedAndWatched) {
-    // only fetch and watch data once per app-use
-    fetchData();
-    setDataRetrivedAndWatched(true);
-  }
 
   function getHeaderTitle(
     options: Record<string, any> | undefined,

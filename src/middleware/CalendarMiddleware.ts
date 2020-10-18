@@ -1,15 +1,13 @@
-import {State} from './../Types';
 import {
-  GetDatesAction,
-  ReplaceDatesAction,
   CalendarState,
   CalendarWindow,
+  CalendarType,
 } from './../reducers/CalendarReducer';
-import {Action} from './../reducers';
 import {CalendarEntry} from '../reducers/CalendarReducer';
 import {CalendarDot, MultiDotMarking} from 'react-native-calendars';
-import {ThunkAction, ThunkDispatch} from 'redux-thunk';
 import {DataTypesState} from '../reducers/DataTypesReducer';
+import {getFirebaseDataWithUser, setFirebaseDataWithUser} from './Utilities';
+import {User} from '../reducers/AuthReducer';
 
 /*===== formatting tool ====*/
 type AgendaItem = {
@@ -238,7 +236,7 @@ export const dateInDateWindow = (
   return false;
 };
 
-const convertDocumentDataToCalendarEntry = (
+/*const convertDocumentDataToCalendarEntry = (
   data: firebase.firestore.DocumentData,
 ): CalendarEntry => {
   const doc = data.data();
@@ -253,142 +251,31 @@ const convertDocumentDataToCalendarEntry = (
     description: doc.description,
     contacts: doc.contacts,
   };
-};
+};*/
 
-export const getDates = (): ThunkAction<
-  Promise<void>,
-  State,
-  firebase.app.App,
-  Action
-> => {
-  return (
-    dispatch: ThunkDispatch<State, {}, Action>,
-    getState: () => State,
-    firebase: firebase.app.App,
-  ): Promise<void> => {
-    return new Promise<void>((resolve) => {
-      const {user} = getState();
-      if (user) {
-        firebase
-          .firestore()
-          .collection('users')
-          .doc(user.uid)
-          .collection('calendar')
-          .orderBy('window.starts')
-          .get()
-          .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-            const dates: CalendarState['dates'] = {};
-            const arr = querySnapshot.docs.map((d) => {
-              const val = convertDocumentDataToCalendarEntry(d);
-              return val;
-            });
-            arr.forEach((d) => {
-              if (d.key) {
-                dates[d.key] = d;
-              }
-            });
-            dispatch(GetDatesAction(dates));
-          })
-          .finally(() => {
-            //console.log('resolving getDates')
-            resolve();
-          });
+export const getDates = (user: User): Promise<CalendarType> => {
+  return getFirebaseDataWithUser<CalendarType>(user, 'users/calendar').then(
+    (c) => {
+      for (let key in Object.keys(c)) {
+        c[key].window.starts = new Date(c[key].window.starts);
+        c[key].window.ends = new Date(c[key].window.ends);
       }
-    });
-  };
+      return c;
+    },
+  );
 };
 
-export const watchDates = (): ThunkAction<
-  Promise<void>,
-  State,
-  firebase.app.App,
-  Action
-> => {
-  return (
-    dispatch: ThunkDispatch<State, {}, Action>,
-    getState: () => State,
-    firebase: firebase.app.App,
-  ): Promise<void> => {
-    return new Promise<void>((resolve) => {
-      const {user} = getState();
-      if (user) {
-        //firestore.setLogLevel('debug');
-        firebase
-          .firestore()
-          .collection('users')
-          .doc(user.uid)
-          .collection('calendar')
-          .orderBy('window.starts')
-          .onSnapshot((documentSnapshot: firebase.firestore.QuerySnapshot) => {
-            const dates: CalendarState['dates'] = {};
-            const arr = documentSnapshot.docs.map((d) => {
-              const val = convertDocumentDataToCalendarEntry(d);
-              return val;
-            });
-            arr.forEach((d) => {
-              if (d.key) {
-                dates[d.key] = d;
-              }
-            });
-            dispatch(ReplaceDatesAction(dates));
-          });
-      }
-    });
-  };
-};
-
-export const addDates = (
+export const addDate = (
+  user: User,
   date: CalendarEntry,
-  onComplete?: () => void,
-): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
-  return (
-    dispatch: ThunkDispatch<State, {}, Action>,
-    getState: () => State,
-    firebase: firebase.app.App,
-  ): Promise<void> => {
-    return new Promise<void>((resolve) => {
-      const {user} = getState();
-      if (user) {
-        //firebase.firestore.setLogLevel('debug');
-        if (date.key) {
-          // its an update
-          const {key, ...data} = date;
-          firebase
-            .firestore()
-            .collection('users')
-            .doc(user.uid)
-            .collection('calendar')
-            .doc(key)
-            .update(data)
-            .then(() => {
-              /* rely on watchDates to pull new data
-              const dates: CalendarState['dates'] = {date};
-              dispatch(GetDatesAction(dates))*/
-              onComplete && onComplete();
-            });
-        } else {
-          // it's a new record
-          firebase
-            .firestore()
-            .collection('users')
-            .doc(user.uid)
-            .collection('calendar')
-            .add(date)
-            .then(
-              (
-                value: firebase.firestore.DocumentReference<
-                  firebase.firestore.DocumentData
-                >,
-              ) => {
-                /* rely on watchDates to pull new data
-              const dates: CalendarState['dates'] = {date}
-              dates.key = value.id;
-              dispatch(GetDatesAction(dates))*/
-                onComplete && onComplete();
-              },
-            );
-        }
-      }
-    });
-  };
+): Promise<CalendarEntry> => {
+  return setFirebaseDataWithUser<CalendarEntry>(
+    user,
+    'users/calendar',
+    date,
+  ).then((d) => {
+    d.window.starts = new Date(d.window.starts);
+    d.window.ends = new Date(d.window.ends);
+    return d;
+  });
 };
