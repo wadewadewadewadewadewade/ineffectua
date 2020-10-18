@@ -21,9 +21,10 @@ const firebaseUserToUser = (
 };
 
 const firebaseUserDocumentToUser = (
+  uid: string,
   userDocument: firebaseInstance.firestore.DocumentData,
 ) => {
-  const {uid, email, displayName, photoURL} = userDocument;
+  const {email, displayName, photoURL} = userDocument;
   const data: User = {
     uid,
     email,
@@ -54,7 +55,7 @@ export const getUserById = (
           if (userData === undefined) {
             reject('No user information was returned');
           } else {
-            const user: User = firebaseUserDocumentToUser(userData);
+            const user: User = firebaseUserDocumentToUser(value.id, userData);
             resolve(user);
           }
         },

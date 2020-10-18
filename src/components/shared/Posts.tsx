@@ -21,7 +21,6 @@ import {
   fetchPosts,
   emptyPost,
   addPost,
-  getPostById,
   deletePost,
 } from '../../middleware/PostsMiddleware';
 import Slider from '@react-native-community/slider';
@@ -34,6 +33,7 @@ import {
   QueryStatus,
   useQuery,
   useMutation,
+  queryCache,
 } from 'react-query';
 import {User} from '../../reducers/AuthReducer';
 import {getUserById} from '../../middleware/AuthMiddleware';
@@ -385,34 +385,40 @@ const PostsList = ({
 }) => {
   const [user] = useSelector((state: State) => [state.user]);
   const fetchPostsWithCustomParams = (
-    key: string,
+    col: string,
+    crit: PostCriteria,
     cursor: number | undefined,
   ) => {
-    const crit = JSON.parse(key) as PostCriteria;
     return fetchPosts(user, crit, cursor);
   };
   const {
     status,
     data,
     isFetching,
-    refetch,
     //isFetchingMore,
     //fetchMore,
     //canFetchMore,
     error,
-  } = useInfiniteQuery<Array<Post>, Error, [string, number | undefined]>(
-    JSON.stringify(criteria),
-    fetchPostsWithCustomParams,
-    {suspense: true},
-  );
-  const [mutateAdd] = useMutation((post: Post) =>
-    addPost(user, post)
-      .then((key) => getPostById(user, criteria, key))
-      .then(() => refetch()),
-  );
-  const [mutateDelete] = useMutation((post: Post) =>
-    deletePost(user, post).then(() => refetch()),
-  );
+  } = useInfiniteQuery<
+    Array<Post>,
+    Error,
+    [string, PostCriteria, number | undefined]
+  >(['posts', criteria], fetchPostsWithCustomParams, {suspense: true});
+  const [mutateAdd] = useMutation((post: Post) => addPost(user, post), {
+    onSuccess: (d) =>
+      data &&
+      data[0] &&
+      queryCache.setQueryData(['posts', criteria], [d, ...data[0]]),
+  });
+  const [mutateDelete] = useMutation((post: Post) => deletePost(user, post), {
+    onSuccess: (d, v) =>
+      data &&
+      data[0] &&
+      queryCache.setQueryData(
+        criteria,
+        data[0].filter((p) => p.key !== v.key),
+      ),
+  });
   const savePost = (post: Post) => {
     mutateAdd(post);
   };
@@ -424,11 +430,12 @@ const PostsList = ({
   } else if (status === QueryStatus.Error) {
     return <Text>An error occured while fetching posts: {error?.message}</Text>;
   } else {
-    const posts: Array<Post> = data
-      ? showComposePost
-        ? [emptyPost, ...data[0]]
-        : data[0]
-      : [];
+    const posts: Array<Post> =
+      data && data[0]
+        ? showComposePost
+          ? [emptyPost, ...data[0]]
+          : data[0]
+        : [];
     return (
       <SafeAreaView style={styles.flex}>
         <FlatList

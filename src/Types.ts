@@ -79,6 +79,6 @@ export type RootStackParamList = {
   Tabs: MaterialBottomTabParams;
   AuthFlow: undefined;
   NotFound: undefined;
-  Profile: { userId?: string; };
-  Messaging: { initialUserId?: string; };
+  Profile: {userId?: string};
+  Messaging: {initialUserId?: string};
 };

@@ -6,8 +6,6 @@ import {
   Dimensions,
   ScaledSize,
   Linking,
-  View,
-  StyleSheet,
 } from 'react-native';
 import {firebase} from '../firebase/config';
 import {
@@ -179,29 +177,32 @@ const Navigation = () => {
   React.useEffect(() => {
     const restoreState = async () => {
       try {
-        const initialUrl = await Linking.getInitialURL();
+        // only do the resxt if signed in
+        if (user) {
+          const initialUrl = await Linking.getInitialURL();
 
-        if (Platform.OS !== 'web' || initialUrl === null) {
-          const savedState = await AsyncStorage.getItem(
-            NAVIGATION_PERSISTENCE_KEY,
-          );
-
-          const savedStateName = savedState
-            ? JSON.parse(savedState)
-            : undefined;
-
-          if (savedStateName !== undefined) {
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-            previousRouteName = getHeaderTitle(
-              undefined,
-              undefined,
-              savedStateName,
+          if (Platform.OS !== 'web' || initialUrl === null) {
+            const savedState = await AsyncStorage.getItem(
+              NAVIGATION_PERSISTENCE_KEY,
             );
-            setInitialState(savedStateName);
+
+            const savedStateName = savedState
+              ? JSON.parse(savedState)
+              : undefined;
+
+            if (savedStateName !== undefined) {
+              // eslint-disable-next-line react-hooks/exhaustive-deps
+              previousRouteName = getHeaderTitle(
+                undefined,
+                undefined,
+                savedStateName,
+              );
+              setInitialState(savedStateName);
+            }
           }
         }
       } finally {
-        setIsReady(true);
+        user && setIsReady(true);
       }
     };
 
@@ -222,13 +223,13 @@ const Navigation = () => {
 
   const navigationRef = React.useRef<NavigationContainerRef>(null);
 
-  if (!isReady) {
+  /*if (!isReady) {
     return (
       <View style={styles.activityIndicator}>
         <ActivityIndicator />
       </View>
     );
-  }
+  }*/
 
   const isLargeScreen = dimensions.width >= 1024;
 
@@ -342,9 +343,7 @@ const Navigation = () => {
                     name="Messaging"
                     children={() => {
                       return (
-                        <Messaging
-                          navigationRef={navigationRef.current}
-                        />
+                        <Messaging navigationRef={navigationRef.current} />
                       );
                     }}
                     options={{title: 'Messaging'}}
@@ -365,12 +364,5 @@ const Navigation = () => {
     </PaperProvider>
   );
 };
-
-const styles = StyleSheet.create({
-  activityIndicator: {
-    height: '100%',
-    justifyContent: 'center',
-  },
-});
 
 export default Navigation;

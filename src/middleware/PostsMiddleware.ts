@@ -187,9 +187,9 @@ export const watchPosts = (
 export const addPost = async (
   user: User | false,
   post: Post,
-): Promise<string> => {
+): Promise<Post> => {
   if (!user) {
-    return new Promise<string>((re, rj) => rj('not authenticated'));
+    return new Promise<Post>((re, rj) => rj('not authenticated'));
   } else if (user.getIdToken) {
     const path = post.criteria.key ? `${post.criteria.key.type}` : 'posts';
     return user.getIdToken().then(async (token) =>
@@ -208,7 +208,7 @@ export const addPost = async (
       ).json(),
     );
   } else {
-    return new Promise<string>((re, rj) => rj('unknown authentication error'));
+    return new Promise<Post>((re, rj) => rj('unknown authentication error'));
   }
 };
 
