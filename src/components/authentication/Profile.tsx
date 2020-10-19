@@ -23,8 +23,6 @@ import {themeIsDark} from '../../reducers/ThemeReducer';
 import {signOut, getUserById} from '../../middleware/AuthMiddleware';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import {TouchableHighlight} from 'react-native-gesture-handler';
-import {getFirebaseData} from '../../middleware';
-import {isFetching} from '../../reducers';
 import Tags from '../shared/Tags';
 import Medications from '../shared/Medications';
 import Contacts from '../shared/Contacts';
@@ -121,8 +119,6 @@ const SideBar = ({
   const dispatch = useDispatch();
   const toggleTheme = () => dispatch(ToggleThemeAction());
   const logout = () => dispatch(signOut());
-  const refreshDataFromFirebase = () => getFirebaseData(dispatch);
-  const fetching = (is: boolean) => dispatch(isFetching(is));
   const thumbnail =
     user !== false && user.photoURL !== undefined && user.photoURL.href
       ? user.photoURL.href
@@ -188,15 +184,6 @@ const SideBar = ({
         <Divider />
         <Contacts display="list" navigationRef={navigationRef} />
         <Divider />
-        <Button
-          onPress={() => {
-            fetching(true);
-            refreshDataFromFirebase().finally(() => fetching(false));
-          }}
-          style={styles.button}>
-          <Text>Refresh Data</Text>
-        </Button>
-        <Divider />
         <Button onPress={() => logout()} style={styles.button}>
           Sign Out
         </Button>
@@ -258,8 +245,6 @@ const ProfilePage = ({
   const dispatch = useDispatch();
   const toggleTheme = () => dispatch(ToggleThemeAction());
   const logout = () => dispatch(signOut());
-  const refreshDataFromFirebase = () => getFirebaseData(dispatch);
-  const fetching = (is: boolean) => dispatch(isFetching(is));
   const thumbnail =
     user !== false && user.photoURL !== undefined && user.photoURL.href
       ? user.photoURL.href
@@ -307,15 +292,6 @@ const ProfilePage = ({
           navigationRef={navigationRef}
         />
         <Divider />
-        <Button
-          onPress={() => {
-            fetching(true);
-            refreshDataFromFirebase().finally(() => fetching(false));
-          }}
-          style={styles.button}>
-          <Text>Refresh Data</Text>
-        </Button>
-        <Divider />
         <Button onPress={() => logout()} style={styles.button}>
           Sign Out
         </Button>
@@ -328,13 +304,19 @@ const ProfilePage = ({
         {thumbnail ? (
           <Avatar.Image source={{uri: thumbnail}} style={styles.image} />
         ) : null}
-        {user && user.displayName !== null &&
+        {user && user.displayName !== null && (
           <Subheading style={styles.name}>{user.displayName}</Subheading>
-        }
+        )}
         <Button
           theme={theme.paper}
-          onPress={() => navigationRef?.navigate('Root', {screen: 'Messaging', props: {userId: user.uid}})}
-        >Message</Button>
+          onPress={() =>
+            navigationRef?.navigate('Root', {
+              screen: 'Messaging',
+              props: {userId: user.uid},
+            })
+          }>
+          Message
+        </Button>
         <Suspense fallback={<ActivityIndicator />}>
           <Tags userId={user.uid} />
         </Suspense>

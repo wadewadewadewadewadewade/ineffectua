@@ -18,12 +18,8 @@ import {
   PanGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
 import {Svg, Path} from 'react-native-svg';
-import {connect} from 'react-redux';
-import {ThunkDispatch} from 'redux-thunk';
-import {State} from '../../Types';
 import {PainLogLocation, PainLogType} from '../../reducers/PainLogReducer';
 import {
-  addPainLogLocation,
   emptyPainLogLocation,
   PainLogThreads,
 } from '../../middleware/PainLogMiddleware';
@@ -490,27 +486,4 @@ const styles = StyleSheet.create({
   },
 });
 
-interface OwnProps {}
-
-interface DispatchProps {
-  addNewPainLocation: (painlogLocation: PainLogLocation) => void;
-}
-
-const mapStateToProps = (state: State) => {
-  return {
-    user: state.user,
-    theme: state.theme,
-    painlog: state.painlog,
-  };
-};
-const mapDispatchToProps = (
-  dispatch: ThunkDispatch<State, firebase.app.App, any>,
-  ownProps: OwnProps,
-): DispatchProps => {
-  return {
-    addNewPainLocation: (painlogLocation: PainLogLocation) => {
-      dispatch(addPainLogLocation(painlogLocation));
-    },
-  };
-};
-export default connect(mapStateToProps, mapDispatchToProps)(PainLog);
+export default PainLog;

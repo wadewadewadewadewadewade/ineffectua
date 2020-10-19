@@ -3,15 +3,25 @@ import {View, FlatList, StyleSheet} from 'react-native';
 import {Text, Modal, Portal, FAB, ActivityIndicator} from 'react-native-paper';
 import {useScrollToTop} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
-import {addContact, getContacts, emptyContact} from '../../middleware/ContactsMiddleware';
+import {
+  addContact,
+  getContacts,
+  emptyContact,
+} from '../../middleware/ContactsMiddleware';
 import {ThemeState} from '../../reducers/ThemeReducer';
 import {Contact, ContactsType} from '../../reducers/ContactsReducer';
 import {NewContact} from '../shared/Contacts';
 import {TouchableHighlight} from 'react-native-gesture-handler';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import {firebaseDocumentToArray} from '../../firebase/utilities';
-import { useQueryCache, useQuery, useMutation, queryCache, QueryStatus } from 'react-query';
-import { State } from '../../Types';
+import {
+  useQueryCache,
+  useQuery,
+  useMutation,
+  queryCache,
+  QueryStatus,
+} from 'react-query';
+import {State} from '../../Types';
 
 const ContactItem = React.memo(
   ({
@@ -54,18 +64,17 @@ const ItemSeparator = (theme: ThemeState['theme']) => {
 };
 
 export const ContactsList = () => {
-  const [user, theme] = useSelector((state: State) => [state.user, state.theme]);
+  const [user, theme] = useSelector((state: State) => [
+    state.user,
+    state.theme,
+  ]);
   let dummyForType: Contact | undefined;
   const [addOrEditContactId, setAddOrEditContactId] = React.useState(
     dummyForType,
   );
   const cache = useQueryCache();
   const fetchDataTypes = (path: string) => getContacts(user);
-  const {
-    data,
-    status,
-    error,
-  } = useQuery<
+  const {data, status, error} = useQuery<
     ContactsType,
     Error,
     [string, number | undefined]

@@ -10,12 +10,12 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native-paper';
-import {useSelector, useDispatch} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {
   addContact,
   emptyContact,
   newContactName,
-  getContactsByUserId,
+  getContacts,
 } from '../../middleware/ContactsMiddleware';
 import {State} from '../../Types';
 import {paperColors, Theme} from '../../reducers/ThemeReducer';
@@ -29,6 +29,13 @@ import {MaterialCommunityIcons} from '@expo/vector-icons';
 import {firebaseDocumentToArray} from '../../firebase/utilities';
 import FlexableTextArea from './FlexableTextArea';
 import {NavigationContainerRef} from '@react-navigation/native';
+import {
+  useQueryCache,
+  useMutation,
+  QueryStatus,
+  useQuery,
+  queryCache,
+} from 'react-query';
 
 export const NewContact = (props: {
   value?: Contact;
@@ -169,7 +176,7 @@ type Props = {
   onValueChange?: (contacts: Array<string>) => void;
 };
 
-const Contacts = ({
+const ContactsComponent = ({
   value,
   display,
   limit,
@@ -177,37 +184,34 @@ const Contacts = ({
   navigationRef,
   onValueChange,
 }: Props) => {
-  const [theme, stateContacts] = useSelector((state: State) => [
+  const [user, theme] = useSelector((state: State) => [
+    state.user,
     state.theme,
-    state.contacts,
   ]);
-  const [ready, setReady] = React.useState(false);
-  const [contacts, setContacts] = React.useState(stateContacts);
-  React.useEffect(() => {
-    const getContacts = async () => {
-      try {
-        if (userId !== undefined) {
-          getContactsByUserId(userId)
-            .then((c) => setContacts(c))
-            .then(() => setReady(true));
-        } else if (Object.keys(stateContacts).length > 0) {
-          setContacts(stateContacts);
-          setReady(true);
+  const cache = useQueryCache();
+  const fetchDataTypes = (path: string) => getContacts(user);
+  const {data, status, error} = useQuery<
+    ContactsType,
+    Error,
+    [string, number | undefined]
+  >('users/contacts', fetchDataTypes, {suspense: true});
+  const [saveContact] = useMutation((c: Contact) => addContact(user, c), {
+    onSuccess: (c) => {
+      queryCache.setQueryData<ContactsType>('users/contacts', (old) => {
+        const newContactsType: ContactsType = {};
+        if (c.key) {
+          newContactsType[c.key] = c;
         }
-      } catch (e) {
-        console.error('Contacts', e);
-        setReady(true);
-      }
-    };
-
-    !ready && getContacts();
-  }, [ready, stateContacts, userId]);
-  const dispatch = useDispatch();
-  const addNewContact = React.useCallback(
-    (contact: Contact, onComplete: (contact: Contact) => void) =>
-      dispatch(addContact(contact, onComplete)),
-    [dispatch],
-  );
+        if (old) {
+          return {...old, ...newContactsType};
+        } else {
+          return newContactsType;
+        }
+      });
+    },
+    onSettled: () => cache.invalidateQueries('users/contacts'),
+  });
+  const contacts = data || {};
   const [visible, setVisible] = React.useState(false);
   const [newContacts, setNewContacts] = React.useState(
     value || new Array<string>(),
@@ -217,8 +221,12 @@ const Contacts = ({
     userId ? undefined : {name: newContactName},
   );
   let pickerRef: RNPickerSelect | null = null;
-  if (!ready || contacts === undefined) {
+  if (!user) {
+    return <View />;
+  } else if (status === QueryStatus.Loading) {
     return <ActivityIndicator />;
+  } else if (status === QueryStatus.Error) {
+    return <Text>An error occured while fetching posts: {error?.message}</Text>;
   } else {
     if (display === 'list') {
       return (
@@ -334,8 +342,8 @@ const Contacts = ({
                 value={emptyContact}
                 saveNewContact={(contact?: Contact) => {
                   if (contact) {
-                    addNewContact(contact, (c: Contact) => {
-                      if (c.key) {
+                    saveContact(contact).then((c: Contact | undefined) => {
+                      if (c && c.key) {
                         setVisible(false);
                         setNewContacts([...newContacts, c.key]);
                         onValueChange && onValueChange(newContacts);
@@ -352,6 +360,16 @@ const Contacts = ({
       );
     }
   }
+};
+
+export const Contacts = (props: Props) => {
+  return (
+    <View>
+      <React.Suspense fallback={<ActivityIndicator />}>
+        <ContactsComponent {...props} />
+      </React.Suspense>
+    </View>
+  );
 };
 
 const pickerStyles: PickerStyle = {

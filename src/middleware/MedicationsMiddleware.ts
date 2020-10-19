@@ -1,8 +1,8 @@
-import { User } from './../reducers/AuthReducer';
-import { MedicationsType } from './../reducers/MedicationsReducer';
+import {User} from './../reducers/AuthReducer';
+import {MedicationsType} from './../reducers/MedicationsReducer';
 import {Medication, MedicationsState} from '../reducers/MedicationsReducer';
 import {firebaseDocumentToArray} from '../firebase/utilities';
-import { getFirebaseDataWithUser, setFirebaseDataWithUser } from './Utilities';
+import {getFirebaseDataWithUser, setFirebaseDataWithUser} from './Utilities';
 
 export const newMedicationName = '+ Add New Medication';
 export const emptyMedication: Medication = {name: '', active: true};
@@ -32,6 +32,9 @@ export const getMedications = (user: User): Promise<MedicationsType> => {
   return getFirebaseDataWithUser(user, 'users/medications');
 };
 
-export const addMedication = (user: User, medication: Medication): Promise<Medication> => {
+export const addMedication = (
+  user: User,
+  medication: Medication,
+): Promise<Medication> => {
   return setFirebaseDataWithUser(user, 'users/medications', medication);
 };

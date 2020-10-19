@@ -2,7 +2,14 @@ import * as React from 'react';
 import {View, StyleSheet} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import RNPickerSelect, {PickerStyle} from 'react-native-picker-select';
-import {Text, Button, Modal, Portal, TextInput, ActivityIndicator} from 'react-native-paper';
+import {
+  Text,
+  Button,
+  Modal,
+  Portal,
+  TextInput,
+  ActivityIndicator,
+} from 'react-native-paper';
 import {useSelector} from 'react-redux';
 import {
   addDataType,
@@ -12,11 +19,21 @@ import {
   getDatatypes,
 } from '../../middleware/DataTypesMiddleware';
 import {State} from '../../Types';
-import {DataType, DataTypesState, DataTypesType} from '../../reducers/DataTypesReducer';
+import {
+  DataType,
+  DataTypesState,
+  DataTypesType,
+} from '../../reducers/DataTypesReducer';
 import {ColorPicker, fromHsv} from 'react-native-color-picker';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {firebaseDocumentToArray} from '../../firebase/utilities';
-import {useQueryCache, useQuery, QueryStatus, queryCache, useMutation} from 'react-query';
+import {
+  useQueryCache,
+  useQuery,
+  QueryStatus,
+  queryCache,
+  useMutation,
+} from 'react-query';
 
 const NewDataType = (props: {
   value?: DataType | string;
@@ -75,22 +92,14 @@ type Props = {
   onValueChange: (datatype: DataType) => void;
 };
 
-const DataTypesComponent = ({
-  dataTypeId,
-  value,
-  onValueChange,
-}: Props) => {
+const DataTypesComponent = ({dataTypeId, value, onValueChange}: Props) => {
   const [user, theme] = useSelector((state: State) => [
     state.user,
     state.theme,
   ]);
   const cache = useQueryCache();
   const fetchDataTypes = (path: string) => getDatatypes(user);
-  const {
-    data,
-    status,
-    error,
-  } = useQuery<
+  const {data, status, error} = useQuery<
     DataTypesType,
     Error,
     [string, number | undefined]
@@ -174,22 +183,19 @@ const DataTypesComponent = ({
           </Modal>
         </Portal>
       </View>
-    )
+    );
   }
-}
+};
 
-const DataTypes = ({
-  dataTypeId,
-  value,
-  onValueChange,
-}: Props) => {
+const DataTypes = ({dataTypeId, value, onValueChange}: Props) => {
   return (
     <View>
       <React.Suspense fallback={<ActivityIndicator />}>
         <DataTypesComponent
           dataTypeId={dataTypeId}
           value={value}
-          onValueChange={onValueChange} />
+          onValueChange={onValueChange}
+        />
       </React.Suspense>
     </View>
   );

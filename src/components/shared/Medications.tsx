@@ -10,12 +10,12 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native-paper';
-import {useSelector, useDispatch} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {
   addMedication,
   emptyMedication,
   newMedicationName,
-  getMedicationsByUserId,
+  getMedications,
 } from '../../middleware/MedicationsMiddleware';
 import {State} from '../../Types';
 import {ThemeState, paperColors, Theme} from '../../reducers/ThemeReducer';
@@ -38,6 +38,13 @@ import {formatDateAndTime} from '../../middleware/CalendarMiddleware';
 import {firebaseDocumentToArray} from '../../firebase/utilities';
 import FlexableTextArea from './FlexableTextArea';
 import {NavigationContainerRef} from '@react-navigation/native';
+import {
+  useQueryCache,
+  useQuery,
+  useMutation,
+  queryCache,
+  QueryStatus,
+} from 'react-query';
 
 type NewMedicationProps = {
   value?: Medication;
@@ -218,44 +225,44 @@ type Props = {
   onValueChange?: (medications: Array<string>) => void;
 };
 
-const Medications = ({
+const MedicationsComponent = ({
   value,
   display,
   userId,
   navigationRef,
   onValueChange,
 }: Props) => {
-  const [theme, stateMedications] = useSelector((state: State) => [
+  const [theme, user] = useSelector((state: State) => [
     state.theme,
-    state.medications,
+    state.user,
   ]);
-  const dispatch = useDispatch();
-  const [ready, setReady] = React.useState(false);
-  const [medications, setMedications] = React.useState(stateMedications);
-  React.useEffect(() => {
-    const getMedications = async () => {
-      try {
-        if (userId !== undefined) {
-          getMedicationsByUserId(userId)
-            .then((m) => setMedications(m))
-            .then(() => setReady(true));
-        } else if (Object.keys(stateMedications).length > 0) {
-          setMedications(stateMedications);
-          setReady(true);
-        }
-      } catch (e) {
-        console.error('Medications', e);
-        setReady(true);
-      }
-    };
-
-    !ready && getMedications();
-  }, [ready, stateMedications, userId]);
-  const addNewMedication = React.useCallback(
-    (medication: Medication, onComplete: (medication: Medication) => void) =>
-      dispatch(addMedication(medication, onComplete)),
-    [dispatch],
+  const cache = useQueryCache();
+  const fetchDataTypes = (path: string) => getMedications(user);
+  const {data, status, error} = useQuery<
+    MedicationsType,
+    Error,
+    [string, number | undefined]
+  >('users/medications', fetchDataTypes, {suspense: true});
+  const [saveMedication] = useMutation(
+    (m: Medication) => addMedication(user, m),
+    {
+      onSuccess: (m) => {
+        queryCache.setQueryData<MedicationsType>('users/medications', (old) => {
+          const newMedicationsType: MedicationsType = {};
+          if (m.key) {
+            newMedicationsType[m.key] = m;
+          }
+          if (old) {
+            return {...old, ...newMedicationsType};
+          } else {
+            return newMedicationsType;
+          }
+        });
+      },
+      onSettled: () => cache.invalidateQueries('users/medications'),
+    },
   );
+  const medications = data || {};
   const [visible, setVisible] = React.useState(false);
   const [newMedications, setNewMedications] = React.useState(
     value || new Array<string>(),
@@ -265,121 +272,140 @@ const Medications = ({
     userId ? undefined : {name: newMedicationName, active: true},
   );
   let pickerRef: RNPickerSelect | null = null;
-  if (!ready || medications === undefined) {
+  if (!user) {
+    return <View />;
+  } else if (status === QueryStatus.Loading) {
     return <ActivityIndicator />;
-  } else if (display === 'list') {
-    return (
-      <SideBar
-        theme={theme}
-        medications={medications}
-        navigationRef={navigationRef === undefined ? null : navigationRef}
-      />
-    );
-  } else if (display === 'summary') {
-    return (
-      <View style={styles.container}>
-        <TouchableHighlight
-          onPress={() => {
-            navigationRef?.navigate('Tabs', {screen: 'MedicationsList'});
-          }}>
-          <View style={styles.row}>
-            <Text style={[styles.labelFont, {color: theme.paper.colors.text}]}>
-              Medications
-            </Text>
-            <MaterialCommunityIcons
-              style={styles.navigateIcon}
-              name="chevron-right"
-              color={paperColors(theme).text}
-              size={26}
-            />
-          </View>
-        </TouchableHighlight>
-        {medicationsArray.map((m) => (
-          <MedicationItem medication={m} />
-        ))}
-      </View>
-    );
+  } else if (status === QueryStatus.Error) {
+    return <Text>An error occured while fetching posts: {error?.message}</Text>;
   } else {
-    return (
-      <View style={styles.container}>
-        <View style={styles.spaceBetween}>
-          <Text style={{color: theme.paper.colors.text}}>Medication</Text>
-          <View style={styles.pickerView}>
-            <RNPickerSelect
-              ref={(r) => (pickerRef = r)}
-              style={pickerStyles}
-              items={medicationsArray.map((c) => ({
-                label: c.name,
-                value: c.name,
-              }))}
-              onValueChange={(itemValue, itemIndex) => {
-                if (itemValue) {
-                  const sel = medicationsArray.filter(
-                    (c) => c.name === itemValue.toString(),
-                  )[0];
-                  if (sel.name === newMedicationName) {
-                    setVisible(true);
-                  } else if (sel.key) {
-                    setNewMedications([...newMedications, sel.key]);
-                    if (pickerRef) {
-                      pickerRef.setState({value: undefined});
-                      pickerRef.forceUpdate();
-                    }
-                    onValueChange &&
-                      onValueChange([...newMedications, sel.key]);
-                  }
-                }
-              }}
-            />
-          </View>
+    if (display === 'list') {
+      return (
+        <SideBar
+          theme={theme}
+          medications={medications}
+          navigationRef={navigationRef === undefined ? null : navigationRef}
+        />
+      );
+    } else if (display === 'summary') {
+      return (
+        <View style={styles.container}>
+          <TouchableHighlight
+            onPress={() => {
+              navigationRef?.navigate('Tabs', {screen: 'MedicationsList'});
+            }}>
+            <View style={styles.row}>
+              <Text
+                style={[styles.labelFont, {color: theme.paper.colors.text}]}>
+                Medications
+              </Text>
+              <MaterialCommunityIcons
+                style={styles.navigateIcon}
+                name="chevron-right"
+                color={paperColors(theme).text}
+                size={26}
+              />
+            </View>
+          </TouchableHighlight>
+          {medicationsArray.map((m) => (
+            <MedicationItem medication={m} />
+          ))}
         </View>
-        {newMedications &&
-          newMedications.map(
-            (cId: string) =>
-              medications[cId] && (
-                <View key={cId} style={styles.existingMedications}>
-                  <Text style={styles.existingMedicationsText}>
-                    {medications[cId].name}
-                  </Text>
-                  <MaterialCommunityIcons
-                    onPress={() => {
-                      setNewMedications(
-                        newMedications.filter((c) => c !== cId),
-                      );
-                    }}
-                    style={styles.existingMedicationsIcon}
-                    name="delete"
-                    color={paperColors(theme).text}
-                    size={26}
-                  />
-                </View>
-              ),
-          )}
-        <Portal>
-          <Modal visible={visible}>
-            <NewMedication
-              value={emptyMedication}
-              medications={medications}
-              theme={theme}
-              saveNewMedication={(medication?: Medication) => {
-                if (medication) {
-                  addNewMedication(medication, (c: Medication) => {
-                    if (c.key) {
-                      setVisible(false);
-                      setNewMedications([...newMedications, c.key]);
-                      onValueChange && onValueChange(newMedications);
+      );
+    } else {
+      return (
+        <View style={styles.container}>
+          <View style={styles.spaceBetween}>
+            <Text style={{color: theme.paper.colors.text}}>Medication</Text>
+            <View style={styles.pickerView}>
+              <RNPickerSelect
+                ref={(r) => (pickerRef = r)}
+                style={pickerStyles}
+                items={medicationsArray.map((c) => ({
+                  label: c.name,
+                  value: c.name,
+                }))}
+                onValueChange={(itemValue, itemIndex) => {
+                  if (itemValue) {
+                    const sel = medicationsArray.filter(
+                      (c) => c.name === itemValue.toString(),
+                    )[0];
+                    if (sel.name === newMedicationName) {
+                      setVisible(true);
+                    } else if (sel.key) {
+                      setNewMedications([...newMedications, sel.key]);
+                      if (pickerRef) {
+                        pickerRef.setState({value: undefined});
+                        pickerRef.forceUpdate();
+                      }
+                      onValueChange &&
+                        onValueChange([...newMedications, sel.key]);
                     }
-                  });
-                } else {
-                  setVisible(false);
-                }
-              }}
-            />
-          </Modal>
-        </Portal>
-      </View>
-    );
+                  }
+                }}
+              />
+            </View>
+          </View>
+          {newMedications &&
+            newMedications.map(
+              (cId: string) =>
+                medications[cId] && (
+                  <View key={cId} style={styles.existingMedications}>
+                    <Text style={styles.existingMedicationsText}>
+                      {medications[cId].name}
+                    </Text>
+                    <MaterialCommunityIcons
+                      onPress={() => {
+                        setNewMedications(
+                          newMedications.filter((c) => c !== cId),
+                        );
+                      }}
+                      style={styles.existingMedicationsIcon}
+                      name="delete"
+                      color={paperColors(theme).text}
+                      size={26}
+                    />
+                  </View>
+                ),
+            )}
+          <Portal>
+            <Modal visible={visible}>
+              <NewMedication
+                value={emptyMedication}
+                medications={medications}
+                theme={theme}
+                saveNewMedication={(medication?: Medication) => {
+                  if (medication) {
+                    saveMedication(medication).then(
+                      (m: Medication | undefined) => {
+                        if (m && m.key) {
+                          setVisible(false);
+                          setNewMedications([...newMedications, m.key]);
+                          onValueChange && onValueChange(newMedications);
+                        }
+                      },
+                    );
+                  } else {
+                    setVisible(false);
+                  }
+                }}
+              />
+            </Modal>
+          </Portal>
+        </View>
+      );
+    }
   }
+};
+
+export const Medications = (props: Props) => {
+  return (
+    <View>
+      <React.Suspense fallback={<ActivityIndicator />}>
+        <MedicationsComponent {...props} />
+      </React.Suspense>
+    </View>
+  );
 };
 
 const pickerStyles: PickerStyle = {

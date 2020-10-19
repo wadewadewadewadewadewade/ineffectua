@@ -1,14 +1,8 @@
-import {State} from './../Types';
-import {
-  GetPainLogAction,
-  ReplacePainLogAction,
-  PainLogType,
-} from '../reducers/PainLogReducer';
-import {Action} from './../reducers';
+import {PainLogType} from '../reducers/PainLogReducer';
 import {PainLogLocation} from './../reducers/PainLogReducer';
-import {ThunkAction, ThunkDispatch} from 'redux-thunk';
-import {DocumentData, DocumentReference} from '@firebase/firestore-types';
 import {firebaseDocumentToArray} from '../firebase/utilities';
+import {User} from '../reducers/AuthReducer';
+import {getFirebaseDataWithUser, setFirebaseDataWithUser} from './Utilities';
 
 export const newPainLogLocationName = '+ Add New PainLogLocation';
 export const emptyPainLogLocation: PainLogLocation = {created: new Date()};
@@ -173,173 +167,13 @@ export class PainLogThreads {
   }
 }
 
-const convertDocumentDataToPainLogLocation = (
-  data: firebase.firestore.DocumentData,
-): PainLogLocation => {
-  const doc = data.data();
-  const painLogLocationData: PainLogLocation = {
-    key: data.id,
-    created:
-      doc.created &&
-      doc.created.seconds &&
-      new Date(doc.created.seconds * 1000),
-    typeId: doc.typeId,
-    title: doc.title,
-    active: doc.active,
-    description: doc.description,
-    severity: doc.severity,
-    medications: doc.medications,
-    next: doc.next,
-    previous: doc.previous,
-  };
-  if (doc.position) {
-    painLogLocationData.position = doc.position;
-  }
-  return painLogLocationData;
-};
-
-export const getPainLog = (): ThunkAction<
-  Promise<void>,
-  State,
-  firebase.app.App,
-  Action
-> => {
-  return (
-    dispatch: ThunkDispatch<State, {}, Action>,
-    getState: () => State,
-    firebase: firebase.app.App,
-  ): Promise<void> => {
-    return new Promise<void>((resolve) => {
-      const {user} = getState();
-      if (user) {
-        firebase
-          .firestore()
-          .collection('users')
-          .doc(user.uid)
-          .collection('painlog')
-          .get()
-          .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-            const painLogLocations: PainLogType = {};
-            const arr = querySnapshot.docs.map((d) => {
-              const val = convertDocumentDataToPainLogLocation(d);
-              return val;
-            });
-            arr.forEach((d) => {
-              if (d.key) {
-                painLogLocations[d.key] = d;
-              }
-            });
-            dispatch(GetPainLogAction(painLogLocations));
-          })
-          .finally(() => {
-            //console.log('resolving getPainLog')
-            resolve();
-          });
-      }
-    });
-  };
-};
-
-export const watchPainLog = (): ThunkAction<
-  Promise<void>,
-  State,
-  firebase.app.App,
-  Action
-> => {
-  return (
-    dispatch: ThunkDispatch<State, {}, Action>,
-    getState: () => State,
-    firebase: firebase.app.App,
-  ): Promise<void> => {
-    return new Promise<void>((resolve) => {
-      const {user} = getState();
-      if (user) {
-        //firestore.setLogLevel('debug');
-        firebase
-          .firestore()
-          .collection('users')
-          .doc(user.uid)
-          .collection('painlog')
-          .orderBy('name')
-          .onSnapshot((documentSnapshot: firebase.firestore.QuerySnapshot) => {
-            const painLogLocations: PainLogType = {};
-            const arr = documentSnapshot.docs.map((d) => {
-              const val = convertDocumentDataToPainLogLocation(d);
-              return val;
-            });
-            arr.forEach((d) => {
-              if (d.key) {
-                painLogLocations[d.key] = d;
-              }
-            });
-            dispatch(ReplacePainLogAction(painLogLocations));
-          });
-      }
-    });
-  };
+export const getPainLog = (user: User): Promise<PainLogType> => {
+  return getFirebaseDataWithUser(user, 'users/painlog');
 };
 
 export const addPainLogLocation = (
-  painLogLocation: PainLogLocation,
-  onComplete?: (PainLogLocation: PainLogLocation) => void,
-): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
-  return (
-    dispatch: ThunkDispatch<State, {}, Action>,
-    getState: () => State,
-    firebase: firebase.app.App,
-  ): Promise<void> => {
-    return new Promise<void>((resolve) => {
-      const {user} = getState();
-      if (user) {
-        if (painLogLocation.key) {
-          // its an update
-          const {key, ...data} = painLogLocation;
-          firebase
-            .firestore()
-            .collection('users')
-            .doc(user.uid)
-            .collection('painlog')
-            .doc(key)
-            .update(data)
-            .then(() => {
-              onComplete && onComplete(painLogLocation);
-            });
-        } else if (painLogLocation.previous) {
-          // it's a change to a previous location = new record in linked-list
-          painLogLocation.created = new Date(Date.now());
-          firebase
-            .firestore()
-            .collection('users')
-            .doc(user.uid)
-            .collection('painlog')
-            .add(painLogLocation)
-            .then((value: DocumentReference<DocumentData>) => {
-              const data = {...painLogLocation, key: value.id};
-              // then update the "parent" record witht eh "child" id
-              firebase
-                .firestore()
-                .collection('users')
-                .doc(user.uid)
-                .collection('painlog')
-                .doc(painLogLocation.previous)
-                .update({next: data.key});
-              onComplete && onComplete(data);
-            });
-        } else {
-          // it's a new record
-          painLogLocation.created = new Date(Date.now());
-          firebase
-            .firestore()
-            .collection('users')
-            .doc(user.uid)
-            .collection('painlog')
-            .add(painLogLocation)
-            .then((value: DocumentReference<DocumentData>) => {
-              const data = {...painLogLocation, key: value.id};
-              onComplete && onComplete(data);
-            });
-        }
-      }
-    });
-  };
+  user: User,
+  contact: PainLogLocation,
+): Promise<PainLogLocation> => {
+  return setFirebaseDataWithUser(user, 'users/contacts', contact);
 };

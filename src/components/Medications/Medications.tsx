@@ -2,8 +2,7 @@ import * as React from 'react';
 import {View, FlatList, StyleSheet, Linking} from 'react-native';
 import {Text, Modal, Portal, FAB, ActivityIndicator} from 'react-native-paper';
 import {useScrollToTop} from '@react-navigation/native';
-import {connect, useSelector} from 'react-redux';
-import {ThunkDispatch} from 'redux-thunk';
+import {useSelector} from 'react-redux';
 import {State} from '../../Types';
 import {
   addMedication,
@@ -16,7 +15,13 @@ import {NewMedication} from '../shared/Medications';
 import {TouchableHighlight} from 'react-native-gesture-handler';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import {firebaseDocumentToArray} from '../../firebase/utilities';
-import { useQueryCache, useQuery, useMutation, queryCache, QueryStatus } from 'react-query';
+import {
+  useQueryCache,
+  useQuery,
+  useMutation,
+  queryCache,
+  QueryStatus,
+} from 'react-query';
 
 const MedicationItem = React.memo(
   ({
@@ -72,38 +77,40 @@ const ItemSeparator = (theme: ThemeState['theme']) => {
 };
 
 export const MedicationsList = () => {
-  const [user, theme] = useSelector((state: State) => [state.user, state.theme]);
+  const [user, theme] = useSelector((state: State) => [
+    state.user,
+    state.theme,
+  ]);
   let dummyForType: Medication | undefined;
   const [addOrEditMedicationId, setAddOrEditMedicationId] = React.useState(
     dummyForType,
   );
   const cache = useQueryCache();
   const fetchDataTypes = (path: string) => getMedications(user);
-  const {
-    data,
-    status,
-    error,
-  } = useQuery<
+  const {data, status, error} = useQuery<
     MedicationsType,
     Error,
     [string, number | undefined]
   >('users/medications', fetchDataTypes, {suspense: true});
-  const [saveMedication] = useMutation((m: Medication) => addMedication(user, m), {
-    onSuccess: (m) => {
-      queryCache.setQueryData<MedicationsType>('users/medications', (old) => {
-        const newMedciationType: MedicationsType = {};
-        if (m.key) {
-          newMedciationType[m.key] = m;
-        }
-        if (old) {
-          return {...old, ...newMedciationType};
-        } else {
-          return newMedciationType;
-        }
-      });
+  const [saveMedication] = useMutation(
+    (m: Medication) => addMedication(user, m),
+    {
+      onSuccess: (m) => {
+        queryCache.setQueryData<MedicationsType>('users/medications', (old) => {
+          const newMedciationType: MedicationsType = {};
+          if (m.key) {
+            newMedciationType[m.key] = m;
+          }
+          if (old) {
+            return {...old, ...newMedciationType};
+          } else {
+            return newMedciationType;
+          }
+        });
+      },
+      onSettled: () => cache.invalidateQueries('users/datatypes'),
     },
-    onSettled: () => cache.invalidateQueries('users/datatypes'),
-  });
+  );
   const medications = data || {};
   const ref = React.useRef<FlatList<Medication>>(null);
   useScrollToTop(ref);
@@ -147,13 +154,15 @@ export const MedicationsList = () => {
               theme={theme}
               saveNewMedication={(medication?: Medication) => {
                 if (medication) {
-                  saveMedication(medication).then((m: Medication| undefined) => {
-                    if (m && m.key) {
-                      setAddOrEditMedicationId(undefined);
-                      //setNewMedications([...newMedications, c.key]);
-                      //onValueChange(newMedications);
-                    }
-                  });
+                  saveMedication(medication).then(
+                    (m: Medication | undefined) => {
+                      if (m && m.key) {
+                        setAddOrEditMedicationId(undefined);
+                        //setNewMedications([...newMedications, c.key]);
+                        //onValueChange(newMedications);
+                      }
+                    },
+                  );
                 } else {
                   setAddOrEditMedicationId(undefined);
                 }
