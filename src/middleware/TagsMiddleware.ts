@@ -1,23 +1,12 @@
 import {State} from './../Types';
-import {Tag, UserTag} from '../reducers/TagsReducer';
+import {Tag} from '../reducers/TagsReducer';
 import {Action} from './../reducers';
 import {ThunkAction, ThunkDispatch} from 'redux-thunk';
 // for the autocomplete call, as it doesn't go through redux/thunk
-import {firebase as firebaseInstance} from '../firebase/config';
-import {AuthState} from '../reducers/AuthReducer';
+import {AuthState, User} from '../reducers/AuthReducer';
+import {getFirebaseDataWithUser} from './Utilities';
 
 export const emptyTag: Tag = {name: ''};
-
-const convertDocumentDataToUserTag = (
-  data: firebase.firestore.DocumentData,
-): UserTag => {
-  const doc = data.data();
-  return {
-    key: data.id,
-    name: doc.name,
-    tagId: doc.tagId,
-  };
-};
 
 type FetchObject = {
   key: string;
@@ -64,30 +53,18 @@ export const getTagsByKeyArray = (
   }
 };
 
-export const getTagIdsForUser = (
-  userId?: string,
-  firebase = firebaseInstance,
-) => {
-  return new Promise<Array<string>>((resolve, reject) => {
-    if (!userId) {
-      resolve(new Array<string>());
-    } else {
-      firebase
-        .firestore()
-        .collection('users')
-        .doc(userId)
-        .collection('tags')
-        .get()
-        .then((querySnapshot: firebase.firestore.QuerySnapshot) => {
-          const userTags = querySnapshot.docs.map((tagIdDoc) =>
-            convertDocumentDataToUserTag(tagIdDoc),
-          );
-          const userTagIds = userTags.map((ut) => ut.tagId);
-          resolve(userTagIds);
-          return userTagIds;
-        });
-    }
-  });
+export const getTagIdsForUser = (user: User, userId: string, cursor = 0) => {
+  if (!user) {
+    return new Promise<Array<string>>((resolve) =>
+      resolve(new Array<string>()),
+    );
+  } else {
+    return getFirebaseDataWithUser<Array<string>>(
+      user,
+      `users/${userId}/tags`,
+      cursor,
+    );
+  }
 };
 
 /*function createIndex(text: string): Tag['searchableIndex'] {

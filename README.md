@@ -53,7 +53,7 @@ It makes sense to put the less frequently used features in the drawer on the lef
 * Currently the Drawer only contains the dark theme toggle, and the tabs displayed are not the correct tabs.
 * Currently the URLs and document header/titles are not correct.
  
-### Appointments
+### Calendar
  
 Appointments are just a simple calendar with date information (specified below), optionally connecting an event in time with a contact and/or a medication prescription date. The appointments can have a type, which can be created and named arbitrarily by the user, and these types can also be referenced by the pain log.
  
@@ -66,8 +66,8 @@ So for example, if you're seeing a doctor about a back pain, that doctor (via [c
 * Add event
  
  
-##### <span style="color:red">Status:</span>
-* Currently calendar listing, calendar day, and add date functionality is loosely built as I was learning React Native, but there are many bugs to fix and styles to make pretty as well as more functionality to add
+##### <span style="color:yellow">Status:</span>
+* In Progress
  
 ### Contacts
  
@@ -82,8 +82,8 @@ The contact can optionally have a "type", which is the same "type" used by [appo
 * Contact detail
 * Add contact
  
-##### <span style="color:red">Status:</span>
-* Not yet started
+##### <span style="color:yellow">Status:</span>
+* In Progress
  
 ### Lock-screen
  
@@ -96,7 +96,7 @@ I'd like to let the user make available on the lock-screen any number of the the
 ##### <span style="color:red">Status:</span>
 * Not yet started
  
-### Meds
+### Medications
  
 A list of medications configurable by the user, with each entry having the following property:
 * refill date
@@ -108,8 +108,8 @@ A list of medications configurable by the user, with each entry having the follo
 * Med detail
 * Add med
  
-##### <span style="color:red">Status:</span>
-* Not yet started
+##### <span style="color:yellow">Status:</span>
+* In Progress
  
 ### Pain Log
  
@@ -124,8 +124,8 @@ The pain log is an SVG image of a figure, front and back, that the user can add/
 * Figure view (with scrub bar and menstrual cycle indicator)
 * Pain log location detail (doubles as add pin log location view)
  
-##### <span style="color:red">Status:</span>
-* Not yet started, but the SVG figure exists as does the mark SVG
+##### <span style="color:yellow">Status:</span>
+* In Progress
  
 #### Social Pages
  
@@ -141,8 +141,8 @@ I'd like to add a social feature to this app; the intent of which is twofold:
   * Users can build support groups by one user acting as a moderator, adding multiple users to the same group
 * Other administrator-interactive features might be useful to motivate users to share their stories, such as a weekly video submission suggestion where users submit short videos and some administrator of the app can post those to a YouTube channel for the app in general?
  
-##### <span style="color:red">Status:</span>
-* Not yet started
+##### <span style="color:yellow">Status:</span>
+* In Progress
  
 ## `Coder Information/notes below here`
  
@@ -151,70 +151,83 @@ I'd like to add a social feature to this app; the intent of which is twofold:
 ```
 {
   theme: Theme,
-  user: firebase.User
-  dates: Hash<CalendarEntry>
+  user: User
 }
 ```
- 
-##### <span style="color:red">Status:</span>
-* Calendar dates and some user data are all that is currently stored in a Firebase back-end
 
 ### NoSQL database structure
-* {UserID}
-  * email
-  * photoUrl
-  * themeName
-  * tags
-    * {TagID}
-      * name
-  * datatypes
-    * {DataTypeID}
-      * title
-      * color
-  * calendars
-    * {CalendarID}
-      * typeId
-      * title
-      * window
-        * starts (timestamp)
-        * ends (timestamp)
-      * description
-      * contacts
-        * contactId 1
-        * contactId 2
-        * etc
-  * meds
-    * {MedID}
-      * typeId
-      * name
-      * prescribed (timestamp)
-      * lastFilled (timestamp)
-      * refillsRemaining (number)
-      * contacts
-        * contactId 1
-        * contactId 2
-        * etc
-  * contacts
-    * {ContactID}
-      * typeId
-      * name
-      * phoneNumber
-      * email
-      * description
-      * location
-  * painlog
-    * version (number) <-- for versioning - [see description below](#description-of-painlog-versioning)
-    * locations
-      * {LocationID}
-        * created (DateTime)
-        * typeId
-        * x (percentage)
-        * y (percentage)
+* tags
+  * {TagID}
+    * name
+    * path
+    * created
+      * by (userId)
+      * on (timestamp)
+      * from (IPv4)
+* posts (comments and messages collections are structured the same)
+  * {PostID}
+    * body
+    * tags (array)
+    * criteria
+      * privacy (number)
+      * key (optional)
+        * id
+        * type
+    * created
+      * by (userId)
+      * on (timestamp)
+      * from (IPv4)
+* users
+  * {UserID}
+    * displayName
+    * email
+    * photoUrl
+    * datatypes
+      * {DataTypeID}
         * title
-        * active (boolean)
+        * color
+    * calendar
+      * {CalendarID}
+        * typeId
+        * title
+        * window
+          * starts (timestamp)
+          * ends (timestamp)
         * description
-        * severity (number)
-        * medId
+        * contacts (array)
+    * medications
+      * {MedID}
+        * typeId
+        * active (boolean)
+        * name
+        * created (timestamp)
+        * prescribed (contactId)
+        * lastFilled (timestamp)
+        * refills (number)
+    * contacts
+      * {ContactID}
+        * typeId
+        * created (timestamp)
+        * name
+        * number
+        * email
+        * description
+        * location
+    * painlog
+      * version (number) <-- for versioning - [see description below](#description-of-painlog-versioning)
+      * locations
+        * {LocationID}
+          * title
+          * active (boolean)
+          * description
+          * severity (number)
+          * medicationId
+          * created (DateTime)
+          * previous (locationId)
+          * typeId
+          * postition
+            * x (percentage)
+            * y (percentage)
 
 #### Description of Painlog Versioning
 
@@ -258,15 +271,6 @@ So using the data above:
 I dom't know if that versioning system will work well while allowing the user to scrub through them - I'm hoping that most lookups have an O(1) time complexity - but we'll see I suppose
 
 ### Notes to Self
- 
-* I added react-native-network-info so I could store the IP address of the user in the DB. I would like to do this server-side, with firebase functions, but that requires me to enter my payment info again, and I'm avoiding that for now
- 
+
 I had to edit /android/build.gradle to set the minSdkversion to 28 (>= 20) to [support multidex](https://developer.android.com/studio/build/multidex). 
  
-### Next
- 
-* Add CalendarTypes for classification of different symptoms
-* fix header and document titling on navigation
-* style CalendarEntry
-* etc
-

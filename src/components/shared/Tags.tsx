@@ -226,39 +226,63 @@ type Props = {
   onTagsChanged?: (tags: Array<string>) => void;
 };
 
-const Tags = ({value, userId, style, onTagsChanged}: Props) => {
+const TagsListComponent = ({value, userId, style, onTagsChanged}: Props) => {
+  const [user, theme] = useSelector((state: State) => [
+    state.user,
+    state.theme,
+  ]);
   const [tagIds, setTagIds] = React.useState(value);
-  const userTagIds = useQuery<string[], Error, [string]>(
-    userId,
-    getTagIdsForUser,
-    {suspense: true},
-  ).data;
-  if (!value && !tagIds && userId) {
+  let getUserTagIds = (path: string, uId?: string, cursor = 0) =>
+    new Promise<Array<string>>((r) => r([]));
+  if (userId !== undefined) {
+    getUserTagIds = (path: string, uId?: string, cursor = 0) =>
+      getTagIdsForUser(user, userId, cursor);
+  }
+  const {data, status, error} = useQuery<
+    Array<string>,
+    Error,
+    [string, string | undefined, number | undefined]
+  >(['/users/tags', userId], getUserTagIds, {suspense: true});
+  const userTagIds = data;
+  if (!tagIds && userId) {
     setTagIds(userTagIds);
   }
-  const theme = useSelector((state: State) => state.theme);
-  return (
-    <View
-      style={[
-        styles.pickerContainer,
-        {
-          backgroundColor: theme.paper.colors.surface,
-          borderRadius: theme.paper.roundness,
-        },
-        style,
-      ]}>
-      <View style={styles.tagsContainer}>
-        <Text style={[styles.label, {color: theme.paper.colors.text}]}>
-          Tags
-        </Text>
-        <React.Suspense fallback={<ActivityIndicator />}>
+  if (status === QueryStatus.Loading) {
+    return <ActivityIndicator />;
+  } else if (status === QueryStatus.Error) {
+    return <Text>An error occured while fetching posts: {error?.message}</Text>;
+  } else {
+    return (
+      <View
+        style={[
+          styles.pickerContainer,
+          {
+            backgroundColor: theme.paper.colors.surface,
+            borderRadius: theme.paper.roundness,
+          },
+          style,
+        ]}>
+        <View style={styles.tagsContainer}>
+          <Text style={[styles.label, {color: theme.paper.colors.text}]}>
+            Tags
+          </Text>
           {onTagsChanged ? (
             <TagList value={tagIds} onTagsChanged={onTagsChanged} />
           ) : (
             <TagList value={tagIds} />
           )}
-        </React.Suspense>
+        </View>
       </View>
+    );
+  }
+};
+
+export const Tags = (props: Props) => {
+  return (
+    <View>
+      <React.Suspense fallback={<ActivityIndicator />}>
+        <TagsListComponent {...props} />
+      </React.Suspense>
     </View>
   );
 };
