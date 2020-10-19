@@ -585,6 +585,8 @@ const styles = StyleSheet.create({
   tagsRow: {
     flexDirection: 'row',
     flexWrap: 'nowrap',
+    flex: 1,
+    justifyContent: 'space-between',
   },
   postMetadataContainer: {
     alignContent: 'flex-end',

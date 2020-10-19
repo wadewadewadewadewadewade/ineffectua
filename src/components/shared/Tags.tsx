@@ -315,9 +315,11 @@ const styles = StyleSheet.create({
     flexGrow: 0,
     padding: 8,
     margin: 8,
+    flex: 1,
   },
   tagListContainer: {
     flexDirection: 'row',
+    flex: 1,
   },
   tagText: {
     fontSize: 16,
@@ -328,7 +330,6 @@ const styles = StyleSheet.create({
   },
   pickerContainer: {
     position: 'relative',
-    minHeight: 64,
   },
   pickerTextInput: {
     marginHorizontal: 8,
