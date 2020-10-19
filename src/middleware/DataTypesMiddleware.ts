@@ -76,21 +76,10 @@ export const dataTypeIsValid = (
   return false;
 };
 
-/*const convertDocumentDataToDataType = (
-  data: firebase.firestore.DocumentData,
-): DataType => {
-  const doc = data.data();
-  return {
-    key: data.id,
-    title: doc.title,
-    color: doc.color,
-  };
-};*/
-
 export const getDatatypes = (user: User): Promise<DataTypesType> => {
   return getFirebaseDataWithUser(user, 'users/datatypes');
 };
 
-export const addDatatype = (user: User, date: DataType): Promise<DataType> => {
+export const addDataType = (user: User, date: DataType): Promise<DataType> => {
   return setFirebaseDataWithUser(user, 'users/datatypes', date);
 };

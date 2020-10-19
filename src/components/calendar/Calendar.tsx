@@ -42,7 +42,7 @@ const CalendarListComponent = ({
     DataTypesType,
     Error,
     [string, number | undefined]
-  >('user/calendar', fetchDatatypes, {suspense: true});
+  >('user/datatypes', fetchDatatypes, {suspense: true});
   const getLowestStatus = (statuses: Array<QueryStatus>) => {
     const namesToNumbers = {
       error: 0,

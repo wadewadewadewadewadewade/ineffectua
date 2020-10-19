@@ -261,7 +261,7 @@ const CalendarDay = (props: {
     DataTypesType,
     Error,
     [string, number | undefined]
-  >('users/calendar', fetchDatatypes, {suspense: true});
+  >('users/datatypes', fetchDatatypes, {suspense: true});
   const getLowestStatus = (statuses: Array<QueryStatus>) => {
     const namesToNumbers = {
       error: 0,

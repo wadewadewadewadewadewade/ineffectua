@@ -3,21 +3,21 @@ import {StyleSheet, Dimensions, ScaledSize} from 'react-native';
 import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import PainLog from './painlog/PainLog';
-import ContactsList from './Contacts/ContactsList';
+import Contacts from './Contacts/Contacts';
 import Agenda from './agenda/Agenda';
 import CalendarNavigator, {
   CalendarStackParamList,
 } from './calendar/CalendarNavigator';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
-import MedicationsList from './Medications/MedicationsList';
+import Medications from './Medications/Medications';
 import {contrast} from '../middleware/DataTypesMiddleware';
 
 export type MaterialBottomTabParams = {
   Agenda: undefined;
   Calendar: CalendarStackParamList;
   PainLog: undefined;
-  ContactsList: undefined;
-  MedicationsList: undefined;
+  Contacts: undefined;
+  Medications: undefined;
 };
 
 const MaterialBottomTabs = createMaterialBottomTabNavigator<
@@ -100,8 +100,8 @@ export default function MaterialBottomTabsScreen() {
           }}
         />
         <MaterialBottomTabs.Screen
-          name="ContactsList"
-          component={ContactsList}
+          name="Contacts"
+          component={Contacts}
           options={{
             tabBarIcon: ({color}) => (
               <MaterialCommunityIcons
@@ -114,8 +114,8 @@ export default function MaterialBottomTabsScreen() {
           }}
         />
         <MaterialBottomTabs.Screen
-          name="MedicationsList"
-          component={MedicationsList}
+          name="Medications"
+          component={Medications}
           options={{
             tabBarIcon: ({color}) => (
               <MaterialCommunityIcons
