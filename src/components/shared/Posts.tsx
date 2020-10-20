@@ -604,6 +604,7 @@ const styles = StyleSheet.create({
   postPrivacyContainer: {
     paddingHorizontal: 12,
     flex: 1,
+    maxWidth: 70,
   },
   flex: {
     flex: 1,

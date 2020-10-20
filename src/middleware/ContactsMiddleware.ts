@@ -5,7 +5,7 @@ import {firebaseDocumentToArray} from '../firebase/utilities';
 import {getFirebaseDataWithUser, setFirebaseDataWithUser} from './Utilities';
 
 export const newContactName = '+ Add New Contact';
-export const emptyContact: Contact = {name: ''};
+export const emptyContact: Contact = {key: '', name: '', created: new Date(-1)};
 
 export const contactIsValid = (
   contact: Contact,
@@ -29,9 +29,23 @@ export const contactIsValid = (
 };
 
 export const getContacts = (user: User): Promise<ContactsType> => {
-  return getFirebaseDataWithUser(user, 'users/contacts');
+  return getFirebaseDataWithUser<ContactsType>(user, 'users/contacts').then(
+    (ct: ContactsType) => {
+      const keys = Object.keys(ct);
+      for(let i=0;i<keys.length;i++) {
+        const key = keys[i];
+        const contact = ct[key];
+        contact.created = new Date(contact.created);
+      }
+      return ct;
+    },
+  );
 };
 
 export const addContact = (user: User, contact: Contact): Promise<Contact> => {
   return setFirebaseDataWithUser(user, 'users/contacts', contact);
+};
+
+export const deleteContact = (user: User, contact: Contact): Promise<Contact> => {
+  return setFirebaseDataWithUser(user, 'users/contacts', contact, 'DELETE');
 };

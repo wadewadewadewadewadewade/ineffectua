@@ -177,7 +177,7 @@ export const MedicationsList = () => {
 
 export const Medications = () => {
   return (
-    <View>
+    <View style={styles.outerContainer}>
       <React.Suspense fallback={<ActivityIndicator />}>
         <MedicationsList />
       </React.Suspense>
@@ -186,6 +186,9 @@ export const Medications = () => {
 };
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    height: '100%',
+  },
   wide: {
     width: '100%',
   },

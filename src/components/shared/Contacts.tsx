@@ -36,6 +36,7 @@ import {
   useQuery,
   queryCache,
 } from 'react-query';
+import DataTypes from './DataTypes';
 
 export const NewContact = (props: {
   value?: Contact;
@@ -47,15 +48,19 @@ export const NewContact = (props: {
   ]);
   const {value, saveNewContact} = props;
   const [name, setName] = React.useState(value?.name || '');
+  const [typeId, setTypeId] = React.useState(value?.typeId);
   const [nameTouched, setNameTouched] = React.useState(false);
-  const [number, setNumber] = React.useState(value?.number || '');
-  const [email, setEmail] = React.useState(value?.email || '');
-  const [location, setLocation] = React.useState(value?.location || '');
+  const [number, setNumber] = React.useState(value?.number);
+  const [email, setEmail] = React.useState(value?.email);
+  const [location, setLocation] = React.useState(value?.location);
   const [description, setDescription] = React.useState(
     value?.description || '',
   );
   const newContact: Contact = {
+    key: value?.key || '',
+    created: new Date(),
     name,
+    typeId,
     number,
     email,
     location,
@@ -81,6 +86,7 @@ export const NewContact = (props: {
         }}
         placeholder="Name"
       />
+      <DataTypes value={typeId} onValueChange={(dt) => setTypeId(dt.key)} />
       <TextInput
         value={number}
         keyboardType="phone-pad"
@@ -218,7 +224,7 @@ const ContactsComponent = ({
   );
   const contactsArray = firebaseDocumentToArray<Contact>(
     contacts,
-    userId ? undefined : {name: newContactName},
+    userId ? undefined : {key: '', name: newContactName, created: new Date(-1)},
   );
   let pickerRef: RNPickerSelect | null = null;
   if (!user) {

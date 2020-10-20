@@ -1,6 +1,6 @@
 export type Contact = {
-  key?: string;
-  created?: Date;
+  key: string;
+  created: Date;
   typeId?: string;
   name: string;
   number?: string;
