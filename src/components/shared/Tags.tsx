@@ -8,19 +8,27 @@ import {
   TextInputKeyPressEventData,
 } from 'react-native';
 import {Text, TextInput, ActivityIndicator} from 'react-native-paper';
-import {useSelector, useDispatch} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {
   getTagsForAutocomplete,
   getTagsByKeyArray,
-  addTagWithDispatch,
-  getTagIdsForUser,
+  getTagsForUser,
+  addTag,
+  addTagForUser,
+  deleteTagForUser,
 } from '../../middleware/TagsMiddleware';
 import {State} from '../../Types';
 import {paperColors} from '../../reducers/ThemeReducer';
-import {Tag} from '../../reducers/TagsReducer';
+import {Tag, UserTag} from '../../reducers/TagsReducer';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import {TouchableHighlight, FlatList} from 'react-native-gesture-handler';
-import {useQuery, QueryStatus} from 'react-query';
+import {
+  useQuery,
+  QueryStatus,
+  queryCache,
+  useMutation,
+  useQueryCache,
+} from 'react-query';
 
 const TagComponent = ({
   tag,
@@ -145,13 +153,28 @@ const NewTagField = ({
   onTagsChanged: (newTag: Tag) => void;
 }) => {
   const [tagName, setTagName] = React.useState<string>('');
-  const theme = useSelector((state: State) => state.theme);
-  const dispatch = useDispatch();
+  const [user, theme] = useSelector((state: State) => [
+    state.user,
+    state.theme,
+  ]);
+  const cache = useQueryCache();
   const {status, data, isFetching, error} = useQuery<
     Tag[],
     Error,
     [string, Array<string>]
   >(tagName, getTagsForAutocomplete, {suspense: false});
+  const [mutateAdd] = useMutation((tag: Tag) => addTag(user, tag), {
+    onSuccess: (t) => {
+      queryCache.setQueryData<Array<Tag>>('/tags', (old) => {
+        if (old) {
+          return [t, ...old];
+        } else {
+          return [t];
+        }
+      });
+    },
+    onSettled: () => cache.invalidateQueries('/tags'),
+  });
   return (
     <View style={styles.pickerContainer}>
       <TextInput
@@ -181,9 +204,7 @@ const NewTagField = ({
               );
               if (tagNames.length === 0) {
                 // if the tag isn't alread in the list, try adding it
-                dispatch(
-                  addTagWithDispatch({name: tagName}, (t) => onTagsChanged(t)),
-                );
+                mutateAdd({name: tagName}).then((t) => t && onTagsChanged(t));
               } else {
                 onTagsChanged({name: tagName});
               }
@@ -232,20 +253,48 @@ const TagsListComponent = ({value, userId, style, onTagsChanged}: Props) => {
     state.theme,
   ]);
   const [tagIds, setTagIds] = React.useState(value);
-  let getUserTagIds = (path: string, uId?: string, cursor = 0) =>
-    new Promise<Array<string>>((r) => r([]));
+  let getUserTags = (path: string, uId?: string, cursor = 0) =>
+    new Promise<Array<UserTag>>((r) => r([]));
   if (userId !== undefined) {
-    getUserTagIds = (path: string, uId?: string, cursor = 0) =>
-      getTagIdsForUser(user, userId, cursor);
+    getUserTags = (path: string, uId?: string, cursor = 0) =>
+      getTagsForUser(user, userId, cursor);
   }
   const {data, status, error} = useQuery<
-    Array<string>,
+    Array<UserTag>,
     Error,
     [string, string | undefined, number | undefined]
-  >(['/users/tags', userId], getUserTagIds, {suspense: true});
+  >(['/users/tags', userId], getUserTags, {suspense: true});
+  const cache = useQueryCache();
+  const [mutateAdd] = useMutation((tag: UserTag) => addTagForUser(user, tag), {
+    onSuccess: (t) => {
+      queryCache.setQueryData<Array<UserTag>>('/user/tags', (old) => {
+        if (old) {
+          return [t, ...old];
+        } else {
+          return [t];
+        }
+      });
+    },
+    onSettled: () => cache.invalidateQueries('/user/tags'),
+  });
+  const [mutateRemove] = useMutation(
+    (tag: UserTag) => deleteTagForUser(user, tag),
+    {
+      onSuccess: (t) => {
+        queryCache.setQueryData<Array<UserTag>>('/user/tags', (old) => {
+          if (old) {
+            return old.filter((ut) => ut.key !== t.key);
+          } else {
+            return [];
+          }
+        });
+      },
+      onSettled: () => cache.invalidateQueries('/user/tags'),
+    },
+  );
   const userTagIds = data;
   if (!tagIds && userId) {
-    setTagIds(userTagIds);
+    setTagIds(userTagIds?.map((ut) => ut.key));
   }
   if (status === QueryStatus.Loading) {
     return <ActivityIndicator />;
@@ -267,7 +316,32 @@ const TagsListComponent = ({value, userId, style, onTagsChanged}: Props) => {
             Tags
           </Text>
           {onTagsChanged ? (
-            <TagList value={tagIds} onTagsChanged={onTagsChanged} />
+            <TagList
+              value={tagIds}
+              onTagsChanged={(updatedTagIds) => {
+                if (userId !== undefined) {
+                  const addedTagIds = new Array<string>();
+                  const removedTagIds = new Array<string>();
+                  updatedTagIds.forEach((t) => {
+                    if (!tagIds?.includes(t)) {
+                      addedTagIds.push(t);
+                    }
+                  });
+                  tagIds?.forEach((t) => {
+                    if (!updatedTagIds.includes(t)) {
+                      removedTagIds.push(t);
+                    }
+                  });
+                  addedTagIds.forEach((t) => {
+                    mutateAdd(userTagIds?.find((ut) => ut.tagId === t));
+                  });
+                  removedTagIds.forEach((t) => {
+                    mutateRemove(userTagIds?.find((ut) => ut.tagId === t));
+                  });
+                }
+                onTagsChanged(updatedTagIds);
+              }}
+            />
           ) : (
             <TagList value={tagIds} />
           )}
@@ -279,7 +353,7 @@ const TagsListComponent = ({value, userId, style, onTagsChanged}: Props) => {
 
 export const Tags = (props: Props) => {
   return (
-    <View>
+    <View style={styles.tagsRelativeContainer}>
       <React.Suspense fallback={<ActivityIndicator />}>
         <TagsListComponent {...props} />
       </React.Suspense>
@@ -288,6 +362,11 @@ export const Tags = (props: Props) => {
 };
 
 const styles = StyleSheet.create({
+  tagsRelativeContainer: {
+    position: 'relative',
+    zIndex: 2,
+    elevation: 2,
+  },
   container: {
     flex: 1,
   },

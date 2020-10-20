@@ -6,7 +6,7 @@ import {getFirebaseDataWithUser, setFirebaseDataWithUser} from './Utilities';
 export const newTypeTitle = '+ Add New Type';
 export const defaultTypeTitle = 'Default';
 export const defaultColor = '#660000';
-export const emptyDataType: DataType = {title: '', color: '#000'};
+export const emptyDataType: DataType = {key: '', title: '', color: '#000'};
 
 // START contreacting color borrowed from https://medium.com/better-programming/generate-contrasting-text-for-your-random-background-color-ac302dc87b4
 interface RGB {

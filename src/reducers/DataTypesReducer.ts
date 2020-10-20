@@ -1,5 +1,5 @@
 export type DataType = {
-  key?: string;
+  key: string;
   title: string;
   color: string;
 };

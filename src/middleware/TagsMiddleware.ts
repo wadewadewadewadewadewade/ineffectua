@@ -1,10 +1,6 @@
-import {State} from './../Types';
-import {Tag} from '../reducers/TagsReducer';
-import {Action} from './../reducers';
-import {ThunkAction, ThunkDispatch} from 'redux-thunk';
-// for the autocomplete call, as it doesn't go through redux/thunk
-import {AuthState, User} from '../reducers/AuthReducer';
-import {getFirebaseDataWithUser} from './Utilities';
+import {Tag, UserTag} from '../reducers/TagsReducer';
+import {User} from '../reducers/AuthReducer';
+import {getFirebaseDataWithUser, setFirebaseDataWithUser} from './Utilities';
 
 export const emptyTag: Tag = {name: ''};
 
@@ -53,17 +49,33 @@ export const getTagsByKeyArray = (
   }
 };
 
-export const getTagIdsForUser = (user: User, userId: string, cursor = 0) => {
+export const getTagsForUser = (user: User, userId: string, cursor = 0) => {
   if (!user) {
-    return new Promise<Array<string>>((resolve) =>
-      resolve(new Array<string>()),
+    return new Promise<Array<UserTag>>((resolve) =>
+      resolve(new Array<UserTag>()),
     );
   } else {
-    return getFirebaseDataWithUser<Array<string>>(
+    return getFirebaseDataWithUser<Array<UserTag>>(
       user,
       `users/${userId}/tags`,
       cursor,
     );
+  }
+};
+
+export const addTagForUser = (user: User, tag: UserTag) => {
+  if (!user) {
+    return new Promise<UserTag>((resolve) => resolve({} as UserTag));
+  } else {
+    return setFirebaseDataWithUser<UserTag>(user, 'users/tags', tag);
+  }
+};
+
+export const deleteTagForUser = (user: User, tag: UserTag) => {
+  if (!user) {
+    return new Promise<UserTag>((resolve) => resolve({} as UserTag));
+  } else {
+    return setFirebaseDataWithUser<UserTag>(user, 'users/tags', tag, 'DELETE');
   }
 };
 
@@ -79,56 +91,6 @@ export const getTagIdsForUser = (user: User, userId: string, cursor = 0) => {
   return searchableIndex;
 }*/
 
-export const addTag = (user: AuthState['user'], tag: Tag) => {
-  if (!user) {
-    return new Promise<string>((re, rj) => rj('not authenticated'));
-  } else if (user.getIdToken) {
-    return user.getIdToken().then(async (token) =>
-      (
-        await fetch(
-          'https://us-central1-ineffectua.cloudfunctions.net/api/v1/tags',
-          {
-            method: 'PUT',
-            headers: new Headers({
-              Authorization: 'Bearer ' + token,
-              ContentType: 'application/json',
-            }),
-            body: JSON.stringify(tag),
-          },
-        )
-      ).json(),
-    );
-  } else {
-    return new Promise<string>((re, rj) => rj('unknown authentication error'));
-  }
-};
-
-export const addTagWithDispatch = (
-  tag: Tag,
-  onComplete?: (tag: Tag) => void,
-): ThunkAction<Promise<Tag>, State, firebase.app.App, Action> => {
-  return (
-    dispatch: ThunkDispatch<State, {}, Action>,
-    getState: () => State,
-    firebase: firebase.app.App,
-  ): Promise<Tag> => {
-    return new Promise<Tag>((resolve, reject) => {
-      const {user} = getState();
-      if (user) {
-        if (onComplete !== undefined) {
-          addTag(user, tag)
-            .then((t) => {
-              resolve(t);
-              return t;
-            })
-            .then(onComplete)
-            .catch(reject);
-        } else {
-          addTag(user, tag).then(resolve).catch(reject);
-        }
-      } else {
-        reject('Please authenticate');
-      }
-    });
-  };
+export const addTag = (user: User, tag: Tag) => {
+  return setFirebaseDataWithUser<Tag>(user, 'tags', tag);
 };

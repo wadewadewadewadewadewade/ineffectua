@@ -11,8 +11,7 @@ export type Tag = {
 };
 
 export type UserTag = {
-  key?: string;
-  name: string;
+  key: string;
   tagId: string;
 };
 

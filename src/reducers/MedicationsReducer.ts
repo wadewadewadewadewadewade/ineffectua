@@ -1,6 +1,6 @@
 export type Medication = {
-  key?: string;
-  created?: Date;
+  key: string;
+  created: Date;
   typeId?: string;
   name: string;
   active: boolean;

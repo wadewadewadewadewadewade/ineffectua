@@ -1,5 +1,13 @@
 import * as React from 'react';
-import {View, FlatList, StyleSheet, Linking} from 'react-native';
+import {
+  View,
+  FlatList,
+  StyleSheet,
+  Linking,
+  GestureResponderEvent,
+  Platform,
+  Alert,
+} from 'react-native';
 import {Text, Modal, Portal, FAB, ActivityIndicator} from 'react-native-paper';
 import {useScrollToTop} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
@@ -8,6 +16,7 @@ import {
   addMedication,
   emptyMedication,
   getMedications,
+  deleteMedication,
 } from '../../middleware/MedicationsMiddleware';
 import {ThemeState, paperColors} from '../../reducers/ThemeReducer';
 import {Medication, MedicationsType} from '../../reducers/MedicationsReducer';
@@ -31,41 +40,107 @@ const MedicationItem = React.memo(
     item: Medication;
     onPress: (medication: Medication) => void;
   }) => {
-    const theme = useSelector((state: State) => state.theme);
+    const [user, theme] = useSelector((state: State) => [
+      state.user,
+      state.theme,
+    ]);
     const {colors} = theme.navigation;
-
+    const cache = useQueryCache();
+    const [mutateDelete] = useMutation(
+      (medication: Medication) => deleteMedication(user, medication),
+      {
+        onSuccess: (d, v) => {
+          queryCache.setQueryData(
+            'users/medications',
+            (old: MedicationsType | undefined) => {
+              if (old !== undefined) {
+                const keyToRemove = v.key;
+                const {[keyToRemove]: removed, ...rest} = old;
+                return rest as MedicationsType;
+              } else {
+                return {};
+              }
+            },
+          );
+        },
+        onSettled: () => cache.invalidateQueries('users/medications'),
+      },
+    );
+    const createTwoButtonAlert = (e: GestureResponderEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (Platform.OS === 'web') {
+        // Alert doesn't seem to work in expo/web https://github.com/expo/expo/issues/6560
+        // TODO: add window.confirm to clobal namespace so we can use confirm() on desktop
+        mutateDelete(item);
+      } else {
+        Alert.alert(
+          'Delete post',
+          'Are you sure? This action is not reversable.',
+          [
+            {
+              text: 'Cancel',
+              //onPress: () => console.log("Cancel Pressed"),
+              style: 'cancel',
+            },
+            {text: 'OK', onPress: () => mutateDelete(item)},
+          ],
+          {cancelable: true},
+        );
+      }
+    };
     return (
-      <TouchableHighlight
-        onPress={() => onPress(item)}
-        style={styles.existingMedication}>
-        <View style={[styles.item, {backgroundColor: colors.card}]}>
-          <View style={styles.avatar}>
-            <Text style={styles.letter}>
-              {item.name.slice(0, 1).toUpperCase()}
-            </Text>
+      <View style={[styles.item, {backgroundColor: colors.card}]}>
+        <TouchableHighlight
+          onPress={() => onPress(item)}
+          containerStyle={styles.existingMedication}>
+          <View style={styles.rowWide}>
+            <View style={styles.avatar}>
+              <Text style={styles.letter}>
+                {item.name.slice(0, 1).toUpperCase()}
+              </Text>
+            </View>
+            <View style={styles.details}>
+              <Text style={[styles.name, {color: colors.text}]}>
+                {item.name}
+              </Text>
+              <Text style={[styles.number, {color: colors.text}]}>
+                {item.refills + ' refill'}
+                {item.refills !== 1 && 's'}
+              </Text>
+            </View>
           </View>
-          <View style={styles.details}>
-            <Text style={[styles.name, {color: colors.text}]}>{item.name}</Text>
-            <Text style={[styles.number, {color: colors.text}]}>
-              {item.refills + ' refill'}
-              {item.refills !== 1 && 's'}
-            </Text>
-          </View>
-          <View style={styles.links}>
-            <MaterialCommunityIcons
-              onPress={() => {
-                Linking.openURL(
-                  'https://en.wikipedia.org/wiki/' +
-                    encodeURIComponent(item.name),
-                );
-              }}
-              name="information"
-              color={paperColors(theme).text}
-              size={26}
-            />
-          </View>
+        </TouchableHighlight>
+        <View style={styles.links}>
+          <MaterialCommunityIcons
+            style={styles.icon}
+            onPress={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const url =
+                'https://en.wikipedia.org/wiki/' +
+                encodeURIComponent(item.name);
+              Linking.canOpenURL(url).then((val) => {
+                if (val) {
+                  Linking.openURL(url);
+                } else {
+                  // TODO: message about inability to open URL
+                }
+              });
+            }}
+            name="information"
+            color={paperColors(theme).text}
+            size={26}
+          />
+          <MaterialCommunityIcons
+            style={styles.icon}
+            name={'delete'}
+            onPress={createTwoButtonAlert}
+            color={paperColors(theme).text}
+            size={26}
+          />
         </View>
-      </TouchableHighlight>
+      </View>
     );
   },
 );
@@ -108,7 +183,7 @@ export const MedicationsList = () => {
           }
         });
       },
-      onSettled: () => cache.invalidateQueries('users/datatypes'),
+      onSettled: () => cache.invalidateQueries('users/medications'),
     },
   );
   const medications = data || {};
@@ -186,6 +261,11 @@ export const Medications = () => {
 };
 
 const styles = StyleSheet.create({
+  rowWide: {
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
+    flex: 1,
+  },
   outerContainer: {
     height: '100%',
   },
@@ -201,8 +281,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   existingMedication: {
-    display: 'flex',
-    backgroundColor: '#0f0',
+    flex: 1,
   },
   item: {
     flexDirection: 'row',
@@ -223,10 +302,11 @@ const styles = StyleSheet.create({
   },
   details: {
     margin: 8,
-    flexGrow: 1,
+    flex: 1,
   },
   links: {
-    flexDirection: 'column',
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
   },
   name: {
     fontWeight: 'bold',
@@ -235,6 +315,9 @@ const styles = StyleSheet.create({
   number: {
     fontSize: 12,
     opacity: 0.5,
+  },
+  icon: {
+    marginHorizontal: 8,
   },
   separator: {
     height: StyleSheet.hairlineWidth,

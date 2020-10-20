@@ -1,5 +1,12 @@
 import * as React from 'react';
-import {View, FlatList, StyleSheet, Platform, Alert, GestureResponderEvent} from 'react-native';
+import {
+  View,
+  FlatList,
+  StyleSheet,
+  Platform,
+  Alert,
+  GestureResponderEvent,
+} from 'react-native';
 import {Text, Modal, Portal, FAB, ActivityIndicator} from 'react-native-paper';
 import {useScrollToTop} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
@@ -25,35 +32,36 @@ import {
 import {State} from '../../Types';
 
 const ContactItem = React.memo(
-  ({
-    item,
-    onPress,
-  }: {
-    item: Contact;
-    onPress: (contact: Contact) => void;
-  }) => {
-    const [user, theme] = useSelector((state: State) => [state.user, state.theme]);
+  ({item, onPress}: {item: Contact; onPress: (contact: Contact) => void}) => {
+    const [user, theme] = useSelector((state: State) => [
+      state.user,
+      state.theme,
+    ]);
     const {colors} = theme.navigation;
     const cache = useQueryCache();
-    const [mutateDelete] = useMutation((contact: Contact) => deleteContact(user, contact), {
-      onSuccess: (d, v) => {
-        queryCache.setQueryData(
-          'users/contacts',
-          (old: ContactsType | undefined) => {
-            if (old !== undefined) {
-              const keyToRemove = v.key;
-              const {[keyToRemove]: removed, ...rest} = old;
-              return rest as ContactsType;
-            } else {
-              return {};
-            }
-          },
-        );
+    const [mutateDelete] = useMutation(
+      (contact: Contact) => deleteContact(user, contact),
+      {
+        onSuccess: (d, v) => {
+          queryCache.setQueryData(
+            'users/contacts',
+            (old: ContactsType | undefined) => {
+              if (old !== undefined) {
+                const keyToRemove = v.key;
+                const {[keyToRemove]: removed, ...rest} = old;
+                return rest as ContactsType;
+              } else {
+                return {};
+              }
+            },
+          );
+        },
+        onSettled: () => cache.invalidateQueries('users/contacts'),
       },
-      onSettled: () => cache.invalidateQueries('users/contacts'),
-    });
+    );
     const createTwoButtonAlert = (e: GestureResponderEvent) => {
       e.preventDefault();
+      e.stopPropagation();
       if (Platform.OS === 'web') {
         // Alert doesn't seem to work in expo/web https://github.com/expo/expo/issues/6560
         mutateDelete(item);
@@ -74,11 +82,14 @@ const ContactItem = React.memo(
       }
     };
     return (
-      <View style={[styles.flexRow, {backgroundColor: theme.navigation.colors.card}]}>
+      <View
+        style={[
+          styles.flexRow,
+          {backgroundColor: theme.navigation.colors.card},
+        ]}>
         <TouchableHighlight
           onPress={() => onPress(item)}
-          containerStyle={styles.existingContact}
-        >
+          containerStyle={styles.existingContact}>
           <View style={styles.item}>
             <View style={styles.avatar}>
               <Text style={styles.letter}>
@@ -86,7 +97,9 @@ const ContactItem = React.memo(
               </Text>
             </View>
             <View style={styles.details}>
-              <Text style={[styles.name, {color: colors.text}]}>{item.name}</Text>
+              <Text style={[styles.name, {color: colors.text}]}>
+                {item.name}
+              </Text>
               <Text style={[styles.number, {color: colors.text}]}>
                 {item.number}
               </Text>
@@ -116,9 +129,7 @@ export const ContactsList = () => {
     state.theme,
   ]);
   let dummyForType: Contact | undefined;
-  const [addOrEditContact, setAddOrEditContact] = React.useState(
-    dummyForType,
-  );
+  const [addOrEditContact, setAddOrEditContact] = React.useState(dummyForType);
   const cache = useQueryCache();
   const fetchDataTypes = (path: string) => getContacts(user);
   const {data, status, error} = useQuery<

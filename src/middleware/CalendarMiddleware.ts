@@ -257,7 +257,7 @@ export const getDates = (user: User): Promise<CalendarType> => {
   return getFirebaseDataWithUser<CalendarType>(user, 'users/calendar').then(
     (c) => {
       const keys = Object.keys(c);
-      for(let i=0;i<keys.length;i++) {
+      for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const contact = c[key];
         contact.window.starts = new Date(c[key].window.starts);

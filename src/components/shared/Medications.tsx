@@ -9,6 +9,7 @@ import {
   Portal,
   TextInput,
   ActivityIndicator,
+  Divider,
 } from 'react-native-paper';
 import {useSelector} from 'react-redux';
 import {
@@ -75,6 +76,8 @@ export const NewMedication = ({
     value?.description || '',
   );
   const newMedication: Medication = {
+    key: '',
+    created: new Date(-1),
     name,
     active,
     typeId,
@@ -108,10 +111,12 @@ export const NewMedication = ({
         value={active}
         onValueChange={(val) => setActive(val)}
       />
+      <Divider />
       <DataTypes
         value={typeId}
         onValueChange={(dt) => dt.key && setTypeId(dt.key)}
       />
+      <Divider />
       <View style={styles.rowContainer}>
         <Text style={styles.label}>Prescriber</Text>
         <Contacts
@@ -154,14 +159,16 @@ export const NewMedication = ({
         onChangeText={(text) => setDescription(text)}
       />
       <TouchableOpacity
-        style={{backgroundColor: theme.paper.colors.accent, ...styles.button}}
+        style={{backgroundColor: theme.paper.colors.accent}}
         onPress={() => {
           typeof name === 'string' &&
             name.length &&
             nameExists.length === 0 &&
             saveNewMedication(newMedication);
         }}>
-        <Text style={styles.buttonContents}>{buttonLabel} Medication</Text>
+        <View style={styles.button}>
+          <Text style={styles.buttonContents}>{buttonLabel} Medication</Text>
+        </View>
       </TouchableOpacity>
       <Button onPress={() => saveNewMedication()} style={styles.saveButton}>
         <Text>Cancel</Text>
@@ -269,7 +276,9 @@ const MedicationsComponent = ({
   );
   const medicationsArray = firebaseDocumentToArray(
     medications,
-    userId ? undefined : {name: newMedicationName, active: true},
+    userId
+      ? undefined
+      : {name: newMedicationName, active: true, key: '', created: new Date(-1)},
   );
   let pickerRef: RNPickerSelect | null = null;
   if (!user) {
@@ -451,6 +460,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingVertical: 12,
+    paddingRight: 16,
   },
   button: {
     padding: 16,

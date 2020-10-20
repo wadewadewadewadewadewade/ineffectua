@@ -48,7 +48,7 @@ const NewDataType = (props: {
   const [newColor, setNewColor] = React.useState(
     typeof value === 'string' ? datatypes[value]?.color : value?.color || '',
   );
-  const newDataType = {title: newTitle, color: newColor};
+  const newDataType = {key: '', title: newTitle, color: newColor};
   const datatypesArray = firebaseDocumentToArray<DataType>(datatypes);
   const newTitleExists = datatypesArray.filter((dt) => dt.title === newTitle);
   return (

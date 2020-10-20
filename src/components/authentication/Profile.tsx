@@ -197,7 +197,7 @@ const SideBar = ({
           <Avatar.Image source={{uri: thumbnail}} style={styles.image} />
         ) : null}
         <Subheading>
-          {user && user.displayName !== null ? ' ' + user.displayName : ''}!
+          {user && user.displayName !== null ? ' ' + user.displayName : ''}
         </Subheading>
         {isLandscapeOnPhone && <TabsLinks navigationRef={navigationRef} />}
         <Divider />
@@ -277,7 +277,12 @@ const ProfilePage = ({
         />
         <Divider />
         <Suspense fallback={<ActivityIndicator />}>
-          <Tags userId={user.uid} />
+          <Tags
+            userId={user.uid}
+            onTagsChanged={(t) => {
+              /* do nothing*/
+            }}
+          />
         </Suspense>
         <Divider />
         <Medications

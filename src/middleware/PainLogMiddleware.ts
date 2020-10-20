@@ -168,12 +168,29 @@ export class PainLogThreads {
 }
 
 export const getPainLog = (user: User): Promise<PainLogType> => {
-  return getFirebaseDataWithUser(user, 'users/painlog');
+  return getFirebaseDataWithUser<PainLogType>(user, 'users/painlog').then(
+    (p) => {
+      const keys = Object.keys(p);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const location = p[key];
+        location.created = location.created && new Date(location.created);
+      }
+      return p;
+    },
+  );
 };
 
 export const addPainLogLocation = (
   user: User,
   contact: PainLogLocation,
 ): Promise<PainLogLocation> => {
-  return setFirebaseDataWithUser(user, 'users/contacts', contact);
+  return setFirebaseDataWithUser<PainLogLocation>(
+    user,
+    'users/painlog',
+    contact,
+  ).then((l) => {
+    l.created = l.created && new Date(l.created);
+    return l;
+  });
 };

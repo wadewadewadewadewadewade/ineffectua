@@ -7,36 +7,12 @@ import {
   AuthState,
   initialState as authInitialState,
 } from './reducers/AuthReducer';
-import {
-  CalendarEntry,
-  CalendarState,
-  initialState as calendarInitialState,
-} from './reducers/CalendarReducer';
-import {
-  DataType,
-  DataTypesState,
-  initialState as datatypesInitialState,
-} from './reducers/DataTypesReducer';
-import {
-  Contact,
-  ContactsState,
-  initialState as contactsInitialState,
-} from './reducers/ContactsReducer';
-import {
-  Medication,
-  MedicationsState,
-  initialState as medicationsInitialState,
-} from './reducers/MedicationsReducer';
-import {
-  PainLogLocation,
-  PainLogState,
-  initialState as painLogInitialState,
-} from './reducers/PainLogReducer';
-import {
-  Tag,
-  TagsState,
-  initialState as tagsInitialState,
-} from './reducers/TagsReducer';
+import {CalendarEntry} from './reducers/CalendarReducer';
+import {DataType} from './reducers/DataTypesReducer';
+import {Contact} from './reducers/ContactsReducer';
+import {Medication} from './reducers/MedicationsReducer';
+import {PainLogLocation} from './reducers/PainLogReducer';
+import {Tag} from './reducers/TagsReducer';
 
 export const NAVIGATION_PERSISTENCE_KEY = 'NAVIGATION_STATE';
 export const THEME_PERSISTENCE_KEY = 'THEME_TYPE';
@@ -49,25 +25,12 @@ export type AllTypes =
   | PainLogLocation
   | Tag;
 
-export type State = AuthState &
-  ThemeState &
-  CalendarState &
-  DataTypesState &
-  ContactsState &
-  MedicationsState &
-  PainLogState &
-  TagsState;
+export type State = AuthState & ThemeState;
 
 // Initial State
 export const initialState: State = {
   user: authInitialState.user,
   theme: themeInitialState.theme,
-  dates: calendarInitialState,
-  datatypes: datatypesInitialState,
-  contacts: contactsInitialState,
-  medications: medicationsInitialState,
-  painlog: painLogInitialState,
-  tags: tagsInitialState,
 };
 
 export type RootDrawerParamList = {

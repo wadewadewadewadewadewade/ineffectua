@@ -32,7 +32,7 @@ export const getContacts = (user: User): Promise<ContactsType> => {
   return getFirebaseDataWithUser<ContactsType>(user, 'users/contacts').then(
     (ct: ContactsType) => {
       const keys = Object.keys(ct);
-      for(let i=0;i<keys.length;i++) {
+      for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const contact = ct[key];
         contact.created = new Date(contact.created);
@@ -43,9 +43,25 @@ export const getContacts = (user: User): Promise<ContactsType> => {
 };
 
 export const addContact = (user: User, contact: Contact): Promise<Contact> => {
-  return setFirebaseDataWithUser(user, 'users/contacts', contact);
+  return setFirebaseDataWithUser<Contact>(user, 'users/contacts', contact).then(
+    (c) => {
+      c.created = new Date(c.created);
+      return c;
+    },
+  );
 };
 
-export const deleteContact = (user: User, contact: Contact): Promise<Contact> => {
-  return setFirebaseDataWithUser(user, 'users/contacts', contact, 'DELETE');
+export const deleteContact = (
+  user: User,
+  contact: Contact,
+): Promise<Contact> => {
+  return setFirebaseDataWithUser<Contact>(
+    user,
+    'users/contacts',
+    contact,
+    'DELETE',
+  ).then((c) => {
+    c.created = new Date(c.created);
+    return c;
+  });
 };
