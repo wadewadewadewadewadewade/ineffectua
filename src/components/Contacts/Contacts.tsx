@@ -158,7 +158,7 @@ export const ContactsList = () => {
 
 export const Contacts = () => {
   return (
-    <View>
+    <View style={styles.outerComponent}>
       <React.Suspense fallback={<ActivityIndicator />}>
         <ContactsList />
       </React.Suspense>
@@ -169,6 +169,9 @@ export const Contacts = () => {
 const styles = StyleSheet.create({
   wide: {
     width: '100%',
+  },
+  outerComponent: {
+    height: '100%',
   },
   container: {
     flexDirection: 'column',

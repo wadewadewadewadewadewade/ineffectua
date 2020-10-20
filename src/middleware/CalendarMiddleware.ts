@@ -256,9 +256,12 @@ export const dateInDateWindow = (
 export const getDates = (user: User): Promise<CalendarType> => {
   return getFirebaseDataWithUser<CalendarType>(user, 'users/calendar').then(
     (c) => {
-      for (let key in Object.keys(c)) {
-        c[key].window.starts = new Date(c[key].window.starts);
-        c[key].window.ends = new Date(c[key].window.ends);
+      const keys = Object.keys(c);
+      for(let i=0;i<keys.length;i++) {
+        const key = keys[i];
+        const contact = c[key];
+        contact.window.starts = new Date(c[key].window.starts);
+        contact.window.ends = new Date(c[key].window.ends);
       }
       return c;
     },

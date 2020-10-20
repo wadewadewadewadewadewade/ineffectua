@@ -6,6 +6,7 @@ import {store, persistor} from '../Store';
 import {enableScreens} from 'react-native-screens';
 import Navigation from './Navigation';
 import {QueryCache, ReactQueryCacheProvider} from 'react-query'; // https://react-query.tanstack.com/docs/guides/suspense
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 enableScreens();
 
 const queryCache = new QueryCache({
@@ -23,7 +24,9 @@ export default function App() {
     <ReduxProvider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <ReactQueryCacheProvider queryCache={queryCache}>
-          <Navigation />
+          <SafeAreaProvider>
+            <Navigation />
+          </SafeAreaProvider>
         </ReactQueryCacheProvider>
       </PersistGate>
     </ReduxProvider>

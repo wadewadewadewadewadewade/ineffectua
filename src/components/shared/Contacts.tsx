@@ -402,7 +402,6 @@ const styles = StyleSheet.create({
     paddingLeft: 12,
   },
   button: {
-    padding: 16,
     alignItems: 'center',
     paddingVertical: 16,
   },
@@ -445,6 +444,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     textTransform: 'uppercase',
+    paddingVertical: 16,
   },
   contactItem: {
     flex: 1,

@@ -603,6 +603,7 @@ const styles = StyleSheet.create({
   },
   postPrivacyContainer: {
     paddingHorizontal: 12,
+    flex: 1,
   },
   flex: {
     flex: 1,

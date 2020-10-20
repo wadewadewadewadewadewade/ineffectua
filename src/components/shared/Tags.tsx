@@ -325,14 +325,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   label: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 8,
     paddingVertical: 8,
   },
   pickerContainer: {
     position: 'relative',
+    justifyContent: 'center',
+    flex: 1,
   },
   pickerTextInput: {
     marginHorizontal: 8,
+    borderWidth: 0,
   },
   picker: {
     position: 'absolute',
