@@ -58,10 +58,7 @@ export const NewMedication = ({
   value,
   saveNewMedication,
 }: NewMedicationProps) => {
-  const [theme, medications] = useSelector((state: State) => [
-    state.theme,
-    state.medications,
-  ]);
+  const theme = useSelector((state: State) => state.theme);
   const [name, setName] = React.useState(value?.name || '');
   const [active, setActive] = React.useState(value?.active || false);
   const [nameTouched, setNameTouched] = React.useState(false);
@@ -317,7 +314,7 @@ const MedicationsComponent = ({
             </View>
           </TouchableHighlight>
           {medicationsArray.map((m) => (
-            <MedicationItem medication={m} />
+            <MedicationItem key={m.key} medication={m} />
           ))}
         </View>
       );
@@ -357,16 +354,16 @@ const MedicationsComponent = ({
           </View>
           {newMedications &&
             newMedications.map(
-              (cId: string) =>
-                medications[cId] && (
-                  <View key={cId} style={styles.existingMedications}>
+              (mId: string) =>
+                medications[mId] && (
+                  <View key={mId} style={styles.existingMedications}>
                     <Text style={styles.existingMedicationsText}>
-                      {medications[cId].name}
+                      {medications[mId].name}
                     </Text>
                     <MaterialCommunityIcons
                       onPress={() => {
                         setNewMedications(
-                          newMedications.filter((c) => c !== cId),
+                          newMedications.filter((c) => c !== mId),
                         );
                       }}
                       style={styles.existingMedicationsIcon}

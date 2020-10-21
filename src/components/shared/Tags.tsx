@@ -93,11 +93,13 @@ const TagList = ({
   value?: Array<string>;
   onTagsChanged?: (tags: Array<string>) => void;
 }) => {
-  const {status, data, isFetching, error} = useQuery<Tag[], Error, [string]>(
-    JSON.stringify(value),
-    (tagIds) => getTagsByKeyArray(tagIds ? JSON.parse(tagIds) : []),
-    {suspense: true},
-  );
+  const {status, data, isFetching, error} = useQuery<
+    Tag[],
+    Error,
+    [string, string[]]
+  >(['/tags', value], (path, tagIds) => getTagsByKeyArray(tagIds), {
+    suspense: true,
+  });
   const tags = data || [];
   if (!value) {
     return <View />;
@@ -107,6 +109,7 @@ const TagList = ({
   } else if (status === QueryStatus.Error) {
     return <Text>An error occured while fetching tags: {error?.message}</Text>;
   } else if (onTagsChanged) {
+    // only allow max of 10 tags - for Firesitre 'where in []' reasons, and also seems unnecessary
     return (
       <View style={styles.tagListContainer}>
         {tags.length > 0 &&
@@ -123,15 +126,17 @@ const TagList = ({
               }
             />
           ))}
-        <NewTagField
-          tags={tags}
-          onTagsChanged={(tag) =>
-            onTagsChanged([
-              ...tags.map((t: Tag) => t.key as string),
-              tag.key as string,
-            ])
-          }
-        />
+        {tags.length < 10 && (
+          <NewTagField
+            tags={tags}
+            onTagsChanged={(tag) =>
+              onTagsChanged([
+                ...tags.map((t: Tag) => t.key as string),
+                tag.key as string,
+              ])
+            }
+          />
+        )}
       </View>
     );
   } else {
@@ -253,21 +258,26 @@ const TagsListComponent = ({value, userId, style, onTagsChanged}: Props) => {
     state.theme,
   ]);
   const [tagIds, setTagIds] = React.useState(value);
-  let getUserTags = (path: string, uId?: string, cursor = 0) =>
+  const queryKey = userId
+    ? `/users/${userId}/tags`
+    : user
+    ? `/users/${user.uid}/tags`
+    : '/users/tags';
+  let getUserTags = (path: string, cursor = 0) =>
     new Promise<Array<UserTag>>((r) => r([]));
   if (userId !== undefined) {
-    getUserTags = (path: string, uId?: string, cursor = 0) =>
+    getUserTags = (path: string, cursor = 0) =>
       getTagsForUser(user, userId, cursor);
   }
   const {data, status, error} = useQuery<
     Array<UserTag>,
     Error,
-    [string, string | undefined, number | undefined]
-  >(['/users/tags', userId], getUserTags, {suspense: true});
+    [string, number | undefined]
+  >(queryKey, getUserTags, {suspense: true});
   const cache = useQueryCache();
   const [mutateAdd] = useMutation((tag: UserTag) => addTagForUser(user, tag), {
     onSuccess: (t) => {
-      queryCache.setQueryData<Array<UserTag>>('/user/tags', (old) => {
+      queryCache.setQueryData<Array<UserTag>>(queryKey, (old) => {
         if (old) {
           return [t, ...old];
         } else {
@@ -275,26 +285,31 @@ const TagsListComponent = ({value, userId, style, onTagsChanged}: Props) => {
         }
       });
     },
-    onSettled: () => cache.invalidateQueries('/user/tags'),
+    onSettled: () => cache.invalidateQueries(queryKey),
   });
   const [mutateRemove] = useMutation(
     (tag: UserTag) => deleteTagForUser(user, tag),
     {
       onSuccess: (t) => {
-        queryCache.setQueryData<Array<UserTag>>('/user/tags', (old) => {
-          if (old) {
-            return old.filter((ut) => ut.key !== t.key);
-          } else {
-            return [];
-          }
-        });
+        console.log(userId ? `/users/${userId}/tags` : '/tags');
+        queryCache.setQueryData<Array<UserTag>>(
+          userId ? `/users/${userId}/tags` : '/tags',
+          (old) => {
+            if (old) {
+              return old.filter((ut) => ut.key !== t.key);
+            } else {
+              return [];
+            }
+          },
+        );
       },
-      onSettled: () => cache.invalidateQueries('/user/tags'),
+      onSettled: (t) =>
+        cache.invalidateQueries(userId ? `/users/${userId}/tags` : '/tags'),
     },
   );
-  const userTagIds = data;
+  const userTags = data;
   if (!tagIds && userId) {
-    setTagIds(userTagIds?.map((ut) => ut.key));
+    setTagIds(userTags?.map((ut) => ut.tagId));
   }
   if (status === QueryStatus.Loading) {
     return <ActivityIndicator />;
@@ -332,11 +347,11 @@ const TagsListComponent = ({value, userId, style, onTagsChanged}: Props) => {
                       removedTagIds.push(t);
                     }
                   });
-                  addedTagIds.forEach((t) => {
-                    mutateAdd(userTagIds?.find((ut) => ut.tagId === t));
+                  addedTagIds.forEach((tagId) => {
+                    mutateAdd({key: '', tagId} as UserTag);
                   });
-                  removedTagIds.forEach((t) => {
-                    mutateRemove(userTagIds?.find((ut) => ut.tagId === t));
+                  removedTagIds.forEach((tagId) => {
+                    mutateRemove(userTags?.find((ut) => ut.tagId === tagId));
                   });
                 }
                 onTagsChanged(updatedTagIds);
@@ -395,6 +410,7 @@ const styles = StyleSheet.create({
     padding: 8,
     margin: 8,
     flex: 1,
+    flexBasis: 'min-content',
   },
   tagListContainer: {
     flexDirection: 'row',

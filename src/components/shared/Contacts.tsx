@@ -42,9 +42,9 @@ export const NewContact = (props: {
   value?: Contact;
   saveNewContact: (contact?: Contact) => void;
 }) => {
-  const [theme, contacts] = useSelector((state: State) => [
+  const [user, theme] = useSelector((state: State) => [
+    state.user,
     state.theme,
-    state.contacts,
   ]);
   const {value, saveNewContact} = props;
   const [name, setName] = React.useState(value?.name || '');
@@ -67,7 +67,12 @@ export const NewContact = (props: {
     description,
   };
   const buttonLabel = !value || value === emptyContact ? 'Add New' : 'Edit';
-  const contactsArray = firebaseDocumentToArray<Contact>(contacts);
+  const {data} = useQuery<ContactsType, Error, [string]>(
+    '/users/contacts',
+    () => getContacts(user),
+    {suspense: false},
+  );
+  const contactsArray = (data && firebaseDocumentToArray(data)) || [];
   const nameExists = contactsArray.filter((c) => c.name === name);
   return (
     <SafeAreaView style={{backgroundColor: theme.paper.colors.surface}}>
@@ -165,7 +170,7 @@ const SideBar = ({
       <SafeAreaView style={styles.sidebarInset}>
         <FlatList
           data={contactsArray}
-          keyExtractor={(i) => i.key || i.name}
+          keyExtractor={(i) => i.key}
           renderItem={({item, index}) => <ContactItem contact={item} />}
         />
       </SafeAreaView>
@@ -263,7 +268,7 @@ const ContactsComponent = ({
             </View>
           </TouchableHighlight>
           {contactsArray.map((c) => (
-            <ContactItem contact={c} />
+            <ContactItem key={c.key} contact={c} />
           ))}
         </View>
       );
@@ -302,7 +307,7 @@ const ContactsComponent = ({
             newContacts.map(
               (cId: string) =>
                 contacts[cId] && (
-                  <View style={styles.existingContacts}>
+                  <View key={cId} style={styles.existingContacts}>
                     <Text style={styles.existingContactsText}>
                       {contacts[cId].name}
                     </Text>
