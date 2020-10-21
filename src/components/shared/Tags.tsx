@@ -29,6 +29,8 @@ import {
   useMutation,
   useQueryCache,
 } from 'react-query';
+import {navigate} from '../RootNavigation';
+import {PostCriteriaKey} from '../../reducers/PostsReducer';
 
 const TagComponent = ({
   tag,
@@ -51,9 +53,13 @@ const TagComponent = ({
           backgroundColor: theme.paper.colors.backdrop,
         },
       ]}>
-      <Text style={[styles.tagText, {color: paperColors(theme).onSurface}]}>
-        {name}
-      </Text>
+      <TouchableHighlight onPress={() => {
+        navigate('Agenda', {key: {id: tag.key, type: 'tags'}}, `#${tag.name}`)
+      }}>
+        <Text style={[styles.tagText, {color: paperColors(theme).onSurface}]}>
+          {name}
+        </Text>
+      </TouchableHighlight>
       {removeTag !== undefined && (
         <MaterialCommunityIcons
           onPress={() => {
@@ -209,9 +215,9 @@ const NewTagField = ({
               );
               if (tagNames.length === 0) {
                 // if the tag isn't alread in the list, try adding it
-                mutateAdd({name: tagName}).then((t) => t && onTagsChanged(t));
+                mutateAdd({key: '', name: tagName}).then((t) => t && onTagsChanged(t));
               } else {
-                onTagsChanged({name: tagName});
+                onTagsChanged({key: '', name: tagName});
               }
             }
           }
@@ -299,7 +305,7 @@ const TagsListComponent = ({value, userId, style, onTagsChanged}: Props) => {
       onSettled: (t) => cache.invalidateQueries(queryKey),
     },
   );
-  if (!tagIds && userId) {
+  if ((!tagIds && userId) || (userId && userTags?.length !== tagIds?.length)) {
     setTagIds(userTags?.map((ut) => ut.tagId));
   }
   if (status === QueryStatus.Loading) {

@@ -30,11 +30,13 @@ export const getPostPrivacyName = (privacy: PostPrivacyTypes) => {
   }
 };
 
+export type PostCriteriaKey = {
+  id: string;
+  type: 'tags' | 'posts' | 'comments' | 'messages';
+}
+
 export type PostCriteria = {
-  key?: {
-    id: string;
-    type: 'posts' | 'comments' | 'messages';
-  };
+  key?: PostCriteriaKey;
   privacy: PostPrivacyTypes;
 };
 

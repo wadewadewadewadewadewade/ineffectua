@@ -1,30 +1,34 @@
 import React from 'react';
 import {Agenda as AgendaList, DateObject} from 'react-native-calendars';
 import {StyleSheet, View, Text} from 'react-native';
-import {connect} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {State} from '../../Types';
-import {NavigationContainerRef} from '@react-navigation/native';
 import {CalendarType, CalendarWindow} from '../../reducers/CalendarReducer';
 import {
   formatDates,
   formatDatesForMarking,
   dateInDateWindow,
   addDays,
+  getDates,
 } from '../../middleware/CalendarMiddleware';
-import {Theme, themeIsDark} from '../../reducers/ThemeReducer';
+import {themeIsDark} from '../../reducers/ThemeReducer';
 import Posts from '../shared/Posts';
 import {DataTypesType} from '../../reducers/DataTypesReducer';
-import {PostPrivacyTypes} from '../../reducers/PostsReducer';
+import {PostPrivacyTypes, PostCriteria} from '../../reducers/PostsReducer';
 import {firebaseDocumentToArray} from '../../firebase/utilities';
+import {useQuery} from 'react-query';
+import {getDatatypes} from '../../middleware/DataTypesMiddleware';
+import {navigate, getRouteParams} from '../RootNavigation';
 
-type AgendaProps = {
-  theme: Theme;
-  dates: CalendarType;
-  datatypes: DataTypesType;
-  navigation: NavigationContainerRef;
-};
-
-const Agenda = ({dates, navigation, theme, datatypes}: AgendaProps) => {
+const Agenda = () => {
+  const params = getRouteParams();
+  const criteria: PostCriteria = {
+    privacy: PostPrivacyTypes.PUBLIC,
+  }
+  if (params !== undefined && params.key !== undefined) {
+    criteria.key = params.key;
+  }
+  const [user, theme] = useSelector((state: State) => [state.user, state.theme]);
   const calendarTheme = {
     ...theme.paper,
     agendaDayTextColor: themeIsDark(theme) ? '#666' : '#ccc',
@@ -32,6 +36,20 @@ const Agenda = ({dates, navigation, theme, datatypes}: AgendaProps) => {
     agendaTodayColor: 'red',
     agendaKnobColor: 'blue',
   };
+  const fetchDates = (path: string) => getDates(user);
+  const fetchDatatypes = (path: string) => getDatatypes(user);
+  const datesQuery = useQuery<
+    CalendarType,
+    Error,
+    [string, number | undefined]
+  >('user/calendar', fetchDates, {suspense: false});
+  const dataTypesQuery = useQuery<
+    DataTypesType,
+    Error,
+    [string, number | undefined]
+  >('user/datatypes', fetchDatatypes, {suspense: false});
+  const dates: CalendarType = datesQuery.data || {};
+  const datatypes = dataTypesQuery.data || {};
   const datesArray = firebaseDocumentToArray(dates);
   const upcomingWeek: CalendarWindow = {
     starts: new Date(),
@@ -55,12 +73,11 @@ const Agenda = ({dates, navigation, theme, datatypes}: AgendaProps) => {
           //onCalendarToggled={(calendarOpened) => {console.log(calendarOpened)}}
           // Callback that gets called on day press
           onDayPress={(day: DateObject) =>
-            navigation.navigate('CalendarDay', {
-              date: day,
-              title:
-                'Calendar: ' +
+            navigate('CalendarDay',
+              {date: day},
+              'Calendar: ' +
                 new Date(Date.parse(day.dateString)).toDateString(),
-            })
+            )
           }
           // Callback that gets called when day changes while scrolling agenda list
           //onDayChange={(day)=>{console.log('day changed')}}
@@ -120,8 +137,7 @@ const Agenda = ({dates, navigation, theme, datatypes}: AgendaProps) => {
       )}
       <Posts
         showComposePost={true}
-        criteria={{privacy: PostPrivacyTypes.PUBLIC}}
-        navigationRef={navigation}
+        criteria={criteria}
       />
     </View>
   );
@@ -139,11 +155,4 @@ const styles = StyleSheet.create({
   },
 });
 
-const mapStateToProps = (state: State) => {
-  return {
-    theme: state.theme,
-    dates: state.dates,
-    datatypes: state.datatypes,
-  };
-};
-export default connect(mapStateToProps)(Agenda);
+export default Agenda;

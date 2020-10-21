@@ -15,12 +15,9 @@ import {useQuery, QueryStatus} from 'react-query';
 import {CalendarType} from '../../reducers/CalendarReducer';
 import {DataTypesType} from '../../reducers/DataTypesReducer';
 import {ActivityIndicator} from 'react-native-paper';
+import {navigate} from '../RootNavigation';
 
-const CalendarListComponent = ({
-  navigation,
-}: {
-  navigation: StackNavigationProp<CalendarStackParamList, 'Calendar'>;
-}) => {
+const CalendarListComponent = () => {
   const [user, theme] = useSelector((state: State) => [
     state.user,
     state.theme,
@@ -86,12 +83,11 @@ const CalendarListComponent = ({
         //displayLoadingIndicator={true}
         // Handler which gets executed on day press. Default = undefined
         onDayPress={(day: DateObject) =>
-          navigation.navigate('CalendarDay', {
-            date: day,
-            title:
-              'Calendar: ' +
+          navigate('CalendarDay',
+            {date: day},
+            'Calendar: ' +
               new Date(Date.parse(day.dateString)).toDateString(),
-          })
+          )
         }
         // Handler which gets executed on day long press. Default = undefined
         //onDayLongPress={(day: DateObject) => navigation.navigate('ModalScreen', { component: CalendarEntry, date: day })}
@@ -145,14 +141,11 @@ const CalendarListComponent = ({
   }
 };
 
-const Calendar = (props: {
-  navigation: StackNavigationProp<CalendarStackParamList, 'Calendar'>;
-}) => {
-  const {navigation} = props;
+const Calendar = () => {
   return (
     <View>
       <Suspense fallback={<ActivityIndicator />}>
-        <CalendarListComponent navigation={navigation} />
+        <CalendarListComponent />
       </Suspense>
     </View>
   );

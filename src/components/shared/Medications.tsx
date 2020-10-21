@@ -58,7 +58,7 @@ export const NewMedication = ({
   value,
   saveNewMedication,
 }: NewMedicationProps) => {
-  const theme = useSelector((state: State) => state.theme);
+  const [user, theme] = useSelector((state: State) => [state.user, state.theme]);
   const [name, setName] = React.useState(value?.name || '');
   const [active, setActive] = React.useState(value?.active || false);
   const [nameTouched, setNameTouched] = React.useState(false);
@@ -84,6 +84,12 @@ export const NewMedication = ({
     description,
   };
   const buttonLabel = !value || value === emptyMedication ? 'Add New' : 'Edit';
+  const {data, status, error} = useQuery<
+    MedicationsType,
+    Error,
+    [string, number | undefined]
+  >('users/medications', () => getMedications(user), {suspense: false});
+  const medications = data || {};
   const medicationsArray = firebaseDocumentToArray(medications);
   const nameExists = medicationsArray.filter((c) => c.name === name);
   return (

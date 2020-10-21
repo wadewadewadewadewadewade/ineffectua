@@ -39,8 +39,8 @@ import {
 import {User} from '../../reducers/AuthReducer';
 import {getUserById} from '../../middleware/AuthMiddleware';
 import {TouchableHighlight} from 'react-native-gesture-handler';
-import {NavigationContainerRef} from '@react-navigation/native';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
+import {navigate} from '../RootNavigation';
 
 // used for a list of posts, for comments within a post, messages between users, and for searching maybe?
 
@@ -168,10 +168,8 @@ const ComposePost = ({criteria, height, onSavePost}: ComposePostProps) => {
 
 const PostUser = ({
   userId,
-  navigationRef,
 }: {
   userId: string;
-  navigationRef: NavigationContainerRef | null;
 }) => {
   const [rerun, setRerun] = React.useState(true);
   const {status, data, error, refetch} = useQuery<User>(userId, getUserById, {
@@ -199,18 +197,18 @@ const PostUser = ({
       <View style={styles.postUser}>
         <TouchableHighlight
           onPress={() =>
-            navigationRef?.navigate('Root', {
-              screen: 'Profile',
-              params: {userId: data.uid},
-            })
+            navigate('Profile',
+              {user: {userId: data.uid}},
+              data.displayName
+            )
           }>
           {thumbnail ? (
             <Avatar.Image
               onTouchEnd={() => {
-                navigationRef?.navigate('Root', {
-                  screen: 'Profile',
-                  params: {userId: data.uid},
-                });
+                navigate('Profile',
+                  {user: {userId: data.uid}},
+                  data.displayName
+                )
               }}
               size={40}
               source={{uri: thumbnail}}
@@ -231,12 +229,10 @@ const PostUser = ({
 
 const PostComponent = ({
   post,
-  navigationRef,
   inset,
   onDeletePost,
 }: {
   post: Post;
-  navigationRef: NavigationContainerRef | null;
   inset: number;
   onDeletePost: (post: Post) => void;
 }) => {
@@ -280,7 +276,6 @@ const PostComponent = ({
             <React.Suspense fallback={<ActivityIndicator />}>
               <PostUser
                 userId={post.created.by}
-                navigationRef={navigationRef}
               />
             </React.Suspense>
             <Text style={styles.postMetadataText}>
@@ -356,7 +351,6 @@ const PostComponent = ({
           ]}>
           <Posts
             showComposePost={true}
-            navigationRef={navigationRef}
             criteria={{
               key: {
                 id: post.key,
@@ -376,12 +370,10 @@ const PostComponent = ({
 const PostsList = ({
   criteria,
   showComposePost,
-  navigationRef,
   inset,
 }: {
   criteria: PostCriteria;
   showComposePost?: boolean;
-  navigationRef: NavigationContainerRef | null;
   inset: number;
 }) => {
   const [user] = useSelector((state: State) => [state.user]);
@@ -468,7 +460,6 @@ const PostsList = ({
               <PostComponent
                 inset={inset + 1}
                 post={p.item}
-                navigationRef={navigationRef}
                 onDeletePost={(p2) => removePost(p2)}
               />
             )
@@ -486,14 +477,12 @@ const PostsList = ({
 type PostProps = {
   showComposePost?: boolean;
   criteria: PostCriteria;
-  navigationRef: NavigationContainerRef | null;
   inset?: number;
 };
 
 const Posts = ({
   showComposePost,
   criteria,
-  navigationRef,
   inset = 0,
 }: PostProps) => {
   return (
@@ -503,7 +492,6 @@ const Posts = ({
           inset={inset}
           criteria={criteria}
           showComposePost={showComposePost === true}
-          navigationRef={navigationRef}
         />
       </React.Suspense>
     </View>

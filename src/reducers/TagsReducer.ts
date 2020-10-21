@@ -1,5 +1,5 @@
 export type Tag = {
-  key?: string;
+  key: string;
   name: string;
   path?: string;
   created?: {

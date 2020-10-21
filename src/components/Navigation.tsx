@@ -16,7 +16,6 @@ import {
 import {
   InitialState,
   NavigationContainer,
-  NavigationContainerRef,
   getFocusedRouteNameFromRoute,
   RouteProp,
 } from '@react-navigation/native';
@@ -29,6 +28,7 @@ import {
   HeaderStyleInterpolators,
 } from '@react-navigation/stack';
 import {Action} from '../reducers';
+import {navigationRef} from './RootNavigation';
 
 // use this to restart the app for things like changing RTL to LTR
 //import {restartApp} from './Restart';
@@ -204,8 +204,6 @@ const Navigation = () => {
 
     return () => Dimensions.removeEventListener('change', onDimensionsChange);
   }, []);
-
-  const navigationRef = React.useRef<NavigationContainerRef>(null);
 
   /*if (!isReady) {
     return (
