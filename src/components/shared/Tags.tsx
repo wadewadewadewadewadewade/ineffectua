@@ -274,16 +274,15 @@ const TagsListComponent = ({value, userId, style, onTagsChanged}: Props) => {
     Error,
     [string, number | undefined]
   >(queryKey, getUserTags, {suspense: true});
+  const userTags = data;
   const cache = useQueryCache();
   const [mutateAdd] = useMutation((tag: UserTag) => addTagForUser(user, tag), {
     onSuccess: (t) => {
-      queryCache.setQueryData<Array<UserTag>>(queryKey, (old) => {
-        if (old) {
-          return [t, ...old];
-        } else {
-          return [t];
-        }
-      });
+      let newUserTags = [t];
+      if (userTags) {
+        newUserTags = [...userTags, t];
+      }
+      queryCache.setQueryData<Array<UserTag>>(queryKey, newUserTags);
     },
     onSettled: () => cache.invalidateQueries(queryKey),
   });
@@ -291,23 +290,15 @@ const TagsListComponent = ({value, userId, style, onTagsChanged}: Props) => {
     (tag: UserTag) => deleteTagForUser(user, tag),
     {
       onSuccess: (t) => {
-        console.log(userId ? `/users/${userId}/tags` : '/tags');
-        queryCache.setQueryData<Array<UserTag>>(
-          userId ? `/users/${userId}/tags` : '/tags',
-          (old) => {
-            if (old) {
-              return old.filter((ut) => ut.key !== t.key);
-            } else {
-              return [];
-            }
-          },
-        );
+        let newUserTags = new Array<UserTag>();
+        if (userTags) {
+          newUserTags = userTags.filter((ut) => ut.key !== t.key);
+        }
+        queryCache.setQueryData(queryKey, newUserTags);
       },
-      onSettled: (t) =>
-        cache.invalidateQueries(userId ? `/users/${userId}/tags` : '/tags'),
+      onSettled: (t) => cache.invalidateQueries(queryKey),
     },
   );
-  const userTags = data;
   if (!tagIds && userId) {
     setTagIds(userTags?.map((ut) => ut.tagId));
   }
@@ -414,6 +405,7 @@ const styles = StyleSheet.create({
   },
   tagListContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     flex: 1,
   },
   tagText: {
@@ -422,11 +414,13 @@ const styles = StyleSheet.create({
   label: {
     paddingHorizontal: 8,
     paddingVertical: 8,
+    alignSelf: 'flex-start',
   },
   pickerContainer: {
     position: 'relative',
     justifyContent: 'center',
     flex: 1,
+    minWidth: 70,
   },
   pickerTextInput: {
     marginHorizontal: 8,

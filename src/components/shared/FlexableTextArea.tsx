@@ -26,6 +26,7 @@ const FlexableTextArea = ({
 }: FlexableTextAreaProps) => {
   const [height, setHeight] = React.useState(1);
   const [body, setBody] = React.useState(value || '');
+  const lineHeight = 22;
   return (
     <View style={style}>
       <TextInput
@@ -37,7 +38,7 @@ const FlexableTextArea = ({
         value={body}
         onContentSizeChange={(e) => {
           const newHeight = Math.floor(
-            e.nativeEvent.contentSize.height / styles.description.lineHeight,
+            e.nativeEvent.contentSize.height / lineHeight,
           );
           if (newHeight !== height) {
             setHeight(newHeight);
@@ -68,7 +69,6 @@ const FlexableTextArea = ({
 const styles = StyleSheet.create({
   description: {
     fontSize: 16,
-    lineHeight: 22,
     padding: 3,
     minHeight: 0,
   },
