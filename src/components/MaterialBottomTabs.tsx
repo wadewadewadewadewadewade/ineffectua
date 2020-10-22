@@ -11,14 +11,13 @@ import CalendarNavigator, {
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import Medications from './Medications/Medications';
 import {contrast} from '../middleware/DataTypesMiddleware';
-import { GeneralNavigationParams } from '../Types';
 
 export type MaterialBottomTabParams = {
-  Agenda: GeneralNavigationParams;
+  Agenda: undefined;
   Calendar: CalendarStackParamList;
   PainLog: undefined;
-  Contacts: GeneralNavigationParams & {contactId?: string};
-  Medications: GeneralNavigationParams & {medicationId?: string};
+  Contacts: undefined;
+  Medications: undefined;
 };
 
 const MaterialBottomTabs = createMaterialBottomTabNavigator<

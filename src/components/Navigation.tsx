@@ -13,12 +13,7 @@ import {
   Appbar,
   ActivityIndicator,
 } from 'react-native-paper';
-import {
-  InitialState,
-  NavigationContainer,
-  getFocusedRouteNameFromRoute,
-  RouteProp,
-} from '@react-navigation/native';
+import {InitialState, NavigationContainer} from '@react-navigation/native';
 import {
   createDrawerNavigator,
   DrawerScreenProps,
@@ -230,9 +225,7 @@ const Navigation = () => {
         {isUserAuthenticated(user) ? (
           <Drawer.Navigator
             drawerType={isLargeScreen ? 'permanent' : undefined}
-            drawerContent={() => (
-              <Profile />
-            )}>
+            drawerContent={() => <Profile />}>
             <Drawer.Screen name="Root">
               {({navigation}: DrawerScreenProps<RootDrawerParamList>) => (
                 <Stack.Navigator
@@ -264,13 +257,11 @@ const Navigation = () => {
                   <Stack.Screen
                     name="Profile"
                     children={() => {
-                      return (
-                        <Profile
-                          layout={ProfileLayouts.PAGE}
-                        />
-                      );
+                      return <Profile layout={ProfileLayouts.PAGE} />;
                     }}
-                    options={({ route }) => ({ title: getHeaderTitle(undefined, route) })}
+                    options={({route}) => ({
+                      title: getHeaderTitle(undefined, route),
+                    })}
                   />
                   <Stack.Screen
                     name="NotFound"

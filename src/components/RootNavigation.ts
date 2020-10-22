@@ -1,5 +1,8 @@
-import { RootStackParamList } from './../Types';
-import { NavigationContainerRef, RouteProp, getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import {GeneralNavigationParams} from './../Types';
+import {
+  NavigationContainerRef,
+  getFocusedRouteNameFromRoute,
+} from '@react-navigation/native';
 import {PostCriteriaKey} from './../reducers/PostsReducer';
 import * as React from 'react';
 import {DateObject} from 'react-native-calendars';
@@ -45,6 +48,30 @@ export function getRouteParams() {
   return navigationRef.current?.getCurrentRoute()?.params as NavigationParams;
 }
 
+const getRouteParamsAsObject = (
+  params: object | undefined,
+): (GeneralNavigationParams & NavigationParams) | undefined => {
+  if (params !== undefined && 'params' in params) {
+    return (params as any).params;
+  } else if (params !== undefined) {
+    return params;
+  } else {
+    return undefined;
+  }
+};
+
+type RouteNames =
+  | 'Agenda'
+  | 'AuthFlow'
+  | 'Profile'
+  | 'Calendar'
+  | 'CalendarDay'
+  | 'Contacts'
+  | 'Medications'
+  | 'PainLog'
+  | 'NotFound'
+  | undefined;
+
 export function getHeaderTitle(
   options: Record<string, any> | undefined,
   route:
@@ -54,40 +81,24 @@ export function getHeaderTitle(
         params?: object;
       }>
     | undefined,
-  savedStateName?: string,
+  savedStateName?: RouteNames,
 ): string {
   // If the focused route is not found, we need to assume it's the initial screen
   // This can happen during if there hasn't been any navigation inside the screen
   // In our case, it's "Feed" as that's the first screen inside the navigator
-  let routeName =
+  const routeName: RouteNames | undefined =
     savedStateName ||
-    (options && options.title) ||
-    (route && (getFocusedRouteNameFromRoute(route) || route.name));
+    (route &&
+      ((getFocusedRouteNameFromRoute(route) || route.name) as RouteNames));
+
+  const params = (route && getRouteParamsAsObject(route.params)) || {
+    title: undefined,
+  };
   switch (routeName) {
-    case 'ModalScreen':
-      return ((route as RouteProp<RootStackParamList, 'Tabs'>)?.params as any)
-        .title;
-    case 'Tabs':
-    case 'Agenda':
-    case 'Feed':
-      const agendaParams = (route?.params as RootStackParamList['Tabs']['Agenda']);
-      return agendaParams && agendaParams.title || 'Agenda';
-    case 'CalendarEntry':
-      const calendarDayParams = (route?.params as RootStackParamList['Tabs']['Calendar']['CalendarDay']);
-      return calendarDayParams && calendarDayParams.title || calendarDayParams.date.dateString;
+    case 'CalendarDay':
     case 'Calendar':
-      return 'Calendar';
-    case 'PainLogEntry':
-    case 'PainLog':
-      return 'Pain Log';
-    case 'Profile':
-      const profileParams = (route?.params as RootStackParamList['Tabs']['Agenda']);
-      return profileParams && profileParams.title || 'Profile';
-    case 'Contacts':
-      const contactsParams = (route?.params as RootStackParamList['Tabs']['Agenda']);
-      return contactsParams && contactsParams.title || 'Contacts';
-    case 'Account':
-      return 'My Account';
+      return (params && (params.title || params.date?.dateString)) || routeName;
+    default:
+      return (params && params.title) || routeName || '';
   }
-  return routeName;
 }

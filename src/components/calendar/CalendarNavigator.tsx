@@ -2,7 +2,7 @@ import React from 'react';
 import CalendarDay, {CalendarDayProps} from './CalendarDay';
 import {createStackNavigator} from '@react-navigation/stack';
 import Calendar from './Calendar';
-import { GeneralNavigationParams } from '../../Types';
+import {GeneralNavigationParams} from '../../Types';
 
 export type CalendarStackParamList = {
   Calendar: undefined;
