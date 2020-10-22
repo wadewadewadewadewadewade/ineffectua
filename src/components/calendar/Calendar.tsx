@@ -8,8 +8,6 @@ import {
   getDates,
 } from '../../middleware/CalendarMiddleware';
 import {themeIsDark} from '../../reducers/ThemeReducer';
-import {CalendarStackParamList} from './CalendarNavigator';
-import {StackNavigationProp} from '@react-navigation/stack';
 import {getDatatypes} from '../../middleware/DataTypesMiddleware';
 import {useQuery, QueryStatus} from 'react-query';
 import {CalendarType} from '../../reducers/CalendarReducer';

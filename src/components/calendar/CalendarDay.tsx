@@ -219,7 +219,6 @@ const TimeSlot = (props: {
 
 export type CalendarDayProps = {
   date: DateObject;
-  title: string;
 };
 
 const CalendarDay = (props: {

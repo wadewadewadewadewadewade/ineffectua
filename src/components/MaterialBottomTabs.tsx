@@ -11,13 +11,14 @@ import CalendarNavigator, {
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import Medications from './Medications/Medications';
 import {contrast} from '../middleware/DataTypesMiddleware';
+import { GeneralNavigationParams } from '../Types';
 
 export type MaterialBottomTabParams = {
-  Agenda: undefined;
+  Agenda: GeneralNavigationParams;
   Calendar: CalendarStackParamList;
   PainLog: undefined;
-  Contacts: undefined;
-  Medications: undefined;
+  Contacts: GeneralNavigationParams & {contactId?: string};
+  Medications: GeneralNavigationParams & {medicationId?: string};
 };
 
 const MaterialBottomTabs = createMaterialBottomTabNavigator<
@@ -77,7 +78,7 @@ export default function MaterialBottomTabsScreen() {
           options={{
             tabBarIcon: ({color}) => (
               <MaterialCommunityIcons
-                name="home"
+                name="comment"
                 color={contrast(color)}
                 size={26}
               />

@@ -38,9 +38,13 @@ export type RootDrawerParamList = {
   Another: undefined;
 };
 
+export type GeneralNavigationParams = {
+  title?: string;
+}
+
 export type RootStackParamList = {
   Tabs: MaterialBottomTabParams;
-  AuthFlow: undefined;
+  AuthFlow: GeneralNavigationParams;
   NotFound: undefined;
-  Profile: {userId?: string};
+  Profile: GeneralNavigationParams & {userId?: string};
 };

@@ -15,7 +15,6 @@ import {
   ActivityIndicator,
 } from 'react-native-paper';
 import SettingsItem from '../shared/SettingsItem';
-import {NavigationContainerRef} from '@react-navigation/native';
 import {useSelector, useDispatch} from 'react-redux';
 import {State} from '../../Types';
 import {ToggleThemeAction, paperColors} from '../../reducers/ThemeReducer';
@@ -27,6 +26,7 @@ import Tags from '../shared/Tags';
 import Medications from '../shared/Medications';
 import Contacts from '../shared/Contacts';
 import {User} from '../../reducers/AuthReducer';
+import {navigate, getRouteParams} from '../RootNavigation';
 
 enum ProfileViews {
   'PRIVATE' = 0,
@@ -38,47 +38,27 @@ export enum ProfileLayouts {
   'PAGE' = 1,
 }
 
-const getUserIdFromRoute = (navigationRef: NavigationContainerRef | null) => {
-  if (navigationRef !== null) {
-    const route = navigationRef.getCurrentRoute();
-    if (route !== undefined) {
-      const params = route.params;
-      if (params !== undefined && 'userId' in params) {
-        const {userId} = params as {userId?: string};
-        if (userId !== undefined) {
-          return userId;
-        }
-      }
-    }
-  }
-  return undefined;
-};
-
-const TabsLinks = ({
-  navigationRef,
-}: {
-  navigationRef: NavigationContainerRef | null;
-}) => {
+const TabsLinks = () => {
   const [theme] = useSelector((state: State) => [state.theme]);
   const color = theme.paper.colors.text;
   return (
     <View>
       <View style={styles.row}>
-        <TouchableHighlight onPress={() => navigationRef?.navigate('Agenda')}>
-          <MaterialCommunityIcons name="home" color={color} size={26} />
+        <TouchableHighlight onPress={() => navigate('Agenda')}>
+          <MaterialCommunityIcons name="comment" color={color} size={26} />
         </TouchableHighlight>
-        <TouchableHighlight onPress={() => navigationRef?.navigate('Calendar')}>
+        <TouchableHighlight onPress={() => navigate('Calendar')}>
           <MaterialCommunityIcons name="calendar" color={color} size={26} />
         </TouchableHighlight>
         <TouchableHighlight
-          onPress={() => navigationRef?.navigate('ContactsList')}>
+          onPress={() => navigate('Contacts')}>
           <MaterialCommunityIcons name="contacts" color={color} size={26} />
         </TouchableHighlight>
         <TouchableHighlight
-          onPress={() => navigationRef?.navigate('MedicationsList')}>
+          onPress={() => navigate('Medications')}>
           <MaterialCommunityIcons name="pill" color={color} size={26} />
         </TouchableHighlight>
-        <TouchableHighlight onPress={() => navigationRef?.navigate('PainLog')}>
+        <TouchableHighlight onPress={() => navigate('PainLog')}>
           <MaterialCommunityIcons name="human" color={color} size={26} />
         </TouchableHighlight>
       </View>
@@ -87,12 +67,8 @@ const TabsLinks = ({
   );
 };
 
-const SideBar = ({
-  navigationRef,
-}: {
-  navigationRef: NavigationContainerRef | null;
-}) => {
-  const userId = getUserIdFromRoute(navigationRef); // no userId supplied means private
+const SideBar = () => {
+  const userId = getRouteParams()?.user?.userId; // no userId supplied means private
   const [ready, setReady] = React.useState(false);
   const [user, setUser] = React.useState<User>(
     useSelector((state: State) => state.user),
@@ -160,7 +136,7 @@ const SideBar = ({
           </View>
           <MaterialCommunityIcons
             onPress={() => {
-              navigationRef?.navigate('Root', {screen: 'Profile'});
+              navigate('Profile');
             }}
             style={styles.settingsIcon}
             name="cogs"
@@ -174,7 +150,7 @@ const SideBar = ({
           onValueChange={() => toggleTheme()}
         />
         <Divider />
-        {isLandscapeOnPhone && <TabsLinks navigationRef={navigationRef} />}
+        {isLandscapeOnPhone && <TabsLinks />}
         <Divider />
         <Suspense fallback={<ActivityIndicator />}>
           <Tags userId={user.uid} />
@@ -199,7 +175,7 @@ const SideBar = ({
         <Subheading>
           {user && user.displayName !== null ? ' ' + user.displayName : ''}
         </Subheading>
-        {isLandscapeOnPhone && <TabsLinks navigationRef={navigationRef} />}
+        {isLandscapeOnPhone && <TabsLinks />}
         <Divider />
         <Suspense fallback={<ActivityIndicator />}>
           <Tags userId={user.uid} />
@@ -213,13 +189,9 @@ const SideBar = ({
   }
 };
 
-const ProfilePage = ({
-  navigationRef,
-}: {
-  navigationRef: NavigationContainerRef | null;
-}) => {
+const ProfilePage = () => {
   const [ready, setReady] = React.useState(false);
-  const userId = getUserIdFromRoute(navigationRef); // no userId supplied means private
+  const userId = getRouteParams()?.user?.userId; // no userId supplied means private
   const [user, setUser] = React.useState<User>(
     useSelector((state: State) => state.user),
   );
@@ -307,10 +279,7 @@ const ProfilePage = ({
         <Button
           theme={theme.paper}
           onPress={() =>
-            navigationRef?.navigate('Root', {
-              screen: 'Messaging',
-              props: {userId: user.uid},
-            })
+            navigate('Agenda', {user: {userId: user.uid}}, user.displayName)
           }>
           Message
         </Button>
@@ -328,16 +297,14 @@ const ProfilePage = ({
 
 const Profile = ({
   layout,
-  navigationRef,
 }: {
   layout?: ProfileLayouts;
-  navigationRef: NavigationContainerRef | null;
 }) => {
   const pageLayout = layout ? layout : ProfileLayouts.SIDEBAR;
   if (pageLayout === ProfileLayouts.PAGE) {
-    return <ProfilePage navigationRef={navigationRef} />;
+    return <ProfilePage />;
   } else {
-    return <SideBar navigationRef={navigationRef} />;
+    return <SideBar />;
   }
 };
 

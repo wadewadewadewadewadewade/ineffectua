@@ -28,7 +28,7 @@ import {
   HeaderStyleInterpolators,
 } from '@react-navigation/stack';
 import {Action} from '../reducers';
-import {navigationRef} from './RootNavigation';
+import {navigationRef, getHeaderTitle} from './RootNavigation';
 
 // use this to restart the app for things like changing RTL to LTR
 //import {restartApp} from './Restart';
@@ -37,9 +37,7 @@ import LinkingPrefixes from './LinkingPrefixes';
 import MaterialBottomTabs from './MaterialBottomTabs';
 import NotFound from './NotFound';
 import AuthFlow from './authentication/AuthFlow';
-
 import Profile, {ProfileLayouts} from './authentication/Profile';
-
 import {
   NAVIGATION_PERSISTENCE_KEY,
   State,
@@ -54,7 +52,6 @@ import {
 } from '../reducers/AuthReducer';
 import {paperTheme, barClassName, paperColors} from '../reducers/ThemeReducer';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
-import {CalendarDayProps} from './calendar/CalendarDay';
 import {getUserById} from '../middleware/AuthMiddleware';
 import {ThunkDispatch} from 'redux-thunk';
 
@@ -101,50 +98,6 @@ const Navigation = () => {
       });
     return () => unsubscribe();
   }, [user, signIn, signOut]);
-
-  function getHeaderTitle(
-    options: Record<string, any> | undefined,
-    route:
-      | Readonly<{
-          key: string;
-          name: string;
-          params?: object;
-        }>
-      | undefined,
-    savedStateName?: string,
-  ): string {
-    // If the focused route is not found, we need to assume it's the initial screen
-    // This can happen during if there hasn't been any navigation inside the screen
-    // In our case, it's "Feed" as that's the first screen inside the navigator
-    let routeName =
-      savedStateName ||
-      (options && options.title) ||
-      (route && getFocusedRouteNameFromRoute(route));
-
-    switch (routeName) {
-      case 'ModalScreen':
-        return ((route as RouteProp<RootStackParamList, 'Tabs'>)?.params as any)
-          .title;
-      case 'Tabs':
-      case 'Agenda':
-      case 'Feed':
-        return 'Agenda';
-      case 'CalendarEntry':
-        return (route?.params as CalendarDayProps).title;
-      case 'Calendar':
-        return 'Calendar';
-      case 'PainLogEntry':
-      case 'PainLog':
-        return 'Pain Log';
-      case 'Profile':
-        return 'My Profile';
-      case 'Contacts':
-        return 'Contacts';
-      case 'Account':
-        return 'My Account';
-    }
-    return routeName;
-  }
 
   let previousRouteName = 'Feed';
 
@@ -278,7 +231,7 @@ const Navigation = () => {
           <Drawer.Navigator
             drawerType={isLargeScreen ? 'permanent' : undefined}
             drawerContent={() => (
-              <Profile navigationRef={navigationRef.current} />
+              <Profile />
             )}>
             <Drawer.Screen name="Root">
               {({navigation}: DrawerScreenProps<RootDrawerParamList>) => (
@@ -314,11 +267,10 @@ const Navigation = () => {
                       return (
                         <Profile
                           layout={ProfileLayouts.PAGE}
-                          navigationRef={navigationRef.current}
                         />
                       );
                     }}
-                    options={{title: 'Profile'}}
+                    options={({ route }) => ({ title: getHeaderTitle(undefined, route) })}
                   />
                   <Stack.Screen
                     name="NotFound"
