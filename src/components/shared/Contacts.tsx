@@ -28,7 +28,6 @@ import {
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import {firebaseDocumentToArray} from '../../firebase/utilities';
 import FlexableTextArea from './FlexableTextArea';
-import {NavigationContainerRef} from '@react-navigation/native';
 import {
   useQueryCache,
   useMutation,
@@ -37,6 +36,7 @@ import {
   queryCache,
 } from 'react-query';
 import DataTypes from './DataTypes';
+import {navigate} from '../RootNavigation';
 
 export const NewContact = (props: {
   value?: Contact;
@@ -139,21 +139,13 @@ const ContactItem = ({contact}: {contact: Contact}) => {
   );
 };
 
-const SideBar = ({
-  contacts,
-  navigationRef,
-  theme,
-}: {
-  contacts: ContactsType;
-  navigationRef: NavigationContainerRef | null;
-  theme: Theme;
-}) => {
+const SideBar = ({contacts, theme}: {contacts: ContactsType; theme: Theme}) => {
   const contactsArray = firebaseDocumentToArray<Contact>(contacts);
   return (
     <View style={styles.container}>
       <TouchableHighlight
         onPress={() => {
-          navigationRef?.navigate('Tabs', {screen: 'ContactsList'});
+          navigate('Contacts');
         }}>
         <View style={styles.row}>
           <Text style={[styles.labelFont, {color: theme.paper.colors.text}]}>
@@ -183,7 +175,6 @@ type Props = {
   display?: 'list' | 'page' | 'summary';
   limit?: number;
   userId?: string;
-  navigationRef?: NavigationContainerRef | null; // need this for the side bar only
   onValueChange?: (contacts: Array<string>) => void;
 };
 
@@ -192,7 +183,6 @@ const ContactsComponent = ({
   display,
   limit,
   userId,
-  navigationRef,
   onValueChange,
 }: Props) => {
   const [user, theme] = useSelector((state: State) => [
@@ -240,19 +230,13 @@ const ContactsComponent = ({
     return <Text>An error occured while fetching posts: {error?.message}</Text>;
   } else {
     if (display === 'list') {
-      return (
-        <SideBar
-          theme={theme}
-          contacts={contacts}
-          navigationRef={navigationRef === undefined ? null : navigationRef}
-        />
-      );
+      return <SideBar theme={theme} contacts={contacts} />;
     } else if (display === 'summary') {
       return (
         <View style={styles.container}>
           <TouchableHighlight
             onPress={() => {
-              navigationRef?.navigate('Tabs', {screen: 'ContactsList'});
+              navigate('Contacts');
             }}>
             <View style={styles.row}>
               <Text

@@ -38,7 +38,6 @@ import SettingsItem from './SettingsItem';
 import {formatDateAndTime} from '../../middleware/CalendarMiddleware';
 import {firebaseDocumentToArray} from '../../firebase/utilities';
 import FlexableTextArea from './FlexableTextArea';
-import {NavigationContainerRef} from '@react-navigation/native';
 import {
   useQueryCache,
   useQuery,
@@ -46,6 +45,7 @@ import {
   queryCache,
   QueryStatus,
 } from 'react-query';
+import {navigate} from '../RootNavigation';
 
 type NewMedicationProps = {
   value?: Medication;
@@ -58,7 +58,10 @@ export const NewMedication = ({
   value,
   saveNewMedication,
 }: NewMedicationProps) => {
-  const [user, theme] = useSelector((state: State) => [state.user, state.theme]);
+  const [user, theme] = useSelector((state: State) => [
+    state.user,
+    state.theme,
+  ]);
   const [name, setName] = React.useState(value?.name || '');
   const [active, setActive] = React.useState(value?.active || false);
   const [nameTouched, setNameTouched] = React.useState(false);
@@ -84,11 +87,11 @@ export const NewMedication = ({
     description,
   };
   const buttonLabel = !value || value === emptyMedication ? 'Add New' : 'Edit';
-  const {data, status, error} = useQuery<
-    MedicationsType,
-    Error,
-    [string, number | undefined]
-  >('users/medications', () => getMedications(user), {suspense: false});
+  const {data} = useQuery<MedicationsType, Error, [string, number | undefined]>(
+    'users/medications',
+    () => getMedications(user),
+    {suspense: false},
+  );
   const medications = data || {};
   const medicationsArray = firebaseDocumentToArray(medications);
   const nameExists = medicationsArray.filter((c) => c.name === name);
@@ -190,11 +193,9 @@ const MedicationItem = ({medication}: {medication: Medication}) => {
 
 const SideBar = ({
   medications,
-  navigationRef,
   theme,
 }: {
   medications: MedicationsType;
-  navigationRef: NavigationContainerRef | null;
   theme: Theme;
 }) => {
   const medicationsArray = firebaseDocumentToArray<Medication>(medications);
@@ -202,7 +203,7 @@ const SideBar = ({
     <View style={styles.container}>
       <TouchableHighlight
         onPress={() => {
-          navigationRef?.navigate('Tabs', {screen: 'MedicationsList'});
+          navigate('Medications');
         }}>
         <View style={styles.row}>
           <Text style={[styles.labelFont, {color: theme.paper.colors.text}]}>
@@ -231,7 +232,6 @@ type Props = {
   value?: Array<string>;
   display?: 'list' | 'summary' | 'component';
   userId?: string;
-  navigationRef?: NavigationContainerRef | null; // need this for the side bar only
   onValueChange?: (medications: Array<string>) => void;
 };
 
@@ -239,7 +239,6 @@ const MedicationsComponent = ({
   value,
   display,
   userId,
-  navigationRef,
   onValueChange,
 }: Props) => {
   const [theme, user] = useSelector((state: State) => [
@@ -292,19 +291,13 @@ const MedicationsComponent = ({
     return <Text>An error occured while fetching posts: {error?.message}</Text>;
   } else {
     if (display === 'list') {
-      return (
-        <SideBar
-          theme={theme}
-          medications={medications}
-          navigationRef={navigationRef === undefined ? null : navigationRef}
-        />
-      );
+      return <SideBar theme={theme} medications={medications} />;
     } else if (display === 'summary') {
       return (
         <View style={styles.container}>
           <TouchableHighlight
             onPress={() => {
-              navigationRef?.navigate('Tabs', {screen: 'MedicationsList'});
+              navigate('Medications');
             }}>
             <View style={styles.row}>
               <Text

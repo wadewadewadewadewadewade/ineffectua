@@ -166,11 +166,7 @@ const ComposePost = ({criteria, height, onSavePost}: ComposePostProps) => {
   }
 };
 
-const PostUser = ({
-  userId,
-}: {
-  userId: string;
-}) => {
+const PostUser = ({userId}: {userId: string}) => {
   const [rerun, setRerun] = React.useState(true);
   const {status, data, error, refetch} = useQuery<User>(userId, getUserById, {
     suspense: true,
@@ -197,18 +193,16 @@ const PostUser = ({
       <View style={styles.postUser}>
         <TouchableHighlight
           onPress={() =>
-            navigate('Profile',
-              {user: {userId: data.uid}},
-              data.displayName
-            )
+            navigate('Profile', {user: {userId: data.uid}}, data.displayName)
           }>
           {thumbnail ? (
             <Avatar.Image
               onTouchEnd={() => {
-                navigate('Profile',
+                navigate(
+                  'Profile',
                   {user: {userId: data.uid}},
-                  data.displayName
-                )
+                  data.displayName,
+                );
               }}
               size={40}
               source={{uri: thumbnail}}
@@ -274,9 +268,7 @@ const PostComponent = ({
           <Text style={styles.postBody}>{post.body}</Text>
           <View style={styles.postMetadataContainer}>
             <React.Suspense fallback={<ActivityIndicator />}>
-              <PostUser
-                userId={post.created.by}
-              />
+              <PostUser userId={post.created.by} />
             </React.Suspense>
             <Text style={styles.postMetadataText}>
               {post.criteria.privacy !== PostPrivacyTypes.PUBLIC &&
@@ -384,7 +376,13 @@ const PostsList = ({
   ) => {
     return fetchPosts(user, crit, cursor);
   };
-  const collection = criteria.key ? criteria.key.type : 'posts';
+  const collection = criteria.key
+    ? criteria.key
+      ? criteria.key.type === 'posts'
+        ? 'posts/posts'
+        : `posts/${criteria.key.type}/${criteria.key.id}`
+      : 'posts/posts'
+    : 'posts/posts';
   const {
     status,
     data,
@@ -480,11 +478,7 @@ type PostProps = {
   inset?: number;
 };
 
-const Posts = ({
-  showComposePost,
-  criteria,
-  inset = 0,
-}: PostProps) => {
+const Posts = ({showComposePost, criteria, inset = 0}: PostProps) => {
   return (
     <View style={styles.container}>
       <React.Suspense fallback={<ActivityIndicator />}>

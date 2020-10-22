@@ -180,9 +180,9 @@ const SideBar = ({
           <Tags userId={user.uid} />
         </Suspense>
         <Divider />
-        <Medications display="list" navigationRef={navigationRef} />
+        <Medications display="list" />
         <Divider />
-        <Contacts display="list" navigationRef={navigationRef} />
+        <Contacts display="list" />
         <Divider />
         <Button onPress={() => logout()} style={styles.button}>
           Sign Out
@@ -205,9 +205,9 @@ const SideBar = ({
           <Tags userId={user.uid} />
         </Suspense>
         <Divider />
-        <Medications display="list" navigationRef={navigationRef} />
+        <Medications display="list" />
         <Divider />
-        <Contacts display="list" navigationRef={navigationRef} />
+        <Contacts display="list" />
       </ScrollView>
     );
   }
@@ -285,17 +285,9 @@ const ProfilePage = ({
           />
         </Suspense>
         <Divider />
-        <Medications
-          display="summary"
-          userId={user.uid}
-          navigationRef={navigationRef}
-        />
+        <Medications display="summary" userId={user.uid} />
         <Divider />
-        <Contacts
-          display="summary"
-          userId={user.uid}
-          navigationRef={navigationRef}
-        />
+        <Contacts display="summary" userId={user.uid} />
         <Divider />
         <Button onPress={() => logout()} style={styles.button}>
           Sign Out
@@ -326,17 +318,9 @@ const ProfilePage = ({
           <Tags userId={user.uid} />
         </Suspense>
         <Divider />
-        <Medications
-          userId={user.uid}
-          display="list"
-          navigationRef={navigationRef}
-        />
+        <Medications userId={user.uid} display="list" />
         <Divider />
-        <Contacts
-          userId={user.uid}
-          display="list"
-          navigationRef={navigationRef}
-        />
+        <Contacts userId={user.uid} display="list" />
       </ScrollView>
     );
   }

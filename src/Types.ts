@@ -43,5 +43,4 @@ export type RootStackParamList = {
   AuthFlow: undefined;
   NotFound: undefined;
   Profile: {userId?: string};
-  Messaging: {initialUserId?: string};
 };

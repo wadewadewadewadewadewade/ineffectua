@@ -30,7 +30,6 @@ import {
   useQueryCache,
 } from 'react-query';
 import {navigate} from '../RootNavigation';
-import {PostCriteriaKey} from '../../reducers/PostsReducer';
 
 const TagComponent = ({
   tag,
@@ -53,9 +52,14 @@ const TagComponent = ({
           backgroundColor: theme.paper.colors.backdrop,
         },
       ]}>
-      <TouchableHighlight onPress={() => {
-        navigate('Agenda', {key: {id: tag.key, type: 'tags'}}, `#${tag.name}`)
-      }}>
+      <TouchableHighlight
+        onPress={() => {
+          navigate(
+            'Agenda',
+            {key: {id: tag.key, type: 'tags'}},
+            `#${tag.name}`,
+          );
+        }}>
         <Text style={[styles.tagText, {color: paperColors(theme).onSurface}]}>
           {name}
         </Text>
@@ -121,13 +125,13 @@ const TagList = ({
         {tags.length > 0 &&
           tags.map((t: Tag) => (
             <TagComponent
-              key={t.key as string}
+              key={t.key}
               tag={t}
               removeTag={(key) =>
                 onTagsChanged(
                   tags
                     .filter((ta: Tag) => ta.key !== key)
-                    .map((ta: Tag) => ta.key as string),
+                    .map((ta: Tag) => ta.key),
                 )
               }
             />
@@ -136,10 +140,7 @@ const TagList = ({
           <NewTagField
             tags={tags}
             onTagsChanged={(tag) =>
-              onTagsChanged([
-                ...tags.map((t: Tag) => t.key as string),
-                tag.key as string,
-              ])
+              onTagsChanged([...tags.map((t: Tag) => t.key), tag.key])
             }
           />
         )}
@@ -150,7 +151,7 @@ const TagList = ({
       <View>
         {tags &&
           tags.length > 0 &&
-          tags.map((t: Tag) => <TagComponent key={t.key as string} tag={t} />)}
+          tags.map((t: Tag) => <TagComponent key={t.key} tag={t} />)}
       </View>
     );
   }
@@ -215,7 +216,9 @@ const NewTagField = ({
               );
               if (tagNames.length === 0) {
                 // if the tag isn't alread in the list, try adding it
-                mutateAdd({key: '', name: tagName}).then((t) => t && onTagsChanged(t));
+                mutateAdd({key: '', name: tagName}).then(
+                  (t) => t && onTagsChanged(t),
+                );
               } else {
                 onTagsChanged({key: '', name: tagName});
               }
