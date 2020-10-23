@@ -2,6 +2,7 @@ import {GeneralNavigationParams} from './../Types';
 import {
   NavigationContainerRef,
   getFocusedRouteNameFromRoute,
+  CommonActions,
 } from '@react-navigation/native';
 import {PostCriteriaKey} from './../reducers/PostsReducer';
 import * as React from 'react';
@@ -29,18 +30,13 @@ export function navigate(
   params?: NavigationParams,
   title?: string,
 ) {
-  if (RootScreenNames.includes(name)) {
-    navigationRef.current?.navigate(name, {...params, title});
-  } else if (TabScreenNames.includes(name)) {
+  if (TabScreenNames.includes(name)) {
     navigationRef.current?.navigate('Tabs', {
       screen: name,
       params: {...params, title},
     });
   } else {
-    navigationRef.current?.navigate('Root', {
-      screen: name,
-      params: {...params, title},
-    });
+    navigationRef.current?.navigate(name, params);
   }
 }
 
