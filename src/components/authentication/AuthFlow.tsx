@@ -14,7 +14,7 @@ import {Svg, G, Path} from 'react-native-svg';
 
 type AuthStackParams = {
   SignIn: undefined;
-  Success: undefined;
+  AuthenticationSuccess: undefined;
 };
 
 const SignInScreen = () => {
@@ -408,7 +408,6 @@ const SimpleStackScreen = (props: any) => {
         <SimpleStack.Screen
           name="SignIn"
           options={{
-            title: 'Sign in',
             animationTypeForReplace: isSignout ? 'pop' : 'push',
             headerShown: false,
           }}
@@ -416,8 +415,7 @@ const SimpleStackScreen = (props: any) => {
         />
       ) : (
         <SimpleStack.Screen
-          name="Success"
-          options={{title: 'Authentication Success'}}
+          name="AuthenticationSuccess"
           children={() => <AuthenticationSuccessScreen />}
         />
       )}

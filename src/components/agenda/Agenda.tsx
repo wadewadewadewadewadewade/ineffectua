@@ -19,16 +19,23 @@ import {firebaseDocumentToArray} from '../../firebase/utilities';
 import {useQuery} from 'react-query';
 import {getDatatypes} from '../../middleware/DataTypesMiddleware';
 import {navigate, getRouteParams} from '../RootNavigation';
+import {MaterialBottomTabScreenProps} from '@react-navigation/material-bottom-tabs';
+import {MaterialBottomTabParams} from '../MaterialBottomTabs';
 
-const Agenda = () => {
+const Agenda = ({
+  navigation,
+}: MaterialBottomTabScreenProps<MaterialBottomTabParams, 'Agenda'>) => {
   const params = getRouteParams();
   const criteria: PostCriteria = {
     privacy: PostPrivacyTypes.PUBLIC,
-  }
+  };
   if (params !== undefined && params.key !== undefined) {
     criteria.key = params.key;
   }
-  const [user, theme] = useSelector((state: State) => [state.user, state.theme]);
+  const [user, theme] = useSelector((state: State) => [
+    state.user,
+    state.theme,
+  ]);
   const calendarTheme = {
     ...theme.paper,
     agendaDayTextColor: themeIsDark(theme) ? '#666' : '#ccc',
@@ -73,7 +80,8 @@ const Agenda = () => {
           //onCalendarToggled={(calendarOpened) => {console.log(calendarOpened)}}
           // Callback that gets called on day press
           onDayPress={(day: DateObject) =>
-            navigate('CalendarDay',
+            navigate(
+              'CalendarDay',
               {date: day},
               'Calendar: ' +
                 new Date(Date.parse(day.dateString)).toDateString(),
@@ -136,6 +144,7 @@ const Agenda = () => {
         />
       )}
       <Posts
+        navigation={navigation}
         showComposePost={true}
         criteria={criteria}
       />

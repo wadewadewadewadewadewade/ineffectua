@@ -6,6 +6,8 @@ import {
   Dimensions,
   ScaledSize,
   Linking,
+  View,
+  StyleSheet,
 } from 'react-native';
 import {firebase} from '../firebase/config';
 import {
@@ -23,8 +25,11 @@ import {
   HeaderStyleInterpolators,
 } from '@react-navigation/stack';
 import {Action} from '../reducers';
-import {navigationRef, getHeaderTitle} from './RootNavigation';
-
+import {
+  navigationRef,
+  getHeaderTitle,
+  formatDocumentTitle,
+} from './RootNavigation';
 // use this to restart the app for things like changing RTL to LTR
 //import {restartApp} from './Restart';
 import {AsyncStorage} from 'react-native';
@@ -94,21 +99,18 @@ const Navigation = () => {
     return () => unsubscribe();
   }, [user, signIn, signOut]);
 
-  let previousRouteName = 'Feed';
-
   // this will allow us to re-enable analytics after user approves...once I create that user-flow
   /*React.useEffect(() => {
     const enableAnalytics = async () => {
       firebase.analytics().setAnalyticsCollectionEnabled(true);
     }
-
     enableAnalytics()
   }, [])*/
-
+  let previousRouteName: string | undefined = 'Agenda';
   React.useEffect(() => {
     const restoreState = async () => {
       try {
-        // only do the resxt if signed in
+        // only do the rest if signed in
         if (user) {
           const initialUrl = await Linking.getInitialURL();
 
@@ -123,11 +125,7 @@ const Navigation = () => {
 
             if (savedStateName !== undefined) {
               // eslint-disable-next-line react-hooks/exhaustive-deps
-              previousRouteName = getHeaderTitle(
-                undefined,
-                undefined,
-                savedStateName,
-              );
+              previousRouteName = getHeaderTitle(savedStateName);
               setInitialState(savedStateName);
             }
           }
@@ -136,31 +134,26 @@ const Navigation = () => {
         user && setIsReady(true);
       }
     };
-
     !isReady && restoreState();
   }, [isReady]);
 
   const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
-
   React.useEffect(() => {
     const onDimensionsChange = ({window}: {window: ScaledSize}) => {
       setDimensions(window);
     };
-
     Dimensions.addEventListener('change', onDimensionsChange);
-
     return () => Dimensions.removeEventListener('change', onDimensionsChange);
   }, []);
+  const isLargeScreen = dimensions.width >= 1024;
 
-  /*if (!isReady) {
+  if (!isReady) {
     return (
       <View style={styles.activityIndicator}>
         <ActivityIndicator />
       </View>
     );
-  }*/
-
-  const isLargeScreen = dimensions.width >= 1024;
+  }
 
   return (
     <PaperProvider theme={paperTheme(theme)}>
@@ -207,6 +200,7 @@ const Navigation = () => {
                 path: '',
                 initialRouteName: 'Agenda',
                 screens: {
+                  SignIn: 'sign-in/',
                   Calendar: 'calendar/',
                   PainLog: 'pain-log/',
                   ContactsList: 'contacts/',
@@ -220,7 +214,7 @@ const Navigation = () => {
         }}
         fallback={<ActivityIndicator />}
         documentTitle={{
-          formatter: getHeaderTitle,
+          formatter: formatDocumentTitle,
         }}>
         {isUserAuthenticated(user) ? (
           <Drawer.Navigator
@@ -230,12 +224,12 @@ const Navigation = () => {
               {({navigation}: DrawerScreenProps<RootDrawerParamList>) => (
                 <Stack.Navigator
                   screenOptions={{
+                    headerTitle: getHeaderTitle(),
                     headerStyleInterpolator: HeaderStyleInterpolators.forUIKit,
                   }}>
                   <Stack.Screen
                     name="Tabs"
-                    options={({route}) => ({
-                      headerTitle: getHeaderTitle(undefined, route),
+                    options={{
                       headerLeft: isLargeScreen
                         ? undefined
                         : () => (
@@ -251,7 +245,7 @@ const Navigation = () => {
                               onPress={() => navigation.toggleDrawer()}
                             />
                           ),
-                    })}
+                    }}
                     component={MaterialBottomTabs}
                   />
                   <Stack.Screen
@@ -259,14 +253,16 @@ const Navigation = () => {
                     children={() => {
                       return <Profile layout={ProfileLayouts.PAGE} />;
                     }}
-                    options={({route}) => ({
-                      title: getHeaderTitle(undefined, route),
-                    })}
+                    options={{
+                      title: getHeaderTitle(),
+                    }}
                   />
                   <Stack.Screen
                     name="NotFound"
                     component={NotFound}
-                    options={{title: 'Oops!'}}
+                    options={{
+                      title: getHeaderTitle(),
+                    }}
                   />
                 </Stack.Navigator>
               )}
@@ -279,5 +275,13 @@ const Navigation = () => {
     </PaperProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  activityIndicator: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
 
 export default Navigation;

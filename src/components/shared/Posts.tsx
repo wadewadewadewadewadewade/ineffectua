@@ -41,6 +41,8 @@ import {getUserById} from '../../middleware/AuthMiddleware';
 import {TouchableHighlight} from 'react-native-gesture-handler';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import {navigate} from '../RootNavigation';
+import {MaterialBottomTabNavigationProp} from '@react-navigation/material-bottom-tabs';
+import {MaterialBottomTabParams} from '../MaterialBottomTabs';
 
 // used for a list of posts, for comments within a post, messages between users, and for searching maybe?
 
@@ -225,10 +227,15 @@ const PostComponent = ({
   post,
   inset,
   onDeletePost,
+  navigation,
 }: {
   post: Post;
   inset: number;
   onDeletePost: (post: Post) => void;
+  navigation: MaterialBottomTabNavigationProp<
+    MaterialBottomTabParams,
+    'Agenda'
+  >;
 }) => {
   const [theme, user] = useSelector((state: State) => [
     state.theme,
@@ -329,7 +336,7 @@ const PostComponent = ({
               },
             ]}
           />
-          <Tags value={post.tags} />
+          <Tags value={post.tags} navigation={navigation} />
         </View>
       </View>
       {exposeComments && (
@@ -343,6 +350,7 @@ const PostComponent = ({
           ]}>
           <Posts
             showComposePost={true}
+            navigation={navigation}
             criteria={{
               key: {
                 id: post.key,
@@ -363,10 +371,15 @@ const PostsList = ({
   criteria,
   showComposePost,
   inset,
+  navigation,
 }: {
   criteria: PostCriteria;
   showComposePost?: boolean;
   inset: number;
+  navigation: MaterialBottomTabNavigationProp<
+    MaterialBottomTabParams,
+    'Agenda'
+  >;
 }) => {
   const [user] = useSelector((state: State) => [state.user]);
   const fetchPostsWithCustomParams = (
@@ -458,6 +471,7 @@ const PostsList = ({
               <PostComponent
                 inset={inset + 1}
                 post={p.item}
+                navigation={navigation}
                 onDeletePost={(p2) => removePost(p2)}
               />
             )
@@ -476,13 +490,23 @@ type PostProps = {
   showComposePost?: boolean;
   criteria: PostCriteria;
   inset?: number;
+  navigation: MaterialBottomTabNavigationProp<
+    MaterialBottomTabParams,
+    'Agenda'
+  >;
 };
 
-const Posts = ({showComposePost, criteria, inset = 0}: PostProps) => {
+const Posts = ({
+  showComposePost,
+  criteria,
+  navigation,
+  inset = 0,
+}: PostProps) => {
   return (
     <View style={styles.container}>
       <React.Suspense fallback={<ActivityIndicator />}>
         <PostsList
+          navigation={navigation}
           inset={inset}
           criteria={criteria}
           showComposePost={showComposePost === true}

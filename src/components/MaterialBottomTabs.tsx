@@ -11,9 +11,11 @@ import CalendarNavigator, {
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import Medications from './Medications/Medications';
 import {contrast} from '../middleware/DataTypesMiddleware';
+import {formatDocumentTitle} from './RootNavigation';
+import {PostCriteria} from '../reducers/PostsReducer';
 
 export type MaterialBottomTabParams = {
-  Agenda: undefined;
+  Agenda: PostCriteria;
   Calendar: CalendarStackParamList;
   PainLog: undefined;
   Contacts: undefined;
@@ -74,7 +76,7 @@ export default function MaterialBottomTabsScreen() {
         <MaterialBottomTabs.Screen
           name="Agenda"
           component={Agenda}
-          options={{
+          options={(options) => ({
             tabBarIcon: ({color}) => (
               <MaterialCommunityIcons
                 name="comment"
@@ -83,12 +85,13 @@ export default function MaterialBottomTabsScreen() {
               />
             ),
             tabBarColor: colors[0],
-          }}
+            tabBarLabel: formatDocumentTitle(options),
+          })}
         />
         <MaterialBottomTabs.Screen
           name="Calendar"
           component={CalendarNavigator}
-          options={{
+          options={(options) => ({
             tabBarIcon: ({color}) => (
               <MaterialCommunityIcons
                 name="calendar"
@@ -97,12 +100,13 @@ export default function MaterialBottomTabsScreen() {
               />
             ),
             tabBarColor: colors[1],
-          }}
+            tabBarLabel: formatDocumentTitle(options),
+          })}
         />
         <MaterialBottomTabs.Screen
           name="Contacts"
           component={Contacts}
-          options={{
+          options={(options) => ({
             tabBarIcon: ({color}) => (
               <MaterialCommunityIcons
                 name="contacts"
@@ -111,12 +115,13 @@ export default function MaterialBottomTabsScreen() {
               />
             ),
             tabBarColor: colors[2],
-          }}
+            tabBarLabel: formatDocumentTitle(options),
+          })}
         />
         <MaterialBottomTabs.Screen
           name="Medications"
           component={Medications}
-          options={{
+          options={(options) => ({
             tabBarIcon: ({color}) => (
               <MaterialCommunityIcons
                 name="pill"
@@ -125,12 +130,13 @@ export default function MaterialBottomTabsScreen() {
               />
             ),
             tabBarColor: colors[3],
-          }}
+            tabBarLabel: formatDocumentTitle(options),
+          })}
         />
         <MaterialBottomTabs.Screen
           name="PainLog"
           component={PainLog}
-          options={{
+          options={(options) => ({
             tabBarIcon: ({color}) => (
               <MaterialCommunityIcons
                 name="human"
@@ -139,7 +145,8 @@ export default function MaterialBottomTabsScreen() {
               />
             ),
             tabBarColor: colors[4],
-          }}
+            tabBarLabel: formatDocumentTitle(options),
+          })}
         />
       </MaterialBottomTabs.Navigator>
     </SafeAreaProvider>

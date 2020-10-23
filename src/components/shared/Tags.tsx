@@ -30,13 +30,21 @@ import {
   useQueryCache,
 } from 'react-query';
 import {navigate} from '../RootNavigation';
+import {MaterialBottomTabNavigationProp} from '@react-navigation/material-bottom-tabs';
+import {MaterialBottomTabParams} from '../MaterialBottomTabs';
+import {PostPrivacyTypes, PostCriteria} from '../../reducers/PostsReducer';
 
 const TagComponent = ({
   tag,
   removeTag,
+  navigation,
 }: {
   tag: Tag;
   removeTag?: (key: string) => void;
+  navigation?: MaterialBottomTabNavigationProp<
+    MaterialBottomTabParams,
+    'Agenda'
+  >;
 }) => {
   const {key, name} = tag;
   const theme = useSelector((state: State) => state.theme);
@@ -54,11 +62,15 @@ const TagComponent = ({
       ]}>
       <TouchableHighlight
         onPress={() => {
-          navigate(
-            'Agenda',
-            {key: {id: tag.key, type: 'tags'}},
-            `#${tag.name}`,
-          );
+          const criteria: PostCriteria = {
+            privacy: PostPrivacyTypes.PUBLIC,
+            key: {id: tag.key, type: 'tags'},
+          };
+          if (navigation !== undefined) {
+            navigation.navigate(criteria);
+          } else {
+            navigate('Agenda', criteria);
+          }
         }}>
         <Text style={[styles.tagText, {color: paperColors(theme).onSurface}]}>
           {name}
@@ -99,9 +111,14 @@ const TagSuggestion = ({
 const TagList = ({
   value,
   onTagsChanged,
+  navigation,
 }: {
   value?: Array<string>;
   onTagsChanged?: (tags: Array<string>) => void;
+  navigation?: MaterialBottomTabNavigationProp<
+    MaterialBottomTabParams,
+    'Agenda'
+  >;
 }) => {
   const {status, data, isFetching, error} = useQuery<
     Tag[],
@@ -125,6 +142,7 @@ const TagList = ({
         {tags.length > 0 &&
           tags.map((t: Tag) => (
             <TagComponent
+              navigation={navigation}
               key={t.key}
               tag={t}
               removeTag={(key) =>
@@ -151,7 +169,9 @@ const TagList = ({
       <View>
         {tags &&
           tags.length > 0 &&
-          tags.map((t: Tag) => <TagComponent key={t.key} tag={t} />)}
+          tags.map((t: Tag) => (
+            <TagComponent navigation={navigation} key={t.key} tag={t} />
+          ))}
       </View>
     );
   }
@@ -259,9 +279,19 @@ type Props = {
   userId?: string;
   style?: StyleProp<ViewStyle>;
   onTagsChanged?: (tags: Array<string>) => void;
+  navigation?: MaterialBottomTabNavigationProp<
+    MaterialBottomTabParams,
+    'Agenda'
+  >;
 };
 
-const TagsListComponent = ({value, userId, style, onTagsChanged}: Props) => {
+const TagsListComponent = ({
+  value,
+  userId,
+  style,
+  onTagsChanged,
+  navigation,
+}: Props) => {
   const [user, theme] = useSelector((state: State) => [
     state.user,
     state.theme,
@@ -332,6 +362,7 @@ const TagsListComponent = ({value, userId, style, onTagsChanged}: Props) => {
           </Text>
           {onTagsChanged ? (
             <TagList
+              navigation={navigation}
               value={tagIds}
               onTagsChanged={(updatedTagIds) => {
                 if (userId !== undefined) {
@@ -358,7 +389,7 @@ const TagsListComponent = ({value, userId, style, onTagsChanged}: Props) => {
               }}
             />
           ) : (
-            <TagList value={tagIds} />
+            <TagList navigation={navigation} value={tagIds} />
           )}
         </View>
       </View>
