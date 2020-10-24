@@ -30,9 +30,9 @@ import {
   useQueryCache,
 } from 'react-query';
 import {navigate} from '../RootNavigation';
-import {MaterialBottomTabNavigationProp} from '@react-navigation/material-bottom-tabs';
-import {MaterialBottomTabParams} from '../MaterialBottomTabs';
+import {PostsStackParams} from '../MaterialBottomTabs';
 import {PostPrivacyTypes, PostCriteria} from '../../reducers/PostsReducer';
+import {StackNavigationProp} from '@react-navigation/stack';
 
 const TagComponent = ({
   tag,
@@ -41,10 +41,7 @@ const TagComponent = ({
 }: {
   tag: Tag;
   removeTag?: (key: string) => void;
-  navigation?: MaterialBottomTabNavigationProp<
-    MaterialBottomTabParams,
-    'Agenda'
-  >;
+  navigation?: StackNavigationProp<PostsStackParams, 'Posts'>;
 }) => {
   const {key, name} = tag;
   const theme = useSelector((state: State) => state.theme);
@@ -67,9 +64,9 @@ const TagComponent = ({
             key: {id: tag.key, type: 'tags'},
           };
           if (navigation !== undefined) {
-            navigation.navigate(criteria);
+            navigation.push('Posts', {criteria, title: `#${tag.name}`});
           } else {
-            navigate('Agenda', criteria);
+            navigate('Posts', {criteria}, `#${tag.name}`);
           }
         }}>
         <Text style={[styles.tagText, {color: paperColors(theme).onSurface}]}>
@@ -115,10 +112,7 @@ const TagList = ({
 }: {
   value?: Array<string>;
   onTagsChanged?: (tags: Array<string>) => void;
-  navigation?: MaterialBottomTabNavigationProp<
-    MaterialBottomTabParams,
-    'Agenda'
-  >;
+  navigation?: StackNavigationProp<PostsStackParams, 'Posts'>;
 }) => {
   const {status, data, isFetching, error} = useQuery<
     Tag[],
@@ -279,10 +273,7 @@ type Props = {
   userId?: string;
   style?: StyleProp<ViewStyle>;
   onTagsChanged?: (tags: Array<string>) => void;
-  navigation?: MaterialBottomTabNavigationProp<
-    MaterialBottomTabParams,
-    'Agenda'
-  >;
+  navigation?: StackNavigationProp<PostsStackParams, 'Posts'>;
 };
 
 const TagsListComponent = ({

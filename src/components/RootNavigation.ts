@@ -3,7 +3,7 @@ import {
   NavigationContainerRef,
   getFocusedRouteNameFromRoute,
 } from '@react-navigation/native';
-import {PostCriteriaKey} from './../reducers/PostsReducer';
+import {PostCriteria} from './../reducers/PostsReducer';
 import * as React from 'react';
 import {DateObject} from 'react-native-calendars';
 
@@ -15,11 +15,14 @@ const TabScreenNames = [
   'Medications',
   'PainLog',
 ];
+const AgendaScreenNames = [
+  'Posts',
+]
 
 export const navigationRef = React.createRef<NavigationContainerRef>();
 
 type NavigationParams = {
-  key?: PostCriteriaKey; // Agenda Posts
+  criteria?: PostCriteria; // Agenda Posts
   date?: DateObject; // Calendar
   user?: {userId: string}; // Profile
 };
@@ -36,11 +39,15 @@ export function navigate(
         screen: name,
         params: {...params, title},
       };
-      /*const route = navigationRef.current.getCurrentRoute();
-      if (route?.key.startsWith(name)) {
-        destination.key = route?.key;
-      }*/
-      navigationRef.current.navigate('Tabs', destination);
+      if (AgendaScreenNames.includes(name)) {
+        navigationRef.current.navigate('Agenda', destination);
+      } else {
+        /*const route = navigationRef.current.getCurrentRoute();
+        if (route?.key.startsWith(name)) {
+          destination.key = route?.key;
+        }*/
+        navigationRef.current.navigate('Tabs', destination);
+      }
     } else {
       navigationRef.current?.navigate(name, params);
     }
@@ -65,6 +72,7 @@ const getRouteParamsAsObject = (
 
 type RouteNames =
   | 'Agenda'
+  | 'Posts'
   | 'SignIn'
   | 'AuthenticationSuccess'
   | 'Profile'
@@ -106,7 +114,7 @@ export function getHeaderTitle(
   const params = (route && getRouteParamsAsObject(route.params)) || {
     title: undefined,
   };
-  //console.log({route, savedStateName, routeName});
+  console.log({route, savedStateName, routeName});
   switch (routeName) {
     case 'AuthenticationSuccess':
       return 'Authentication Success';

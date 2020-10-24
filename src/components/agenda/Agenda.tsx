@@ -19,19 +19,19 @@ import {firebaseDocumentToArray} from '../../firebase/utilities';
 import {useQuery} from 'react-query';
 import {getDatatypes} from '../../middleware/DataTypesMiddleware';
 import {navigate, getRouteParams} from '../RootNavigation';
-import {MaterialBottomTabScreenProps} from '@react-navigation/material-bottom-tabs';
-import {MaterialBottomTabParams} from '../MaterialBottomTabs';
+import {PostsStackParams} from '../MaterialBottomTabs';
+import {StackNavigationProp} from '@react-navigation/stack';
 
 const Agenda = ({
   navigation,
-}: MaterialBottomTabScreenProps<MaterialBottomTabParams, 'Agenda'>) => {
+}: { navigation: StackNavigationProp<PostsStackParams, 'Posts'>}) => {
   const params = getRouteParams();
-  const criteria: PostCriteria = {
-    privacy: PostPrivacyTypes.PUBLIC,
-  };
-  if (params !== undefined && params.key !== undefined) {
-    criteria.key = params.key;
-  }
+  const criteria: PostCriteria =
+    params !== undefined && params.criteria !== undefined
+      ? params.criteria
+      : {
+        privacy: PostPrivacyTypes.PUBLIC,
+      };
   const [user, theme] = useSelector((state: State) => [
     state.user,
     state.theme,

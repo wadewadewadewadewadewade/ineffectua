@@ -11,20 +11,36 @@ import CalendarNavigator, {
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import Medications from './Medications/Medications';
 import {contrast} from '../middleware/DataTypesMiddleware';
-import {formatDocumentTitle} from './RootNavigation';
+import {formatDocumentTitle, getHeaderTitle} from './RootNavigation';
 import {PostCriteria} from '../reducers/PostsReducer';
+import {createStackNavigator} from '@react-navigation/stack';
 
 export type MaterialBottomTabParams = {
-  Agenda: PostCriteria;
+  Agenda: {screen: 'Posts', criteria: PostCriteria};
   Calendar: CalendarStackParamList;
   PainLog: undefined;
   Contacts: undefined;
   Medications: undefined;
 };
 
+export type PostsStackParams = {Posts: {criteria: PostCriteria, title?: string}};
+
 const MaterialBottomTabs = createMaterialBottomTabNavigator<
   MaterialBottomTabParams
 >();
+const PostsStack = createStackNavigator<PostsStackParams>();
+
+const PostsStackNavigator = () => {
+  return (
+  <PostsStack.Navigator>
+    <PostsStack.Screen
+      name="Posts"
+      component={Agenda}
+      options={{title: getHeaderTitle()}}
+      />
+    </PostsStack.Navigator>
+  )
+}
 
 export default function MaterialBottomTabsScreen() {
   const colors = new Array<string>();
@@ -75,7 +91,7 @@ export default function MaterialBottomTabsScreen() {
         }}>
         <MaterialBottomTabs.Screen
           name="Agenda"
-          component={Agenda}
+          component={PostsStackNavigator}
           options={(options) => ({
             tabBarIcon: ({color}) => (
               <MaterialCommunityIcons

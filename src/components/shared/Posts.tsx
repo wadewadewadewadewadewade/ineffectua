@@ -41,8 +41,8 @@ import {getUserById} from '../../middleware/AuthMiddleware';
 import {TouchableHighlight} from 'react-native-gesture-handler';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import {navigate} from '../RootNavigation';
-import {MaterialBottomTabNavigationProp} from '@react-navigation/material-bottom-tabs';
-import {MaterialBottomTabParams} from '../MaterialBottomTabs';
+import {PostsStackParams} from '../MaterialBottomTabs';
+import {StackNavigationProp} from '@react-navigation/stack';
 
 // used for a list of posts, for comments within a post, messages between users, and for searching maybe?
 
@@ -232,10 +232,7 @@ const PostComponent = ({
   post: Post;
   inset: number;
   onDeletePost: (post: Post) => void;
-  navigation: MaterialBottomTabNavigationProp<
-    MaterialBottomTabParams,
-    'Agenda'
-  >;
+  navigation: StackNavigationProp<PostsStackParams, 'Posts'>;
 }) => {
   const [theme, user] = useSelector((state: State) => [
     state.theme,
@@ -376,10 +373,7 @@ const PostsList = ({
   criteria: PostCriteria;
   showComposePost?: boolean;
   inset: number;
-  navigation: MaterialBottomTabNavigationProp<
-    MaterialBottomTabParams,
-    'Agenda'
-  >;
+  navigation: StackNavigationProp<PostsStackParams, 'Posts'>;
 }) => {
   const [user] = useSelector((state: State) => [state.user]);
   const fetchPostsWithCustomParams = (
@@ -490,10 +484,7 @@ type PostProps = {
   showComposePost?: boolean;
   criteria: PostCriteria;
   inset?: number;
-  navigation: MaterialBottomTabNavigationProp<
-    MaterialBottomTabParams,
-    'Agenda'
-  >;
+  navigation: StackNavigationProp<PostsStackParams, 'Posts'>;
 };
 
 const Posts = ({
