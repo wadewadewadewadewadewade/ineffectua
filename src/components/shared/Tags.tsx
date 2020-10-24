@@ -33,6 +33,7 @@ import {navigate} from '../RootNavigation';
 import {PostsStackParams} from '../MaterialBottomTabs';
 import {PostPrivacyTypes, PostCriteria} from '../../reducers/PostsReducer';
 import {StackNavigationProp} from '@react-navigation/stack';
+import {Link} from '@react-navigation/native';
 
 const TagComponent = ({
   tag,
@@ -43,7 +44,7 @@ const TagComponent = ({
   removeTag?: (key: string) => void;
   navigation?: StackNavigationProp<PostsStackParams, 'Posts'>;
 }) => {
-  const {key, name} = tag;
+  const {key, name, path} = tag;
   const theme = useSelector((state: State) => state.theme);
   if (key === undefined) {
     return <View />;
@@ -57,22 +58,11 @@ const TagComponent = ({
           backgroundColor: theme.paper.colors.backdrop,
         },
       ]}>
-      <TouchableHighlight
-        onPress={() => {
-          const criteria: PostCriteria = {
-            privacy: PostPrivacyTypes.PUBLIC,
-            key: {id: tag.key, type: 'tags'},
-          };
-          if (navigation !== undefined) {
-            navigation.push('Posts', {criteria, title: `#${tag.name}`});
-          } else {
-            navigate('Posts', {criteria}, `#${tag.name}`);
-          }
-        }}>
+      <Link to={`/tags/${path}`}>
         <Text style={[styles.tagText, {color: paperColors(theme).onSurface}]}>
           {name}
         </Text>
-      </TouchableHighlight>
+      </Link>
       {removeTag !== undefined && (
         <MaterialCommunityIcons
           onPress={() => {
@@ -230,11 +220,11 @@ const NewTagField = ({
               );
               if (tagNames.length === 0) {
                 // if the tag isn't alread in the list, try adding it
-                mutateAdd({key: '', name: tagName}).then(
+                mutateAdd({key: '', name: tagName, path: ''}).then(
                   (t) => t && onTagsChanged(t),
                 );
               } else {
-                onTagsChanged({key: '', name: tagName});
+                onTagsChanged({key: '', name: tagName, path: ''});
               }
             }
           }

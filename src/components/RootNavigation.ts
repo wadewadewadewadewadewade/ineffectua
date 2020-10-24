@@ -55,6 +55,7 @@ export function navigate(
 }
 
 export function getRouteParams() {
+  console.log(navigationRef.current?.getCurrentRoute())
   return navigationRef.current?.getCurrentRoute()?.params as NavigationParams;
 }
 

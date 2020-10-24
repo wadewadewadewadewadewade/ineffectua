@@ -53,7 +53,9 @@ import {
 import {paperTheme, barClassName, paperColors} from '../reducers/ThemeReducer';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import {getUserById} from '../middleware/AuthMiddleware';
+import {getTagIdByPath} from '../middleware/TagsMiddleware';
 import {ThunkDispatch} from 'redux-thunk';
+import {PostCriteria, PostPrivacyTypes} from '../reducers/PostsReducer';
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -198,14 +200,32 @@ const Navigation = () => {
             screens: {
               Root: {
                 path: '',
-                initialRouteName: 'Agenda',
+                initialRouteName: 'Tabs',
                 screens: {
+                  Tabs: {
+                    initialRouteName: 'Agenda',
+                    screens: {
+                      Calendar: 'calendar/',
+                      PainLog: 'pain-log/',
+                      ContactsList: 'contacts/',
+                      MedicationsList: 'medications/',
+                      Agenda: {
+                        initialRouteName: 'Posts',
+                        screens: {
+                          Posts: {
+                            path: ':type?/:id?',
+                            parse: {
+                              id: (id) => ({privacy: PostPrivacyTypes.PUBLIC, key: {type: id.replace(/\/.*/, ''), id: id.replace(/^.+\//, '')}} as PostCriteria)
+                            },
+                            stringify: {
+                              id: (id?: PostCriteria) => id && id.key ? `${id.key.type}/${id.key.id}` : ''
+                            }
+                          }
+                        }
+                      },
+                    }
+                  },
                   SignIn: 'sign-in/',
-                  Calendar: 'calendar/',
-                  PainLog: 'pain-log/',
-                  ContactsList: 'contacts/',
-                  MedicationsList: 'medications/',
-                  Agenda: '',
                   NotFound: '.+',
                 },
               },

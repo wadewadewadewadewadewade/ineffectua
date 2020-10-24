@@ -1,7 +1,7 @@
 export type Tag = {
   key: string;
   name: string;
-  path?: string;
+  path: string;
   created?: {
     by: string;
     on: Date;

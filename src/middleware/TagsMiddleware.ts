@@ -2,7 +2,7 @@ import {Tag, UserTag} from '../reducers/TagsReducer';
 import {User} from '../reducers/AuthReducer';
 import {getFirebaseDataWithUser, setFirebaseDataWithUser} from './Utilities';
 
-export const emptyTag: Tag = {name: ''};
+export const emptyTag: Tag = {key: '', name: '', path: ''};
 
 type FetchObject = {
   key: string;
@@ -20,12 +20,18 @@ const mapFetchToTags = (fetchObject: Array<FetchObject>): Array<Tag> => {
   return posts;
 };
 
+export const getTagIdByPath = async (path: string): Promise<string> => {
+  return await fetch(
+    `https://us-central1-ineffectua.cloudfunctions.net/api/v1/tags/-/${path}`,
+  ).then((promise) => promise.json());
+}
+
 export const getTagsForAutocomplete = (
   prefix: string,
   tagsInUse: Array<string>,
   minimumCharacters = 3,
 ): Promise<Array<Tag>> => {
-  if (!prefix || prefix.length < minimumCharacters) {
+  if (!prefix || prefix.length < minimumCharacters || prefix === '-') { // '-' is used for get-tag-path api endpoint
     return new Promise<Array<Tag>>((r) => r([]));
   } else {
     const tagsInUseJson =
