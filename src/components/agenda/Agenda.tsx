@@ -14,7 +14,11 @@ import {
 import {themeIsDark} from '../../reducers/ThemeReducer';
 import Posts from '../shared/Posts';
 import {DataTypesType} from '../../reducers/DataTypesReducer';
-import {PostPrivacyTypes, PostCriteria} from '../../reducers/PostsReducer';
+import {
+  PostPrivacyTypes,
+  PostCriteria,
+  PostCriteriaKey,
+} from '../../reducers/PostsReducer';
 import {firebaseDocumentToArray} from '../../firebase/utilities';
 import {useQuery} from 'react-query';
 import {getDatatypes} from '../../middleware/DataTypesMiddleware';
@@ -24,14 +28,27 @@ import {StackNavigationProp} from '@react-navigation/stack';
 
 const Agenda = ({
   navigation,
-}: { navigation: StackNavigationProp<PostsStackParams, 'Posts'>}) => {
+}: {
+  navigation: StackNavigationProp<PostsStackParams, 'Posts'>;
+}) => {
   const params = getRouteParams();
-  const criteria: PostCriteria =
-    params !== undefined && params.criteria !== undefined
-      ? params.criteria
-      : {
-        privacy: PostPrivacyTypes.PUBLIC,
+  const criteria: PostCriteria = {
+    privacy: PostPrivacyTypes.PUBLIC,
+  };
+  if (params !== undefined) {
+    if (
+      params.type !== undefined &&
+      params.id !== undefined &&
+      params.type !== 'undefined' &&
+      params.id !== 'undefined'
+    ) {
+      criteria.key = {
+        type: params.type as PostCriteriaKey['type'],
+        id: params.id,
       };
+    }
+  }
+  //console.log({params, criteria});
   const [user, theme] = useSelector((state: State) => [
     state.user,
     state.theme,

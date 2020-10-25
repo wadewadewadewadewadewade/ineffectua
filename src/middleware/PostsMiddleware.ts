@@ -131,12 +131,20 @@ export const addPost = async (
   user: User | false,
   post: Post,
 ): Promise<Post> => {
-  const path = post.criteria.key ? post.criteria.key.type === 'posts' ? 'posts/posts' : `posts/${post.criteria.key.type}` : 'posts/posts';
+  const path = post.criteria.key
+    ? post.criteria.key.type === 'posts'
+      ? 'posts/posts'
+      : `posts/${post.criteria.key.type}`
+    : 'posts/posts';
   return setFirebaseDataWithUser(user, path, post);
 };
 
 export const deletePost = (user: User, post: Post): Promise<Post> => {
-  const path = post.criteria.key ? post.criteria.key.type === 'posts' ? 'posts/posts' : `posts/${post.criteria.key.type}` : 'posts/posts';
+  const path = post.criteria.key
+    ? post.criteria.key.type === 'posts'
+      ? 'posts/posts'
+      : `posts/${post.criteria.key.type}`
+    : 'posts/posts';
   return setFirebaseDataWithUser(user, path, post, 'DELETE');
 };
 
@@ -145,7 +153,11 @@ export const getPostById = (
   criteria: PostCriteria,
   key: string,
 ): Promise<Post> => {
-  const path = criteria.key ? criteria.key.type === 'posts' ? 'posts/posts' : `posts/${criteria.key.type}` : 'posts/posts';
+  const path = criteria.key
+    ? criteria.key.type === 'posts'
+      ? 'posts/posts'
+      : `posts/${criteria.key.type}`
+    : 'posts/posts';
   return getFirebaseDataWithUser<Post>(user, `${path}/${key}`).then((p) => {
     p.created.on = new Date(p.created.on);
     return p;

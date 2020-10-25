@@ -29,11 +29,9 @@ import {
   useMutation,
   useQueryCache,
 } from 'react-query';
-import {navigate} from '../RootNavigation';
 import {PostsStackParams} from '../MaterialBottomTabs';
-import {PostPrivacyTypes, PostCriteria} from '../../reducers/PostsReducer';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {Link} from '@react-navigation/native';
+import {Link, StackActions} from '@react-navigation/native';
 
 const TagComponent = ({
   tag,

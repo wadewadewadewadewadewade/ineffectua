@@ -12,18 +12,19 @@ import {MaterialCommunityIcons} from '@expo/vector-icons';
 import Medications from './Medications/Medications';
 import {contrast} from '../middleware/DataTypesMiddleware';
 import {formatDocumentTitle, getHeaderTitle} from './RootNavigation';
-import {PostCriteria} from '../reducers/PostsReducer';
 import {createStackNavigator} from '@react-navigation/stack';
 
 export type MaterialBottomTabParams = {
-  Agenda: {screen: 'Posts', criteria: PostCriteria};
+  Agenda: {screen: 'Posts'; type?: string; id?: string};
   Calendar: CalendarStackParamList;
   PainLog: undefined;
   Contacts: undefined;
   Medications: undefined;
 };
 
-export type PostsStackParams = {Posts: {criteria: PostCriteria, title?: string}};
+export type PostsStackParams = {
+  Posts: {type?: string; id?: string; title?: string};
+};
 
 const MaterialBottomTabs = createMaterialBottomTabNavigator<
   MaterialBottomTabParams
@@ -32,15 +33,15 @@ const PostsStack = createStackNavigator<PostsStackParams>();
 
 const PostsStackNavigator = () => {
   return (
-  <PostsStack.Navigator>
-    <PostsStack.Screen
-      name="Posts"
-      component={Agenda}
-      options={{title: getHeaderTitle()}}
+    <PostsStack.Navigator>
+      <PostsStack.Screen
+        name="Posts"
+        component={Agenda}
+        options={{title: getHeaderTitle()}}
       />
     </PostsStack.Navigator>
-  )
-}
+  );
+};
 
 export default function MaterialBottomTabsScreen() {
   const colors = new Array<string>();

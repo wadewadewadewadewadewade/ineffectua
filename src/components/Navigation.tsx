@@ -53,9 +53,7 @@ import {
 import {paperTheme, barClassName, paperColors} from '../reducers/ThemeReducer';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import {getUserById} from '../middleware/AuthMiddleware';
-import {getTagIdByPath} from '../middleware/TagsMiddleware';
 import {ThunkDispatch} from 'redux-thunk';
-import {PostCriteria, PostPrivacyTypes} from '../reducers/PostsReducer';
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -213,17 +211,11 @@ const Navigation = () => {
                         initialRouteName: 'Posts',
                         screens: {
                           Posts: {
-                            path: ':type?/:id?',
-                            parse: {
-                              id: (id) => ({privacy: PostPrivacyTypes.PUBLIC, key: {type: id.replace(/\/.*/, ''), id: id.replace(/^.+\//, '')}} as PostCriteria)
-                            },
-                            stringify: {
-                              id: (id?: PostCriteria) => id && id.key ? `${id.key.type}/${id.key.id}` : ''
-                            }
-                          }
-                        }
+                            path: ':type/:id',
+                          },
+                        },
                       },
-                    }
+                    },
                   },
                   SignIn: 'sign-in/',
                   NotFound: '.+',

@@ -3,7 +3,6 @@ import {
   NavigationContainerRef,
   getFocusedRouteNameFromRoute,
 } from '@react-navigation/native';
-import {PostCriteria} from './../reducers/PostsReducer';
 import * as React from 'react';
 import {DateObject} from 'react-native-calendars';
 
@@ -15,14 +14,13 @@ const TabScreenNames = [
   'Medications',
   'PainLog',
 ];
-const AgendaScreenNames = [
-  'Posts',
-]
+const AgendaScreenNames = ['Posts'];
 
 export const navigationRef = React.createRef<NavigationContainerRef>();
 
 type NavigationParams = {
-  criteria?: PostCriteria; // Agenda Posts
+  type?: string; // Agenda Posts
+  id?: string; // Agenda Posts
   date?: DateObject; // Calendar
   user?: {userId: string}; // Profile
 };
@@ -55,7 +53,7 @@ export function navigate(
 }
 
 export function getRouteParams() {
-  console.log(navigationRef.current?.getCurrentRoute())
+  //console.log(navigationRef.current?.getCurrentRoute());
   return navigationRef.current?.getCurrentRoute()?.params as NavigationParams;
 }
 
@@ -115,7 +113,7 @@ export function getHeaderTitle(
   const params = (route && getRouteParamsAsObject(route.params)) || {
     title: undefined,
   };
-  console.log({route, savedStateName, routeName});
+  //console.log({route, savedStateName, routeName});
   switch (routeName) {
     case 'AuthenticationSuccess':
       return 'Authentication Success';
