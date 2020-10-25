@@ -208,8 +208,14 @@ const Navigation = () => {
                       ContactsList: 'contacts/',
                       MedicationsList: 'medications/',
                       Agenda: {
-                        initialRouteName: 'Posts',
+                        initialRouteName: 'Agenda',
                         screens: {
+                          Agenda: {
+                            path: '',
+                          },
+                          Post: {
+                            path: 'posts/:id',
+                          },
                           Posts: {
                             path: ':type/:id',
                           },

@@ -23,7 +23,9 @@ export type MaterialBottomTabParams = {
 };
 
 export type PostsStackParams = {
+  Agenda: {type?: string; id?: string; title?: string};
   Posts: {type?: string; id?: string; title?: string};
+  Post: {type?: string; id?: string; title?: string};
 };
 
 const MaterialBottomTabs = createMaterialBottomTabNavigator<
@@ -33,9 +35,19 @@ const PostsStack = createStackNavigator<PostsStackParams>();
 
 const PostsStackNavigator = () => {
   return (
-    <PostsStack.Navigator>
+    <PostsStack.Navigator initialRouteName="Agenda">
+      <PostsStack.Screen
+        name="Agenda"
+        component={Agenda}
+        options={{title: getHeaderTitle()}}
+      />
       <PostsStack.Screen
         name="Posts"
+        component={Agenda}
+        options={{title: getHeaderTitle()}}
+      />
+      <PostsStack.Screen
+        name="Post"
         component={Agenda}
         options={{title: getHeaderTitle()}}
       />

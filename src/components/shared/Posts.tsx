@@ -16,6 +16,7 @@ import {
   PostCriteria,
   PostPrivacyTypes,
   getPostPrivacyName,
+  PostCriteriaKey,
 } from '../../reducers/PostsReducer';
 import {
   fetchPosts,
@@ -40,7 +41,7 @@ import {User} from '../../reducers/AuthReducer';
 import {getUserById} from '../../middleware/AuthMiddleware';
 import {TouchableHighlight} from 'react-native-gesture-handler';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
-import {navigate} from '../RootNavigation';
+import {navigate, getRouteParams} from '../RootNavigation';
 import {PostsStackParams} from '../MaterialBottomTabs';
 import {StackNavigationProp} from '@react-navigation/stack';
 
@@ -365,16 +366,34 @@ const PostComponent = ({
 // https://react-query.tanstack.com/docs/guides/infinite-queries
 
 const PostsList = ({
-  criteria,
+  criteriaProperty,
   showComposePost,
   inset,
   navigation,
 }: {
-  criteria: PostCriteria;
+  criteriaProperty?: PostCriteria;
   showComposePost?: boolean;
   inset: number;
   navigation: StackNavigationProp<PostsStackParams, 'Posts'>;
 }) => {
+  const params = getRouteParams();
+  const criteria: PostCriteria = criteriaProperty || {
+    privacy: PostPrivacyTypes.PUBLIC,
+  };
+  if (params !== undefined && criteriaProperty === undefined) {
+    if (
+      params.type !== undefined &&
+      params.id !== undefined &&
+      params.type !== 'undefined' &&
+      params.id !== 'undefined'
+    ) {
+      criteria.key = {
+        type: params.type as PostCriteriaKey['type'],
+        id: params.id,
+      };
+    }
+  }
+  console.log({params, criteria});
   const [user] = useSelector((state: State) => [state.user]);
   const fetchPostsWithCustomParams = (
     col: string,
@@ -482,7 +501,7 @@ const PostsList = ({
 
 type PostProps = {
   showComposePost?: boolean;
-  criteria: PostCriteria;
+  criteria?: PostCriteria;
   inset?: number;
   navigation: StackNavigationProp<PostsStackParams, 'Posts'>;
 };
@@ -499,7 +518,7 @@ const Posts = ({
         <PostsList
           navigation={navigation}
           inset={inset}
-          criteria={criteria}
+          criteriaProperty={criteria}
           showComposePost={showComposePost === true}
         />
       </React.Suspense>

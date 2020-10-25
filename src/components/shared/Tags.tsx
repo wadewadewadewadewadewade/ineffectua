@@ -31,7 +31,7 @@ import {
 } from 'react-query';
 import {PostsStackParams} from '../MaterialBottomTabs';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {Link, StackActions} from '@react-navigation/native';
+import {Link} from '@react-navigation/native';
 
 const TagComponent = ({
   tag,

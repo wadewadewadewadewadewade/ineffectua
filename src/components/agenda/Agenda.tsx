@@ -14,15 +14,10 @@ import {
 import {themeIsDark} from '../../reducers/ThemeReducer';
 import Posts from '../shared/Posts';
 import {DataTypesType} from '../../reducers/DataTypesReducer';
-import {
-  PostPrivacyTypes,
-  PostCriteria,
-  PostCriteriaKey,
-} from '../../reducers/PostsReducer';
 import {firebaseDocumentToArray} from '../../firebase/utilities';
 import {useQuery} from 'react-query';
 import {getDatatypes} from '../../middleware/DataTypesMiddleware';
-import {navigate, getRouteParams} from '../RootNavigation';
+import {navigate} from '../RootNavigation';
 import {PostsStackParams} from '../MaterialBottomTabs';
 import {StackNavigationProp} from '@react-navigation/stack';
 
@@ -31,24 +26,6 @@ const Agenda = ({
 }: {
   navigation: StackNavigationProp<PostsStackParams, 'Posts'>;
 }) => {
-  const params = getRouteParams();
-  const criteria: PostCriteria = {
-    privacy: PostPrivacyTypes.PUBLIC,
-  };
-  if (params !== undefined) {
-    if (
-      params.type !== undefined &&
-      params.id !== undefined &&
-      params.type !== 'undefined' &&
-      params.id !== 'undefined'
-    ) {
-      criteria.key = {
-        type: params.type as PostCriteriaKey['type'],
-        id: params.id,
-      };
-    }
-  }
-  //console.log({params, criteria});
   const [user, theme] = useSelector((state: State) => [
     state.user,
     state.theme,
@@ -160,11 +137,7 @@ const Agenda = ({
           theme={calendarTheme}
         />
       )}
-      <Posts
-        navigation={navigation}
-        showComposePost={true}
-        criteria={criteria}
-      />
+      <Posts navigation={navigation} showComposePost={true} />
     </View>
   );
 };
