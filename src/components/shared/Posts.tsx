@@ -41,7 +41,7 @@ import {User} from '../../reducers/AuthReducer';
 import {getUserById} from '../../middleware/AuthMiddleware';
 import {TouchableHighlight} from 'react-native-gesture-handler';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
-import {navigate, getRouteParams} from '../RootNavigation';
+import {navigate, NavigationParams, navigationRef} from '../RootNavigation';
 import {PostsStackParams} from '../MaterialBottomTabs';
 import {StackNavigationProp} from '@react-navigation/stack';
 
@@ -376,7 +376,7 @@ const PostsList = ({
   inset: number;
   navigation: StackNavigationProp<PostsStackParams, 'Posts'>;
 }) => {
-  const params = getRouteParams();
+  const params = navigationRef.current?.getCurrentRoute()?.params as NavigationParams;
   const criteria: PostCriteria = criteriaProperty || {
     privacy: PostPrivacyTypes.PUBLIC,
   };
@@ -506,7 +506,7 @@ type PostProps = {
   navigation: StackNavigationProp<PostsStackParams, 'Posts'>;
 };
 
-const Posts = ({
+export const Posts = ({
   showComposePost,
   criteria,
   navigation,

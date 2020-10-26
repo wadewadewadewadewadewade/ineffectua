@@ -18,7 +18,7 @@ const AgendaScreenNames = ['Posts'];
 
 export const navigationRef = React.createRef<NavigationContainerRef>();
 
-type NavigationParams = {
+export type NavigationParams = {
   type?: string; // Agenda Posts
   id?: string; // Agenda Posts
   date?: DateObject; // Calendar
@@ -113,7 +113,7 @@ export function getHeaderTitle(
   const params = (route && getRouteParamsAsObject(route.params)) || {
     title: undefined,
   };
-  //console.log({route, savedStateName, routeName});
+  console.log({route, savedStateName, routeName});
   switch (routeName) {
     case 'AuthenticationSuccess':
       return 'Authentication Success';
@@ -122,6 +122,8 @@ export function getHeaderTitle(
       return 'Agenda';
     case 'Tabs':
       return 'Agenda';
+    case 'Posts':
+      return params.type === 'tags' ? `#${params.id}` : 'Posts';
     case 'CalendarDay':
     case 'Calendar':
       return (params && (params.title || params.date?.dateString)) || routeName;

@@ -44,7 +44,11 @@ const PostsStackNavigator = () => {
       <PostsStack.Screen
         name="Posts"
         component={Agenda}
-        options={{title: getHeaderTitle()}}
+        options={(options) => {
+          const {type, id} = options.route.params;
+          const title = type === 'tags' ? `#${id}` : 'Post';
+          return {title};
+        }}
       />
       <PostsStack.Screen
         name="Post"

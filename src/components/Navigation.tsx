@@ -15,7 +15,7 @@ import {
   Appbar,
   ActivityIndicator,
 } from 'react-native-paper';
-import {InitialState, NavigationContainer} from '@react-navigation/native';
+import {InitialState, NavigationContainer, getPathFromState, getStateFromPath} from '@react-navigation/native';
 import {
   createDrawerNavigator,
   DrawerScreenProps,
@@ -229,6 +229,18 @@ const Navigation = () => {
               },
             },
           },
+          /*getStateFromPath(path, config) {
+            const defaultState = getStateFromPath(path, config);
+            console.log({path, config, defaultState});
+            // add first page to routes, then you will have a back btn
+            const { routes } = defaultState || {routes: undefined};
+            const firstRouteName= 'Posts';
+            if (defaultState !== undefined && routes !== undefined && routes.length === 1 && routes[0].name !== firstRouteName) {
+              defaultState.routes.unshift({ name: firstRouteName});
+              console.log({defaultState});
+            }
+            return defaultState
+          },*/
         }}
         fallback={<ActivityIndicator />}
         documentTitle={{
