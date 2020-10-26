@@ -1,8 +1,4 @@
-import {GeneralNavigationParams} from './../Types';
-import {
-  NavigationContainerRef,
-  getFocusedRouteNameFromRoute,
-} from '@react-navigation/native';
+import {NavigationContainerRef} from '@react-navigation/native';
 import * as React from 'react';
 import {DateObject} from 'react-native-calendars';
 
@@ -14,7 +10,7 @@ const TabScreenNames = [
   'Medications',
   'PainLog',
 ];
-const AgendaScreenNames = ['Posts'];
+const AgendaScreenNames = ['Agenda', 'Posts', 'Post'];
 
 export const navigationRef = React.createRef<NavigationContainerRef>();
 
@@ -52,12 +48,40 @@ export function navigate(
   }
 }
 
-export function getRouteParams() {
+/*export function getRouteParams() {
   //console.log(navigationRef.current?.getCurrentRoute());
   return navigationRef.current?.getCurrentRoute()?.params as NavigationParams;
-}
+}*/
 
-const getRouteParamsAsObject = (
+type TitleType = {
+  title: string;
+  headerTitle: string;
+};
+
+export const formatTitle = (options: Record<string, any> | undefined) => {
+  const title: TitleType = {title: 'Agenda', headerTitle: 'Agenda'};
+  //console.log({options});
+  if (options !== undefined) {
+    if ('title' in options) {
+      // AuthFlow
+      title.title = options.title;
+      title.headerTitle = options.title;
+    } else if ('tabBarLabel' in options) {
+      // Tabs screens
+      title.title = options.tabBarLabel;
+      title.headerTitle = options.tabBarLabel;
+    } else if ('type' in options && 'id' in options) {
+      const {type, id} = options;
+      if (type === 'tags') {
+        title.title = `#${id}`;
+        title.headerTitle = `#${id}`;
+      }
+    }
+  }
+  return title;
+};
+
+/*const getRouteParamsAsObject = (
   params: object | undefined,
 ): (GeneralNavigationParams & NavigationParams) | undefined => {
   if (params !== undefined && 'params' in params) {
@@ -83,22 +107,6 @@ type RouteNames =
   | 'NotFound'
   | 'Tabs'
   | undefined;
-
-export const formatDocumentTitle = (
-  options: Record<string, any> | undefined,
-) => {
-  //console.log({options});
-  if (options !== undefined && 'title' in options) {
-    // AuthFlow
-    return options.title;
-  } else if (options !== undefined && 'tabBarLabel' in options) {
-    // Tabs screens
-    return getHeaderTitle();
-  } else {
-    // we don't know, so probably the default inital screen
-    return 'Agenda';
-  }
-};
 
 export function getHeaderTitle(
   savedStateName?: RouteNames,
@@ -132,4 +140,4 @@ export function getHeaderTitle(
     default:
       return (params && params.title) || routeName;
   }
-}
+}*/

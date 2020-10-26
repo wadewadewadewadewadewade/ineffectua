@@ -11,7 +11,6 @@ import CalendarNavigator, {
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import Medications from './Medications/Medications';
 import {contrast} from '../middleware/DataTypesMiddleware';
-import {formatDocumentTitle, getHeaderTitle} from './RootNavigation';
 import {createStackNavigator} from '@react-navigation/stack';
 
 export type MaterialBottomTabParams = {
@@ -36,25 +35,9 @@ const PostsStack = createStackNavigator<PostsStackParams>();
 const PostsStackNavigator = () => {
   return (
     <PostsStack.Navigator initialRouteName="Agenda">
-      <PostsStack.Screen
-        name="Agenda"
-        component={Agenda}
-        options={{title: getHeaderTitle()}}
-      />
-      <PostsStack.Screen
-        name="Posts"
-        component={Agenda}
-        options={(options) => {
-          const {type, id} = options.route.params;
-          const title = type === 'tags' ? `#${id}` : 'Post';
-          return {title};
-        }}
-      />
-      <PostsStack.Screen
-        name="Post"
-        component={Agenda}
-        options={{title: getHeaderTitle()}}
-      />
+      <PostsStack.Screen name="Agenda" component={Agenda} />
+      <PostsStack.Screen name="Posts" component={Agenda} />
+      <PostsStack.Screen name="Post" component={Agenda} />
     </PostsStack.Navigator>
   );
 };
@@ -118,7 +101,6 @@ export default function MaterialBottomTabsScreen() {
               />
             ),
             tabBarColor: colors[0],
-            tabBarLabel: formatDocumentTitle(options),
           })}
         />
         <MaterialBottomTabs.Screen
@@ -133,7 +115,6 @@ export default function MaterialBottomTabsScreen() {
               />
             ),
             tabBarColor: colors[1],
-            tabBarLabel: formatDocumentTitle(options),
           })}
         />
         <MaterialBottomTabs.Screen
@@ -148,7 +129,6 @@ export default function MaterialBottomTabsScreen() {
               />
             ),
             tabBarColor: colors[2],
-            tabBarLabel: formatDocumentTitle(options),
           })}
         />
         <MaterialBottomTabs.Screen
@@ -163,7 +143,6 @@ export default function MaterialBottomTabsScreen() {
               />
             ),
             tabBarColor: colors[3],
-            tabBarLabel: formatDocumentTitle(options),
           })}
         />
         <MaterialBottomTabs.Screen
@@ -178,7 +157,6 @@ export default function MaterialBottomTabsScreen() {
               />
             ),
             tabBarColor: colors[4],
-            tabBarLabel: formatDocumentTitle(options),
           })}
         />
       </MaterialBottomTabs.Navigator>

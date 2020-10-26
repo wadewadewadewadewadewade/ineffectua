@@ -29,18 +29,14 @@ import {
   useMutation,
   useQueryCache,
 } from 'react-query';
-import {PostsStackParams} from '../MaterialBottomTabs';
-import {StackNavigationProp} from '@react-navigation/stack';
 import {Link} from '@react-navigation/native';
 
 const TagComponent = ({
   tag,
   removeTag,
-  navigation,
 }: {
   tag: Tag;
   removeTag?: (key: string) => void;
-  navigation?: StackNavigationProp<PostsStackParams, 'Posts'>;
 }) => {
   const {key, name, path} = tag;
   const theme = useSelector((state: State) => state.theme);
@@ -96,11 +92,9 @@ const TagSuggestion = ({
 const TagList = ({
   value,
   onTagsChanged,
-  navigation,
 }: {
   value?: Array<string>;
   onTagsChanged?: (tags: Array<string>) => void;
-  navigation?: StackNavigationProp<PostsStackParams, 'Posts'>;
 }) => {
   const {status, data, isFetching, error} = useQuery<
     Tag[],
@@ -124,7 +118,6 @@ const TagList = ({
         {tags.length > 0 &&
           tags.map((t: Tag) => (
             <TagComponent
-              navigation={navigation}
               key={t.key}
               tag={t}
               removeTag={(key) =>
@@ -151,9 +144,7 @@ const TagList = ({
       <View>
         {tags &&
           tags.length > 0 &&
-          tags.map((t: Tag) => (
-            <TagComponent navigation={navigation} key={t.key} tag={t} />
-          ))}
+          tags.map((t: Tag) => <TagComponent key={t.key} tag={t} />)}
       </View>
     );
   }
@@ -261,16 +252,9 @@ type Props = {
   userId?: string;
   style?: StyleProp<ViewStyle>;
   onTagsChanged?: (tags: Array<string>) => void;
-  navigation?: StackNavigationProp<PostsStackParams, 'Posts'>;
 };
 
-const TagsListComponent = ({
-  value,
-  userId,
-  style,
-  onTagsChanged,
-  navigation,
-}: Props) => {
+const TagsListComponent = ({value, userId, style, onTagsChanged}: Props) => {
   const [user, theme] = useSelector((state: State) => [
     state.user,
     state.theme,
@@ -341,7 +325,6 @@ const TagsListComponent = ({
           </Text>
           {onTagsChanged ? (
             <TagList
-              navigation={navigation}
               value={tagIds}
               onTagsChanged={(updatedTagIds) => {
                 if (userId !== undefined) {
@@ -368,7 +351,7 @@ const TagsListComponent = ({
               }}
             />
           ) : (
-            <TagList navigation={navigation} value={tagIds} />
+            <TagList value={tagIds} />
           )}
         </View>
       </View>

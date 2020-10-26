@@ -26,7 +26,7 @@ import Tags from '../shared/Tags';
 import Medications from '../shared/Medications';
 import Contacts from '../shared/Contacts';
 import {User} from '../../reducers/AuthReducer';
-import {navigate, getRouteParams} from '../RootNavigation';
+import {navigate, navigationRef, NavigationParams} from '../RootNavigation';
 
 enum ProfileViews {
   'PRIVATE' = 0,
@@ -50,12 +50,10 @@ const TabsLinks = () => {
         <TouchableHighlight onPress={() => navigate('Calendar')}>
           <MaterialCommunityIcons name="calendar" color={color} size={26} />
         </TouchableHighlight>
-        <TouchableHighlight
-          onPress={() => navigate('Contacts')}>
+        <TouchableHighlight onPress={() => navigate('Contacts')}>
           <MaterialCommunityIcons name="contacts" color={color} size={26} />
         </TouchableHighlight>
-        <TouchableHighlight
-          onPress={() => navigate('Medications')}>
+        <TouchableHighlight onPress={() => navigate('Medications')}>
           <MaterialCommunityIcons name="pill" color={color} size={26} />
         </TouchableHighlight>
         <TouchableHighlight onPress={() => navigate('PainLog')}>
@@ -68,7 +66,9 @@ const TabsLinks = () => {
 };
 
 const SideBar = () => {
-  const userId = getRouteParams()?.user?.userId; // no userId supplied means private
+  const params = navigationRef.current?.getCurrentRoute()
+    ?.params as NavigationParams;
+  const userId = params?.user?.userId; // no userId supplied means private
   const [ready, setReady] = React.useState(false);
   const [user, setUser] = React.useState<User>(
     useSelector((state: State) => state.user),
@@ -191,7 +191,9 @@ const SideBar = () => {
 
 const ProfilePage = () => {
   const [ready, setReady] = React.useState(false);
-  const userId = getRouteParams()?.user?.userId; // no userId supplied means private
+  const params = navigationRef.current?.getCurrentRoute()
+    ?.params as NavigationParams;
+  const userId = params?.user?.userId; // no userId supplied means private
   const [user, setUser] = React.useState<User>(
     useSelector((state: State) => state.user),
   );
@@ -295,11 +297,7 @@ const ProfilePage = () => {
   }
 };
 
-const Profile = ({
-  layout,
-}: {
-  layout?: ProfileLayouts;
-}) => {
+const Profile = ({layout}: {layout?: ProfileLayouts}) => {
   const pageLayout = layout ? layout : ProfileLayouts.SIDEBAR;
   if (pageLayout === ProfileLayouts.PAGE) {
     return <ProfilePage />;

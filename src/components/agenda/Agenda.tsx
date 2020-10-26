@@ -17,7 +17,12 @@ import {DataTypesType} from '../../reducers/DataTypesReducer';
 import {firebaseDocumentToArray} from '../../firebase/utilities';
 import {useQuery} from 'react-query';
 import {getDatatypes} from '../../middleware/DataTypesMiddleware';
-import {navigate} from '../RootNavigation';
+import {
+  navigate,
+  navigationRef,
+  NavigationParams,
+  formatTitle,
+} from '../RootNavigation';
 import {PostsStackParams} from '../MaterialBottomTabs';
 import {StackNavigationProp} from '@react-navigation/stack';
 
@@ -30,6 +35,20 @@ const Agenda = ({
     state.user,
     state.theme,
   ]);
+  const params = navigationRef.current?.getCurrentRoute()
+    ?.params as NavigationParams;
+  if (params !== undefined) {
+    const title = formatTitle(params);
+    navigation
+      .dangerouslyGetParent()
+      ?.dangerouslyGetParent()
+      ?.setOptions(title);
+  } else {
+    navigation.dangerouslyGetParent()?.dangerouslyGetParent()?.setOptions({
+      title: 'Agenda',
+      headerTitle: 'Agenda',
+    });
+  }
   const calendarTheme = {
     ...theme.paper,
     agendaDayTextColor: themeIsDark(theme) ? '#666' : '#ccc',
@@ -144,7 +163,7 @@ const Agenda = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingTop: 12,
     flex: 1,
     position: 'relative',

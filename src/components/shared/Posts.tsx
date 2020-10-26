@@ -334,7 +334,7 @@ const PostComponent = ({
               },
             ]}
           />
-          <Tags value={post.tags} navigation={navigation} />
+          <Tags value={post.tags} />
         </View>
       </View>
       {exposeComments && (
@@ -376,7 +376,8 @@ const PostsList = ({
   inset: number;
   navigation: StackNavigationProp<PostsStackParams, 'Posts'>;
 }) => {
-  const params = navigationRef.current?.getCurrentRoute()?.params as NavigationParams;
+  const params = navigationRef.current?.getCurrentRoute()
+    ?.params as NavigationParams;
   const criteria: PostCriteria = criteriaProperty || {
     privacy: PostPrivacyTypes.PUBLIC,
   };
@@ -393,7 +394,6 @@ const PostsList = ({
       };
     }
   }
-  console.log({params, criteria});
   const [user] = useSelector((state: State) => [state.user]);
   const fetchPostsWithCustomParams = (
     col: string,

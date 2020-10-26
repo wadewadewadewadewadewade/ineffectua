@@ -15,7 +15,7 @@ import {
   Appbar,
   ActivityIndicator,
 } from 'react-native-paper';
-import {InitialState, NavigationContainer, getPathFromState, getStateFromPath} from '@react-navigation/native';
+import {InitialState, NavigationContainer} from '@react-navigation/native';
 import {
   createDrawerNavigator,
   DrawerScreenProps,
@@ -25,11 +25,7 @@ import {
   HeaderStyleInterpolators,
 } from '@react-navigation/stack';
 import {Action} from '../reducers';
-import {
-  navigationRef,
-  getHeaderTitle,
-  formatDocumentTitle,
-} from './RootNavigation';
+import {navigationRef, formatTitle} from './RootNavigation';
 // use this to restart the app for things like changing RTL to LTR
 //import {restartApp} from './Restart';
 import {AsyncStorage} from 'react-native';
@@ -106,7 +102,7 @@ const Navigation = () => {
     }
     enableAnalytics()
   }, [])*/
-  let previousRouteName: string | undefined = 'Agenda';
+  let previousRouteName: string | undefined;
   React.useEffect(() => {
     const restoreState = async () => {
       try {
@@ -124,8 +120,6 @@ const Navigation = () => {
               : undefined;
 
             if (savedStateName !== undefined) {
-              // eslint-disable-next-line react-hooks/exhaustive-deps
-              previousRouteName = getHeaderTitle(savedStateName);
               setInitialState(savedStateName);
             }
           }
@@ -135,7 +129,7 @@ const Navigation = () => {
       }
     };
     !isReady && restoreState();
-  }, [isReady]);
+  }, [isReady, user]);
 
   const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
   React.useEffect(() => {
@@ -233,34 +227,38 @@ const Navigation = () => {
             const defaultState = getStateFromPath(path, config);
             console.log({path, config, defaultState});
             // add first page to routes, then you will have a back btn
-            const { routes } = defaultState || {routes: undefined};
-            const firstRouteName= 'Posts';
-            if (defaultState !== undefined && routes !== undefined && routes.length === 1 && routes[0].name !== firstRouteName) {
-              defaultState.routes.unshift({ name: firstRouteName});
+            const {routes} = defaultState || {routes: undefined};
+            const firstRouteName = 'Posts';
+            if (
+              defaultState !== undefined &&
+              routes !== undefined &&
+              routes.length === 1 &&
+              routes[0].name !== firstRouteName
+            ) {
+              defaultState.routes.unshift({name: firstRouteName});
               console.log({defaultState});
             }
-            return defaultState
+            return defaultState;
           },*/
         }}
         fallback={<ActivityIndicator />}
         documentTitle={{
-          formatter: formatDocumentTitle,
+          formatter: (o) => formatTitle(o).title,
         }}>
         {isUserAuthenticated(user) ? (
           <Drawer.Navigator
             drawerType={isLargeScreen ? 'permanent' : undefined}
-            drawerContent={() => <Profile />}>
+            drawerContent={() => <Profile layout={ProfileLayouts.SIDEBAR} />}>
             <Drawer.Screen name="Root">
               {({navigation}: DrawerScreenProps<RootDrawerParamList>) => (
                 <Stack.Navigator
                   screenOptions={{
-                    headerTitle: getHeaderTitle(),
                     headerStyleInterpolator: HeaderStyleInterpolators.forUIKit,
                   }}>
                   <Stack.Screen
                     name="Tabs"
-                    options={{
-                      headerLeft: isLargeScreen
+                    options={({route}) => ({
+                      headerRight: isLargeScreen
                         ? undefined
                         : () => (
                             <Appbar.Action
@@ -275,7 +273,8 @@ const Navigation = () => {
                               onPress={() => navigation.toggleDrawer()}
                             />
                           ),
-                    }}
+                      ...formatTitle(route.params),
+                    })}
                     component={MaterialBottomTabs}
                   />
                   <Stack.Screen
@@ -283,17 +282,8 @@ const Navigation = () => {
                     children={() => {
                       return <Profile layout={ProfileLayouts.PAGE} />;
                     }}
-                    options={{
-                      title: getHeaderTitle(),
-                    }}
                   />
-                  <Stack.Screen
-                    name="NotFound"
-                    component={NotFound}
-                    options={{
-                      title: getHeaderTitle(),
-                    }}
-                  />
+                  <Stack.Screen name="NotFound" component={NotFound} />
                 </Stack.Navigator>
               )}
             </Drawer.Screen>
