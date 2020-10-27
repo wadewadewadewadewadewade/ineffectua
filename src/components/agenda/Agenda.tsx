@@ -29,7 +29,6 @@ const Agenda = () => {
   ]);
   const route = useRoute();
   const navigation = useNavigation();
-  const linkTo = useLinkTo();
   const params = route.params;
   const headerLeft = () => (
     <Appbar.Action
@@ -41,7 +40,10 @@ const Agenda = () => {
           size={26}
         />
       )}
-      onPress={() => linkTo('/')}
+      onPress={() => {
+        navigation.dangerouslyGetParent()?.dangerouslyGetParent()?.setOptions({headerTitle: 'Agenda'})
+        navigation.navigate('Agenda')
+      }}
     />
   )
   React.useEffect(() => {

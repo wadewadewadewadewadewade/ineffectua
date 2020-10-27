@@ -16,7 +16,7 @@ import {
   Appbar,
   ActivityIndicator,
 } from 'react-native-paper';
-import {InitialState, NavigationContainer, useLinking} from '@react-navigation/native';
+import {InitialState, NavigationContainer, useLinking, getStateFromPath} from '@react-navigation/native';
 import {
   createDrawerNavigator,
   DrawerScreenProps,
@@ -112,6 +112,8 @@ const Navigation = () => {
           path: '',
           initialRouteName: 'Tabs',
           screens: {
+            Profile: 'profile/:userId',
+            SignIn: 'sign-in/',
             Tabs: {
               initialRouteName: 'Agenda',
               screens: {
@@ -135,16 +137,6 @@ const Navigation = () => {
                 },
               },
             },
-            Profile: {
-              path: 'profile/:id',
-              parse: {
-                id: (id) => ({userId: id}),
-              },
-              stringify: {
-                id: (userId) => userId ? userId : '',
-              },
-            },
-            SignIn: 'sign-in/',
             NotFound: '.+',
           },
         },
@@ -155,15 +147,17 @@ const Navigation = () => {
       console.log({path, config, defaultState});
       // add first page to routes, then you will have a back btn
       const {routes} = defaultState || {routes: undefined};
-      const firstRouteName = 'Posts';
+      const firstRouteName = 'Agenda';
       if (
         defaultState !== undefined &&
         routes !== undefined &&
         routes.length === 1 &&
         routes[0].name !== firstRouteName
       ) {
-        defaultState.routes.unshift({name: firstRouteName});
-        console.log({defaultState});
+        defaultState.routes.push({name: firstRouteName});
+        const newState = {...defaultState, routes: [...defaultState.routes, {name: 'Agenda'}]};
+        console.log({defaultState, newState})
+        return newState;
       }
       return defaultState;
     },*/
@@ -173,6 +167,7 @@ const Navigation = () => {
       try {
         if (user) {
           const state = await getInitialState();
+          console.log({state})
           if (Platform.OS !== 'web' || state === undefined) {
             const savedState = await AsyncStorage.getItem(
               NAVIGATION_PERSISTENCE_KEY,

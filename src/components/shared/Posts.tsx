@@ -42,7 +42,7 @@ import {getUserById} from '../../middleware/AuthMiddleware';
 import {TouchableHighlight} from 'react-native-gesture-handler';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import {NavigationParams} from '../RootNavigation';
-import {useRoute, useLinkTo} from '@react-navigation/native';
+import {useRoute, useNavigation} from '@react-navigation/native';
 
 // used for a list of posts, for comments within a post, messages between users, and for searching maybe?
 
@@ -169,7 +169,7 @@ const ComposePost = ({criteria, height, onSavePost}: ComposePostProps) => {
 };
 
 const PostUser = ({userId}: {userId: string}) => {
-  const linkTo = useLinkTo();
+  const navigation = useNavigation();
   const [rerun, setRerun] = React.useState(true);
   const {status, data, error, refetch} = useQuery<User>(userId, getUserById, {
     suspense: true,
@@ -196,7 +196,7 @@ const PostUser = ({userId}: {userId: string}) => {
       <View style={styles.postUser}>
         <TouchableHighlight
           onPress={() =>
-            linkTo(`/profile/${data.uid}`)
+            navigation.navigate('Profile', {userId: data.uid})
           }>
           {thumbnail ? (
             <Avatar.Image

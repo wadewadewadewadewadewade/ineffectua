@@ -14,7 +14,7 @@ import {contrast} from '../middleware/DataTypesMiddleware';
 import {createStackNavigator} from '@react-navigation/stack';
 
 export type MaterialBottomTabParams = {
-  Agenda: {screen: 'Posts'; type?: string; id?: string};
+  Agenda: {screen: 'Agenda' | 'Posts' | 'Post'; type?: string; id?: string};
   Calendar: CalendarStackParamList;
   PainLog: undefined;
   Contacts: undefined;
