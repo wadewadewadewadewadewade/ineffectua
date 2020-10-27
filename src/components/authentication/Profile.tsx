@@ -26,7 +26,8 @@ import Tags from '../shared/Tags';
 import Medications from '../shared/Medications';
 import Contacts from '../shared/Contacts';
 import {User} from '../../reducers/AuthReducer';
-import {navigate, navigationRef, NavigationParams} from '../RootNavigation';
+import {NavigationParams} from '../RootNavigation';
+import {Link} from '@react-navigation/native';
 
 enum ProfileViews {
   'PRIVATE' = 0,
@@ -44,21 +45,21 @@ const TabsLinks = () => {
   return (
     <View>
       <View style={styles.row}>
-        <TouchableHighlight onPress={() => navigate('Agenda')}>
+        <Link to="/">
           <MaterialCommunityIcons name="comment" color={color} size={26} />
-        </TouchableHighlight>
-        <TouchableHighlight onPress={() => navigate('Calendar')}>
+        </Link>
+        <Link to="/calendar/">
           <MaterialCommunityIcons name="calendar" color={color} size={26} />
-        </TouchableHighlight>
-        <TouchableHighlight onPress={() => navigate('Contacts')}>
+        </Link>
+        <Link to="/contacts/">
           <MaterialCommunityIcons name="contacts" color={color} size={26} />
-        </TouchableHighlight>
-        <TouchableHighlight onPress={() => navigate('Medications')}>
+        </Link>
+        <Link to="/medications/">
           <MaterialCommunityIcons name="pill" color={color} size={26} />
-        </TouchableHighlight>
-        <TouchableHighlight onPress={() => navigate('PainLog')}>
+        </Link>
+        <Link to="/painlog/">
           <MaterialCommunityIcons name="human" color={color} size={26} />
-        </TouchableHighlight>
+        </Link>
       </View>
       <Divider />
     </View>
@@ -66,32 +67,7 @@ const TabsLinks = () => {
 };
 
 const SideBar = () => {
-  const params = navigationRef.current?.getCurrentRoute()
-    ?.params as NavigationParams;
-  const userId = params?.user?.userId; // no userId supplied means private
-  const [ready, setReady] = React.useState(false);
-  const [user, setUser] = React.useState<User>(
-    useSelector((state: State) => state.user),
-  );
-  const [error, setError] = React.useState<Error | undefined>();
-  React.useEffect(() => {
-    const getUserConditionally = async () => {
-      if (userId) {
-        getUserById(userId)
-          .then((u) => setUser(u))
-          .catch((e) => setError(e))
-          .then(() => setReady(true));
-      } else {
-        setReady(true);
-      }
-    };
-    !ready && getUserConditionally();
-  }, [ready, userId]);
-  const profileView =
-    userId !== undefined && user !== false && userId !== user.uid
-      ? ProfileViews.PUBLIC
-      : ProfileViews.PRIVATE;
-  const theme = useSelector((state: State) => state.theme);
+  const [user, theme] = useSelector((state: State) => [state.user, state.theme]);
   const dispatch = useDispatch();
   const toggleTheme = () => dispatch(ToggleThemeAction());
   const logout = () => dispatch(signOut());
@@ -109,19 +85,13 @@ const SideBar = () => {
     Dimensions.addEventListener('change', onDimensionsChange);
     return () => Dimensions.removeEventListener('change', onDimensionsChange);
   }, []);
-  if (error) {
-    return (
-      <View>
-        <Text>An error occured: {error.message}</Text>
-      </View>
-    );
-  } else if (user === false) {
+  if (user === false) {
     return (
       <View>
         <Text>Please sign in</Text>
       </View>
     );
-  } else if (profileView === ProfileViews.PRIVATE) {
+  } else {
     return (
       <ScrollView style={styles.content}>
         <View style={styles.row}>
@@ -134,15 +104,14 @@ const SideBar = () => {
               {user && user.displayName !== null ? ' ' + user.displayName : ''}!
             </Text>
           </View>
-          <MaterialCommunityIcons
-            onPress={() => {
-              navigate('Profile');
-            }}
-            style={styles.settingsIcon}
-            name="cogs"
-            color={paperColors(theme).text}
-            size={26}
-          />
+          <Link to="/profile/">
+            <MaterialCommunityIcons
+              style={styles.settingsIcon}
+              name="cogs"
+              color={paperColors(theme).text}
+              size={26}
+            />
+          </Link>
         </View>
         <SettingsItem
           label="Dark theme"
@@ -165,43 +134,19 @@ const SideBar = () => {
         </Button>
       </ScrollView>
     );
-  } else {
-    // public
-    return (
-      <ScrollView style={styles.content}>
-        {thumbnail ? (
-          <Avatar.Image source={{uri: thumbnail}} style={styles.image} />
-        ) : null}
-        <Subheading>
-          {user && user.displayName !== null ? ' ' + user.displayName : ''}
-        </Subheading>
-        {isLandscapeOnPhone && <TabsLinks />}
-        <Divider />
-        <Suspense fallback={<ActivityIndicator />}>
-          <Tags userId={user.uid} />
-        </Suspense>
-        <Divider />
-        <Medications display="list" />
-        <Divider />
-        <Contacts display="list" />
-      </ScrollView>
-    );
   }
 };
 
-const ProfilePage = () => {
+const ProfilePage = ({userId} : {userId?: string}) => {
   const [ready, setReady] = React.useState(false);
-  const params = navigationRef.current?.getCurrentRoute()
-    ?.params as NavigationParams;
-  const userId = params?.user?.userId; // no userId supplied means private
   const [user, setUser] = React.useState<User>(
     useSelector((state: State) => state.user),
   );
   const [error, setError] = React.useState<Error | undefined>();
   React.useEffect(() => {
     const getUserConditionally = async () => {
-      if (userId) {
-        getUserById(userId)
+      if (userId && (!user || userId !== user.uid)) {
+        await getUserById(userId)
           .then((u) => setUser(u))
           .catch((e) => setError(e))
           .then(() => setReady(true));
@@ -278,13 +223,9 @@ const ProfilePage = () => {
         {user && user.displayName !== null && (
           <Subheading style={styles.name}>{user.displayName}</Subheading>
         )}
-        <Button
-          theme={theme.paper}
-          onPress={() =>
-            navigate('Agenda', {user: {userId: user.uid}}, user.displayName)
-          }>
+        <Link to={`/messages/${user.uid}`}>
           Message
-        </Button>
+        </Link>
         <Suspense fallback={<ActivityIndicator />}>
           <Tags userId={user.uid} />
         </Suspense>
@@ -297,10 +238,10 @@ const ProfilePage = () => {
   }
 };
 
-const Profile = ({layout}: {layout?: ProfileLayouts}) => {
+const Profile = ({layout, userId}: {layout?: ProfileLayouts, userId?: string}) => {
   const pageLayout = layout ? layout : ProfileLayouts.SIDEBAR;
   if (pageLayout === ProfileLayouts.PAGE) {
-    return <ProfilePage />;
+    return <ProfilePage userId={userId} />;
   } else {
     return <SideBar />;
   }

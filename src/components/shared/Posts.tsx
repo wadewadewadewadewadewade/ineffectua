@@ -41,9 +41,8 @@ import {User} from '../../reducers/AuthReducer';
 import {getUserById} from '../../middleware/AuthMiddleware';
 import {TouchableHighlight} from 'react-native-gesture-handler';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
-import {navigate, NavigationParams, navigationRef} from '../RootNavigation';
-import {PostsStackParams} from '../MaterialBottomTabs';
-import {StackNavigationProp} from '@react-navigation/stack';
+import {NavigationParams} from '../RootNavigation';
+import {useRoute, useLinkTo} from '@react-navigation/native';
 
 // used for a list of posts, for comments within a post, messages between users, and for searching maybe?
 
@@ -170,6 +169,7 @@ const ComposePost = ({criteria, height, onSavePost}: ComposePostProps) => {
 };
 
 const PostUser = ({userId}: {userId: string}) => {
+  const linkTo = useLinkTo();
   const [rerun, setRerun] = React.useState(true);
   const {status, data, error, refetch} = useQuery<User>(userId, getUserById, {
     suspense: true,
@@ -196,17 +196,10 @@ const PostUser = ({userId}: {userId: string}) => {
       <View style={styles.postUser}>
         <TouchableHighlight
           onPress={() =>
-            navigate('Profile', {user: {userId: data.uid}}, data.displayName)
+            linkTo(`/profile/${data.uid}`)
           }>
           {thumbnail ? (
             <Avatar.Image
-              onTouchEnd={() => {
-                navigate(
-                  'Profile',
-                  {user: {userId: data.uid}},
-                  data.displayName,
-                );
-              }}
               size={40}
               source={{uri: thumbnail}}
               style={styles.postUserImage}
@@ -228,12 +221,10 @@ const PostComponent = ({
   post,
   inset,
   onDeletePost,
-  navigation,
 }: {
   post: Post;
   inset: number;
   onDeletePost: (post: Post) => void;
-  navigation: StackNavigationProp<PostsStackParams, 'Posts'>;
 }) => {
   const [theme, user] = useSelector((state: State) => [
     state.theme,
@@ -348,7 +339,6 @@ const PostComponent = ({
           ]}>
           <Posts
             showComposePost={true}
-            navigation={navigation}
             criteria={{
               key: {
                 id: post.key,
@@ -369,24 +359,21 @@ const PostsList = ({
   criteriaProperty,
   showComposePost,
   inset,
-  navigation,
 }: {
   criteriaProperty?: PostCriteria;
   showComposePost?: boolean;
   inset: number;
-  navigation: StackNavigationProp<PostsStackParams, 'Posts'>;
 }) => {
-  const params = navigationRef.current?.getCurrentRoute()
-    ?.params as NavigationParams;
+  const route = useRoute();
+  const params = route.params as NavigationParams | undefined;
   const criteria: PostCriteria = criteriaProperty || {
     privacy: PostPrivacyTypes.PUBLIC,
   };
   if (params !== undefined && criteriaProperty === undefined) {
     if (
       params.type !== undefined &&
-      params.id !== undefined &&
-      params.type !== 'undefined' &&
-      params.id !== 'undefined'
+      ['tags', 'posts', 'messages'].includes(params.type) &&
+      params.id !== undefined
     ) {
       criteria.key = {
         type: params.type as PostCriteriaKey['type'],
@@ -484,7 +471,6 @@ const PostsList = ({
               <PostComponent
                 inset={inset + 1}
                 post={p.item}
-                navigation={navigation}
                 onDeletePost={(p2) => removePost(p2)}
               />
             )
@@ -503,20 +489,17 @@ type PostProps = {
   showComposePost?: boolean;
   criteria?: PostCriteria;
   inset?: number;
-  navigation: StackNavigationProp<PostsStackParams, 'Posts'>;
 };
 
 export const Posts = ({
   showComposePost,
   criteria,
-  navigation,
   inset = 0,
 }: PostProps) => {
   return (
     <View style={styles.container}>
       <React.Suspense fallback={<ActivityIndicator />}>
         <PostsList
-          navigation={navigation}
           inset={inset}
           criteriaProperty={criteria}
           showComposePost={showComposePost === true}

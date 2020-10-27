@@ -1,4 +1,5 @@
 import * as React from 'react';
+import 'react-native-gesture-handler';
 import {useSelector, useDispatch} from 'react-redux';
 import {
   Platform,
@@ -15,7 +16,7 @@ import {
   Appbar,
   ActivityIndicator,
 } from 'react-native-paper';
-import {InitialState, NavigationContainer} from '@react-navigation/native';
+import {InitialState, NavigationContainer, useLinking} from '@react-navigation/native';
 import {
   createDrawerNavigator,
   DrawerScreenProps,
@@ -67,7 +68,7 @@ const Navigation = () => {
   const signOut = React.useCallback(() => dispatch(SignOutAction()), [
     dispatch,
   ]);
-  const [isReady, setIsReady] = React.useState(Platform.OS === 'web');
+  const [isReady, setIsReady] = React.useState(false);
   const [initialState, setInitialState] = React.useState<
     InitialState | undefined
   >();
@@ -103,25 +104,87 @@ const Navigation = () => {
     enableAnalytics()
   }, [])*/
   let previousRouteName: string | undefined;
+  const { getInitialState } = useLinking(navigationRef, {
+    prefixes: LinkingPrefixes,
+    config: {
+      screens: {
+        Root: {
+          path: '',
+          initialRouteName: 'Tabs',
+          screens: {
+            Tabs: {
+              initialRouteName: 'Agenda',
+              screens: {
+                Calendar: 'calendar/',
+                PainLog: 'pain-log/',
+                ContactsList: 'contacts/',
+                MedicationsList: 'medications/',
+                Agenda: {
+                  initialRouteName: 'Agenda',
+                  screens: {
+                    Agenda: {
+                      path: '',
+                    },
+                    Post: {
+                      path: 'posts/:id',
+                    },
+                    Posts: {
+                      path: ':type/:id',
+                    },
+                  },
+                },
+              },
+            },
+            Profile: {
+              path: 'profile/:id',
+              parse: {
+                id: (id) => ({userId: id}),
+              },
+              stringify: {
+                id: (userId) => userId ? userId : '',
+              },
+            },
+            SignIn: 'sign-in/',
+            NotFound: '.+',
+          },
+        },
+      },
+    },
+    /*getStateFromPath(path, config) {
+      const defaultState = getStateFromPath(path, config);
+      console.log({path, config, defaultState});
+      // add first page to routes, then you will have a back btn
+      const {routes} = defaultState || {routes: undefined};
+      const firstRouteName = 'Posts';
+      if (
+        defaultState !== undefined &&
+        routes !== undefined &&
+        routes.length === 1 &&
+        routes[0].name !== firstRouteName
+      ) {
+        defaultState.routes.unshift({name: firstRouteName});
+        console.log({defaultState});
+      }
+      return defaultState;
+    },*/
+  });
   React.useEffect(() => {
     const restoreState = async () => {
       try {
-        // only do the rest if signed in
         if (user) {
-          const initialUrl = await Linking.getInitialURL();
-
-          if (Platform.OS !== 'web' || initialUrl === null) {
+          const state = await getInitialState();
+          if (Platform.OS !== 'web' || state === undefined) {
             const savedState = await AsyncStorage.getItem(
               NAVIGATION_PERSISTENCE_KEY,
             );
-
             const savedStateName = savedState
               ? JSON.parse(savedState)
               : undefined;
-
             if (savedStateName !== undefined) {
               setInitialState(savedStateName);
             }
+          } else {
+            setInitialState(state);
           }
         }
       } finally {
@@ -129,7 +192,7 @@ const Navigation = () => {
       }
     };
     !isReady && restoreState();
-  }, [isReady, user]);
+  }, [isReady, user, getInitialState]);
 
   const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
   React.useEffect(() => {
@@ -158,7 +221,6 @@ const Navigation = () => {
         onStateChange={(state) => {
           const currentRoute = navigationRef.current?.getCurrentRoute();
           const currentRouteName = currentRoute?.name;
-
           if (currentRouteName && previousRouteName !== currentRouteName) {
             // The line below uses the expo-firebase-analytics tracker
             // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
@@ -173,74 +235,12 @@ const Navigation = () => {
                   "AsyncStorage error - I bet you're in a web browser",
                 );
           }
-
           // Save the current route name for later comparision
           if (currentRouteName) {
             previousRouteName = currentRouteName;
           }
         }}
         theme={theme.navigation}
-        linking={{
-          // To test deep linking on, run the following in the Terminal:
-          // Android: adb shell am start -a android.intent.action.VIEW -d "exp://127.0.0.1:19000/--/simple-stack"
-          // iOS: xcrun simctl openurl booted exp://127.0.0.1:19000/--/simple-stack
-          // Android (bare): adb shell am start -a android.intent.action.VIEW -d "rne://127.0.0.1:19000/--/simple-stack"
-          // iOS (bare): xcrun simctl openurl booted rne://127.0.0.1:19000/--/simple-stack
-          // The first segment of the link is the the scheme + host (returned by `Linking.makeUrl`)
-          prefixes: LinkingPrefixes,
-          config: {
-            screens: {
-              Root: {
-                path: '',
-                initialRouteName: 'Tabs',
-                screens: {
-                  Tabs: {
-                    initialRouteName: 'Agenda',
-                    screens: {
-                      Calendar: 'calendar/',
-                      PainLog: 'pain-log/',
-                      ContactsList: 'contacts/',
-                      MedicationsList: 'medications/',
-                      Agenda: {
-                        initialRouteName: 'Agenda',
-                        screens: {
-                          Agenda: {
-                            path: '',
-                          },
-                          Post: {
-                            path: 'posts/:id',
-                          },
-                          Posts: {
-                            path: ':type/:id',
-                          },
-                        },
-                      },
-                    },
-                  },
-                  SignIn: 'sign-in/',
-                  NotFound: '.+',
-                },
-              },
-            },
-          },
-          /*getStateFromPath(path, config) {
-            const defaultState = getStateFromPath(path, config);
-            console.log({path, config, defaultState});
-            // add first page to routes, then you will have a back btn
-            const {routes} = defaultState || {routes: undefined};
-            const firstRouteName = 'Posts';
-            if (
-              defaultState !== undefined &&
-              routes !== undefined &&
-              routes.length === 1 &&
-              routes[0].name !== firstRouteName
-            ) {
-              defaultState.routes.unshift({name: firstRouteName});
-              console.log({defaultState});
-            }
-            return defaultState;
-          },*/
-        }}
         fallback={<ActivityIndicator />}
         documentTitle={{
           formatter: (o) => formatTitle(o).title,
@@ -273,7 +273,6 @@ const Navigation = () => {
                               onPress={() => navigation.toggleDrawer()}
                             />
                           ),
-                      ...formatTitle(route.params),
                     })}
                     component={MaterialBottomTabs}
                   />

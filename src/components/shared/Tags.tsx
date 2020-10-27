@@ -29,7 +29,7 @@ import {
   useMutation,
   useQueryCache,
 } from 'react-query';
-import {Link} from '@react-navigation/native';
+import {Link, StackActions} from '@react-navigation/native';
 
 const TagComponent = ({
   tag,
@@ -52,7 +52,7 @@ const TagComponent = ({
           backgroundColor: theme.paper.colors.backdrop,
         },
       ]}>
-      <Link to={`/tags/${path}`}>
+      <Link to={`/tags/${path}`} action={StackActions.push('Posts', {type: 'tags', id: tag.path})}>
         <Text style={[styles.tagText, {color: paperColors(theme).onSurface}]}>
           {name}
         </Text>
