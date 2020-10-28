@@ -14,6 +14,7 @@ const queryCache = new QueryCache({
     queries: {
       suspense: true,
       refetchOnWindowFocus: false,
+      refetchIntervalInBackground: false,
     },
   },
 });

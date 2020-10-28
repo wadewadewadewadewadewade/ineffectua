@@ -1,6 +1,6 @@
 import React from 'react';
 import {DateObject} from 'react-native-calendars';
-import {StyleSheet, ScaledSize, Dimensions, View} from 'react-native';
+import {StyleSheet, View, useWindowDimensions} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useSelector} from 'react-redux';
 import {State} from '../../Types';
@@ -229,17 +229,7 @@ const CalendarDay = (props: {
     state.theme,
   ]);
   const [visible, setVisible] = React.useState(false);
-  const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
-  React.useEffect(() => {
-    const onDimensionsChange = (p2: {
-      window: ScaledSize;
-      screen: ScaledSize;
-    }) => {
-      setDimensions(p2.window);
-    };
-    Dimensions.addEventListener('change', onDimensionsChange);
-    return () => Dimensions.removeEventListener('change', onDimensionsChange);
-  }, []);
+  const dimensions = useWindowDimensions();
   const {route} = props;
   const {date} = route.params;
   const thisDate = new Date(date.year, date.month - 1, date.day);

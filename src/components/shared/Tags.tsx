@@ -52,7 +52,12 @@ const TagComponent = ({
           backgroundColor: theme.paper.colors.backdrop,
         },
       ]}>
-      <Link to={`/tags/${path}`} action={StackActions.push('Posts', {type: 'tags', id: tag.path})}>
+      <Link
+        to={`/tags/${path}`}
+        action={StackActions.push('Tabs', {
+          screen: 'Agenda',
+          params: {screen: 'Posts', params: {type: 'tags', id: tag.path}},
+        })}>
         <Text style={[styles.tagText, {color: paperColors(theme).onSurface}]}>
           {name}
         </Text>
@@ -319,41 +324,46 @@ const TagsListComponent = ({value, userId, style, onTagsChanged}: Props) => {
           },
           style,
         ]}>
-        <View style={styles.tagsContainer}>
-          <Text style={[styles.label, {color: theme.paper.colors.text}]}>
-            Tags
-          </Text>
-          {onTagsChanged ? (
-            <TagList
-              value={tagIds}
-              onTagsChanged={(updatedTagIds) => {
-                if (userId !== undefined) {
-                  const addedTagIds = new Array<string>();
-                  const removedTagIds = new Array<string>();
-                  updatedTagIds.forEach((t) => {
-                    if (!tagIds?.includes(t)) {
-                      addedTagIds.push(t);
-                    }
-                  });
-                  tagIds?.forEach((t) => {
-                    if (!updatedTagIds.includes(t)) {
-                      removedTagIds.push(t);
-                    }
-                  });
-                  addedTagIds.forEach((tagId) => {
-                    mutateAdd({key: '', tagId} as UserTag);
-                  });
-                  removedTagIds.forEach((tagId) => {
-                    mutateRemove(userTags?.find((ut) => ut.tagId === tagId));
-                  });
-                }
-                onTagsChanged(updatedTagIds);
-              }}
-            />
-          ) : (
-            <TagList value={tagIds} />
-          )}
-        </View>
+        {onTagsChanged !== undefined ||
+        (tagIds !== undefined && tagIds.length > 0) ? (
+          <View style={styles.tagsContainer}>
+            <Text style={[styles.label, {color: theme.paper.colors.text}]}>
+              Tags
+            </Text>
+            {onTagsChanged ? (
+              <TagList
+                value={tagIds}
+                onTagsChanged={(updatedTagIds) => {
+                  if (userId !== undefined) {
+                    const addedTagIds = new Array<string>();
+                    const removedTagIds = new Array<string>();
+                    updatedTagIds.forEach((t) => {
+                      if (!tagIds?.includes(t)) {
+                        addedTagIds.push(t);
+                      }
+                    });
+                    tagIds?.forEach((t) => {
+                      if (!updatedTagIds.includes(t)) {
+                        removedTagIds.push(t);
+                      }
+                    });
+                    addedTagIds.forEach((tagId) => {
+                      mutateAdd({key: '', tagId} as UserTag);
+                    });
+                    removedTagIds.forEach((tagId) => {
+                      mutateRemove(userTags?.find((ut) => ut.tagId === tagId));
+                    });
+                  }
+                  onTagsChanged(updatedTagIds);
+                }}
+              />
+            ) : (
+              <TagList value={tagIds} />
+            )}
+          </View>
+        ) : (
+          <View />
+        )}
       </View>
     );
   }

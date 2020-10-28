@@ -18,39 +18,52 @@ import {firebaseDocumentToArray} from '../../firebase/utilities';
 import {useQuery} from 'react-query';
 import {getDatatypes} from '../../middleware/DataTypesMiddleware';
 import {formatTitle} from '../RootNavigation';
-import {useRoute, useNavigation, useLinkTo} from '@react-navigation/native';
+import {
+  useRoute,
+  useNavigation,
+  useFocusEffect,
+} from '@react-navigation/native';
 import {Appbar} from 'react-native-paper';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
-
 const Agenda = () => {
   const [user, theme] = useSelector((state: State) => [
     state.user,
     state.theme,
   ]);
-  const route = useRoute();
   const navigation = useNavigation();
-  const params = route.params;
-  const headerLeft = () => (
-    <Appbar.Action
-      color={paperColors(theme).text}
-      icon={() => (
-        <MaterialCommunityIcons
-          name="arrow-left"
-          color={paperColors(theme).text}
-          size={26}
-        />
-      )}
-      onPress={() => {
-        navigation.dangerouslyGetParent()?.dangerouslyGetParent()?.setOptions({headerTitle: 'Agenda'})
-        navigation.navigate('Agenda')
-      }}
-    />
-  )
-  React.useEffect(() => {
-    const title = params !== undefined ? {...formatTitle(params), headerLeft} : {title: 'Agenda', headerTitle: 'Agenda'};
+  const route = useRoute();
+  useFocusEffect(() => {
+    // configure header and document title
+    const params = route.params;
+    const headerLeft = () => (
+      <Appbar.Action
+        color={paperColors(theme).text}
+        icon={() => (
+          <MaterialCommunityIcons
+            name="arrow-left"
+            color={paperColors(theme).text}
+            size={26}
+          />
+        )}
+        onPress={() => {
+          navigation
+            .dangerouslyGetParent()
+            ?.dangerouslyGetParent()
+            ?.setOptions({headerTitle: 'Agenda'});
+          navigation.navigate('Agenda');
+        }}
+      />
+    );
+    const title =
+      params !== undefined
+        ? {...formatTitle(params), headerLeft}
+        : {title: 'Agenda', headerTitle: 'Agenda', headerLeft: null};
     navigation.setOptions(title); // header bar title
-    navigation.dangerouslyGetParent()?.dangerouslyGetParent()?.setOptions(title); // document title
-  },[params])
+    navigation
+      .dangerouslyGetParent()
+      ?.dangerouslyGetParent()
+      ?.setOptions(title); // document title
+  });
   const calendarTheme = {
     ...theme.paper,
     agendaDayTextColor: themeIsDark(theme) ? '#666' : '#ccc',
@@ -95,12 +108,12 @@ const Agenda = () => {
           //onCalendarToggled={(calendarOpened) => {console.log(calendarOpened)}}
           // Callback that gets called on day press
           onDayPress={(day: DateObject) =>
-            navigation.navigate(
-              'CalendarDay',
-              {date: day,
-              title: 'Calendar: ' +
+            navigation.navigate('CalendarDay', {
+              date: day,
+              title:
+                'Calendar: ' +
                 new Date(Date.parse(day.dateString)).toDateString(),
-              })
+            })
           }
           // Callback that gets called when day changes while scrolling agenda list
           //onDayChange={(day)=>{console.log('day changed')}}

@@ -1,11 +1,5 @@
 import React, {Suspense} from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  Dimensions,
-  ScaledSize,
-  View,
-} from 'react-native';
+import {ScrollView, StyleSheet, View, useWindowDimensions} from 'react-native';
 import {
   Subheading,
   Avatar,
@@ -21,12 +15,10 @@ import {ToggleThemeAction, paperColors} from '../../reducers/ThemeReducer';
 import {themeIsDark} from '../../reducers/ThemeReducer';
 import {signOut, getUserById} from '../../middleware/AuthMiddleware';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
-import {TouchableHighlight} from 'react-native-gesture-handler';
 import Tags from '../shared/Tags';
 import Medications from '../shared/Medications';
 import Contacts from '../shared/Contacts';
 import {User} from '../../reducers/AuthReducer';
-import {NavigationParams} from '../RootNavigation';
 import {Link} from '@react-navigation/native';
 
 enum ProfileViews {
@@ -67,7 +59,10 @@ const TabsLinks = () => {
 };
 
 const SideBar = () => {
-  const [user, theme] = useSelector((state: State) => [state.user, state.theme]);
+  const [user, theme] = useSelector((state: State) => [
+    state.user,
+    state.theme,
+  ]);
   const dispatch = useDispatch();
   const toggleTheme = () => dispatch(ToggleThemeAction());
   const logout = () => dispatch(signOut());
@@ -75,16 +70,9 @@ const SideBar = () => {
     user !== false && user.photoURL !== undefined && user.photoURL.href
       ? user.photoURL.href
       : null;
-  const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
+  const dimensions = useWindowDimensions();
   const isLandscapeOnPhone =
     dimensions.width > dimensions.height && dimensions.height <= 420;
-  React.useEffect(() => {
-    const onDimensionsChange = ({window}: {window: ScaledSize}) => {
-      setDimensions(window);
-    };
-    Dimensions.addEventListener('change', onDimensionsChange);
-    return () => Dimensions.removeEventListener('change', onDimensionsChange);
-  }, []);
   if (user === false) {
     return (
       <View>
@@ -137,7 +125,7 @@ const SideBar = () => {
   }
 };
 
-const ProfilePage = ({userId} : {userId?: string}) => {
+const ProfilePage = ({userId}: {userId?: string}) => {
   const [ready, setReady] = React.useState(false);
   const [user, setUser] = React.useState<User>(
     useSelector((state: State) => state.user),
@@ -155,7 +143,7 @@ const ProfilePage = ({userId} : {userId?: string}) => {
       }
     };
     !ready && getUserConditionally();
-  }, [ready, userId]);
+  }, [ready, user, userId]);
   const profileView =
     userId !== undefined && user !== false && userId !== user.uid
       ? ProfileViews.PUBLIC
@@ -223,9 +211,7 @@ const ProfilePage = ({userId} : {userId?: string}) => {
         {user && user.displayName !== null && (
           <Subheading style={styles.name}>{user.displayName}</Subheading>
         )}
-        <Link to={`/messages/${user.uid}`}>
-          Message
-        </Link>
+        <Link to={`/messages/${user.uid}`}>Message</Link>
         <Suspense fallback={<ActivityIndicator />}>
           <Tags userId={user.uid} />
         </Suspense>
@@ -238,7 +224,13 @@ const ProfilePage = ({userId} : {userId?: string}) => {
   }
 };
 
-const Profile = ({layout, userId}: {layout?: ProfileLayouts, userId?: string}) => {
+const Profile = ({
+  layout,
+  userId,
+}: {
+  layout?: ProfileLayouts;
+  userId?: string;
+}) => {
   const pageLayout = layout ? layout : ProfileLayouts.SIDEBAR;
   if (pageLayout === ProfileLayouts.PAGE) {
     return <ProfilePage userId={userId} />;

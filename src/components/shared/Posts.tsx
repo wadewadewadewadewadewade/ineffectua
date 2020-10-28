@@ -195,9 +195,7 @@ const PostUser = ({userId}: {userId: string}) => {
     return (
       <View style={styles.postUser}>
         <TouchableHighlight
-          onPress={() =>
-            navigation.navigate('Profile', {userId: data.uid})
-          }>
+          onPress={() => navigation.navigate('Profile', {userId: data.uid})}>
           {thumbnail ? (
             <Avatar.Image
               size={40}
@@ -491,11 +489,7 @@ type PostProps = {
   inset?: number;
 };
 
-export const Posts = ({
-  showComposePost,
-  criteria,
-  inset = 0,
-}: PostProps) => {
+export const Posts = ({showComposePost, criteria, inset = 0}: PostProps) => {
   return (
     <View style={styles.container}>
       <React.Suspense fallback={<ActivityIndicator />}>

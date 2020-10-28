@@ -84,6 +84,7 @@ const pixelsToPercentViewStyle = (
   obj: ObjectDimensions,
 ): ViewStyle => {
   const percent = pixelsToPercent(loc, obj);
+  console.log('pixelsToPercentViewStyle')
   return {
     left: percent.x.toFixed(2) + '%',
     top: percent.y.toFixed(2) + '%',
@@ -249,6 +250,7 @@ const Location = ({
   const scaleRange = 0.2;
   const scale = new Value(1);
   const onGestureEvent = (e: PanGestureHandlerGestureEvent) => {
+    console.log('onGestureEvent', e.nativeEvent);
     if (e.nativeEvent.state === PanGestureState.ACTIVE) {
       add(offsetX, e.nativeEvent.translationX);
       add(offsetY, e.nativeEvent.translationY);
@@ -256,9 +258,10 @@ const Location = ({
   };
   const onHandlerStateChange = (e: PanGestureHandlerStateChangeEvent) => {
     const {state} = e.nativeEvent;
+    console.log('onHandlerStateChange', e.nativeEvent);
     switch (state) {
       case PanGestureState.BEGAN:
-        add(offsetX, scaleShift.x);
+        add(offsetX, scaleShift.x); // <--- I don't think the result of addition gets set anywhere
         add(offsetY, scaleShift.y);
         add(scale, scaleRange);
         break;
@@ -390,7 +393,7 @@ export const PainLogComponent = () => {
   const updateLocation = (loc: PainLogLocation) => {
     const {key, next, ...rest} = loc;
     const newLocation: PainLogLocation = {...rest, previous: key};
-    saveLocation(newLocation);
+    // saveLocation(newLocation);
   };
   let alternatekey = 1;
   const visibleMostRecentLocationsWithinDateRange =
@@ -513,6 +516,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     marginVertical: 'auto',
+    flex: 1,
   },
   touchablefigure: {
     flex: 1,
