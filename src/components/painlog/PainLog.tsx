@@ -84,7 +84,6 @@ const pixelsToPercentViewStyle = (
   obj: ObjectDimensions,
 ): ViewStyle => {
   const percent = pixelsToPercent(loc, obj);
-  console.log('pixelsToPercentViewStyle')
   return {
     left: percent.x.toFixed(2) + '%',
     top: percent.y.toFixed(2) + '%',
