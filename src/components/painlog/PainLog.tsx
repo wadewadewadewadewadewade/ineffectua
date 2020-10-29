@@ -10,10 +10,7 @@ import {
   Animated,
   PanResponder,
 } from 'react-native';
-import {
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native-gesture-handler';
+import {ScrollView, TouchableOpacity} from 'react-native-gesture-handler';
 import {Svg, Path} from 'react-native-svg';
 import {PainLogLocation, PainLogType} from '../../reducers/PainLogReducer';
 import {
@@ -95,27 +92,13 @@ const addLocations = (
     y: loc1.y + loc2.y,
   };
 };
-const multiplyLocation = (loc: ScreenPosition, multiplyer: number): ScreenPosition =>
-  ({x: loc.x * multiplyer, y: loc.y * multiplyer});
+const multiplyLocation = (
+  loc: ScreenPosition,
+  multiplyer: number,
+): ScreenPosition => ({x: loc.x * multiplyer, y: loc.y * multiplyer});
 const dimensionsEqual = (dim1: ObjectDimensions, dim2: ObjectDimensions) =>
   dim1.width === dim2.width && dim1.height === dim2.height;
 const undefinedFigureDimensions: ObjectDimensions = {width: -1, height: -1};
-const clampPosition = (pos: ScreenPosition, dim: ObjectDimensions) => {
-  const ret = {...pos};
-  if (ret.x < 0) {
-    ret.x = 0;
-  }
-  if (ret.y < 0) {
-    ret.y = 0;
-  }
-  if (ret.x > dim.width) {
-    ret.x = dim.width;
-  }
-  if (ret.y > dim.height) {
-    ret.y = dim.height;
-  }
-  return ret;
-}
 
 type NewPainLogLocationProps = {
   value?: PainLogLocation;
@@ -239,8 +222,14 @@ const Location = ({
   updateLocation: (loc: PainLogLocation) => void;
 }) => {
   const theme = useSelector((state: State) => state.theme);
-  const [locationDimensions, setLocationDimensions] = React.useState(undefinedFigureDimensions);
-  if (!value.position || figureDimensions.width < 1 || figureDimensions.height < 1) {
+  const [locationDimensions, setLocationDimensions] = React.useState(
+    undefinedFigureDimensions,
+  );
+  if (
+    !value.position ||
+    figureDimensions.width < 1 ||
+    figureDimensions.height < 1
+  ) {
     console.error('position or figure dimensions missing', {
       value,
       figureDimensions,
@@ -250,9 +239,9 @@ const Location = ({
   const scaleMax = 1.2;
   const scaleShift = {
     x: 0.5 * scaleMax * locationDimensions.width,
-    y: 0.5 * scaleMax * locationDimensions.height
+    y: 0.5 * scaleMax * locationDimensions.height,
   };
-  let position = percentToPixels(value.position, figureDimensions);
+  let positionDelta = {x: 0, y: 0};
   //console.log({figureDimensions})
   const adjustForDesktop: ViewStyle =
     Platform.OS === 'web'
@@ -263,47 +252,53 @@ const Location = ({
           padding: 0,
         }
       : {};
-  const animatedValue = new Animated.ValueXY({x: -20, y: -20});
+  const animatedValue = new Animated.ValueXY(multiplyLocation(scaleShift, -1));
   const scale = new Animated.Value(1);
-  animatedValue.addListener((value) => position = clampPosition(value, figureDimensions));
+  animatedValue.addListener((val) => (positionDelta = val));
   const panResponder = PanResponder.create({
     onMoveShouldSetPanResponder: () => true, //Tell iOS that we are allowing the movement
     onPanResponderGrant: (e, gestureState) => {
       scale.setValue(1.2);
-      animatedValue.setOffset(multiplyLocation(scaleShift, -1));
-      animatedValue.setValue({x: 0, y: 0});
+      animatedValue.extractOffset(); // move the value back into the offset
     },
     onPanResponderMove: Animated.event([
-      null, {dx: animatedValue.x, dy: animatedValue.y}
+      null,
+      {dx: animatedValue.x, dy: animatedValue.y},
     ]), // Creates a function to handle the movement and set offsets
     onPanResponderRelease: () => {
       scale.setValue(1);
-      animatedValue.setOffset(addLocations(position, scaleShift));
       animatedValue.flattenOffset(); // Flatten the offset so it resets the default positioning
-      console.log({position}); // is this a delta and not a x/y?
       if (value.position) {
+        const newPosition = addLocations(
+          positionDelta, // position is a delta and not an x/y offset
+          percentToPixels(value.position, figureDimensions),
+        );
         const newPositionPercentage = pixelsToPercent(
-          addLocations(position, percentToPixels(value.position, figureDimensions)),
+          newPosition,
           figureDimensions,
         );
         // this should always be true, but TypeScript likes being explicit...
         const pixels = {
           start: percentToPixels(value.position, figureDimensions),
-          end: addLocations(position, percentToPixels(value.position, figureDimensions)),
+          end: newPosition,
         };
         const percent = {start: value.position, end: newPositionPercentage};
-        console.log('updating', {pixels, percent});
+        console.log(
+          'updating',
+          {pixels, percent},
+          {newPosition, positionDelta},
+        );
         //updateLocation({key: value.key, position: newPositionPercentage}); // only update the changed information
       }
-    }
+    },
   });
   let lastPress = 0;
   const onDoublePress = () => {
     const time = new Date().getTime();
-    const delta = time - lastPress;
+    const timeDelta = time - lastPress;
 
     const DOUBLE_PRESS_DELAY = 400;
-    if (delta < DOUBLE_PRESS_DELAY) {
+    if (timeDelta < DOUBLE_PRESS_DELAY) {
       updateLocation(value);
       return false;
     }
@@ -313,19 +308,24 @@ const Location = ({
   return (
     <Animated.View
       onStartShouldSetResponder={() => onDoublePress()}
-      onLayout={
-        (e: LayoutChangeEvent) => setLocationDimensions({
+      onLayout={(e: LayoutChangeEvent) =>
+        setLocationDimensions({
           width: e.nativeEvent.layout.width,
-          height: e.nativeEvent.layout.height
+          height: e.nativeEvent.layout.height,
         })
       }
       style={[
         styles.location,
-        pixelsToPercentViewStyle(position, figureDimensions),
+        pixelsToPercentViewStyle(
+          percentToPixels(value.position, figureDimensions),
+          figureDimensions,
+        ),
         adjustForDesktop,
-        {transform: [{translateX: animatedValue.x}, {translateY: animatedValue.y}, {scale}]},]}
-        {...panResponder.panHandlers}
-      >
+        {
+          transform: [...animatedValue.getTranslateTransform(), {scale}],
+        },
+      ]}
+      {...panResponder.panHandlers}>
       <Svg
         fill={paperColors(theme).accent}
         style={styles.locationIcon}
@@ -362,7 +362,10 @@ export const PainLogComponent = () => {
           const newPainLogType: PainLogType = {};
           if (m.key !== undefined) {
             newPainLogType[m.key] = m;
-            if (m.previous !== undefined && newPainLogType[m.previous] !== undefined) {
+            if (
+              m.previous !== undefined &&
+              newPainLogType[m.previous] !== undefined
+            ) {
               newPainLogType[m.previous].next = m.key;
             }
           }
@@ -404,8 +407,12 @@ export const PainLogComponent = () => {
     saveLocation(newLocation);
   };
   let alternatekey = 1;
-  const visibleMostRecentLocationsWithinDateRange =
-    !dimensionsEqual(figureDimensions, undefinedFigureDimensions) ? painLogArray : [];
+  const visibleMostRecentLocationsWithinDateRange = !dimensionsEqual(
+    figureDimensions,
+    undefinedFigureDimensions,
+  )
+    ? painLogArray
+    : [];
   if (!user) {
     return <View />;
   } else if (status === QueryStatus.Loading) {
@@ -435,7 +442,7 @@ export const PainLogComponent = () => {
               setFigureDimensions({
                 width: e.nativeEvent.layout.width,
                 height: e.nativeEvent.layout.height,
-              })
+              });
             }}
             onTouchStart={(e) => addLocation(e)}>
             {visibleMostRecentLocationsWithinDateRange.map((p) => (
@@ -523,6 +530,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginVertical: 'auto',
     flex: 1,
+    overflow: 'hidden',
   },
   touchablefigure: {
     flex: 1,
