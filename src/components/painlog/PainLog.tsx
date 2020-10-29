@@ -8,14 +8,11 @@ import {
   LayoutChangeEvent,
   ViewStyle,
   Animated,
+  PanResponder,
 } from 'react-native';
 import {
   ScrollView,
   TouchableOpacity,
-  PanGestureHandler,
-  State as PanGestureState,
-  PanGestureHandlerStateChangeEvent,
-  PanGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
 import {Svg, Path} from 'react-native-svg';
 import {PainLogLocation, PainLogType} from '../../reducers/PainLogReducer';
@@ -25,7 +22,7 @@ import {
   getPainLog,
   addPainLogLocation,
 } from '../../middleware/PainLogMiddleware';
-import {paperColors, ThemeState} from '../../reducers/ThemeReducer';
+import {paperColors} from '../../reducers/ThemeReducer';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {
   Modal,
@@ -101,15 +98,14 @@ const addLocations = (
 
 type NewPainLogLocationProps = {
   value?: PainLogLocation;
-  theme: ThemeState['theme'];
   saveNewPainLogLocation: (painLogLocation?: PainLogLocation) => void;
 };
 
 export const NewPainLogLocation = ({
   value,
-  theme,
   saveNewPainLogLocation,
 }: NewPainLogLocationProps) => {
+  const theme = useSelector((state: State) => state.theme);
   const [title, setTitle] = React.useState(value?.title || '');
   const [active, setActive] = React.useState(value?.active || false);
   const [titleTouched, setTitleTouched] = React.useState(false);
@@ -215,14 +211,13 @@ export const NewPainLogLocation = ({
 const Location = ({
   value,
   figureDimensions,
-  theme,
   updateLocation,
 }: {
   value: PainLogLocation;
   figureDimensions: {width: number; height: number};
-  theme: ThemeState['theme'];
   updateLocation: (loc: PainLogLocation) => void;
 }) => {
+  const theme = useSelector((state: State) => state.theme);
   if (!value.position || figureDimensions.width < 1) {
     console.error('position or figure dimensions missing', {
       value,
@@ -231,7 +226,7 @@ const Location = ({
     return <View />;
   }
   const scaleShift = {x: 18, y: 2};
-  const position = percentToPixels(value.position, figureDimensions);
+  let position = percentToPixels(value.position, figureDimensions);
   const adjustForDesktop: ViewStyle =
     Platform.OS === 'web'
       ? {
@@ -241,8 +236,42 @@ const Location = ({
           padding: 0,
         }
       : {};
-  const {Value, add} = Animated;
-  const offsetX = new Value(0);
+
+  const animatedValue = new Animated.ValueXY(position);
+  const scale = new Animated.Value(1);
+  animatedValue.addListener((value) => position = value);
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: () => true, //Tell iOS that we are allowing the movement
+    onPanResponderGrant: (e, gestureState) => {
+      scale.setValue(1.2);
+      animatedValue.setOffset(addLocations(position, scaleShift));
+      animatedValue.setValue({x: 0, y: 0});
+    },
+    onPanResponderMove: Animated.event([
+      null, {dx: animatedValue.x, dy: animatedValue.y}
+    ]), // Creates a function to handle the movement and set offsets
+    onPanResponderRelease: () => {
+      scale.setValue(1);
+      animatedValue.flattenOffset(); // Flatten the offset so it resets the default positioning
+      const newPositionPercentage = pixelsToPercent(
+        position,
+        figureDimensions,
+      );
+      if (value.position) {
+        // this should always be true, but TypeScript likes being explicit...
+        const pixels = {
+          start: percentToPixels(value.position, figureDimensions),
+          end: position,
+        };
+        const percent = {start: value.position, end: newPositionPercentage};
+        console.log('updating', {pixels, percent});
+        //setPosition(newPosition)
+        updateLocation({key: value.key, position: newPositionPercentage}); // only update the changed information
+      }
+    }
+  });
+  /*const {Value, add} = Animated;
+  let offsetX = new Value(0);
   const offsetY = new Value(0);
   const translateX = new Value(0);
   const translateY = new Value(0);
@@ -291,7 +320,7 @@ const Location = ({
         }
         break;
     }
-  };
+  };*/
   let lastPress = 0;
   const onDoublePress = () => {
     const time = new Date().getTime();
@@ -306,28 +335,24 @@ const Location = ({
     return true;
   };
   return (
-    <PanGestureHandler
-      maxPointers={1}
-      onGestureEvent={onGestureEvent}
-      onHandlerStateChange={onHandlerStateChange}>
-      <Animated.View
-        onStartShouldSetResponder={() => onDoublePress()}
-        style={[
-          styles.location,
-          pixelsToPercentViewStyle(position, figureDimensions),
-          adjustForDesktop,
-          {transform: [{translateX, translateY, scale}]},
-        ]}>
-        <Svg
-          fill={paperColors(theme).accent}
-          style={styles.locationIcon}
-          x="0px"
-          y="0px"
-          viewBox="170 0 510.38998 544.45404">
-          <Path d="m 668.17324,354.98227 c -27.09373,10.56359 -98.70397,5.0123 -144.05699,-11.16706 -52.49147,-18.72648 -56.07413,-16.82796 -53.35923,28.27137 0.83955,13.94574 -1.05874,20.38493 -6.02697,20.44135 -5.5256,0.0635 -5.67224,1.08776 -0.61708,4.29954 8.59276,5.45905 -8.08653,44.47774 -19.01295,44.47774 -5.85464,0 -5.66667,1.73323 0.90078,8.30068 4.56507,4.56483 7.01591,11.64706 5.44644,15.73693 -1.57,4.09064 -0.24441,9.05031 2.94521,11.02167 10.71075,6.61959 6.1119,14.63181 -6.16252,10.73544 -11.42079,-3.62452 -11.5294,-3.36347 -2.40226,5.76368 5.75436,5.75435 8.07673,13.06182 5.83424,18.36014 -2.04848,4.84021 -4.91657,14.29668 -6.37391,21.01533 -1.45662,6.71812 -5.85417,12.21495 -9.77195,12.21495 -10.41168,0 -25.24631,-16.54775 -22.12521,-24.68063 1.47598,-3.84651 -1.16283,-8.47029 -5.86421,-10.27412 -6.87613,-2.63906 -7.95403,-9.03666 -5.51048,-32.71198 2.04848,-19.84445 0.99575,-30.11201 -3.23119,-31.52125 -4.26777,-1.42208 -6.52891,-25.34708 -7.08499,-74.95781 -0.44899,-40.07743 -1.10156,-75.97501 -1.45054,-79.77138 -0.34873,-3.79608 -7.35208,-9.81097 -15.56308,-13.36545 -8.21124,-3.5542 -39.35934,-22.37818 -69.21807,-41.82983 -29.85905,-19.45214 -60.54804,-39.08897 -68.19791,-43.63815 -50.37445,-29.95402 -59.4031,-36.57365 -64.17656,-47.05004 -2.93261,-6.43618 -3.96465,-16.93098 -2.29336,-23.32129 3.27478,-12.52315 32.61901,-27.475962 53.91804,-27.475962 22.66972,0 112.38514,46.544862 135.35522,70.222932 30.54283,31.48444 34.88567,29.3654 35.4299,-17.29104 0.72645,-62.343742 4.90449,-107.812982 10.94511,-119.099452 8.70461,-16.26428 35.34907,-29.9812297 53.15937,-27.3673497 8.73411,1.28177 22.13758,8.86233 29.78573,16.8450597 13.72119,14.32241 13.79755,14.87269 5.7624,41.53051 -5.28572,17.53621 -8.5625,54.637162 -9.33881,105.735012 l -1.19633,78.71892 49.64023,24.42994 c 61.67453,30.35262 87.12747,41.24274 107.09662,45.82194 19.06514,4.37185 32.61777,17.03203 27.35326,25.55094 -2.33674,3.78024 -1.53774,4.8493 1.99277,2.66731 3.24128,-2.00313 7.43044,-1.1545 9.30884,1.88592 1.87911,3.04022 -3.44891,8.20423 -11.83956,11.47549 z" />
-        </Svg>
-      </Animated.View>
-    </PanGestureHandler>
+    <Animated.View
+      onStartShouldSetResponder={() => onDoublePress()}
+      style={[
+        styles.location,
+        pixelsToPercentViewStyle(position, figureDimensions),
+        adjustForDesktop,
+        {transform: [{translateX: animatedValue.x}, {translateY: animatedValue.y}, {scale}]},]}
+        {...panResponder.panHandlers}
+      >
+      <Svg
+        fill={paperColors(theme).accent}
+        style={styles.locationIcon}
+        x="0px"
+        y="0px"
+        viewBox="170 0 510.38998 544.45404">
+        <Path d="m 668.17324,354.98227 c -27.09373,10.56359 -98.70397,5.0123 -144.05699,-11.16706 -52.49147,-18.72648 -56.07413,-16.82796 -53.35923,28.27137 0.83955,13.94574 -1.05874,20.38493 -6.02697,20.44135 -5.5256,0.0635 -5.67224,1.08776 -0.61708,4.29954 8.59276,5.45905 -8.08653,44.47774 -19.01295,44.47774 -5.85464,0 -5.66667,1.73323 0.90078,8.30068 4.56507,4.56483 7.01591,11.64706 5.44644,15.73693 -1.57,4.09064 -0.24441,9.05031 2.94521,11.02167 10.71075,6.61959 6.1119,14.63181 -6.16252,10.73544 -11.42079,-3.62452 -11.5294,-3.36347 -2.40226,5.76368 5.75436,5.75435 8.07673,13.06182 5.83424,18.36014 -2.04848,4.84021 -4.91657,14.29668 -6.37391,21.01533 -1.45662,6.71812 -5.85417,12.21495 -9.77195,12.21495 -10.41168,0 -25.24631,-16.54775 -22.12521,-24.68063 1.47598,-3.84651 -1.16283,-8.47029 -5.86421,-10.27412 -6.87613,-2.63906 -7.95403,-9.03666 -5.51048,-32.71198 2.04848,-19.84445 0.99575,-30.11201 -3.23119,-31.52125 -4.26777,-1.42208 -6.52891,-25.34708 -7.08499,-74.95781 -0.44899,-40.07743 -1.10156,-75.97501 -1.45054,-79.77138 -0.34873,-3.79608 -7.35208,-9.81097 -15.56308,-13.36545 -8.21124,-3.5542 -39.35934,-22.37818 -69.21807,-41.82983 -29.85905,-19.45214 -60.54804,-39.08897 -68.19791,-43.63815 -50.37445,-29.95402 -59.4031,-36.57365 -64.17656,-47.05004 -2.93261,-6.43618 -3.96465,-16.93098 -2.29336,-23.32129 3.27478,-12.52315 32.61901,-27.475962 53.91804,-27.475962 22.66972,0 112.38514,46.544862 135.35522,70.222932 30.54283,31.48444 34.88567,29.3654 35.4299,-17.29104 0.72645,-62.343742 4.90449,-107.812982 10.94511,-119.099452 8.70461,-16.26428 35.34907,-29.9812297 53.15937,-27.3673497 8.73411,1.28177 22.13758,8.86233 29.78573,16.8450597 13.72119,14.32241 13.79755,14.87269 5.7624,41.53051 -5.28572,17.53621 -8.5625,54.637162 -9.33881,105.735012 l -1.19633,78.71892 49.64023,24.42994 c 61.67453,30.35262 87.12747,41.24274 107.09662,45.82194 19.06514,4.37185 32.61777,17.03203 27.35326,25.55094 -2.33674,3.78024 -1.53774,4.8493 1.99277,2.66731 3.24128,-2.00313 7.43044,-1.1545 9.30884,1.88592 1.87911,3.04022 -3.44891,8.20423 -11.83956,11.47549 z" />
+      </Svg>
+    </Animated.View>
   );
 };
 
@@ -410,7 +435,6 @@ export const PainLogComponent = () => {
           <Modal visible={location !== emptyPainLogLocation}>
             <NewPainLogLocation
               value={location}
-              theme={theme}
               saveNewPainLogLocation={(painLogLocation?: PainLogLocation) => {
                 if (painLogLocation) {
                   saveLocation(painLogLocation);
@@ -435,7 +459,6 @@ export const PainLogComponent = () => {
                 key={p.key || alternatekey++}
                 value={p}
                 figureDimensions={figureDimensions}
-                theme={theme}
                 updateLocation={(p2) => updateLocation(p2)}
               />
             ))}

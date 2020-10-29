@@ -1,5 +1,5 @@
 import React, {Suspense} from 'react';
-import {ScrollView, StyleSheet, View, useWindowDimensions} from 'react-native';
+import {ScrollView, StyleSheet, View, Dimensions, ScaledSize} from 'react-native';
 import {
   Subheading,
   Avatar,
@@ -70,7 +70,14 @@ const SideBar = () => {
     user !== false && user.photoURL !== undefined && user.photoURL.href
       ? user.photoURL.href
       : null;
-  const dimensions = useWindowDimensions();
+  const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
+  React.useEffect(() => {
+    const onDimensionsChange = ({window}: {window: ScaledSize}) => {
+      setDimensions(window);
+    };
+    Dimensions.addEventListener('change', onDimensionsChange);
+    return () => Dimensions.removeEventListener('change', onDimensionsChange);
+  }, []);
   const isLandscapeOnPhone =
     dimensions.width > dimensions.height && dimensions.height <= 420;
   if (user === false) {

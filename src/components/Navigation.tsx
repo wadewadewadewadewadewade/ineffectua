@@ -4,9 +4,11 @@ import {useSelector, useDispatch} from 'react-redux';
 import {
   Platform,
   StatusBar,
+  Dimensions,
+  ScaledSize,
+  Linking,
   View,
   StyleSheet,
-  useWindowDimensions,
 } from 'react-native';
 import {firebase} from '../firebase/config';
 import {
@@ -14,11 +16,7 @@ import {
   Appbar,
   ActivityIndicator,
 } from 'react-native-paper';
-import {
-  InitialState,
-  NavigationContainer,
-  useLinking,
-} from '@react-navigation/native';
+import {InitialState, NavigationContainer, useLinking, getStateFromPath} from '@react-navigation/native';
 import {
   createDrawerNavigator,
   DrawerScreenProps,
@@ -106,7 +104,7 @@ const Navigation = () => {
     enableAnalytics()
   }, [])*/
   let previousRouteName: string | undefined;
-  const {getInitialState} = useLinking(navigationRef, {
+  const { getInitialState } = useLinking(navigationRef, {
     prefixes: LinkingPrefixes,
     config: {
       screens: {
@@ -169,7 +167,6 @@ const Navigation = () => {
       try {
         if (user) {
           const state = await getInitialState();
-          console.log({state});
           if (Platform.OS !== 'web' || state === undefined) {
             const savedState = await AsyncStorage.getItem(
               NAVIGATION_PERSISTENCE_KEY,
@@ -191,7 +188,14 @@ const Navigation = () => {
     !isReady && restoreState();
   }, [isReady, user, getInitialState]);
 
-  const dimensions = useWindowDimensions();
+  const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
+  React.useEffect(() => {
+    const onDimensionsChange = ({window}: {window: ScaledSize}) => {
+      setDimensions(window);
+    };
+    Dimensions.addEventListener('change', onDimensionsChange);
+    return () => Dimensions.removeEventListener('change', onDimensionsChange);
+  }, []);
   const isLargeScreen = dimensions.width >= 1024;
 
   if (!isReady) {
