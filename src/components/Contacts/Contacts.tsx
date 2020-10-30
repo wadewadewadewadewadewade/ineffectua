@@ -8,7 +8,7 @@ import {
   GestureResponderEvent,
 } from 'react-native';
 import {Text, Modal, Portal, FAB, ActivityIndicator} from 'react-native-paper';
-import {useScrollToTop} from '@react-navigation/native';
+import {useScrollToTop, useNavigation, useFocusEffect} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
 import {
   addContact,
@@ -214,6 +214,10 @@ export const ContactsList = () => {
 };
 
 export const Contacts = () => {
+  const navigation = useNavigation();
+  useFocusEffect(() => {
+    navigation.dangerouslyGetParent()?.setOptions({headerTitle: 'Contacts'});
+  });
   return (
     <View style={styles.outerComponent}>
       <React.Suspense fallback={<ActivityIndicator />}>

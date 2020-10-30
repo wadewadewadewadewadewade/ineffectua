@@ -3,6 +3,7 @@ import CalendarDay, {CalendarDayProps} from './CalendarDay';
 import {createStackNavigator} from '@react-navigation/stack';
 import Calendar from './Calendar';
 import {GeneralNavigationParams} from '../../Types';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 export type CalendarStackParamList = {
   Calendar: undefined;
@@ -11,6 +12,10 @@ export type CalendarStackParamList = {
 };
 
 const CalendarNavigation = () => {
+  const navigation = useNavigation();
+  useFocusEffect(() => {
+    navigation.dangerouslyGetParent()?.setOptions({headerTitle: 'Calendar'});
+  });
   const Stack = createStackNavigator<CalendarStackParamList>();
   return (
     <Stack.Navigator initialRouteName="Calendar">

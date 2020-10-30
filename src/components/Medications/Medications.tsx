@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import {Text, Modal, Portal, FAB, ActivityIndicator} from 'react-native-paper';
-import {useScrollToTop} from '@react-navigation/native';
+import {useScrollToTop, useNavigation, useFocusEffect} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
 import {State} from '../../Types';
 import {
@@ -251,6 +251,10 @@ export const MedicationsList = () => {
 };
 
 export const Medications = () => {
+  const navigation = useNavigation();
+  useFocusEffect(() => {
+    navigation.dangerouslyGetParent()?.setOptions({headerTitle: 'Medications'});
+  });
   return (
     <View style={styles.outerContainer}>
       <React.Suspense fallback={<ActivityIndicator />}>

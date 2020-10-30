@@ -66,20 +66,15 @@ export default function MaterialBottomTabsScreen() {
     colors.push('#' + color);
   }
   const [dimensions, setDimensions] = React.useState(Dimensions.get('window'));
-
   React.useEffect(() => {
     const onDimensionsChange = ({window}: {window: ScaledSize}) => {
       setDimensions(window);
     };
-
     Dimensions.addEventListener('change', onDimensionsChange);
-
     return () => Dimensions.removeEventListener('change', onDimensionsChange);
   }, []);
-
   const isLandscapeOnPhone =
     dimensions.width > dimensions.height && dimensions.height <= 420;
-
   return (
     <SafeAreaProvider>
       <MaterialBottomTabs.Navigator
@@ -115,6 +110,7 @@ export default function MaterialBottomTabsScreen() {
               />
             ),
             tabBarColor: colors[1],
+            title: 'Calendar',
           })}
         />
         <MaterialBottomTabs.Screen
@@ -129,6 +125,7 @@ export default function MaterialBottomTabsScreen() {
               />
             ),
             tabBarColor: colors[2],
+            title: 'Contacts',
           })}
         />
         <MaterialBottomTabs.Screen
@@ -143,6 +140,7 @@ export default function MaterialBottomTabsScreen() {
               />
             ),
             tabBarColor: colors[3],
+            title: 'Medications',
           })}
         />
         <MaterialBottomTabs.Screen
@@ -157,6 +155,8 @@ export default function MaterialBottomTabsScreen() {
               />
             ),
             tabBarColor: colors[4],
+            title: 'Pain Log',
+            headerTitle: 'Pain log',
           })}
         />
       </MaterialBottomTabs.Navigator>

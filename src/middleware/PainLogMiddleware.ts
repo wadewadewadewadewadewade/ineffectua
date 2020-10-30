@@ -54,7 +54,8 @@ export class PainLogThreads {
         for (const date in this.hash[t]) {
           if (this.hash[t][date].key === loc.previous) { // the previous key is found
             thread = parseInt(t, 10);
-            this.hash[thread][isodate] = {...this.hash[thread][date], ...loc};
+            const {key, next, created, previous, ...rest} = this.hash[thread][date];
+            this.hash[thread][isodate] = {...rest, ...loc};
             found = true;
           }
         }

@@ -6,7 +6,6 @@ import {
   StatusBar,
   Dimensions,
   ScaledSize,
-  Linking,
   View,
   StyleSheet,
 } from 'react-native';

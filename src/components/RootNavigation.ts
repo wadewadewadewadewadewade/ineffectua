@@ -63,7 +63,7 @@ export const formatTitle = (options: Record<string, any> | undefined) => {
   //console.log({options});
   if (options !== undefined) {
     if ('title' in options) {
-      // AuthFlow
+      // AuthFlow, tabs other than Agenda
       title.title = options.title;
       title.headerTitle = options.title;
     } else if ('tabBarLabel' in options) {
