@@ -9,7 +9,11 @@ import {
   Alert,
 } from 'react-native';
 import {Text, Modal, Portal, FAB, ActivityIndicator} from 'react-native-paper';
-import {useScrollToTop, useNavigation, useFocusEffect} from '@react-navigation/native';
+import {
+  useScrollToTop,
+  useNavigation,
+  useFocusEffect,
+} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
 import {State} from '../../Types';
 import {

@@ -1,8 +1,8 @@
 import React from 'react';
-import { PainLogLocation } from "../../reducers/PainLogReducer";
-import { useSelector } from "react-redux";
-import { State } from "../../Types";
-import { 
+import {PainLogLocation} from '../../reducers/PainLogReducer';
+import {useSelector} from 'react-redux';
+import {State} from '../../Types';
+import {
   Alert,
   Platform,
   Animated,
@@ -10,9 +10,9 @@ import {
   LayoutChangeEvent,
   ViewStyle,
   View,
-  StyleSheet
+  StyleSheet,
 } from 'react-native';
-import { paperColors } from '../../reducers/ThemeReducer';
+import {paperColors} from '../../reducers/ThemeReducer';
 import {Svg, Path} from 'react-native-svg';
 import SettingsItem from '../shared/SettingsItem';
 import DataTypes from '../shared/DataTypes';
@@ -20,14 +20,9 @@ import Slider from '@react-native-community/slider';
 import Medications from '../shared/Medications';
 import FlexableTextArea from '../shared/FlexableTextArea';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {
-  TextInput,
-  Button,
-  Divider,
-  Text,
-} from 'react-native-paper';
+import {TextInput, Button, Divider, Text} from 'react-native-paper';
 import {TouchableOpacity} from 'react-native-gesture-handler';
-import { emptyPainLogLocation } from '../../middleware/PainLogMiddleware';
+import {emptyPainLogLocation} from '../../middleware/PainLogMiddleware';
 
 type ScreenPosition = {
   x: number;
@@ -80,9 +75,14 @@ const multiplyLocation = (
   loc: ScreenPosition,
   multiplyer: number,
 ): ScreenPosition => ({x: loc.x * multiplyer, y: loc.y * multiplyer});
-export const dimensionsEqual = (dim1: ObjectDimensions, dim2: ObjectDimensions) =>
-  dim1.width === dim2.width && dim1.height === dim2.height;
-export const undefinedFigureDimensions: ObjectDimensions = {width: -1, height: -1};
+export const dimensionsEqual = (
+  dim1: ObjectDimensions,
+  dim2: ObjectDimensions,
+) => dim1.width === dim2.width && dim1.height === dim2.height;
+export const undefinedFigureDimensions: ObjectDimensions = {
+  width: -1,
+  height: -1,
+};
 
 type NewPainLogLocationProps = {
   value?: PainLogLocation;
@@ -276,7 +276,11 @@ const Location = ({
           {pixels, percent},
           {newPosition, positionDelta},
         );
-        updateLocation({key: value.key, created: new Date(), position: newPositionPercentage}); // only update the changed information
+        updateLocation({
+          key: value.key,
+          created: new Date(),
+          position: newPositionPercentage,
+        }); // only update the changed information
       }
     },
   });

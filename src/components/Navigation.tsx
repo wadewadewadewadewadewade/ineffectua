@@ -15,7 +15,12 @@ import {
   Appbar,
   ActivityIndicator,
 } from 'react-native-paper';
-import {InitialState, NavigationContainer, useLinking, getStateFromPath} from '@react-navigation/native';
+import {
+  InitialState,
+  NavigationContainer,
+  useLinking,
+  getStateFromPath,
+} from '@react-navigation/native';
 import {
   createDrawerNavigator,
   DrawerScreenProps,
@@ -103,7 +108,7 @@ const Navigation = () => {
     enableAnalytics()
   }, [])*/
   let previousRouteName: string | undefined;
-  const { getInitialState } = useLinking(navigationRef, {
+  const {getInitialState} = useLinking(navigationRef, {
     prefixes: LinkingPrefixes,
     config: {
       screens: {

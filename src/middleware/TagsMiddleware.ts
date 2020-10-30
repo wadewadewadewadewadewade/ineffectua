@@ -24,14 +24,15 @@ export const getTagIdByPath = async (path: string): Promise<string> => {
   return await fetch(
     `https://us-central1-ineffectua.cloudfunctions.net/api/v1/tags/-/${path}`,
   ).then((promise) => promise.json());
-}
+};
 
 export const getTagsForAutocomplete = (
   prefix: string,
   tagsInUse: Array<string>,
   minimumCharacters = 3,
 ): Promise<Array<Tag>> => {
-  if (!prefix || prefix.length < minimumCharacters || prefix === '-') { // '-' is used for get-tag-path api endpoint
+  if (!prefix || prefix.length < minimumCharacters || prefix === '-') {
+    // '-' is used for get-tag-path api endpoint
     return new Promise<Array<Tag>>((r) => r([]));
   } else {
     const tagsInUseJson =

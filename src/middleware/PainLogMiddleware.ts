@@ -1,4 +1,4 @@
-import { CalendarWindow } from './../reducers/CalendarReducer';
+import {CalendarWindow} from './../reducers/CalendarReducer';
 import {PainLogType} from '../reducers/PainLogReducer';
 import {PainLogLocation} from './../reducers/PainLogReducer';
 import {firebaseDocumentToArray} from '../firebase/utilities';
@@ -6,7 +6,10 @@ import {User} from '../reducers/AuthReducer';
 import {getFirebaseDataWithUser, setFirebaseDataWithUser} from './Utilities';
 
 export const newPainLogLocationName = '+ Add New PainLogLocation';
-export const emptyPainLogLocation: PainLogLocation = {key: '', created: new Date()};
+export const emptyPainLogLocation: PainLogLocation = {
+  key: '',
+  created: new Date(),
+};
 
 type PainLogThread = {
   [isodate: string]: PainLogLocation;
@@ -24,10 +27,7 @@ const unknownPainLogKey: PainLogKey = {
   date: new Date(),
 };
 
-export const dateInDateWindow = (
-  date: Date,
-  window: CalendarWindow,
-) => {
+export const dateInDateWindow = (date: Date, window: CalendarWindow) => {
   // check if date is after window ends and date is before window starts (within window)
   if (date > window.ends && date < window.starts) {
     return true;
@@ -44,25 +44,34 @@ export class PainLogThreads {
     [thread: number]: PainLogThread;
   } = {};
 
-  push = (loc: PainLogLocation) => { // used to updae without rebuilding
+  push = (loc: PainLogLocation) => {
+    // used to updae without rebuilding
     let found = false;
     let thread = 0;
     const newdate = loc.created;
     const isodate = newdate.toISOString();
-    if (loc.previous !== undefined) { // found should be true if this is true, unless there's a bug...
+    if (loc.previous !== undefined) {
+      // found should be true if this is true, unless there's a bug...
       for (const t in Object.keys(this.hash)) {
         for (const date in this.hash[t]) {
-          if (this.hash[t][date].key === loc.previous) { // the previous key is found
+          if (this.hash[t][date].key === loc.previous) {
+            // the previous key is found
             thread = parseInt(t, 10);
-            const {key, next, created, previous, ...rest} = this.hash[thread][date];
+            const {key, next, created, previous, ...rest} = this.hash[thread][
+              date
+            ];
             this.hash[thread][isodate] = {...rest, ...loc};
             found = true;
           }
         }
       }
     }
-    if (!found) { // it's a new thread (loc.previous should be false, techncally)
-      const maxThread = parseInt(Object.keys(this.hash).sort().reverse()[0], 10);
+    if (!found) {
+      // it's a new thread (loc.previous should be false, techncally)
+      const maxThread = parseInt(
+        Object.keys(this.hash).sort().reverse()[0],
+        10,
+      );
       thread = maxThread + 1;
       this.hash[thread] = {[isodate]: loc};
     }
@@ -83,7 +92,7 @@ export class PainLogThreads {
       this.newest.thread = thread;
     }
     return this;
-  }
+  };
 
   getArray = (start: Date, end: Date): Array<PainLogLocation> => {
     const result = new Array<PainLogLocation>();
@@ -235,7 +244,9 @@ export const getPainLog = (user: User): Promise<PainLogType> => {
   );
 };
 
-export const getPainLogThreads = async (user: User): Promise<PainLogThreads> => {
+export const getPainLogThreads = async (
+  user: User,
+): Promise<PainLogThreads> => {
   const painlog = await getPainLog(user);
   const threads = new PainLogThreads(painlog);
   return threads;

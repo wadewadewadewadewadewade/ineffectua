@@ -16,12 +16,7 @@ import {
   PainLogThreads,
 } from '../../middleware/PainLogMiddleware';
 import {paperColors} from '../../reducers/ThemeReducer';
-import {
-  Modal,
-  Portal,
-  Text,
-  ActivityIndicator,
-} from 'react-native-paper';
+import {Modal, Portal, Text, ActivityIndicator} from 'react-native-paper';
 import {
   useQueryCache,
   useQuery,
@@ -31,19 +26,23 @@ import {
 } from 'react-query';
 import {useSelector} from 'react-redux';
 import {State} from '../../Types';
-import Location, {NewPainLogLocation, undefinedFigureDimensions, dimensionsEqual} from './Location';
-import { CalendarWindow } from '../../reducers/CalendarReducer';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import Location, {
+  NewPainLogLocation,
+  undefinedFigureDimensions,
+  dimensionsEqual,
+} from './Location';
+import {CalendarWindow} from '../../reducers/CalendarReducer';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
 
 export const PainLogComponent = ({
   painLogArray,
   onSaveLocation,
   onAddNewLocation,
-} : {
-  painLogArray: Array<PainLogLocation>,
-  onSaveLocation: (location: PainLogLocation) => void,
-  onAddNewLocation: (location: PainLogLocation) => void,
+}: {
+  painLogArray: Array<PainLogLocation>;
+  onSaveLocation: (location: PainLogLocation) => void;
+  onAddNewLocation: (location: PainLogLocation) => void;
 }) => {
   const theme = useSelector((state: State) => state.theme);
   const [location, setLocation] = React.useState(emptyPainLogLocation);
@@ -160,7 +159,8 @@ export const PainLogData = () => {
     {
       onSuccess: (m) => {
         queryCache.setQueryData<PainLogThreads>('users/painlog', (old) => {
-          if (old !== undefined) { // there should always be a Threds object
+          if (old !== undefined) {
+            // there should always be a Threds object
             return old.push(m);
           } else {
             return new PainLogThreads({[m.key]: m});
@@ -175,10 +175,18 @@ export const PainLogData = () => {
     oldestInMilliseconds = data.oldest.date.getTime();
   }
   const window: CalendarWindow = {
-    starts: new Date((recentInMilliseconds - oldestInMilliseconds) * dateRange + oldestInMilliseconds - spreadInMilliseconds),
-    ends: new Date((recentInMilliseconds - oldestInMilliseconds) * dateRange + oldestInMilliseconds + spreadInMilliseconds),
+    starts: new Date(
+      (recentInMilliseconds - oldestInMilliseconds) * dateRange +
+        oldestInMilliseconds -
+        spreadInMilliseconds,
+    ),
+    ends: new Date(
+      (recentInMilliseconds - oldestInMilliseconds) * dateRange +
+        oldestInMilliseconds +
+        spreadInMilliseconds,
+    ),
   };
-  const painLogArray = data? data.getArray(window.starts, window.ends) : [];
+  const painLogArray = data ? data.getArray(window.starts, window.ends) : [];
   if (!user) {
     return <View />;
   } else if (status === QueryStatus.Loading) {

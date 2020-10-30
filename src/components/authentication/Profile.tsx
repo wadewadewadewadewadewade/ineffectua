@@ -1,5 +1,11 @@
 import React, {Suspense} from 'react';
-import {ScrollView, StyleSheet, View, Dimensions, ScaledSize} from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  Dimensions,
+  ScaledSize,
+} from 'react-native';
 import {
   Subheading,
   Avatar,

@@ -81,10 +81,10 @@ const CalendarListComponent = () => {
         //displayLoadingIndicator={true}
         // Handler which gets executed on day press. Default = undefined
         onDayPress={(day: DateObject) =>
-          navigate('CalendarDay',
+          navigate(
+            'CalendarDay',
             {date: day},
-            'Calendar: ' +
-              new Date(Date.parse(day.dateString)).toDateString(),
+            'Calendar: ' + new Date(Date.parse(day.dateString)).toDateString(),
           )
         }
         // Handler which gets executed on day long press. Default = undefined
