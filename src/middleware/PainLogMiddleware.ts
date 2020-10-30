@@ -1,3 +1,4 @@
+import { CalendarWindow } from './../reducers/CalendarReducer';
 import {PainLogType} from '../reducers/PainLogReducer';
 import {PainLogLocation} from './../reducers/PainLogReducer';
 import {firebaseDocumentToArray} from '../firebase/utilities';
@@ -5,7 +6,7 @@ import {User} from '../reducers/AuthReducer';
 import {getFirebaseDataWithUser, setFirebaseDataWithUser} from './Utilities';
 
 export const newPainLogLocationName = '+ Add New PainLogLocation';
-export const emptyPainLogLocation: PainLogLocation = {created: new Date()};
+export const emptyPainLogLocation: PainLogLocation = {key: '', created: new Date()};
 
 type PainLogThread = {
   [isodate: string]: PainLogLocation;
@@ -23,6 +24,17 @@ const unknownPainLogKey: PainLogKey = {
   date: new Date(),
 };
 
+export const dateInDateWindow = (
+  date: Date,
+  window: CalendarWindow,
+) => {
+  // check if date is after window ends and date is before window starts (within window)
+  if (date > window.ends && date < window.starts) {
+    return true;
+  }
+  return false;
+};
+
 export class PainLogThreads {
   beginnings: Array<string> = []; // [thread] = isodate
   endings: Array<string> = []; // [thread] = isodate
@@ -31,6 +43,47 @@ export class PainLogThreads {
   hash: {
     [thread: number]: PainLogThread;
   } = {};
+
+  push = (loc: PainLogLocation) => { // used to updae without rebuilding
+    let found = false;
+    let thread = 0;
+    const newdate = loc.created;
+    const isodate = newdate.toISOString();
+    if (loc.previous !== undefined) { // found should be true if this is true, unless there's a bug...
+      for (const t in Object.keys(this.hash)) {
+        for (const date in this.hash[t]) {
+          if (this.hash[t][date].key === loc.previous) { // the previous key is found
+            thread = parseInt(t, 10);
+            this.hash[thread][isodate] = {...this.hash[thread][date], ...loc};
+            found = true;
+          }
+        }
+      }
+    }
+    if (!found) { // it's a new thread (loc.previous should be false, techncally)
+      const maxThread = parseInt(Object.keys(this.hash).sort().reverse()[0], 10);
+      thread = maxThread + 1;
+      this.hash[thread] = {[isodate]: loc};
+    }
+    if (loc.created < new Date(this.beginnings[thread])) {
+      this.beginnings[thread] = isodate;
+    }
+    if (loc.created > new Date(this.endings[thread])) {
+      this.endings[thread] = isodate;
+    }
+    if (loc.created < this.oldest.date) {
+      this.oldest.date = loc.created;
+      this.oldest.isodate = isodate;
+      this.oldest.thread = thread;
+    }
+    if (loc.created > this.newest.date) {
+      this.newest.date = loc.created;
+      this.newest.isodate = isodate;
+      this.newest.thread = thread;
+    }
+    return this;
+  }
+
   getArray = (start: Date, end: Date): Array<PainLogLocation> => {
     const result = new Array<PainLogLocation>();
     const threadsToDiscard = new Array<number>();
@@ -179,6 +232,12 @@ export const getPainLog = (user: User): Promise<PainLogType> => {
       return p;
     },
   );
+};
+
+export const getPainLogThreads = async (user: User): Promise<PainLogThreads> => {
+  const painlog = await getPainLog(user);
+  const threads = new PainLogThreads(painlog);
+  return threads;
 };
 
 export const addPainLogLocation = (
