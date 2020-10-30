@@ -252,13 +252,13 @@ const Location = ({
           padding: 0,
         }
       : {};
-  const animatedValue = new Animated.ValueXY(multiplyLocation(scaleShift, -1));
+  const animatedValue = new Animated.ValueXY(multiplyLocation(scaleShift, -1)); // center the X on the locaton
   const scale = new Animated.Value(1);
   animatedValue.addListener((val) => (positionDelta = val));
   const panResponder = PanResponder.create({
     onMoveShouldSetPanResponder: () => true, //Tell iOS that we are allowing the movement
     onPanResponderGrant: (e, gestureState) => {
-      scale.setValue(1.2);
+      scale.setValue(1.2); // make the X a bit bigger to indicate interaction
       animatedValue.extractOffset(); // move the value back into the offset
     },
     onPanResponderMove: Animated.event([
@@ -273,6 +273,8 @@ const Location = ({
           positionDelta, // position is a delta and not an x/y offset
           percentToPixels(value.position, figureDimensions),
         );
+        animatedValue.setOffset({x: 0, y: 0});
+        animatedValue.setValue(multiplyLocation(scaleShift, -1));
         const newPositionPercentage = pixelsToPercent(
           newPosition,
           figureDimensions,
@@ -288,7 +290,7 @@ const Location = ({
           {pixels, percent},
           {newPosition, positionDelta},
         );
-        //updateLocation({key: value.key, position: newPositionPercentage}); // only update the changed information
+        updateLocation({key: value.key, position: newPositionPercentage}); // only update the changed information
       }
     },
   });
@@ -358,6 +360,9 @@ export const PainLogComponent = () => {
     (l: PainLogLocation) => addPainLogLocation(user, l),
     {
       onSuccess: (m) => {
+        // TODO: need to rebuild all all of this
+        // * recalculate location timeline
+        // * replace currentl location in UI with new location
         queryCache.setQueryData<PainLogType>('users/painlog', (old) => {
           const newPainLogType: PainLogType = {};
           if (m.key !== undefined) {
