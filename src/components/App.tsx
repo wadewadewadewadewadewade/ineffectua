@@ -22,7 +22,7 @@ const queryCache = new QueryCache({
 
 export default function App() {
   YellowBox.ignoreWarnings(['Setting a timer']); // Firebase uses long timers
-  PushNotification.popInitialNotification((notification) => {
+  PushNotification.popInitialNotification((notification) => { // https://github.com/zo0r/react-native-push-notification#readme
     console.log('Initial Notification', notification);
   });
   return (
