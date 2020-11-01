@@ -7,6 +7,7 @@ import {enableScreens} from 'react-native-screens';
 import Navigation from './Navigation';
 import {QueryCache, ReactQueryCacheProvider} from 'react-query'; // https://react-query.tanstack.com/docs/guides/suspense
 import {SafeAreaProvider} from 'react-native-safe-area-context';
+import PushNotification from 'react-native-push-notification';
 enableScreens();
 
 const queryCache = new QueryCache({
@@ -21,6 +22,9 @@ const queryCache = new QueryCache({
 
 export default function App() {
   YellowBox.ignoreWarnings(['Setting a timer']); // Firebase uses long timers
+  PushNotification.popInitialNotification((notification) => {
+    console.log('Initial Notification', notification);
+  });
   return (
     <ReduxProvider store={store}>
       <PersistGate loading={null} persistor={persistor}>
