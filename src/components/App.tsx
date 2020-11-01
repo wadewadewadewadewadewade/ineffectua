@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {YellowBox} from 'react-native';
+import {YellowBox, Platform} from 'react-native';
 import {PersistGate} from 'redux-persist/integration/react';
 import {Provider as ReduxProvider} from 'react-redux';
 import {store, persistor} from '../Store';
@@ -22,9 +22,12 @@ const queryCache = new QueryCache({
 
 export default function App() {
   YellowBox.ignoreWarnings(['Setting a timer']); // Firebase uses long timers
-  PushNotification.popInitialNotification((notification) => { // https://github.com/zo0r/react-native-push-notification#readme
-    console.log('Initial Notification', notification);
-  });
+  if (Platform.OS !== 'web') {
+    PushNotification.localNotification((notification) => {
+      // https://github.com/zo0r/react-native-push-notification#readme
+      console.log('Initial Notification', notification);
+    });
+  }
   return (
     <ReduxProvider store={store}>
       <PersistGate loading={null} persistor={persistor}>
