@@ -252,7 +252,7 @@ const PostComponent = ({
     }
   };
   return (
-    <View>
+    <>
       <View
         style={[
           styles.postComponentContainer,
@@ -347,7 +347,7 @@ const PostComponent = ({
           />
         </View>
       )}
-    </View>
+    </>
   );
 };
 

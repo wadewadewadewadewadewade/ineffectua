@@ -1,17 +1,22 @@
 import * as React from 'react';
-import {StyleSheet, Dimensions, ScaledSize} from 'react-native';
+import {
+  StyleSheet,
+  Dimensions,
+  ScaledSize,
+  ActivityIndicator,
+} from 'react-native';
 import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-import PainLog from './painlog/PainLog';
-import Contacts from './Contacts/Contacts';
-import Agenda from './agenda/Agenda';
 import CalendarNavigator, {
   CalendarStackParamList,
 } from './calendar/CalendarNavigator';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
-import Medications from './Medications/Medications';
 import {contrast} from '../middleware/DataTypesMiddleware';
 import {createStackNavigator} from '@react-navigation/stack';
+const PainLog = React.lazy(() => import('./painlog/PainLog'));
+const Contacts = React.lazy(() => import('./Contacts/Contacts'));
+const Agenda = React.lazy(() => import('./agenda/Agenda'));
+const Medications = React.lazy(() => import('./Medications/Medications'));
 
 export type MaterialBottomTabParams = {
   Agenda: {screen: 'Agenda' | 'Posts' | 'Post'; type?: string; id?: string};
@@ -77,89 +82,91 @@ export default function MaterialBottomTabsScreen() {
     dimensions.width > dimensions.height && dimensions.height <= 420;
   return (
     <SafeAreaProvider>
-      <MaterialBottomTabs.Navigator
-        labeled={false}
-        // eslint-disable-next-line react-native/no-inline-styles
-        barStyle={{
-          ...styles.tabBar,
-          display: isLandscapeOnPhone ? 'none' : 'flex',
-        }}>
-        <MaterialBottomTabs.Screen
-          name="Agenda"
-          component={PostsStackNavigator}
-          options={(options) => ({
-            tabBarIcon: ({color}) => (
-              <MaterialCommunityIcons
-                name="comment"
-                color={contrast(color)}
-                size={26}
-              />
-            ),
-            tabBarColor: colors[0],
-          })}
-        />
-        <MaterialBottomTabs.Screen
-          name="Calendar"
-          component={CalendarNavigator}
-          options={(options) => ({
-            tabBarIcon: ({color}) => (
-              <MaterialCommunityIcons
-                name="calendar"
-                color={contrast(color)}
-                size={26}
-              />
-            ),
-            tabBarColor: colors[1],
-            title: 'Calendar',
-          })}
-        />
-        <MaterialBottomTabs.Screen
-          name="Contacts"
-          component={Contacts}
-          options={(options) => ({
-            tabBarIcon: ({color}) => (
-              <MaterialCommunityIcons
-                name="contacts"
-                color={contrast(color)}
-                size={26}
-              />
-            ),
-            tabBarColor: colors[2],
-            title: 'Contacts',
-          })}
-        />
-        <MaterialBottomTabs.Screen
-          name="Medications"
-          component={Medications}
-          options={(options) => ({
-            tabBarIcon: ({color}) => (
-              <MaterialCommunityIcons
-                name="pill"
-                color={contrast(color)}
-                size={26}
-              />
-            ),
-            tabBarColor: colors[3],
-            title: 'Medications',
-          })}
-        />
-        <MaterialBottomTabs.Screen
-          name="PainLog"
-          component={PainLog}
-          options={(options) => ({
-            tabBarIcon: ({color}) => (
-              <MaterialCommunityIcons
-                name="human"
-                color={contrast(color)}
-                size={26}
-              />
-            ),
-            tabBarColor: colors[4],
-            title: 'Pain Log',
-            headerTitle: 'Pain log',
-          })}
-        />
-      </MaterialBottomTabs.Navigator>
+      <React.Suspense fallback={<ActivityIndicator />}>
+        <MaterialBottomTabs.Navigator
+          labeled={false}
+          // eslint-disable-next-line react-native/no-inline-styles
+          barStyle={{
+            ...styles.tabBar,
+            display: isLandscapeOnPhone ? 'none' : 'flex',
+          }}>
+          <MaterialBottomTabs.Screen
+            name="Agenda"
+            component={PostsStackNavigator}
+            options={(options) => ({
+              tabBarIcon: ({color}) => (
+                <MaterialCommunityIcons
+                  name="comment"
+                  color={contrast(color)}
+                  size={26}
+                />
+              ),
+              tabBarColor: colors[0],
+            })}
+          />
+          <MaterialBottomTabs.Screen
+            name="Calendar"
+            component={CalendarNavigator}
+            options={(options) => ({
+              tabBarIcon: ({color}) => (
+                <MaterialCommunityIcons
+                  name="calendar"
+                  color={contrast(color)}
+                  size={26}
+                />
+              ),
+              tabBarColor: colors[1],
+              title: 'Calendar',
+            })}
+          />
+          <MaterialBottomTabs.Screen
+            name="Contacts"
+            component={Contacts}
+            options={(options) => ({
+              tabBarIcon: ({color}) => (
+                <MaterialCommunityIcons
+                  name="contacts"
+                  color={contrast(color)}
+                  size={26}
+                />
+              ),
+              tabBarColor: colors[2],
+              title: 'Contacts',
+            })}
+          />
+          <MaterialBottomTabs.Screen
+            name="Medications"
+            component={Medications}
+            options={(options) => ({
+              tabBarIcon: ({color}) => (
+                <MaterialCommunityIcons
+                  name="pill"
+                  color={contrast(color)}
+                  size={26}
+                />
+              ),
+              tabBarColor: colors[3],
+              title: 'Medications',
+            })}
+          />
+          <MaterialBottomTabs.Screen
+            name="PainLog"
+            component={PainLog}
+            options={(options) => ({
+              tabBarIcon: ({color}) => (
+                <MaterialCommunityIcons
+                  name="human"
+                  color={contrast(color)}
+                  size={26}
+                />
+              ),
+              tabBarColor: colors[4],
+              title: 'Pain Log',
+              headerTitle: 'Pain log',
+            })}
+          />
+        </MaterialBottomTabs.Navigator>
+      </React.Suspense>
     </SafeAreaProvider>
   );
 }

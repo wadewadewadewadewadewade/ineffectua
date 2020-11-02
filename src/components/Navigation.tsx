@@ -19,7 +19,6 @@ import {
   InitialState,
   NavigationContainer,
   useLinking,
-  getStateFromPath,
 } from '@react-navigation/native';
 import {
   createDrawerNavigator,

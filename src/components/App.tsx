@@ -7,7 +7,7 @@ import {enableScreens} from 'react-native-screens';
 import Navigation from './Navigation';
 import {QueryCache, ReactQueryCacheProvider} from 'react-query'; // https://react-query.tanstack.com/docs/guides/suspense
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-import PushNotification from 'react-native-push-notification';
+import * as Notifications from 'expo-notifications';
 enableScreens();
 
 const queryCache = new QueryCache({
@@ -23,9 +23,21 @@ const queryCache = new QueryCache({
 export default function App() {
   YellowBox.ignoreWarnings(['Setting a timer']); // Firebase uses long timers
   if (Platform.OS !== 'web') {
-    PushNotification.localNotification((notification) => {
-      // https://github.com/zo0r/react-native-push-notification#readme
-      console.log('Initial Notification', notification);
+    // https://docs.expo.io/versions/latest/sdk/notifications/
+    Notifications.setNotificationChannelAsync('contacts', {
+      name: 'Emergency Contacts',
+      importance: Notifications.AndroidImportance.HIGH,
+    });
+
+    Notifications.scheduleNotificationAsync({
+      identifier: 'contacts',
+      content: {
+        title: 'Person',
+        body: 'Type: Name\nNumber',
+      },
+      trigger: {
+        seconds: 2,
+      },
     });
   }
   return (

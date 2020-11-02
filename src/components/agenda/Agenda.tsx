@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Suspense} from 'react';
 import {Agenda as AgendaList, DateObject} from 'react-native-calendars';
 import {StyleSheet, View, Text} from 'react-native';
 import {useSelector} from 'react-redux';
@@ -12,7 +12,6 @@ import {
   getDates,
 } from '../../middleware/CalendarMiddleware';
 import {themeIsDark, paperColors} from '../../reducers/ThemeReducer';
-import Posts from '../shared/Posts';
 import {DataTypesType} from '../../reducers/DataTypesReducer';
 import {firebaseDocumentToArray} from '../../firebase/utilities';
 import {useQuery} from 'react-query';
@@ -23,8 +22,10 @@ import {
   useNavigation,
   useFocusEffect,
 } from '@react-navigation/native';
-import {Appbar} from 'react-native-paper';
+import {Appbar, ActivityIndicator} from 'react-native-paper';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
+const Posts = React.lazy(() => import('../shared/Posts'));
+
 const Agenda = () => {
   const [user, theme] = useSelector((state: State) => [
     state.user,
@@ -171,7 +172,9 @@ const Agenda = () => {
           theme={calendarTheme}
         />
       )}
-      <Posts showComposePost={true} />
+      <Suspense fallback={<ActivityIndicator />}>
+        <Posts showComposePost={true} />
+      </Suspense>
     </View>
   );
 };

@@ -45,7 +45,8 @@
         "googleMaps": {
           "apiKey": "AIzaSyA8Wcik6dTuxBKolLSm5ONBvXNz8Z0T-6c"
         }
-      }
+      },
+      "useNextNotificationsApi": true
     },
     "updates": {
       "fallbackToCacheTimeout": 0
