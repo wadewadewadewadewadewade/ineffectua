@@ -10,6 +10,7 @@ export type User =
       public?: {
         [item: string]: boolean;
       };
+      isVerified: boolean;
     }
   | false;
 
@@ -21,15 +22,21 @@ export type UserName = {
 
 export const RESTORE_TOKEN = 'RESTORE_TOKEN';
 export const SIGN_IN = 'SIGN_IN';
+export const SIGN_IN_COMPLETE = 'SIGN_IN';
 export const SIGN_OUT = 'SIGN_OUT';
 
 export type Action =
   | {type: 'RESTORE_TOKEN'; token: false | User}
   | {type: 'SIGN_IN'; token: false | User}
+  | {type: 'SIGN_IN_COMPLETE'; token: false | User}
   | {type: 'SIGN_OUT'};
 
 export const SignInAction = (user: AuthState['user']): Action => ({
   type: SIGN_IN,
+  token: user,
+});
+export const SignInCompleteAction = (user: AuthState['user']): Action => ({
+  type: SIGN_IN_COMPLETE,
   token: user,
 });
 export const SignOutAction = (): Action => ({type: SIGN_OUT});
@@ -43,7 +50,7 @@ export const initialState: AuthState = {
 };
 
 export const isUserAuthenticated = (user: User | false): boolean => {
-  return user !== undefined && user !== false;
+  return user !== undefined && user !== false && user.isVerified;
 };
 
 export default function AuthReducer(

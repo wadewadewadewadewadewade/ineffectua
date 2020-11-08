@@ -39,6 +39,7 @@
     "react-native": "^0.63.2",
     "react-native-calendars": "git+https://github.com/wadewadewadewadewadewade/react-native-calendars.git",
     "react-native-color-picker": "^0.6.0",
+    "react-native-device-info": "^7.0.2",
     "react-native-gesture-handler": "~1.6.0",
     "react-native-interactable": "^2.0.1",
     "react-native-keyboard-aware-scroll-view": "^0.9.2",

@@ -11,6 +11,7 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 import * as Permissions from 'expo-permissions';
+import DeviceInfo from 'react-native-device-info';
 enableScreens();
 
 const queryCache = new QueryCache({
@@ -54,7 +55,8 @@ async function sendPushNotification(expoPushToken: string) {
 
 async function registerForPushNotificationsAsync() {
   let token;
-  if (Constants.isDevice) {
+  const isEmulator = await DeviceInfo.isEmulator();
+  if (Constants.isDevice && !isEmulator) {
     const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
     let finalStatus = existingStatus;
     if (existingStatus !== 'granted') {
@@ -83,29 +85,44 @@ async function registerForPushNotificationsAsync() {
   return token;
 }
 
+// borrowed from https://github.com/DefinitelyTyped/DefinitelyTyped/issues/30551
+function useAsyncEffect(effect: (isCanceled: () => boolean) => Promise<() => void>, dependencies?: any[]) {
+  return React.useEffect(() => {
+    let canceled = false;
+    effect(() => canceled);
+    return () => { canceled = true; }
+  }, dependencies)
+}
+
 export default function App() {
+  YellowBox.ignoreWarnings(['Setting a timer']); // Firebase uses long timers
   const [expoPushToken, setExpoPushToken] = React.useState<string | undefined>('');
   const [notification, setNotification] = React.useState<Notifications.Notification>();
-  let notificationListener: Subscription = {remove: () => {}};
-  let responseListener: Subscription =  {remove: () => {}};
-  YellowBox.ignoreWarnings(['Setting a timer']); // Firebase uses long timers
-  React.useEffect(() => {
-    registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+  useAsyncEffect(async (isCanceled: () => boolean) => { // disabling notifications during devel
+    let notificationListener: Subscription = {remove: () => {}};
+    let responseListener: Subscription =  {remove: () => {}};
+    const isEmulator = await DeviceInfo.isEmulator();
+    if (!isEmulator && false === true) { 
+      const token = await registerForPushNotificationsAsync()
+      setExpoPushToken(token);
 
-    // This listener is fired whenever a notification is received while the app is foregrounded
-    notificationListener = Notifications.addNotificationReceivedListener(notification => {
-      setNotification(notification);
-    });
+      // This listener is fired whenever a notification is received while the app is foregrounded
+      notificationListener = Notifications.addNotificationReceivedListener(notification => {
+        setNotification(notification);
+      });
 
-    // This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
-    responseListener = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
-    });
+      // This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
+      responseListener = Notifications.addNotificationResponseReceivedListener(response => {
+        console.log(response);
+      });
 
-    return () => {
-      Notifications.removeNotificationSubscription(notificationListener);
-      Notifications.removeNotificationSubscription(responseListener);
-    };
+      return () => {
+        Notifications.removeNotificationSubscription(notificationListener);
+        Notifications.removeNotificationSubscription(responseListener);
+      }
+    } else {
+      return () => { /* do nothing */ }
+    }
   }, []);
   return (
     <ReduxProvider store={store}>

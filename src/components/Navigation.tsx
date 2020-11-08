@@ -185,7 +185,7 @@ const Navigation = () => {
           }
         }
       } finally {
-        user && setIsReady(true);
+        setIsReady(true);
       }
     };
     !isReady && restoreState();
