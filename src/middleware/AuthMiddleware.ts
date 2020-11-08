@@ -65,6 +65,33 @@ export const getUserById = (
   });
 };
 
+export const updateUserById = (
+  userId: string,
+  values: {isVerified?: boolean, displayName?: string, photoURL?: string, password?: string},
+  errorCallback?: (e: any) => void,
+  firebase = firebaseInstance,
+): Promise<User> => {
+  return new Promise<User>((resolve, reject) => {
+    firebase
+      .firestore()
+      .collection('users')
+      .doc(userId)
+      .set(values)
+      .catch(errorCallback)
+      .then(
+        () => {
+          getUserById(userId).then((userData) => {
+            if (userData === undefined) {
+              reject('No user information was returned');
+            } else {
+              resolve(userData);
+            }
+          })
+        },
+      );
+  });
+};
+
 export const authenticate = (
   email: string,
   password: string,
@@ -99,7 +126,6 @@ export const authenticate = (
 
 export const register = (
   email: string,
-  password?: string,
   errorCallback?: (e: any) => void,
 ): ThunkAction<Promise<void>, State, firebase.app.App, Action> => {
   return async (
@@ -108,68 +134,38 @@ export const register = (
     firebase: firebase.app.App,
   ): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
-      if (password === undefined) {
-        var actionCodeSettings = {
-          // URL you want to redirect back to. The domain (www.example.com) for this
-          // URL must be in the authorized domains list in the Firebase Console.
-          url: 'https://www.example.com/finishSignUp?cartId=1234',
-          // This must be true.
-          handleCodeInApp: true,
-          iOS: {
-            bundleId: 'com.example.ios'
-          },
-          android: {
-            packageName: 'com.example.android',
-            installApp: true,
-            minimumVersion: '12'
-          },
-          dynamicLinkDomain: 'example.page.link'
-        };
-        
-        firebase
-          .auth()
-          .sendSignInLinkToEmail(email, actionCodeSettings)
-          .catch(errorCallback)
-          .then((response: void | firebase.auth.UserCredential) => {
-            if (response && response.user) {
-              const user = firebaseUserToUser(response.user, email);
-              user.isVerified = false;
-              firebase
-                .firestore()
-                .collection('users')
-                .doc(user.uid)
-                .set(user)
-                .catch(errorCallback)
-                .then(() => {
-                  dispatch(SignInAction(user));
-                  resolve();
-                });
-            } else {
-              reject('No user information returned from firebase');
-            }
-        });
-      } else {
-        // step two
-        firebase
+      var actionCodeSettings = {
+        // URL you want to redirect back to. The domain (www.example.com) for this
+        // URL must be in the authorized domains list in the Firebase Console.
+        url: 'https://us-central1-ineffectua.cloudfunctions.net/api/v1/users/finishCreation',
+        // This must be true.
+        handleCodeInApp: true,
+        iOS: {
+          bundleId: 'com.ineffectua'
+        },
+        android: {
+          packageName: 'com.ineffectua',
+          installApp: true,
+          minimumVersion: '12'
+        },
+        dynamicLinkDomain: 'example.page.link'
+      };
+      
+      firebase
         .auth()
-        .signInWithEmailAndPassword(email, password)
-        .then((response: firebase.auth.UserCredential) => {
+        .sendSignInLinkToEmail(email, actionCodeSettings)
+        .catch(errorCallback)
+        .then((response: void | firebase.auth.UserCredential) => {
           if (response && response.user) {
             const user = firebaseUserToUser(response.user, email);
-            user.isVerified = true; // set local value to isVerified=true
-            firebase
-              .firestore()
-              .collection('users')
-              .doc(user.uid)
-              .set({isVerified: true}) // set remote value to isVerified=true
-              .catch(errorCallback)
-              .then(() => {
-                dispatch(SignInAction(user));
-                resolve();
-              })
+            updateUserById(user.uid, {isVerified: false}).then((user) => {
+              dispatch(SignInAction(user));
+              resolve();
+            });
+          } else {
+            reject('No user information returned from firebase');
           }
-        });
-      }
+      });
     });
   };
 };

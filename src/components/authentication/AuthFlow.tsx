@@ -8,7 +8,7 @@ import {
 } from '@react-navigation/stack';
 import {useDispatch, useSelector} from 'react-redux';
 import {isUserAuthenticated} from '../../reducers/AuthReducer';
-import {authenticate, register, signOut} from '../../middleware/AuthMiddleware';
+import {authenticate, register, signOut, updateUserById} from '../../middleware/AuthMiddleware';
 import {State, RootDrawerParamList} from '../../Types';
 import {Svg, G, Path} from 'react-native-svg';
 
@@ -25,7 +25,7 @@ const AuthenticationStepOne = () => {
     errorCallback?: (e: any) => void,
   ) => {
     if (pass === undefined) {
-      dispatch(register(emailAddress, undefined, errorCallback));
+      dispatch(register(emailAddress, errorCallback));
     } else {
       dispatch(authenticate(emailAddress, pass, errorCallback));
     }
@@ -356,21 +356,21 @@ const AuthenticationStepTwo = () => {
     displayName: !user || (!user.displayName || user.displayName.length < 1),
     photoURL: !user || (!user.photoURL || !user.photoURL.href || user.photoURL.href.length < 1),
   }
-  const auth = (
-    pass: string,
-    errorCallback?: (e: any) => void,
-  ) => {
-    if (user !== false) {
-      dispatch(authenticate(user.email, pass, errorCallback));
-    }
-  };
   const {colors} = useTheme();
   const [password, onChangePassword] = React.useState('Password');
   const [displayName, onChangeDisplayName] = React.useState(user && user.displayName || '');
   const [photoURL, onChangePhotoURL] = React.useState(user && user.photoURL && user.photoURL.href || '');
   const [passwordConfirm, onChangePasswordConfirm] = React.useState('PasswordConfirm');
+  const auth = (
+    errorCallback?: (e: any) => void,
+  ) => {
+    if (user !== false) {
+      updateUserById(user.uid, {password, displayName, photoURL}).then(
+        () => dispatch(authenticate(user.email, password, errorCallback))
+      );
+    }
+  };
   const [error, onChangeError] = React.useState('');
-  const [isRegister, changeMode] = React.useState(false);
   if (!user) {
     return <Text style={styles.errortext}>An error has occured</Text>
   } else {
@@ -658,7 +658,6 @@ const AuthenticationStepTwo = () => {
             Keyboard.dismiss();
             if (password === passwordConfirm) {
               auth(
-                password,
                 (e) =>
                   onChangeError(
                     'message' in e
